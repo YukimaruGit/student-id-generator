@@ -143,9 +143,10 @@ function showResult() {
     return acc;
   }, {});
 
+  // 最も多い回答を見つける
   const result = Object.entries(counts).reduce((a, b) => 
-    counts[a] > counts[b] ? a : b
-  );
+    counts[a[0]] > counts[b[0]] ? a : b
+  )[0];
 
   // 結果を学生証フォームに反映
   const deptInput = document.getElementById("deptInput");
