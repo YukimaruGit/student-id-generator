@@ -91,49 +91,6 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 写真プレビューの切り替え
-  const updatePhotoPreview = () => {
-    console.log("updatePhotoPreview開始");
-    if (uploadedPhotos.length === 0) {
-      console.log("アップロードされた画像なし");
-      photoPreview.style.display = "none";
-      prevBtn.style.display = "none";
-      nextBtn.style.display = "none";
-      return;
-    }
-
-    console.log("プレビュー更新");
-    photoPreview.style.display = "block";
-    photoImg = uploadedPhotos[currentPhotoIndex];
-    photoPreview.src = photoImg.src;
-    console.log("photoImg更新完了");
-
-    // 矢印ボタンの表示制御
-    prevBtn.style.display = currentPhotoIndex > 0 ? "block" : "none";
-    nextBtn.style.display = currentPhotoIndex < uploadedPhotos.length - 1 ? "block" : "none";
-
-    setTimeout(() => {
-      console.log("遅延drawCard実行（プレビュー更新後）");
-      drawCard();
-    }, 100);
-  };
-
-  // 前の写真へ
-  prevBtn.addEventListener("click", () => {
-    if (currentPhotoIndex > 0) {
-      currentPhotoIndex--;
-      updatePhotoPreview();
-    }
-  });
-
-  // 次の写真へ
-  nextBtn.addEventListener("click", () => {
-    if (currentPhotoIndex < uploadedPhotos.length - 1) {
-      currentPhotoIndex++;
-      updatePhotoPreview();
-    }
-  });
-
   // 顔写真アップロード時
   photoInput.addEventListener("change", e => {
     const files = e.target.files;
@@ -160,14 +117,59 @@ window.addEventListener("DOMContentLoaded", () => {
           console.log("photoImg設定完了");
           updatePhotoPreview();
           previewArea.style.display = "block";
-          setTimeout(() => {
-            console.log("遅延drawCard実行");
-            drawCard();
-          }, 100);
         }
       };
       img.src = URL.createObjectURL(file);
     });
+  });
+
+  // 写真プレビューの切り替え
+  const updatePhotoPreview = () => {
+    console.log("updatePhotoPreview開始");
+    if (uploadedPhotos.length === 0) {
+      console.log("アップロードされた画像なし");
+      photoPreview.style.display = "none";
+      prevBtn.style.display = "none";
+      nextBtn.style.display = "none";
+      return;
+    }
+
+    console.log("プレビュー更新");
+    photoPreview.style.display = "block";
+    photoImg = uploadedPhotos[currentPhotoIndex];
+    
+    // 新しい画像オブジェクトを作成して読み込み
+    const newImg = new Image();
+    newImg.onload = () => {
+      console.log("新しい画像の読み込み完了");
+      photoImg = newImg;
+      photoPreview.src = newImg.src;
+      console.log("photoImg更新完了");
+
+      // 矢印ボタンの表示制御
+      prevBtn.style.display = currentPhotoIndex > 0 ? "block" : "none";
+      nextBtn.style.display = currentPhotoIndex < uploadedPhotos.length - 1 ? "block" : "none";
+
+      // 画像が完全に読み込まれた後に描画
+      drawCard();
+    };
+    newImg.src = uploadedPhotos[currentPhotoIndex].src;
+  };
+
+  // 前の写真へ
+  prevBtn.addEventListener("click", () => {
+    if (currentPhotoIndex > 0) {
+      currentPhotoIndex--;
+      updatePhotoPreview();
+    }
+  });
+
+  // 次の写真へ
+  nextBtn.addEventListener("click", () => {
+    if (currentPhotoIndex < uploadedPhotos.length - 1) {
+      currentPhotoIndex++;
+      updatePhotoPreview();
+    }
   });
 
   // カード描画処理
@@ -176,6 +178,11 @@ window.addEventListener("DOMContentLoaded", () => {
     try {
       if (!bgImg || !bgImg.complete) {
         console.log("背景画像がまだ読み込まれていません");
+        return;
+      }
+
+      if (!photoImg || !photoImg.complete) {
+        console.log("写真がまだ読み込まれていません");
         return;
       }
 
