@@ -154,19 +154,14 @@ function showResult() {
     resultData: results[result] || '未設定'
   });
 
-  // 結果を学生証フォームに反映（エラーハンドリング追加）
-  const courseInput = document.getElementById("courseInput");
-  const clubInput = document.getElementById("clubInput");
-  
+  // 結果を学生証フォームに反映
   if (!results[result]) {
     console.error('診断結果が未定義です:', result);
-    courseInput.value = '未設定';
-    clubInput.value = '未設定';
+    window.setDiagnosisResult('未設定', '未設定');
     return;
   }
-  
-  courseInput.value = results[result].course || '未設定';
-  clubInput.value = results[result].club || '未設定';
+
+  window.setDiagnosisResult(results[result].course, results[result].club);
 
   // 画面遷移
   quizContainer.style.display = "none";
