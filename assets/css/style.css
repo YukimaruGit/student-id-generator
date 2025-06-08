@@ -1,3 +1,4 @@
+/* 全体のスタイル */
 :root {
   --grad-primary: linear-gradient(135deg, #9b59b6, #2980b9);
   --grad-dark: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2));
@@ -28,8 +29,12 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Noto Sans JP', sans-serif;
-  background-color: #f0f2f5;
-  color: #333;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  background-image: 
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
 }
 
 main {
@@ -42,154 +47,12 @@ main {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  background: var(--color-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 }
 
-/* フォーム */
-.form-content {
-  text-align: center;
-}
-
-.form-content h2 {
-  margin-bottom: 2rem;
-  color: #2c3e50;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-  text-align: left;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #34495e;
-  font-weight: bold;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  box-sizing: border-box;
-}
-
-.form-group input[readonly] {
-  background-color: #f8f9fa;
-}
-
-/* ボタン */
-.btn-create {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: 6px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.btn-create:hover {
-  background-color: #2980b9;
-}
-
-/* プレビュー */
-.preview-content {
-  text-align: center;
-}
-
-.id-card {
-  margin: 2rem auto;
-  max-width: 100%;
-  height: auto;
-}
-
-.id-card canvas {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-/* シェアボタン */
-.share-buttons {
-  margin: 2rem 0;
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.btn-share {
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: opacity 0.3s;
-}
-
-.btn-share:hover {
-  opacity: 0.8;
-}
-
-.twitter {
-  background-color: #1da1f2;
-  color: white;
-}
-
-.line {
-  background-color: #00b900;
-  color: white;
-}
-
-/* リセットボタン */
-.btn-reset {
-  background-color: #95a5a6;
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.btn-reset:hover {
-  background-color: #7f8c8d;
-}
-
-/* フッター */
-.footer {
-  text-align: center;
-  padding: 1rem;
-  color: #7f8c8d;
-  font-size: 0.9rem;
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-  main {
-    padding: 1rem;
-  }
-
-  .container {
-    padding: 1rem;
-  }
-
-  .share-buttons {
-    flex-direction: column;
-  }
-
-  .btn-share {
-    width: 100%;
-  }
-}
-
+/* ヘッダー */
 .header {
   position: relative;
   height: 200px;
@@ -205,26 +68,42 @@ main {
   opacity: 0.2;
 }
 
-/* ─────────── フォームカード ─────────── */
-.card {
-  background: var(--color-card);
-  border-radius: var(--radius-card);
-  padding: 24px;
-  box-shadow: var(--shadow-card);
-  margin-bottom: 40px;
+/* フォーム */
+.form-content {
+  text-align: center;
 }
 
-.card > * + * {
-  margin-top: 20px;
-}
-
-.card label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
+.form-content h2 {
+  margin-bottom: 2rem;
   color: var(--color-text);
 }
 
+.form-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+  font-weight: bold;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-input);
+  font-size: 1rem;
+  background: var(--color-card);
+}
+
+.form-group input[readonly] {
+  background-color: #f8f9fa;
+}
+
+/* 写真アップロード */
 .photo-input {
   width: 100%;
   padding: 12px;
@@ -239,103 +118,18 @@ main {
   border-color: var(--color-twitter);
 }
 
-.text-input {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-input);
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.text-input:focus {
-  outline: none;
-  border-color: var(--color-twitter);
-}
-
-.text-input[readonly] {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
-  border-color: #ddd;
-}
-
-.select-input {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-input);
-  font-size: 1rem;
-  background: #ffffff;
-  cursor: pointer;
-  transition: border-color 0.2s;
-}
-
-.select-input:focus {
-  outline: none;
-  border-color: var(--color-twitter);
-}
-
-.birth-date-inputs {
-  display: flex;
-  gap: 12px;
-}
-
-.birth-date-inputs .select-input {
-  flex: 1;
-}
-
-.preview-actions {
-  display: flex;
-  gap: 12px;
-  padding: 16px;
-  background: var(--color-card);
-}
-
-.preview-actions button {
-  flex: 1;
-  padding: 14px;
-  color: var(--color-text-light);
-  border: none;
-  border-radius: var(--radius-input);
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: var(--shadow-button);
-}
-
-.btn-download {
-  background: var(--color-download);
-}
-
-.btn-twitter {
-  background: var(--color-twitter);
-}
-
-.btn-line {
-  background: var(--color-line);
-}
-
-.btn-copy {
-  background: var(--color-copy);
-}
-
-.preview-actions button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
+/* 写真プレビュー */
 .photo-preview-container {
   position: relative;
   width: 100%;
-  margin-top: 12px;
-  display: none;
+  max-width: 300px;
+  margin: 10px auto;
 }
 
-.photo-preview {
+#photoPreview {
   width: 100%;
   height: auto;
   border-radius: var(--radius-input);
-  display: none;
 }
 
 .photo-nav-btn {
@@ -345,12 +139,11 @@ main {
   background: rgba(0,0,0,0.5);
   color: white;
   border: none;
-  border-radius: 50%;
   width: 36px;
   height: 36px;
   font-size: 20px;
   cursor: pointer;
-  display: none;
+  border-radius: 50%;
   z-index: 2;
   transition: all 0.2s;
 }
@@ -359,181 +152,140 @@ main {
   background: rgba(0,0,0,0.8);
 }
 
-#prevPhotoBtn {
-  left: 8px;
-}
+#prevPhotoBtn { left: 8px; }
+#nextPhotoBtn { right: 8px; }
 
-#nextPhotoBtn {
-  right: 8px;
-}
-
-/* 診断ゲーム用スタイル */
-#quizContainer {
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 1rem;
-}
-
-.question-card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  margin-bottom: 2rem;
+/* プレビュー */
+.preview-content {
   text-align: center;
 }
 
-.question-card h2 {
-  color: #333;
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  font-weight: bold;
+.preview-card {
+  display: inline-block;
+  margin-bottom: 20px;
+  background: var(--color-card);
+  padding: 20px;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 }
 
-.question-card p {
-  color: #666;
-  font-size: 1.1rem;
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
+.preview-canvas-wrapper {
+  margin-bottom: 20px;
 }
 
-.choices {
+#studentCanvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-input);
+}
+
+.preview-actions {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-width: 400px;
-  margin: 0 auto;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.choice-btn {
-  background: #f5f5f5;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  padding: 1rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-}
-
-.choice-btn:hover {
-  background: #eee;
-  border-color: #ccc;
-  transform: translateY(-2px);
-}
-
-.result-card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  text-align: center;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.result-card h2 {
-  color: #333;
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  font-weight: bold;
-}
-
-.result-card h3 {
-  color: #666;
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-}
-
-.result-card p {
-  color: #777;
-  font-size: 1rem;
-  margin-bottom: 2rem;
-  line-height: 1.6;
-}
-
-#createIdBtn {
-  background: #4a90e2;
-  color: white;
+/* ボタン */
+.btn-start,
+.btn-create,
+.btn-action,
+.btn-reset {
+  padding: 14px 28px;
   border: none;
-  border-radius: 4px;
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
+  border-radius: var(--radius-input);
   cursor: pointer;
+  font-weight: bold;
+  color: var(--color-text-light);
   transition: all 0.3s ease;
-}
-
-#createIdBtn:hover {
-  background: #357abd;
-  transform: translateY(-2px);
-}
-
-/* 開始画面のスタイル */
-.start-container {
-  max-width: 600px;
-  margin: 4rem auto;
-  text-align: center;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.start-container h1 {
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 1.5rem;
-  line-height: 1.4;
-}
-
-.start-container p {
-  font-size: 1.1rem;
-  color: #666;
-  margin-bottom: 2rem;
+  box-shadow: var(--shadow-button);
 }
 
 .btn-start {
-  background: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 1rem 3rem;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  background: var(--grad-primary);
+  font-size: 1.2em;
+  width: 200px;
 }
 
-.btn-start:hover {
-  background: #357abd;
+.btn-create {
+  background: var(--color-download);
+  width: 100%;
+  margin-top: 20px;
+}
+
+.btn-action {
+  flex: 1;
+  min-width: 120px;
+  background: var(--color-copy);
+}
+
+.btn-action.twitter {
+  background: var(--color-twitter);
+}
+
+.btn-action.line {
+  background: var(--color-line);
+}
+
+.btn-reset {
+  background: var(--grad-dark);
+  margin-top: 20px;
+}
+
+.btn-start:hover,
+.btn-create:hover,
+.btn-action:hover,
+.btn-reset:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-.result-details {
-  margin: 2rem 0;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  text-align: left;
+/* 生年月日セレクト */
+.birth-inputs {
+  display: flex;
+  gap: 12px;
 }
 
-.result-details p {
-  margin-bottom: 1rem;
+.birth-inputs select {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-input);
+  font-size: 1rem;
+  background: var(--color-card);
+  cursor: pointer;
+  transition: border-color 0.2s;
 }
 
-.result-details p:last-child {
-  margin-bottom: 0;
+.birth-inputs select:focus {
+  outline: none;
+  border-color: var(--color-twitter);
 }
 
-.result-details strong {
-  color: #333;
-  font-size: 1.1rem;
+/* フッター */
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: var(--color-text-light);
+  font-size: 0.9em;
+  background: var(--grad-dark);
 }
 
-.result-details .description {
-  color: #666;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin: 0.5rem 0 1.5rem;
-  padding-left: 1rem;
-  border-left: 3px solid #4a90e2;
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  main {
+    padding: 1rem;
+  }
+
+  .container {
+    padding: 1rem;
+  }
+
+  .preview-actions {
+    flex-direction: column;
+  }
+
+  .btn-action {
+    width: 100%;
+  }
 } 
