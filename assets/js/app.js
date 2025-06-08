@@ -277,7 +277,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (platform === 'twitter') {
         shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(data.secure_url)}`;
       } else if (platform === 'line') {
-        shareUrl = `https://line.me/R/msg/text/?${text}%0D%0A${encodeURIComponent(data.secure_url)}`;
+        shareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(data.secure_url)}`;
       }
 
       window.open(shareUrl, "_blank");
