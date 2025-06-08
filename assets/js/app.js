@@ -1,4 +1,4 @@
-import { cloudinaryConfig } from '../../cloudinary.config.js';
+import { cloudinaryConfig } from "./cloudinary.config.js";
 
 const IMG_BG = "assets/img/student_template.png";
 const BOX = {x:72,y:198,w:379,h:497};
@@ -268,19 +268,24 @@ window.addEventListener("DOMContentLoaded", () => {
         throw new Error(`Upload failed: ${res.status} ${res.statusText}`);
       }
       
-      const data = await res.json();
-      console.log("Share: アップロード完了", data);
+      const { secure_url } = await res.json();
+      console.log("Share: アップロード完了", secure_url);
 
       const text = encodeURIComponent("放課後クロニクル 学生証を作成しました！ #放課後クロニクル");
-      let shareUrl;
+      const url = encodeURIComponent(secure_url);
 
       if (platform === 'twitter') {
-        shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(data.secure_url)}`;
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
       } else if (platform === 'line') {
-        shareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(data.secure_url)}`;
+        window.open(`https://social-plugins.line.me/lineit/share?url=${url}`, "_blank");
+      } else {
+        // ダウンロード
+        const a = document.createElement("a");
+        a.href = secure_url;
+        a.download = "student_card.png";
+        a.click();
       }
 
-      window.open(shareUrl, "_blank");
       console.log("Share: シェアウィンドウを開きました");
     } catch (err) {
       console.error("Share: シェア処理失敗", err);
