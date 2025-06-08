@@ -1,5 +1,7 @@
 import { cloudinaryConfig } from './cloudinary.config.js';
 
+// html2canvasのインポートを削除（スクリプトタグで読み込む）
+
 // 効果音の準備（一時的にコメントアウト）
 /*
 const SOUNDS = {
@@ -171,6 +173,11 @@ window.addEventListener("DOMContentLoaded", () => {
         const canvas = document.getElementById('student-card');
         if (!canvas) throw new Error('キャンバスが見つかりません');
         
+        // html2canvasをグローバル変数として使用
+        if (typeof html2canvas === 'undefined') {
+          throw new Error('html2canvasが読み込まれていません');
+        }
+
         const blob = await new Promise(resolve => canvas.toBlob(resolve));
         const url = await uploadToCloudinary(blob);
         
@@ -182,7 +189,7 @@ window.addEventListener("DOMContentLoaded", () => {
         }
       } catch (error) {
         console.error('学生証作成エラー:', error);
-        alert('学生証の作成に失敗しました。');
+        alert('学生証の作成に失敗しました。' + error.message);
       }
     });
   }
