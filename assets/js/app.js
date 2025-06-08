@@ -28,6 +28,12 @@ const POS = {
   birth: { x: 600, y: 500 }
 };
 
+// Cloudinary unsigned preset URL base
+const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/di5rxlddy/image/upload';
+const CLOUDINARY_UPLOAD_PRESET = 'student_card_AS_chronicle';
+
+let photos = [], currentIndex = 0;
+
 // DOMContentLoadedで全体を囲む
 window.addEventListener("DOMContentLoaded", () => {
   console.log("DOMContentLoaded: 初期化開始");
@@ -53,9 +59,9 @@ window.addEventListener("DOMContentLoaded", () => {
     clearCanvas();
 
     // アップロード写真
-    if (photoImg.src && photoImg.src !== 'assets/img/default-photo.png') {
+    if (photos.length > 0 && photos[currentIndex]) {
       try {
-        ctx.drawImage(photoImg, BOX.x, BOX.y, BOX.w, BOX.h);
+        ctx.drawImage(new Image(), 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
       } catch (error) {
         console.error('写真の描画に失敗:', error);
       }
@@ -107,26 +113,14 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // 写真アップロードの処理
-  const photoInput = document.getElementById('photo-input');
-  const previewPhoto = document.getElementById('preview-photo');
+  const photoInput = document.getElementById('photoInput');
+  const previewPhoto = document.getElementById('previewPhoto');
   
   if (photoInput) {
     photoInput.addEventListener('change', e => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result;
-        if (typeof result === 'string') {
-          photoImg.src = result;
-          if (previewPhoto) {
-            previewPhoto.src = result;
-            previewPhoto.style.display = 'block';
-          }
-        }
-      };
-      reader.readAsDataURL(file);
+      photos = Array.from(e.target.files).map(f => URL.createObjectURL(f));
+      currentIndex = 0;
+      updatePhoto();
     });
   }
 
@@ -143,121 +137,130 @@ window.addEventListener("DOMContentLoaded", () => {
   clearCanvas();
   drawCard();
 
-  // Cloudinaryへのアップロード
-  async function uploadToCloudinary(imageData) {
-    const formData = new FormData();
-    formData.append('file', imageData);
-    formData.append('upload_preset', cloudinaryConfig.uploadPreset);
-    formData.append('filename_override', 'student-card.png');
+  // 写真切り替え処理
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  
+  if (prevBtn && nextBtn) {
+    prevBtn.addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updatePhoto();
+      }
+    });
 
-    try {
-      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`, {
-        method: 'POST',
-        body: formData
-      });
+    nextBtn.addEventListener('click', () => {
+      if (currentIndex < photos.length - 1) {
+        currentIndex++;
+        updatePhoto();
+      }
+    });
+  }
 
-      const data = await response.json();
-      return data.secure_url;
-    } catch (error) {
-      console.error('Cloudinaryアップロードエラー:', error);
-      alert('画像のアップロードに失敗しました。');
-      return null;
+  // 写真更新処理
+  function updatePhoto() {
+    previewPhoto.src = photos[currentIndex] || 'assets/img/default-photo.png';
+    
+    // ボタンの表示制御
+    if (prevBtn && nextBtn) {
+      prevBtn.style.display = currentIndex > 0 ? 'block' : 'none';
+      nextBtn.style.display = currentIndex < photos.length - 1 ? 'block' : 'none';
     }
   }
 
-  // 「学生証を作成」→Cloudinaryアップロード
-  const createBtn = document.getElementById('create-btn');
+  // 学生証生成処理
+  const createBtn = document.getElementById('createBtn');
   if (createBtn) {
-    createBtn.addEventListener('click', async () => {
-      try {
-        const canvas = document.getElementById('student-card');
-        if (!canvas) throw new Error('キャンバスが見つかりません');
-        
-        // html2canvasをグローバル変数として使用
-        if (typeof html2canvas === 'undefined') {
-          throw new Error('html2canvasが読み込まれていません');
-        }
-
-        const blob = await new Promise(resolve => canvas.toBlob(resolve));
-        const url = await uploadToCloudinary(blob);
-        
-        if (url) {
-          window.latestImageUrl = url;
-          // URLをコピー
-          await navigator.clipboard.writeText(url);
-          alert('画像をアップロードし、URLをコピーしました！');
-        }
-      } catch (error) {
-        console.error('学生証作成エラー:', error);
-        alert('学生証の作成に失敗しました。' + error.message);
-      }
+    createBtn.addEventListener('click', () => {
+      const cardPreview = document.querySelector('.card-preview');
+      html2canvas(cardPreview, {
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null
+      }).then(canvas => {
+        canvas.toBlob(blob => {
+          // プレビューカードを Cloudinary にアップロード
+          const form = new FormData();
+          form.append('file', blob);
+          form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+          
+          fetch(CLOUDINARY_UPLOAD_URL, {
+            method: 'POST',
+            body: form
+          })
+          .then(res => res.json())
+          .then(json => {
+            const imageUrl = json.secure_url;
+            setupShare(imageUrl);
+          })
+          .catch(err => {
+            console.error('画像アップロードエラー:', err);
+            alert('画像のアップロードに失敗しました。もう一度お試しください。');
+          });
+        });
+      });
     });
   }
 
-  // 「画像をダウンロード」
-  const downloadBtn = document.getElementById('download-btn');
+  // ダウンロード処理
+  const downloadBtn = document.getElementById('downloadBtn');
   if (downloadBtn) {
     downloadBtn.addEventListener('click', () => {
-      try {
-        const canvas = document.getElementById('student-card');
-        if (!canvas) throw new Error('キャンバスが見つかりません');
-        
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
-        link.download = 'student_card.png';
-        link.click();
-      } catch (error) {
-        console.error('ダウンロードエラー:', error);
-        alert('画像のダウンロードに失敗しました。');
-      }
+      const cardPreview = document.querySelector('.card-preview');
+      html2canvas(cardPreview, {
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null
+      }).then(canvas => {
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = 'student_card.png';
+        a.click();
+      });
     });
   }
 
-  // 「Xでシェア」「LINEでシェア」「URLでシェア」
-  const twitterBtn = document.getElementById('twitter-btn');
-  const lineBtn = document.getElementById('line-btn');
-  const urlBtn = document.getElementById('url-btn');
-  
-  if (twitterBtn) {
-    twitterBtn.addEventListener('click', () => {
-      if (!window.latestImageUrl) {
-        alert('先に「学生証を作成」ボタンを押して画像をアップロードしてください。');
-        return;
-      }
-      const url = encodeURIComponent(window.latestImageUrl);
-      const text = encodeURIComponent('放課後クロニクル 学生証を作成しました！');
-      const shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=放課後クロニクル`;
-      window.open(shareUrl, '_blank', 'width=550,height=420');
-    });
-  }
-  
-  if (lineBtn) {
-    lineBtn.addEventListener('click', () => {
-      if (!window.latestImageUrl) {
-        alert('先に「学生証を作成」ボタンを押して画像をアップロードしてください。');
-        return;
-      }
-      const url = encodeURIComponent(window.latestImageUrl);
-      const shareUrl = `https://social-plugins.line.me/lineit/share?url=${url}`;
-      window.open(shareUrl, '_blank', 'width=600,height=600');
-    });
+  // シェア機能セットアップ
+  function setupShare(imageUrl) {
+    const text = encodeURIComponent('放課後クロニクル 学生証を作成しました！ #放課後クロニクル');
+    
+    // Xでシェア
+    const twitterBtn = document.getElementById('twitterBtn');
+    if (twitterBtn) {
+      twitterBtn.addEventListener('click', () => {
+        const url = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(imageUrl)}`;
+        window.open(url, '_blank');
+      });
+    }
+
+    // LINEでシェア
+    const lineBtn = document.getElementById('lineBtn');
+    if (lineBtn) {
+      lineBtn.addEventListener('click', () => {
+        const url = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(imageUrl)}&text=${text}`;
+        window.open(url, '_blank');
+      });
+    }
+
+    // URLでシェア
+    const urlBtn = document.getElementById('urlBtn');
+    if (urlBtn) {
+      urlBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(imageUrl).then(() => {
+          alert('共有用URLをクリップボードにコピーしました');
+        });
+      });
+    }
   }
 
-  if (urlBtn) {
-    urlBtn.addEventListener('click', async () => {
-      if (!window.latestImageUrl) {
-        alert('先に「学生証を作成」ボタンを押して画像をアップロードしてください。');
-        return;
-      }
-      try {
-        await navigator.clipboard.writeText(window.latestImageUrl);
-        alert('画像のURLをコピーしました！');
-      } catch (error) {
-        console.error('URLコピーエラー:', error);
-        alert('URLのコピーに失敗しました。もう一度お試しください。');
-      }
-    });
-  }
+  // 各種テキスト反映
+  ['name-kanji', 'name-romaji', 'department', 'club', 'birth-month', 'birth-day'].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.addEventListener('change', drawCard);
+      element.addEventListener('input', drawCard);
+    }
+  });
 
   console.log("Init: 初期化完了");
 }); 

@@ -2,82 +2,75 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>放課後クロニクル 学生証ジェネレーター</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <header class="gradient-header">
-    <img src="assets/img/crest.png" alt="校章" class="header-logo">
+  <header>
+    <div class="logo"><img src="assets/img/crest.png" alt="校章"></div>
   </header>
 
-  <main class="container">
-    <div class="form-card">
-      <div class="form-content">
-        <div class="form-group">
-          <label for="photo-input">顔写真アップロード</label>
-          <input type="file" id="photo-input" accept="image/*">
+  <main>
+    <section class="form-card">
+      <h2>顔写真アップロード</h2>
+      <input type="file" id="photoInput" accept="image/*">
+      <label>氏名（漢字）<input type="text" id="nameJa" placeholder="例：高森のばら"></label>
+      <label>氏名（ローマ字）<input type="text" id="nameEn" placeholder="例：Takamori Nobara"></label>
+      <label>学科
+        <select id="department">
+          <option value="">選択してください</option>
+          <option>芸術科</option>
+          <option>文芸科</option>
+          <option>理数科</option>
+        </select>
+      </label>
+      <label>部活動
+        <select id="club">
+          <option value="">選択してください</option>
+          <option>ホラー布教部</option>
+          <option>ミステリー研究部</option>
+          <option>放課後探検部</option>
+        </select>
+      </label>
+      <div class="dob">
+        <label>生年月日
+          <input type="number" id="dobMonth" min="1" max="12" placeholder="月">
+          <input type="number" id="dobDay" min="1" max="31" placeholder="日">
+        </label>
+      </div>
+      <button id="createBtn">学生証を作成</button>
+    </section>
+
+    <section class="card-preview">
+      <div class="card-header">学生証</div>
+      <div class="card-body">
+        <div class="photo-frame">
+          <button id="prevBtn">◀</button>
+          <img id="previewPhoto" src="assets/img/default-photo.png" alt="">
+          <button id="nextBtn">▶</button>
         </div>
-        <div class="form-group">
-          <label for="name-kanji">氏名（漢字）</label>
-          <input type="text" id="name-kanji" placeholder="例：高森 のばら">
-        </div>
-        <div class="form-group">
-          <label for="name-romaji">氏名（ローマ字）</label>
-          <input type="text" id="name-romaji" placeholder="例：Takamori Nobara">
-        </div>
-        <div class="form-group">
-          <label for="department">学科</label>
-          <select id="department">
-            <option value="">選択してください</option>
-            <option value="芸術科">芸術科</option>
-            <option value="文芸科">文芸科</option>
-            <option value="理数科">理数科</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="club">部活動</label>
-          <select id="club">
-            <option value="">選択してください</option>
-            <option value="ホラー布教部">ホラー布教部</option>
-            <option value="ミステリー研究部">ミステリー研究部</option>
-            <option value="放課後探検部">放課後探検部</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="birth-month">生年月日</label>
-          <div class="date-selects">
-            <select id="birth-month" aria-label="月"></select>
-            <select id="birth-day" aria-label="日"></select>
+        <div class="template-frame">
+          <img src="assets/img/student_template.png" alt="テンプレート" class="template">
+          <div class="text-overlay">
+            <div class="student-number">0000000000</div>
+            <div class="student-name-ja"></div>
+            <div class="student-name-en"></div>
+            <div class="student-info"></div>
+            <div class="school-name">夢見が丘女子高等学校</div>
           </div>
         </div>
-        <button id="create-btn" class="button create-btn">学生証を作成</button>
       </div>
-    </div>
-
-    <div class="preview-card">
-      <div class="preview-header">
-        <h2>学生証</h2>
-        <img src="assets/img/crest.png" alt="校章" class="preview-logo">
+      <div class="card-footer">
+        <button id="downloadBtn">画像をダウンロード</button>
+        <button id="twitterBtn">Xでシェア</button>
+        <button id="lineBtn">LINEでシェア</button>
+        <button id="urlBtn">URLシェア</button>
       </div>
-      <div class="preview-content">
-        <img id="preview-photo" src="assets/img/default-photo.png" alt="写真" style="display: none;">
-        <canvas id="student-card" width="800" height="500"></canvas>
-      </div>
-    </div>
-
-    <div class="button-group">
-      <button class="button download-btn" id="download-btn">画像をダウンロード</button>
-      <button class="button twitter-btn" id="twitter-btn">Xでシェア</button>
-      <button class="button line-btn" id="line-btn">LINEでシェア</button>
-      <button class="button url-btn" id="url-btn">URLでシェア</button>
-    </div>
+    </section>
   </main>
 
-  <!-- 外部ライブラリの読み込み -->
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-  
-  <!-- アプリケーションコード -->
-  <script type="module" src="assets/js/app.js"></script>
+  <script src="assets/js/vendor/html2canvas.min.js"></script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html> 
