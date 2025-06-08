@@ -1,310 +1,113 @@
 /* 全画面グリッド背景 */
 body {
-  margin: 0;
-  padding: 0;
-  background: #2d2d2d;
-  background-image:
-    linear-gradient(#444 1px, transparent 1px),
-    linear-gradient(90deg,#444 1px, transparent 1px);
-  background-size: 20px 20px;
   font-family: "Noto Sans JP", sans-serif;
-  color: #333;
-}
-
-header {
-  height: 180px;
-  background: linear-gradient(90deg, #8e44ad, #3498db);
-  position: relative;
-}
-
-header .logo {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  opacity: 0.2;
-  width: 120px;
-}
-
-header .logo img {
-  width: 120px;
-}
-
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  background: #f0f0f0;
+  margin: 0;
   padding: 20px;
 }
 
-section {
-  margin: 20px 0;
+.container {
+  max-width: 400px;
+  margin: 0 auto;
 }
 
-/* フォームカード */
-.form-card {
-  background: #fff;
-  width: 90%;
-  max-width: 600px;
+.input-form {
+  background: white;
   padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
 }
 
-.form-card h2 {
-  margin-top: 0;
-  color: #333;
+.input-group {
+  margin-bottom: 15px;
 }
 
-.form-card label {
+.input-group label {
   display: block;
-  margin: 10px 0;
-  font-weight: 500;
+  margin-bottom: 5px;
 }
 
-.form-card input,
-.form-card select {
+.input-group input,
+.input-group select {
   width: 100%;
   padding: 8px;
-  margin-top: 4px;
-  box-sizing: border-box;
-  font-size: 1rem;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
 
-.birthday {
-  margin: 10px 0;
-}
-
-.birthday select {
-  width: calc(50% - 10px);
-  display: inline-block;
-  margin-right: 10px;
-}
-
-.birthday select:last-child {
-  margin-right: 0;
-}
-
-#createBtn {
-  margin-top: 15px;
-  width: 100%;
-  padding: 12px;
-  background: #3498db;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-#createBtn:hover {
-  background: #2980b9;
-}
-
-/* プレビューカード */
 .preview-card {
   position: relative;
-  width: 600px;
-  height: 350px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  width: 100%;
+  height: 250px;
+  background: linear-gradient(135deg, #9c27b0, #673ab7);
+  border-radius: 8px;
   overflow: hidden;
 }
 
-.card-header {
-  height: 60px;
-  background: linear-gradient(90deg,#8e44ad,#3498db);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 1.2rem;
-  font-family: "Noto Serif JP", serif;
-}
-
-.card-body {
-  position: relative;
-  height: 240px;
-  padding: 10px;
-  background: rgba(255,255,255,0.8);
-}
-
-/* 写真プレビュー */
 .photo-frame {
   position: absolute;
   top: 80px;
   left: 50px;
   width: 200px;
   height: 240px;
+  background: #90caf9;
   overflow: hidden;
-  border-radius: 4px;
-  background-color: #90caf9;
-  z-index: 1;
 }
 
 .photo-frame img {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: auto;
+  width: 100%;
   height: 100%;
-  transform: translate(-50%, -50%);
   object-fit: cover;
 }
 
-/* テンプレート */
-.template-frame {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.template-frame .template {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* オーバーレイテキスト */
-.overlay-text {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  font-family: "Noto Serif JP", serif;
-  z-index: 2;
-}
-
-.overlay-text div {
-  position: absolute;
-  white-space: nowrap;
-}
-
-.student-number {
-  top: 20px;
-  right: 20px;
-  font-family: monospace;
-  font-size: 14px;
-  color: #666;
-}
-
-.student-name-ja {
-  top: 60px;
-  left: 280px;
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.student-name-en {
-  top: 100px;
-  left: 280px;
-  font-size: 16px;
-}
-
 .student-info {
-  top: 140px;
+  position: absolute;
+  top: 80px;
   left: 280px;
-  font-size: 14px;
-  color: #666;
+  color: white;
 }
 
-.school-name {
-  bottom: 20px;
-  right: 20px;
-  font-size: 16px;
+.student-info div {
+  margin-bottom: 10px;
+}
+
+.share-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.share-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
   font-weight: bold;
 }
 
-/* フッターシェアボタン */
-.card-footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  padding: 10px;
-  background: #f0f0f0;
-}
-
-.card-footer button {
-  flex: 1;
-  min-width: 120px;
-  padding: 10px;
-  border: none;
-  color: #fff;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s;
-}
-
-#downloadBtn {
-  background: #27ae60;
-}
-
-#downloadBtn:hover {
-  background: #219a52;
-}
-
-#twitterBtn {
+.twitter-share {
   background: #1da1f2;
 }
 
-#twitterBtn:hover {
-  background: #1a91da;
+.line-share {
+  background: #00b900;
 }
 
-#lineBtn {
-  background: #00c300;
+.url-share {
+  background: #666;
 }
 
-#lineBtn:hover {
-  background: #00b300;
-}
-
-#urlBtn {
-  background: #7f8c8d;
-}
-
-#urlBtn:hover {
-  background: #6c7879;
-}
-
-/* レスポンシブ */
-@media (max-width: 600px) {
-  .preview-card {
-    width: 100%;
-    height: auto;
-    max-width: 400px;
-  }
-  
-  .card-body {
-    height: auto;
-    padding: 20px;
-  }
-  
+@media (max-width: 400px) {
   .photo-frame {
-    position: relative;
-    top: 0;
-    left: 0;
-    margin: 0 auto 20px;
     width: 160px;
     height: 200px;
   }
   
-  .student-name-ja,
-  .student-name-en,
   .student-info {
-    left: 20px;
-    text-align: center;
-    width: 100%;
-  }
-  
-  .card-footer button {
-    min-width: calc(50% - 4px);
+    left: 240px;
+    font-size: 14px;
   }
 } 
