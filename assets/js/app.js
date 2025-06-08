@@ -28,91 +28,116 @@ const POS = {
 window.addEventListener("DOMContentLoaded", () => {
   console.log("DOMContentLoaded: 初期化開始");
 
+  // キャンバスの初期化
   const canvas = document.getElementById('student-card');
   const ctx = canvas.getContext('2d');
+  
+  if (!canvas || !ctx) {
+    console.error('キャンバスの初期化に失敗しました');
+    return;
+  }
 
   // 背景を白で塗りつぶす
   function clearCanvas() {
-    if (!ctx) return;
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
+  // 学生証の描画
   function drawCard() {
-    if (!ctx) return;
-    
     // 背景を白で塗りつぶす
     clearCanvas();
 
     // アップロード写真
     if (photoImg.src && photoImg.src !== 'assets/img/default-photo.png') {
-      ctx.drawImage(photoImg, BOX.x, BOX.y, BOX.w, BOX.h);
+      try {
+        ctx.drawImage(photoImg, BOX.x, BOX.y, BOX.w, BOX.h);
+      } catch (error) {
+        console.error('写真の描画に失敗:', error);
+      }
     }
 
     // テキストの描画
-    ctx.font = '24px serif';
-    ctx.fillStyle = '#000000';
+    try {
+      ctx.font = '24px serif';
+      ctx.fillStyle = '#000000';
 
-    const nameKanji = document.getElementById('name-kanji')?.value || '';
-    const nameRomaji = document.getElementById('name-romaji')?.value || '';
-    const department = document.getElementById('department')?.value || '';
-    const club = document.getElementById('club')?.value || '';
-    const birthMonth = document.getElementById('birth-month')?.value || '';
-    const birthDay = document.getElementById('birth-day')?.value || '';
+      const nameKanji = document.getElementById('name-kanji')?.value || '';
+      const nameRomaji = document.getElementById('name-romaji')?.value || '';
+      const department = document.getElementById('department')?.value || '';
+      const club = document.getElementById('club')?.value || '';
+      const birthMonth = document.getElementById('birth-month')?.value || '';
+      const birthDay = document.getElementById('birth-day')?.value || '';
 
-    if (nameKanji) ctx.fillText(nameKanji, POS.name.x, POS.name.y);
-    if (nameRomaji) ctx.fillText(nameRomaji, POS.nameEn.x, POS.nameEn.y);
-    if (department) ctx.fillText(department, POS.department.x, POS.department.y);
-    if (birthMonth && birthDay) {
-      ctx.fillText(`${birthMonth}月${birthDay}日`, POS.birth.x, POS.birth.y);
+      if (nameKanji) ctx.fillText(nameKanji, POS.name.x, POS.name.y);
+      if (nameRomaji) ctx.fillText(nameRomaji, POS.nameEn.x, POS.nameEn.y);
+      if (department) ctx.fillText(department, POS.department.x, POS.department.y);
+      if (birthMonth && birthDay) {
+        ctx.fillText(`${birthMonth}月${birthDay}日`, POS.birth.x, POS.birth.y);
+      }
+    } catch (error) {
+      console.error('テキストの描画に失敗:', error);
     }
   }
 
+  // 写真の初期化
   let photoImg = new Image();
+  photoImg.onload = drawCard;
 
   // ドロップダウン初期化
   const monthSel = document.getElementById('birth-month');
   const daySel = document.getElementById('birth-day');
   
   if (monthSel && daySel) {
-    for(let i=1; i<=12; i++) {
-      const option = document.createElement('option');
-      option.value = i;
-      option.textContent = i + '月';
-      monthSel.appendChild(option);
-    }
-    for(let i=1; i<=31; i++) {
-      const option = document.createElement('option');
-      option.value = i;
-      option.textContent = i + '日';
-      daySel.appendChild(option);
-    }
+    // 月の選択肢を追加
+    monthSel.innerHTML = '<option value="">月</option>' + 
+      Array.from({length: 12}, (_, i) => i + 1)
+        .map(i => `<option value="${i}">${i}月</option>`)
+        .join('');
+
+    // 日の選択肢を追加
+    daySel.innerHTML = '<option value="">日</option>' + 
+      Array.from({length: 31}, (_, i) => i + 1)
+        .map(i => `<option value="${i}">${i}日</option>`)
+        .join('');
   }
 
-  // 画像選択 → プレビュー用 Image にセット
+  // 写真アップロードの処理
   const photoInput = document.getElementById('photo-input');
   const previewPhoto = document.getElementById('preview-photo');
   
   if (photoInput) {
     photoInput.addEventListener('change', e => {
-      const file = e.target.files[0];
+      const file = e.target.files?.[0];
       if (!file) return;
       
       const reader = new FileReader();
       reader.onload = (e) => {
-        photoImg.src = e.target.result;
-        if (previewPhoto) {
-          previewPhoto.src = e.target.result;
-          previewPhoto.style.display = 'block';
+        const result = e.target?.result;
+        if (typeof result === 'string') {
+          photoImg.src = result;
+          if (previewPhoto) {
+            previewPhoto.src = result;
+            previewPhoto.style.display = 'block';
+          }
         }
-        photoImg.onload = drawCard;
       };
       reader.readAsDataURL(file);
     });
   }
 
-  // 初回描画
+  // フォーム入力の監視
+  ['name-kanji', 'name-romaji', 'department', 'club', 'birth-month', 'birth-day'].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.addEventListener('change', drawCard);
+      element.addEventListener('input', drawCard);
+    }
+  });
+
+  // 初期描画
   clearCanvas();
+  drawCard();
 
   // Cloudinaryへのアップロード
   async function uploadToCloudinary(imageData) {
@@ -224,15 +249,6 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
-  // 入力フィールドの変更を監視
-  ['name-kanji', 'name-romaji', 'department', 'club', 'birth-month', 'birth-day'].forEach(id => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.addEventListener('change', drawCard);
-      element.addEventListener('input', drawCard);
-    }
-  });
 
   console.log("Init: 初期化完了");
 }); 
