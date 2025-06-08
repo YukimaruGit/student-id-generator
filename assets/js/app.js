@@ -278,20 +278,12 @@ window.addEventListener("DOMContentLoaded", () => {
         case 'line':
           shareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(sharePageUrl)}`;
           break;
-        case 'discord':
-          shareUrl = sharePageUrl;
-          break;
         default:
           throw new Error('未対応のプラットフォームです');
       }
       
       // プラットフォームに応じた処理
-      if (platform === 'discord') {
-        await navigator.clipboard.writeText(shareUrl);
-        alert('URLをクリップボードにコピーしました！\nDiscordに貼り付けてシェアできます。');
-      } else {
-        window.open(shareUrl, '_blank');
-      }
+      window.open(shareUrl, '_blank');
       
     } catch (error) {
       console.error('シェアに失敗しました:', error);
