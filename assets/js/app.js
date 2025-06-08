@@ -1,4 +1,4 @@
-import { CLOUDINARY_CONFIG } from '../../cloudinary.config.js';
+import { cloudinaryConfig } from '../../cloudinary.config.js';
 
 const IMG_BG = "assets/img/student_template.png";
 const BOX = {x:72,y:198,w:379,h:497};
@@ -212,9 +212,9 @@ window.addEventListener("DOMContentLoaded", () => {
       // Cloudinary アップロード
       const form = new FormData();
       form.append("file", blob);
-      form.append("upload_preset", CLOUDINARY_CONFIG.upload_preset);
+      form.append("upload_preset", cloudinaryConfig.uploadPreset);
 
-      const uploadURL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloud_name}/image/upload`;
+      const uploadURL = `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`;
       console.log("Share: Cloudinaryへのアップロード開始", uploadURL);
 
       const res = await fetch(uploadURL, { 

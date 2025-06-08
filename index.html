@@ -1,58 +1,105 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>放課後クロニクル 学生証ジェネレーター</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="放課後クロニクルの世界観で、あなただけの学生証を作成できるジェネレーターです。">
+  <meta property="og:title" content="放課後クロニクル 学生証ジェネレーター">
+  <meta property="og:description" content="放課後クロニクルの世界観で、あなただけの学生証を作成できるジェネレーターです。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://YukimaruGit.github.io/student-id-generator/">
+  <meta property="og:image" content="https://YukimaruGit.github.io/student-id-generator/assets/img/ogp.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <!-- UI ヘッダーに校章 -->
   <header class="header">
-    <img src="assets/img/crest.png" alt="校章" class="ui-logo"/>
+    <h1>
+      <img src="assets/img/crest.png" alt="放課後クロニクル 校章" class="ui-logo" width="100" height="100">
+      <span class="visually-hidden">放課後クロニクル 学生証ジェネレーター</span>
+    </h1>
   </header>
 
-  <div class="container">
-    <!-- 入力フォーム -->
-    <div class="card" id="formArea">
-      <label>顔写真アップロード</label>
-      <input type="file" id="photoInput" accept="image/*"/>
-
-      <label>氏名（漢字）</label>
-      <input type="text" id="nameInput" placeholder="例：高森 のばら"/>
-
-      <label>氏名（ローマ字）</label>
-      <input type="text" id="nameEnInput" placeholder="例：Takamori Nobara"/>
-
-      <label>学科</label>
-      <input type="text" id="deptInput" placeholder="例：芸術科"/>
-
-      <label>部活動</label>
-      <input type="text" id="clubInput" placeholder="例：ホラー布教部"/>
-
-      <label>生年月日</label>
-      <div>
-        <select id="birthMonth"></select>
-        <select id="birthDay"></select>
+  <main class="container">
+    <form class="card" id="formArea" aria-label="学生証情報入力フォーム">
+      <div class="form-group">
+        <label for="photoInput">顔写真アップロード</label>
+        <input type="file" id="photoInput" accept="image/*" required aria-required="true">
+        <div class="help-text" id="photoHelp">推奨サイズ: 縦長の写真（3:4）</div>
       </div>
 
-      <button id="createBtn">学生証を作成</button>
-    </div>
+      <div class="form-group">
+        <label for="nameInput">氏名（漢字）</label>
+        <input type="text" id="nameInput" placeholder="例：高森 のばら" required aria-required="true">
+      </div>
 
-    <!-- プレビュー -->
-    <div id="previewArea">
+      <div class="form-group">
+        <label for="nameRomajiInput">氏名（ローマ字）</label>
+        <input type="text" id="nameRomajiInput" placeholder="例：Takamori Nobara" required aria-required="true">
+      </div>
+
+      <div class="form-group">
+        <label for="departmentSelect">学科</label>
+        <select id="departmentSelect" required aria-required="true">
+          <option value="">選択してください</option>
+          <option value="芸術科">芸術科</option>
+          <option value="文学科">文学科</option>
+          <option value="科学科">科学科</option>
+          <option value="体育科">体育科</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="clubSelect">部活動</label>
+        <select id="clubSelect" required aria-required="true">
+          <option value="">選択してください</option>
+          <option value="ホラー布教部">ホラー布教部</option>
+          <option value="放課後探検部">放課後探検部</option>
+          <option value="怪異研究部">怪異研究部</option>
+          <option value="図書委員会">図書委員会</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="birthDateInput">生年月日</label>
+        <input type="date" id="birthDateInput" required aria-required="true">
+      </div>
+
+      <button type="button" id="createBtn" class="btn btn-primary">学生証を作成</button>
+    </form>
+
+    <section id="previewArea" class="preview-section" aria-live="polite" hidden>
+      <h2 class="visually-hidden">学生証プレビュー</h2>
       <div class="preview-card">
         <div class="preview-canvas-wrapper">
-          <canvas id="studentCanvas" width="1222" height="768"></canvas>
+          <canvas id="studentCanvas" width="1222" height="768" aria-label="生成された学生証"></canvas>
         </div>
         <div class="preview-actions">
-          <button id="downloadBtn">画像をダウンロード</button>
-          <button id="twitterShareBtn">Xでシェア</button>
-          <button id="lineShareBtn">LINEでシェア</button>
+          <button type="button" id="downloadBtn" class="btn btn-download">
+            <span class="icon-download" aria-hidden="true"></span>
+            画像をダウンロード
+          </button>
+          <button type="button" id="twitterShareBtn" class="btn btn-twitter">
+            <span class="icon-twitter" aria-hidden="true"></span>
+            Xでシェア
+          </button>
+          <button type="button" id="lineShareBtn" class="btn btn-line">
+            <span class="icon-line" aria-hidden="true"></span>
+            LINEでシェア
+          </button>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="copyright">&copy; 2024 放課後クロニクル</p>
+  </footer>
 
   <script type="module" src="assets/js/app.js"></script>
 </body>
