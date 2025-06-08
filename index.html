@@ -48,11 +48,11 @@
         <form id="idForm">
           <div class="form-group">
             <label for="nameInput">名前</label>
-            <input type="text" id="nameInput" required>
+            <input type="text" id="nameInput" placeholder="例：宮森 のばら" required>
           </div>
           <div class="form-group">
             <label for="nameEnInput">名前（ローマ字）</label>
-            <input type="text" id="nameEnInput" required>
+            <input type="text" id="nameEnInput" placeholder="例：Takamori Nobara" required>
           </div>
           <div class="form-group">
             <label for="courseInput">学科</label>
@@ -88,9 +88,7 @@
     <!-- プレビュー画面 -->
     <div id="previewArea" class="container" style="display: none;">
       <div class="preview-content">
-        <div id="idCard" class="id-card">
-          <!-- 学生証のデザインはここに生成 -->
-        </div>
+        <canvas id="studentCanvas"></canvas>
         <div class="share-buttons">
           <button id="downloadBtn" class="btn-share">ダウンロード</button>
           <button id="twitterShareBtn" class="btn-share twitter">Twitterでシェア</button>

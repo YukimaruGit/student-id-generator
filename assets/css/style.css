@@ -112,7 +112,6 @@ main {
   height: auto;
   margin: 1rem auto;
   border-radius: var(--radius-input);
-  display: none;
 }
 
 /* 生年月日セレクト */
@@ -149,7 +148,7 @@ main {
 }
 
 #studentCanvas {
-  max-width: 100%;
+  width: 100%;
   height: auto;
   margin: 2rem auto;
   border-radius: var(--radius-card);
