@@ -1,37 +1,47 @@
 /* 修正開始 */
 :root {
-  --primary-color: #2c3e50;
+  --primary-color: #8e44ad;
   --secondary-color: #3498db;
-  --background-color: #f5f6fa;
+  --accent-color: #2ecc71;
+  --background-color: #1a1a1a;
   --card-background: #ffffff;
   --text-color: #2c3e50;
-  --border-radius: 8px;
+  --border-radius: 12px;
+  --transition-duration: 0.3s;
 }
 
+/* 基本スタイル */
 body {
   margin: 0;
   padding: 0;
   font-family: 'Noto Sans JP', sans-serif;
   background: var(--background-color);
   background-image: 
-    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 20px 20px;
   color: var(--text-color);
+  min-height: 100vh;
 }
 
+/* ヘッダー */
 header {
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  padding: 1rem;
+  padding: 2rem 1rem;
   text-align: center;
   position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 header h1 {
   color: white;
   margin: 0;
   font-family: 'Noto Serif JP', serif;
-  font-size: 2rem;
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
 }
 
 .logo {
@@ -39,10 +49,12 @@ header h1 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  opacity: 0.2;
-  height: 80px;
+  opacity: 0.1;
+  height: 120px;
+  pointer-events: none;
 }
 
+/* メインコンテンツ */
 main {
   max-width: 1200px;
   margin: 2rem auto;
@@ -50,31 +62,105 @@ main {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
+  animation: fadeIn 0.5s ease-out;
 }
 
-.form-card, .preview-card {
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* フォームカード */
+.form-card {
   background: var(--card-background);
   border-radius: var(--border-radius);
   padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* フォーム要素のスタイル */
+.form-card h2 {
+  margin: 0 0 1.5rem;
+  color: var(--primary-color);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.5rem;
+}
+
+/* フォーム要素 */
 label {
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
 }
 
 input[type="text"],
 select {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-top: 0.25rem;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  transition: border-color var(--transition-duration);
 }
 
-/* 生年月日入力のスタイル */
+input[type="text"]:focus,
+select:focus {
+  border-color: var(--secondary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* ファイル入力 */
+input[type="file"] {
+  display: none;
+}
+
+.file-input-label {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--secondary-color);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color var(--transition-duration);
+}
+
+.file-input-label:hover {
+  background: #2980b9;
+}
+
+/* 写真プレビュー */
+.preview-container {
+  width: 200px;
+  height: 200px;
+  margin: 1rem 0;
+  border: 3px dashed #e0e0e0;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  transition: border-color var(--transition-duration);
+}
+
+.preview-container:hover {
+  border-color: var(--secondary-color);
+}
+
+#photoPreview {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--transition-duration);
+}
+
+#photoPreview.loaded {
+  opacity: 1;
+}
+
+/* 生年月日入力 */
 .date-inputs {
   display: flex;
   gap: 1rem;
@@ -82,10 +168,12 @@ select {
 
 input[type="number"] {
   width: 80px;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
   -moz-appearance: textfield;
+  transition: border-color var(--transition-duration);
 }
 
 input[type="number"]::-webkit-outer-spin-button,
@@ -94,49 +182,18 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 0;
 }
 
-/* 写真アップロード関連 */
-.preview-container {
-  width: 200px;
-  height: 200px;
-  margin: 1rem 0;
-  border: 2px dashed #ddd;
-  border-radius: var(--border-radius);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#photoPreview {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: cover;
-}
-
-/* ボタンスタイル */
-button {
-  background: var(--secondary-color);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background: #2980b9;
-}
-
-#generateBtn {
-  width: 100%;
-  margin-top: 1rem;
-  background: var(--primary-color);
+input[type="number"]:focus {
+  border-color: var(--secondary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 /* プレビューカード */
 .preview-card {
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
 }
@@ -145,7 +202,8 @@ button:hover {
   font-family: 'Noto Serif JP', serif;
   font-size: 1.5rem;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
 }
 
 .card-body {
@@ -153,19 +211,98 @@ button:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
 }
 
 #cardCanvas {
   max-width: 100%;
   height: auto;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
 }
 
+/* ボタン */
 .card-footer {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all var(--transition-duration);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+#generateBtn {
+  width: 100%;
+  margin-top: 1.5rem;
+  background: var(--primary-color);
+  color: white;
+}
+
+#generateBtn:hover {
+  background: #763c8f;
+  transform: translateY(-1px);
+}
+
+#downloadBtn {
+  background: var(--accent-color);
+  color: white;
+}
+
+#downloadBtn:hover {
+  background: #27ae60;
+  transform: translateY(-1px);
+}
+
+#twitterBtn {
+  background: #1da1f2;
+  color: white;
+}
+
+#twitterBtn:hover {
+  background: #1a91da;
+  transform: translateY(-1px);
+}
+
+#lineBtn {
+  background: #00c300;
+  color: white;
+}
+
+#lineBtn:hover {
+  background: #00b300;
+  transform: translateY(-1px);
+}
+
+#urlBtn {
+  background: #7f8c8d;
+  color: white;
+}
+
+#urlBtn:hover {
+  background: #6c7879;
+  transform: translateY(-1px);
+}
+
+/* フッター */
+footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
 }
 
 /* レスポンシブデザイン */
@@ -174,15 +311,57 @@ button:hover {
     grid-template-columns: 1fr;
   }
 
+  header h1 {
+    font-size: 2rem;
+  }
+
+  .form-card,
+  .preview-card {
+    padding: 1.5rem;
+  }
+
   .card-footer {
     grid-template-columns: 1fr;
   }
+
+  button {
+    width: 100%;
+  }
 }
 
-footer {
-  text-align: center;
-  padding: 1rem;
-  color: var(--text-color);
-  font-size: 0.875rem;
+/* アクセシビリティ */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+  .form-card,
+  .preview-card {
+    background: #2d3436;
+    color: #ecf0f1;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select {
+    background: #34495e;
+    border-color: #2c3e50;
+    color: #ecf0f1;
+  }
+
+  .preview-container {
+    background: #34495e;
+    border-color: #2c3e50;
+  }
+
+  .card-body {
+    background: #34495e;
+  }
 }
 /* 修正終了 */ 
