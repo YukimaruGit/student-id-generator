@@ -1,8 +1,17 @@
-// 効果音の準備
+// 効果音の準備（一時的にコメントアウト）
+/*
 const SOUNDS = {
   bell: new Audio('assets/sounds/bell.mp3'),
   chalk: new Audio('assets/sounds/chalk.mp3'),
   flip: new Audio('assets/sounds/flip.mp3')
+};
+*/
+
+// 一時的な効果音の代替処理
+const SOUNDS = {
+  bell: { play: () => console.log('Bell sound') },
+  chalk: { play: () => console.log('Chalk sound') },
+  flip: { play: () => console.log('Flip sound') }
 };
 
 // 質問プール（全12問からランダム10問抽出）
@@ -148,7 +157,13 @@ function handleChoice(event) {
   // カードめくりアニメーション
   const card = event.target.closest('.question-card');
   card.classList.add('flipping');
-  SOUNDS.flip.play();
+  
+  // 効果音を再生（エラーハンドリング付き）
+  try {
+    SOUNDS.flip.play();
+  } catch (error) {
+    console.log('Sound playback failed:', error);
+  }
   
   // プログレスバーを更新
   updateProgress(currentQuestion + 1);

@@ -399,4 +399,100 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   console.log("Init: 初期化完了");
-}); 
+});
+
+// 学生証生成フォームの処理
+document.addEventListener('DOMContentLoaded', () => {
+  const idForm = document.getElementById('idForm');
+  const photoInput = document.getElementById('photoInput');
+  const idCard = document.getElementById('idCard');
+
+  // フォーム送信時の処理
+  idForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // フォームデータの取得
+    const name = document.getElementById('nameInput').value;
+    const department = document.getElementById('deptInput').value;
+    const club = document.getElementById('clubInput').value;
+    const photo = photoInput.files[0];
+
+    // 学生証の生成
+    await generateStudentID(name, department, club, photo);
+  });
+
+  // 写真プレビューの処理
+  photoInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.className = 'student-photo';
+        // 既存の写真があれば置き換え
+        const existingPhoto = idCard.querySelector('.student-photo');
+        if (existingPhoto) {
+          existingPhoto.remove();
+        }
+        idCard.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // シェアボタンの処理
+  document.getElementById('twitterShare').addEventListener('click', shareToTwitter);
+  document.getElementById('lineShare').addEventListener('click', shareToLINE);
+  
+  // リセットボタンの処理
+  document.getElementById('resetBtn').addEventListener('click', resetForm);
+});
+
+// 学生証を生成する関数
+async function generateStudentID(name, department, club, photo) {
+  const formArea = document.getElementById('formArea');
+  const previewArea = document.getElementById('previewArea');
+  const idCard = document.getElementById('idCard');
+
+  // 学生証のHTMLを生成
+  idCard.innerHTML = `
+    <div class="id-card-inner">
+      <div class="school-logo"></div>
+      <h3>夢見が丘女子高等学校</h3>
+      <div class="student-info">
+        <p class="name">${name}</p>
+        <p class="department">${department}</p>
+        <p class="club">${club}</p>
+      </div>
+    </div>
+  `;
+
+  // 画面の切り替え
+  formArea.style.display = 'none';
+  previewArea.style.display = 'block';
+}
+
+// Twitterでシェアする関数
+function shareToTwitter() {
+  const text = encodeURIComponent('夢見が丘女子高等学校の学生証を作成しました！ #放課後クロニクル');
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+}
+
+// LINEでシェアする関数
+function shareToLINE() {
+  const text = encodeURIComponent('夢見が丘女子高等学校の学生証を作成しました！');
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://line.me/R/msg/text/?${text}%0D%0A${url}`, '_blank');
+}
+
+// フォームをリセットする関数
+function resetForm() {
+  document.getElementById('idForm').reset();
+  document.getElementById('previewArea').style.display = 'none';
+  document.getElementById('startContainer').style.display = 'block';
+  // 診断結果もリセット
+  document.getElementById('deptInput').value = '';
+  document.getElementById('clubInput').value = '';
+} 
