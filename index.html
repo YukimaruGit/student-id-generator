@@ -2,26 +2,71 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>放課後クロニクル 学生証ジェネレーター</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学生証ジェネレーター</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
   <div class="container">
-    <div id="card" class="card">
-      <canvas id="card-canvas" width="900" height="500"></canvas>
+    <div class="form-card">
+      <div class="form-header">
+        <h1>学生証作成</h1>
+      </div>
+      <div class="form-content">
+        <div class="form-group">
+          <label>顔写真アップロード</label>
+          <input type="file" id="photo-input" accept="image/*">
+        </div>
+        <div class="form-group">
+          <label>氏名（漢字）</label>
+          <input type="text" id="name-kanji" placeholder="例：山田 太郎">
+        </div>
+        <div class="form-group">
+          <label>氏名（ローマ字）</label>
+          <input type="text" id="name-romaji" placeholder="例：YAMADA TARO">
+        </div>
+        <div class="form-group">
+          <label>学科</label>
+          <input type="text" id="department" placeholder="例：情報工学科">
+        </div>
+        <div class="form-group">
+          <label>部活動</label>
+          <input type="text" id="club" placeholder="例：コンピュータ部">
+        </div>
+        <div class="form-group">
+          <label>生年月日</label>
+          <div class="date-selects">
+            <select id="birth-month"></select>
+            <select id="birth-day"></select>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="controls">
-      <input type="file" id="photo-input" accept="image/*">
-      <input id="name"       type="text" placeholder="氏名"      value="高森 のばら">
-      <input id="department" type="text" placeholder="学科／部活" value="芸術科／ホラー布教部">
-      <select id="month"></select>
-      <select id="day"></select>
-      <button id="create-btn">学生証を作成</button>
-      <button id="download-btn">画像をダウンロード</button>
-      <button id="twitter-btn">Xでシェア</button>
-      <button id="line-btn">LINEでシェア</button>
+
+    <div class="preview-card">
+      <div class="preview-header">学生証</div>
+      <img src="assets/img/school-logo.png" class="school-logo" alt="校章">
+      <div class="preview-content">
+        <div class="photo-frame">
+          <img id="preview-photo" src="assets/img/default-photo.png" alt="写真">
+          <div class="carousel-arrows">
+            <button class="carousel-arrow" id="prev-photo">←</button>
+            <button class="carousel-arrow" id="next-photo">→</button>
+          </div>
+        </div>
+        <div class="student-info">
+          <canvas id="student-card" width="600" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button class="button download-btn" id="download-btn">画像をダウンロード</button>
+      <button class="button twitter-btn" id="twitter-btn">Xでシェア</button>
+      <button class="button line-btn" id="line-btn">LINEでシェア</button>
     </div>
   </div>
+
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <script type="module" src="assets/js/app.js"></script>
 </body>
