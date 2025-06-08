@@ -9,9 +9,9 @@ const SOUNDS = {
 
 // 一時的な効果音の代替処理
 const SOUNDS = {
-  bell: { play: () => console.log('Bell sound') },
-  chalk: { play: () => console.log('Chalk sound') },
-  flip: { play: () => console.log('Flip sound') }
+  bell: { play: () => console.log('Bell sound effect') },
+  chalk: { play: () => console.log('Chalk sound effect') },
+  flip: { play: () => console.log('Flip sound effect') }
 };
 
 // 質問プール（全12問からランダム10問抽出）
@@ -116,8 +116,12 @@ function displayQuestion() {
 
   const question = questions[currentQuestion];
   
-  // ベル音を再生
-  SOUNDS.bell.play();
+  // ベル音を再生（エラー処理付き）
+  try {
+    SOUNDS.bell.play();
+  } catch (error) {
+    console.log('Sound playback failed:', error);
+  }
   
   const html = `
     <div class="question-card fade-in">
@@ -143,7 +147,13 @@ function displayQuestion() {
   // 選択肢のクリックイベントを設定
   document.querySelectorAll('.choice-btn').forEach(button => {
     button.addEventListener('click', handleChoice);
-    button.addEventListener('mouseover', () => SOUNDS.chalk.play());
+    button.addEventListener('mouseover', () => {
+      try {
+        SOUNDS.chalk.play();
+      } catch (error) {
+        console.log('Sound playback failed:', error);
+      }
+    });
   });
 }
 
@@ -275,4 +285,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // エクスポート
-export { startQuiz, displayQuestion }; 
+export { startQuiz, displayQuestion, calcResult, makePreviewMessage }; 
