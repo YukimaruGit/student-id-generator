@@ -93,22 +93,29 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // 写真プレビューの切り替え
   const updatePhotoPreview = () => {
+    console.log("updatePhotoPreview開始");
     if (uploadedPhotos.length === 0) {
+      console.log("アップロードされた画像なし");
       photoPreview.style.display = "none";
       prevBtn.style.display = "none";
       nextBtn.style.display = "none";
       return;
     }
 
+    console.log("プレビュー更新");
     photoPreview.style.display = "block";
     photoImg = uploadedPhotos[currentPhotoIndex];
     photoPreview.src = photoImg.src;
+    console.log("photoImg更新完了");
 
     // 矢印ボタンの表示制御
     prevBtn.style.display = currentPhotoIndex > 0 ? "block" : "none";
     nextBtn.style.display = currentPhotoIndex < uploadedPhotos.length - 1 ? "block" : "none";
 
-    drawCard();
+    setTimeout(() => {
+      console.log("遅延drawCard実行（プレビュー更新後）");
+      drawCard();
+    }, 100);
   };
 
   // 前の写真へ
@@ -132,21 +139,31 @@ window.addEventListener("DOMContentLoaded", () => {
     const files = e.target.files;
     if (!files.length) return;
 
+    console.log("画像アップロード開始");
     // 既存の画像をクリア
     uploadedPhotos = [];
     currentPhotoIndex = 0;
     photoImg = null;
+    console.log("既存の画像をクリア");
 
-    Array.from(files).forEach(file => {
+    Array.from(files).forEach((file, index) => {
+      console.log(`画像${index + 1}の読み込み開始`);
       const img = new Image();
       img.onload = () => {
+        console.log(`画像${index + 1}の読み込み完了`);
         uploadedPhotos.push(img);
+        console.log("uploadedPhotos:", uploadedPhotos.length);
         if (uploadedPhotos.length === 1) {
+          console.log("最初の画像を設定");
           currentPhotoIndex = 0;
           photoImg = img;
+          console.log("photoImg設定完了");
           updatePhotoPreview();
           previewArea.style.display = "block";
-          drawCard();
+          setTimeout(() => {
+            console.log("遅延drawCard実行");
+            drawCard();
+          }, 100);
         }
       };
       img.src = URL.createObjectURL(file);
@@ -155,16 +172,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // カード描画処理
   function drawCard() {
+    console.log("drawCard開始");
     try {
       if (!bgImg || !bgImg.complete) {
         console.log("背景画像がまだ読み込まれていません");
         return;
       }
 
+      console.log("photoImg状態:", photoImg ? "存在します" : "存在しません");
       ctx.clearRect(0,0,canvas.width,canvas.height);
       ctx.drawImage(bgImg,0,0,canvas.width,canvas.height);
 
       if (photoImg) {
+        console.log("写真描画開始");
         // 四角クリップを開始
         ctx.save();
         ctx.beginPath();
@@ -180,6 +200,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
         // 画像を描画
         ctx.drawImage(photoImg, 0,0, iw,ih, dx,dy, dw,dh);
+        console.log("写真描画完了");
 
         // クリップ解除
         ctx.restore();
