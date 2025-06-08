@@ -105,6 +105,12 @@ body {
   border-color: var(--color-twitter);
 }
 
+.text-input[readonly] {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  border-color: #ddd;
+}
+
 .select-input {
   width: 100%;
   padding: 12px;
@@ -428,4 +434,34 @@ body {
 .btn-start:hover {
   background: #357abd;
   transform: translateY(-2px);
+}
+
+.result-details {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.result-details p {
+  margin-bottom: 1rem;
+}
+
+.result-details p:last-child {
+  margin-bottom: 0;
+}
+
+.result-details strong {
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.result-details .description {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0.5rem 0 1.5rem;
+  padding-left: 1rem;
+  border-left: 3px solid #4a90e2;
 } 

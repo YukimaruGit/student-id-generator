@@ -35,19 +35,22 @@ const results = {
     title: '文学の才能あふれる知的タイプ',
     summary: '物語を愛し、言葉の世界に没頭するあなたには文学科がぴったり。図書委員会での活動も期待されています。',
     department: '普通科（特進コース）',
-    club: '図書委員会'
+    club: '図書委員会',
+    description: '成績上位者が振り分けられる特進コースで、より高度な学習に挑戦できます。'
   },
   artistic: {
     title: '芸術的センス抜群の表現者タイプ',
     summary: '豊かな感性と表現力を持つあなたには芸術科がおすすめ。音楽や美術を通じて才能を開花させましょう。',
     department: '芸術科（音楽コース・美術コース）',
-    club: '放課後探検部'
+    club: '放課後探検部',
+    description: '音楽と美術の専門的な指導を受けながら、創造性を伸ばすことができます。'
   },
   athletic: {
     title: 'スポーツ万能のアクティブタイプ',
     summary: '体を動かすことが大好きなあなたには体育科が最適。運動部での活躍が期待されています。',
     department: '普通科（英語コース）',
-    club: '怪異研究部'
+    club: '怪異研究部',
+    description: '英語特化の授業を受けながら、グローバルな視野を広げることができます。'
   }
 };
 
@@ -119,6 +122,11 @@ function showResult() {
       <h2>診断結果</h2>
       <h3>${result.title}</h3>
       <p>${result.summary}</p>
+      <div class="result-details">
+        <p><strong>あなたにおすすめの学科：</strong><br>${result.department}</p>
+        <p class="description">${result.description}</p>
+        <p><strong>相性のよい部活動：</strong><br>${result.club}</p>
+      </div>
       <button id="createIdBtn" class="btn-create">学生証を作成</button>
     </div>
   `;
