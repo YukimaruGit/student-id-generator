@@ -236,73 +236,61 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // シェア処理
+  // シェア機能
   async function uploadAndShare(platform) {
     try {
-      if (!bgImg || !bgImg.complete) {
-        alert("背景画像の読み込みを待っています...");
-        return;
-      }
-      console.log("Share: アップロード開始");
-      const blob = await new Promise((resolve, reject) => {
-        canvas.toBlob(blob => {
-          if (blob) resolve(blob);
-          else reject(new Error("Canvas toBlob failed"));
-        }, "image/png");
-      });
-
-      // Cloudinary アップロード
-      const form = new FormData();
-      form.append("file", blob);
-      form.append("upload_preset", cloudinaryConfig.uploadPreset);
-
-      const uploadURL = `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`;
-      console.log("Share: Cloudinaryへのアップロード開始", uploadURL);
-
-      const res = await fetch(uploadURL, { 
-        method: "POST", 
-        body: form 
-      });
+      // キャンバスをBlobに変換
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
       
-      if (!res.ok) {
-        throw new Error(`Upload failed: ${res.status} ${res.statusText}`);
+      // FormDataの作成
+      const formData = new FormData();
+      formData.append('file', blob);
+      formData.append('upload_preset', cloudinaryConfig.uploadPreset);
+      
+      // Cloudinaryにアップロード
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`,
+        {
+          method: 'POST',
+          body: formData
+        }
+      );
+      
+      if (!response.ok) throw new Error('アップロードに失敗しました');
+      
+      const data = await response.json();
+      const secure_url = data.secure_url;
+      
+      // シェアページのURL生成
+      const sharePageUrl = `https://after-school-share.as-chronicle.workers.dev/?img=${encodeURIComponent(secure_url)}`;
+      
+      // プラットフォーム別のシェアURL生成
+      const text = '放課後クロニクル 学生証を作成しました！\n#放課後クロニクル';
+      let shareUrl;
+      
+      switch (platform) {
+        case 'twitter':
+          shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(sharePageUrl)}`;
+          break;
+        case 'line':
+          shareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(sharePageUrl)}`;
+          break;
+        default:
+          throw new Error('未対応のプラットフォームです');
       }
       
-      const { secure_url } = await res.json();
-      console.log("Share: アップロード完了", secure_url);
-
-      const text = encodeURIComponent("放課後クロニクル 学生証を作成しました！ #放課後クロニクル");
-      const url = encodeURIComponent(secure_url);
-
-      if (platform === 'twitter') {
-        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
-      } else if (platform === 'line') {
-        window.open(`https://social-plugins.line.me/lineit/share?url=${url}`, "_blank");
-      } else {
-        // ダウンロード
-        const a = document.createElement("a");
-        a.href = secure_url;
-        a.download = "student_card.png";
-        a.click();
-      }
-
-      console.log("Share: シェアウィンドウを開きました");
-    } catch (err) {
-      console.error("Share: シェア処理失敗", err);
-      alert("画像のアップロードに失敗しました。\nエラー: " + err.message);
+      // シェアウィンドウを開く
+      window.open(shareUrl, '_blank');
+      
+    } catch (error) {
+      console.error('シェアに失敗しました:', error);
+      alert('シェアに失敗しました。もう一度お試しください。');
     }
   }
 
-  // シェアボタンのイベントリスナ
-  twBtn.addEventListener("click", () => {
-    console.log("▶︎ Twitter Share button clicked");
-    uploadAndShare('twitter');
-  });
-
-  lnBtn.addEventListener("click", () => {
-    console.log("▶︎ LINE Share button clicked");
-    uploadAndShare('line');
-  });
+  // シェアボタンのイベントリスナー
+  twBtn.addEventListener('click', () => uploadAndShare('twitter'));
+  lnBtn.addEventListener('click', () => uploadAndShare('line'));
 
   console.log("Init: 初期化完了");
 }); 

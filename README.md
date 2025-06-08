@@ -1,44 +1,85 @@
 # 放課後クロニクル 学生証ジェネレーター
 
-このプロジェクトは、放課後クロニクルの世界観に沿った学生証を生成するWebアプリケーションです。
+放課後クロニクルの世界観で、あなただけの学生証を作成できるジェネレーターです。
 
 ## 機能
 
-- 顔写真のアップロードと自動トリミング
-- 氏名（漢字・ローマ字）の入力
-- 学科・部活動の入力
-- 生年月日の選択
-- 学生証画像のダウンロード
-- SNS（X/Twitter、LINE）でのシェア機能
+- 顔写真のアップロード
+- 学生情報の入力（氏名、学科、部活動、生年月日）
+- 学生証の生成
+- SNSシェア機能（X、LINE）
 
-## 技術スタック
+## 開発環境のセットアップ
 
-- HTML5 Canvas API - 画像生成
-- JavaScript (ES6+) - アプリケーションロジック
-- CSS3 - モダンなUI/UXデザイン
-- Cloudinary - 画像アップロード・共有
-
-## セットアップ
-
-1. リポジトリをクローン
+1. リポジトリのクローン
 ```bash
-git clone https://github.com/yourusername/student-id-generator.git
+git clone https://github.com/YukimaruGit/student-id-generator.git
 cd student-id-generator
 ```
 
-2. 静的サイトホスティング（GitHub Pages等）で公開
-- `index.html` がエントリーポイントです
-- 必要な画像アセットは `assets/img/` に配置されています
+2. Cloudflare Workersの設定
+```bash
+# Wranglerのインストール
+npm install -g wrangler
 
-## 使用方法
+# ログイン
+wrangler login
 
-1. Webブラウザで開く
-2. 顔写真をアップロード
-3. 必要な情報を入力
-4. 「学生証を作成」ボタンをクリック
-5. プレビューを確認
-6. 「画像をダウンロード」または各種SNSでシェア
+# 開発サーバーの起動
+wrangler dev
+
+# 本番環境へのデプロイ
+wrangler deploy
+```
+
+## シェア機能の設定と検証
+
+### Cloudflare Workersのセットアップ
+
+1. `wrangler.toml`の設定
+   - `name`をあなたのプロジェクト名に変更
+   - `account_id`を自分のCloudflareアカウントIDに変更
+
+2. デプロイ
+```bash
+wrangler deploy
+```
+
+### SNSシェアの動作確認
+
+1. Twitter Card Validatorでの確認
+   - https://cards-dev.twitter.com/validator にアクセス
+   - 生成されたシェアURLを入力（例: `https://after-school-share.your-subdomain.workers.dev/?img=https://example.com/image.png`）
+   - 「カードの再取得」をクリックして最新の情報を取得
+   - プレビューが正しく表示されることを確認
+
+2. LINEシェアデバッガーでの確認
+   - https://access.line.me/share-debugger/ にアクセス
+   - 生成されたシェアURLを入力
+   - 「デバッグ」をクリックして最新の情報を取得
+   - プレビューが正しく表示されることを確認
+
+### キャッシュのクリア手順
+
+SNSでシェアした画像が更新されない場合は、以下の手順でキャッシュをクリアしてください：
+
+1. Twitter
+   - Twitter Card Validatorで対象URLを検証
+   - 「カードの再取得」をクリック
+   - 新しいツイートで変更を確認
+
+2. LINE
+   - LINEシェアデバッガーで対象URLを入力
+   - 「デバッグ」をクリック
+   - LINEアプリで新しくシェアして変更を確認
+
+## 技術仕様
+
+- フロントエンド: HTML, CSS, JavaScript
+- 画像処理: Canvas API
+- 画像ホスティング: Cloudinary
+- シェアページ: Cloudflare Workers
 
 ## ライセンス
 
-MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照してください。 
+このプロジェクトは[MITライセンス](LICENSE.txt)の下で公開されています。 

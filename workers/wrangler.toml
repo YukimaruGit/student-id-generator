@@ -1,11 +1,4 @@
-name = "student-card-share"
+name = "after-school-share"
 main = "index.js"
-compatibility_date = "2024-03-14"
-
-[vars]
-CLOUDINARY_CLOUD_NAME = ""  # Cloudinaryのcloud_nameを設定
-CLOUDINARY_API_KEY = ""     # CloudinaryのAPI Keyを設定
-
-[[assets]]
-binding = "ASSETS"
-bucket = "../assets/img" 
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]

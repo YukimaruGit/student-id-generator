@@ -1,18 +1,13 @@
 {
-  "name": "student-card-share",
+  "name": "after-school-share",
   "version": "1.0.0",
-  "description": "放課後クロニクル 学生証ジェネレーター OGP生成サービス",
-  "main": "index.js",
+  "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler publish"
-  },
-  "dependencies": {
-    "@cloudflare/kv-asset-handler": "^0.3.0",
-    "sharp": "^0.33.2"
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
   },
   "devDependencies": {
-    "wrangler": "^3.30.1"
+    "wrangler": "^4.0.0"
   }
-} 
+}
