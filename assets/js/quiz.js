@@ -276,13 +276,40 @@ function makePreviewMessage(result) {
             .replace(/\$\{club\}/g, result.club);
 }
 
+// リセット機能
+function resetQuiz() {
+  currentQuestion = 0;
+  questions = [];
+  tally = {
+    course: { 特進: 0, 英語: 0, 音楽: 0, 美術: 0 },
+    club: {},
+    vibe: 0
+  };
+  
+  const quizContainer = document.getElementById('quizContainer');
+  const formArea = document.getElementById('formArea');
+  const previewArea = document.getElementById('previewArea');
+  
+  if (quizContainer) quizContainer.style.display = 'none';
+  if (formArea) formArea.style.display = 'none';
+  if (previewArea) previewArea.style.display = 'none';
+  
+  const startContainer = document.getElementById('startContainer');
+  if (startContainer) startContainer.style.display = 'block';
+}
+
 // 初期化処理
 document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('startBtn');
   if (startBtn) {
     startBtn.addEventListener('click', startQuiz);
   }
+  
+  const resetBtn = document.getElementById('resetBtn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', resetQuiz);
+  }
 });
 
 // エクスポート
-export { startQuiz, displayQuestion, calcResult, makePreviewMessage }; 
+export { startQuiz, displayQuestion, calcResult, makePreviewMessage, resetQuiz }; 
