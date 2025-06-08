@@ -246,8 +246,12 @@ function makePreviewMessage(result) {
 
 // 初期化処理
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('startBtn').addEventListener('click', startQuiz);
+  // 開始ボタンのイベントリスナーを設定
+  const startBtn = document.getElementById('startBtn');
+  if (startBtn) {
+    startBtn.addEventListener('click', startQuiz);
+  }
 });
 
 // エクスポート
-export { startQuiz }; 
+export { startQuiz, displayQuestion }; 

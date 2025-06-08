@@ -18,22 +18,20 @@
   <link rel="stylesheet" href="assets/css/quiz.css">
   <link rel="stylesheet" href="assets/css/style.css">
   <!-- Google Fonts - Chalk風フォント -->
-  <link href="https://fonts.googleapis.com/css2?family=Kalam&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kalam&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header class="header">
-    <img src="assets/img/crest.png" alt="校章" class="ui-logo">
-  </header>
-
-  <div class="container">
-    <!-- 診断開始画面 -->
-    <div id="startContainer" class="start-container">
-      <h1>夢見が丘女子高等学校<br>入学診断</h1>
-      <p>あなたに最適な学科と部活動を診断します！</p>
-      <button id="startBtn" class="btn-start">診断を始める</button>
+  <main>
+    <!-- 開始画面 -->
+    <div id="startContainer" class="container">
+      <div class="start-content">
+        <h1>夢見が丘女子高等学校<br>入学診断</h1>
+        <p>あなたに最適な学科と部活動を診断します！</p>
+        <button id="startBtn" class="btn-start">診断を始める</button>
+      </div>
     </div>
 
-    <!-- 診断ゲームエリア -->
+    <!-- 診断画面 -->
     <div id="quizContainer" class="quiz-container" style="display: none;">
       <!-- プログレスバー -->
       <div class="progress-container">
@@ -43,7 +41,7 @@
       <!-- 質問カード（JavaScriptで動的に生成） -->
     </div>
 
-    <!-- フォームエリア（初期状態で非表示） -->
+    <!-- 学生証作成フォーム -->
     <div id="formArea" class="container" style="display: none;">
       <div class="form-content">
         <h2>学生証を作成しましょう</h2>
@@ -69,7 +67,7 @@
       </div>
     </div>
 
-    <!-- プレビューエリア（初期状態で非表示） -->
+    <!-- プレビュー画面 -->
     <div id="previewArea" class="container" style="display: none;">
       <div class="preview-content">
         <div id="idCard" class="id-card">
@@ -82,7 +80,7 @@
         <button id="resetBtn" class="btn-reset">もう一度診断する</button>
       </div>
     </div>
-  </div>
+  </main>
 
   <footer class="footer">
     <p class="copyright">&copy; 2024 放課後クロニクル</p>
