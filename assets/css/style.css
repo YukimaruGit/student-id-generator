@@ -73,10 +73,18 @@ section {
   border-radius: 4px;
 }
 
-.dob input {
-  width: calc(50% - 20px);
+.birthday {
+  margin: 10px 0;
+}
+
+.birthday select {
+  width: calc(50% - 10px);
   display: inline-block;
-  margin-right: 4px;
+  margin-right: 10px;
+}
+
+.birthday select:last-child {
+  margin-right: 0;
 }
 
 #createBtn {
@@ -128,53 +136,31 @@ section {
 /* 写真プレビュー */
 .photo-frame {
   position: absolute;
-  left: 20px;
-  top: 50px;
-  width: 120px;
-  height: 150px;
+  top: 80px;
+  left: 50px;
+  width: 200px;
+  height: 240px;
   overflow: hidden;
   border-radius: 4px;
-  background: #f0f0f0;
-}
-
-.photo-frame img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.photo-frame button {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0,0,0,0.5);
-  color: #fff;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  background-color: #90caf9;
   z-index: 1;
 }
 
-.photo-frame button:hover {
-  background: rgba(0,0,0,0.7);
-}
-
-#prevBtn {
-  left: 4px;
-}
-
-#nextBtn {
-  right: 4px;
+.photo-frame img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: auto;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
 }
 
 /* テンプレート */
 .template-frame {
-  position: absolute;
-  right: 20px;
-  top: 10px;
-  width: calc(100% - 160px);
-  height: 220px;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .template-frame .template {
@@ -191,6 +177,7 @@ section {
   width: 100%;
   height: 100%;
   font-family: "Noto Serif JP", serif;
+  z-index: 2;
 }
 
 .overlay-text div {
@@ -208,20 +195,20 @@ section {
 
 .student-name-ja {
   top: 60px;
-  left: 140px;
+  left: 280px;
   font-size: 24px;
   font-weight: bold;
 }
 
 .student-name-en {
   top: 100px;
-  left: 140px;
+  left: 280px;
   font-size: 16px;
 }
 
 .student-info {
   top: 140px;
-  left: 140px;
+  left: 280px;
   font-size: 14px;
   color: #666;
 }
@@ -292,6 +279,7 @@ section {
   .preview-card {
     width: 100%;
     height: auto;
+    max-width: 400px;
   }
   
   .card-body {
@@ -304,12 +292,15 @@ section {
     top: 0;
     left: 0;
     margin: 0 auto 20px;
+    width: 160px;
+    height: 200px;
   }
   
-  .template-frame {
-    position: relative;
-    right: 0;
-    top: 0;
+  .student-name-ja,
+  .student-name-en,
+  .student-info {
+    left: 20px;
+    text-align: center;
     width: 100%;
   }
   

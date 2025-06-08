@@ -47,10 +47,10 @@
       </label>
       <div class="birthday">
         <label>生年月日</label>
-        <select id="birth-month">
+        <select id="dobMonth">
           <option value="">月</option>
         </select>
-        <select id="birth-day">
+        <select id="dobDay">
           <option value="">日</option>
         </select>
       </div>
@@ -58,17 +58,15 @@
     </section>
 
     <!-- プレビュー＆シェア -->
-    <section class="card-preview">
+    <section class="preview-card">
       <div class="card-header">学生証</div>
       <div class="card-body">
-        <div class="photo-frame">
-          <button id="prevBtn">◀</button>
-          <img id="previewPhoto" src="" alt="プレビュー写真">
-          <button id="nextBtn">▶</button>
-        </div>
         <div class="template-frame">
           <img src="assets/img/student_template.png" class="template" alt="学生証テンプレート">
-          <div class="text-overlay">
+          <div class="photo-frame">
+            <!-- 写真がここに配置されます -->
+          </div>
+          <div class="overlay-text">
             <div class="student-number">0000000000</div>
             <div class="student-name-ja"></div>
             <div class="student-name-en"></div>

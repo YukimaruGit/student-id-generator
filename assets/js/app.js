@@ -46,10 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
     lineBtn: document.getElementById('lineBtn'),
     urlBtn: document.getElementById('urlBtn'),
     previewPhoto: document.getElementById('previewPhoto'),
-    templateFrame: document.querySelector('.template-frame'),
+    photoFrame: document.querySelector('.photo-frame'),
     cardPreview: document.querySelector('.preview-card'),
-    birthMonth: document.getElementById('birth-month'),
-    birthDay: document.getElementById('birth-day')
+    dobMonth: document.getElementById('dobMonth'),
+    dobDay: document.getElementById('dobDay')
   };
 
   // 要素の存在確認
@@ -60,15 +60,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 生年月日の選択肢を生成
-  if (elements.birthMonth && elements.birthDay) {
+  if (elements.dobMonth && elements.dobDay) {
     // 月の選択肢を追加
-    elements.birthMonth.innerHTML = '<option value="">月</option>' + 
+    elements.dobMonth.innerHTML = '<option value="">月</option>' + 
       Array.from({length: 12}, (_, i) => i + 1)
         .map(i => `<option value="${i}">${i}</option>`)
         .join('');
 
     // 日の選択肢を追加
-    elements.birthDay.innerHTML = '<option value="">日</option>' + 
+    elements.dobDay.innerHTML = '<option value="">日</option>' + 
       Array.from({length: 31}, (_, i) => i + 1)
         .map(i => `<option value="${i}">${i}</option>`)
         .join('');
@@ -86,6 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // 各ファイルをCloudinaryにアップロード
       for (const file of Array.from(files)) {
+        // 一時的なプレビューを表示
+        const url = URL.createObjectURL(file);
+        updatePhotoPreview(url);
+
         const form = new FormData();
         form.append('file', file);
         form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
@@ -101,7 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const json = await response.json();
         photos.push(json.secure_url);
-        updatePhoto();
+        updatePhotoPreview(json.secure_url);
+        
+        // 一時URLを解放
+        URL.revokeObjectURL(url);
       }
     } catch (err) {
       console.error('画像アップロードエラー:', err);
@@ -109,18 +116,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // 写真プレビューの更新
+  function updatePhotoPreview(imageUrl) {
+    try {
+      if (!elements.photoFrame) {
+        throw new Error('Photo frame not found');
+      }
+
+      // 既存の画像をクリア
+      elements.photoFrame.innerHTML = '';
+
+      // 新しい画像を追加
+      const img = document.createElement('img');
+      img.src = imageUrl;
+      img.alt = 'アップロード写真';
+      elements.photoFrame.appendChild(img);
+
+    } catch (err) {
+      console.error('写真プレビュー更新エラー:', err);
+    }
+  }
+
   // 写真切り替え処理
   elements.prevBtn.onclick = () => {
     if (idx > 0) {
       idx--;
-      updatePhoto();
+      updatePhotoPreview(photos[idx]);
     }
   };
 
   elements.nextBtn.onclick = () => {
     if (idx < photos.length - 1) {
       idx++;
-      updatePhoto();
+      updatePhotoPreview(photos[idx]);
     }
   };
 
@@ -186,55 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // 写真更新処理
-  function updatePhoto() {
-    try {
-      if (!elements.previewPhoto || !elements.templateFrame) {
-        throw new Error('Preview elements not found');
-      }
-
-      if (photos.length > 0) {
-        elements.previewPhoto.src = photos[idx];
-        
-        // テンプレートの写真部分を更新
-        const photoStyle = `
-          background-image: url('${photos[idx]}');
-          background-size: cover;
-          background-position: center;
-          position: absolute;
-          width: 120px;
-          height: 150px;
-          left: 20px;
-          top: 50px;
-          border-radius: 4px;
-          overflow: hidden;
-        `;
-        
-        let photoElement = elements.templateFrame.querySelector('.photo-overlay');
-        if (!photoElement) {
-          photoElement = document.createElement('div');
-          photoElement.className = 'photo-overlay';
-          elements.templateFrame.appendChild(photoElement);
-        }
-        photoElement.style.cssText = photoStyle;
-      } else {
-        elements.previewPhoto.src = '';
-        const photoElement = elements.templateFrame.querySelector('.photo-overlay');
-        if (photoElement) {
-          photoElement.remove();
-        }
-      }
-      
-      // ボタンの表示制御
-      elements.prevBtn.style.display = idx > 0 ? 'block' : 'none';
-      elements.nextBtn.style.display = idx < photos.length - 1 ? 'block' : 'none';
-    } catch (err) {
-      console.error('写真更新エラー:', err);
-    }
-  }
-
   // テキスト反映
-  ['nameJa', 'nameEn', 'department', 'club', 'birth-month', 'birth-day'].forEach(id => {
+  ['nameJa', 'nameEn', 'department', 'club', 'dobMonth', 'dobDay'].forEach(id => {
     const element = document.getElementById(id);
     if (!element) {
       console.error(`Error: ${id} element not found`);
@@ -262,8 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
         nameEn: document.getElementById('nameEn')?.value || '',
         department: document.getElementById('department')?.value || '',
         club: document.getElementById('club')?.value || '',
-        month: document.getElementById('birth-month')?.value || '',
-        day: document.getElementById('birth-day')?.value || ''
+        month: document.getElementById('dobMonth')?.value || '',
+        day: document.getElementById('dobDay')?.value || ''
       };
 
       textElements.nameJa.textContent = values.nameJa;
