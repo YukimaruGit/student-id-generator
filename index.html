@@ -6,9 +6,10 @@
   <title>放課後クロニクル 学生証ジェネレーター</title>
   <meta property="og:title" content="放課後クロニクル 学生証ジェネレーター">
   <meta property="og:description" content="あなただけの学生証を作成しよう！">
-  <meta property="og:image" content="https://res.cloudinary.com/di5rxlddy/image/upload/v1/student_card_AS_chronicle/card_preview.png">
-  <meta property="og:url" content="https://your-domain.com">
+  <meta property="og:image" content="https://res.cloudinary.com/your-cloud-name/image/upload/v1/student-id-generator/preview.png">
+  <meta property="og:url" content="https://your-domain.com/student-id-generator/">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@YourTwitterHandle">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -16,6 +17,7 @@
 </head>
 <body>
   <header>
+    <h1>学生証</h1>
     <img class="logo" src="assets/img/crest.png" alt="校章">
   </header>
 
@@ -23,52 +25,41 @@
     <section class="form-card">
       <h2>顔写真アップロード</h2>
       <input type="file" id="photoInput" accept="image/*">
+      <div class="preview-container">
+        <img id="photoPreview" alt="写真プレビュー">
+      </div>
       <label>氏名（漢字）<input type="text" id="nameJa" placeholder="例：高森のばら"></label>
       <label>氏名（ローマ字）<input type="text" id="nameEn" placeholder="例：Takamori Nobara"></label>
       <label>学科
         <select id="department">
           <option value="">選択してください</option>
-          <option>芸術科</option>
-          <option>文理科</option>
-          <option>文芸科</option>
+          <option value="芸術">芸術</option>
+          <option value="文理">文理</option>
+          <option value="文芸">文芸</option>
         </select>
       </label>
       <label>部活動
         <select id="club">
           <option value="">選択してください</option>
-          <option>ホラー布教部</option>
-          <option>文芸部</option>
-          <option>放課後探検部</option>
+          <option value="ホラー布教">ホラー布教</option>
+          <option value="文芸">文芸</option>
+          <option value="放課後探検">放課後探検</option>
         </select>
       </label>
       <div class="birthday">
         <label>生年月日</label>
-        <select id="dobMonth">
-          <option value="">月</option>
-        </select>
-        <select id="dobDay">
-          <option value="">日</option>
-        </select>
+        <div class="date-inputs">
+          <input type="number" id="dobMonth" min="1" max="12" placeholder="月">
+          <input type="number" id="dobDay" min="1" max="31" placeholder="日">
+        </div>
       </div>
-      <button id="createBtn">学生証を作成</button>
+      <button id="generateBtn">学生証を作成</button>
     </section>
 
     <section class="preview-card">
       <div class="card-header">学生証</div>
       <div class="card-body">
-        <div class="template-frame">
-          <img src="assets/img/student_template.png" class="template" alt="学生証テンプレート">
-          <div class="photo-frame">
-            <!-- 写真がここに配置されます -->
-          </div>
-          <div class="overlay-text">
-            <div class="student-number">0000000000</div>
-            <div class="student-name-ja"></div>
-            <div class="student-name-en"></div>
-            <div class="student-info"></div>
-            <div class="school-name">夢見が丘女子高等学校</div>
-          </div>
-        </div>
+        <canvas id="cardCanvas" width="800" height="500"></canvas>
       </div>
       <div class="card-footer">
         <button id="downloadBtn">画像をダウンロード</button>
@@ -78,5 +69,9 @@
       </div>
     </section>
   </main>
+
+  <footer>
+    <p>&copy; 2024 放課後クロニクル 学生証ジェネレーター</p>
+  </footer>
 </body>
 </html> 
