@@ -48,6 +48,24 @@ window.addEventListener("DOMContentLoaded", () => {
     if (photoImg.src && photoImg.src !== 'assets/img/default-photo.png') {
       ctx.drawImage(photoImg, BOX.x, BOX.y, BOX.w, BOX.h);
     }
+
+    // テキストの描画
+    ctx.font = '24px serif';
+    ctx.fillStyle = '#000000';
+
+    const nameKanji = document.getElementById('name-kanji')?.value || '';
+    const nameRomaji = document.getElementById('name-romaji')?.value || '';
+    const department = document.getElementById('department')?.value || '';
+    const club = document.getElementById('club')?.value || '';
+    const birthMonth = document.getElementById('birth-month')?.value || '';
+    const birthDay = document.getElementById('birth-day')?.value || '';
+
+    if (nameKanji) ctx.fillText(nameKanji, POS.name.x, POS.name.y);
+    if (nameRomaji) ctx.fillText(nameRomaji, POS.nameEn.x, POS.nameEn.y);
+    if (department) ctx.fillText(department, POS.department.x, POS.department.y);
+    if (birthMonth && birthDay) {
+      ctx.fillText(`${birthMonth}月${birthDay}日`, POS.birth.x, POS.birth.y);
+    }
   }
 
   let photoImg = new Image();
@@ -207,17 +225,8 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 入力フィールドの変更を監視してプレビューを更新
-  const formInputs = [
-    'name-kanji',
-    'name-romaji',
-    'department',
-    'club',
-    'birth-month',
-    'birth-day'
-  ];
-
-  formInputs.forEach(id => {
+  // 入力フィールドの変更を監視
+  ['name-kanji', 'name-romaji', 'department', 'club', 'birth-month', 'birth-day'].forEach(id => {
     const element = document.getElementById(id);
     if (element) {
       element.addEventListener('change', drawCard);
