@@ -33,12 +33,15 @@ window.addEventListener("DOMContentLoaded", () => {
   const dlBtn = document.getElementById("downloadBtn");
   const twBtn = document.getElementById("twitterShareBtn");
   const lnBtn = document.getElementById("lineShareBtn");
+  const copyBtn = document.getElementById("copyUrlBtn");
+  const discordBtn = document.getElementById("discordShareBtn");
 
   // 状態管理
   let currentPhotoIndex = 0;
   let uploadedPhotos = [];
   let bgImg = new Image();
   let photoImg = null;
+  let lastShareUrl = null;
 
   // 背景画像のロード
   const loadBackgroundImage = () => {
@@ -263,6 +266,7 @@ window.addEventListener("DOMContentLoaded", () => {
       
       // シェアページのURL生成
       const sharePageUrl = `https://after-school-share.as-chronicle.workers.dev/?img=${encodeURIComponent(secure_url)}`;
+      lastShareUrl = sharePageUrl;
       
       // プラットフォーム別のシェアURL生成
       const text = '放課後クロニクル 学生証を作成しました！\n#放課後クロニクル';
@@ -275,12 +279,20 @@ window.addEventListener("DOMContentLoaded", () => {
         case 'line':
           shareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(sharePageUrl)}`;
           break;
+        case 'discord':
+          shareUrl = sharePageUrl;
+          break;
         default:
           throw new Error('未対応のプラットフォームです');
       }
       
-      // シェアウィンドウを開く
-      window.open(shareUrl, '_blank');
+      // プラットフォームに応じた処理
+      if (platform === 'discord') {
+        await navigator.clipboard.writeText(shareUrl);
+        alert('URLをクリップボードにコピーしました！\nDiscordに貼り付けてシェアできます。');
+      } else {
+        window.open(shareUrl, '_blank');
+      }
       
     } catch (error) {
       console.error('シェアに失敗しました:', error);
@@ -288,9 +300,44 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // URLコピー機能
+  async function copyShareUrl() {
+    try {
+      if (!lastShareUrl) {
+        // 画像がまだアップロードされていない場合は、アップロードを実行
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const formData = new FormData();
+        formData.append('file', blob);
+        formData.append('upload_preset', cloudinaryConfig.uploadPreset);
+        
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`,
+          {
+            method: 'POST',
+            body: formData
+          }
+        );
+        
+        if (!response.ok) throw new Error('アップロードに失敗しました');
+        
+        const data = await response.json();
+        const secure_url = data.secure_url;
+        lastShareUrl = `https://after-school-share.as-chronicle.workers.dev/?img=${encodeURIComponent(secure_url)}`;
+      }
+
+      await navigator.clipboard.writeText(lastShareUrl);
+      alert('URLをクリップボードにコピーしました！');
+    } catch (error) {
+      console.error('URLのコピーに失敗しました:', error);
+      alert('URLのコピーに失敗しました。もう一度お試しください。');
+    }
+  }
+
   // シェアボタンのイベントリスナー
   twBtn.addEventListener('click', () => uploadAndShare('twitter'));
   lnBtn.addEventListener('click', () => uploadAndShare('line'));
+  discordBtn.addEventListener('click', () => uploadAndShare('discord'));
+  copyBtn.addEventListener('click', copyShareUrl);
 
   console.log("Init: 初期化完了");
 }); 
