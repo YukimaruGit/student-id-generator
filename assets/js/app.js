@@ -38,6 +38,7 @@ function initializeApp() {
   const elements = {
     photoInput: document.getElementById('photoInput'),
     photoPreview: document.getElementById('photoPreview'),
+    previewContainer: document.getElementById('previewContainer'),
     nameJa: document.getElementById('nameJa'),
     nameEn: document.getElementById('nameEn'),
     department: document.getElementById('department'),
@@ -49,7 +50,8 @@ function initializeApp() {
     downloadBtn: document.getElementById('downloadBtn'),
     twitterBtn: document.getElementById('twitterBtn'),
     lineBtn: document.getElementById('lineBtn'),
-    urlBtn: document.getElementById('urlBtn')
+    urlBtn: document.getElementById('urlBtn'),
+    loadingOverlay: document.getElementById('loadingOverlay')
   };
 
   // DOM要素の存在チェック
@@ -67,6 +69,16 @@ function initializeApp() {
   const templateImage = new Image();
   templateImage.src = 'assets/img/student_template.png';
   let uploadedPhoto = null;
+
+  // ローディング表示の制御
+  function showLoading(message = '処理中...') {
+    elements.loadingOverlay.querySelector('p').textContent = message;
+    elements.loadingOverlay.classList.add('active');
+  }
+
+  function hideLoading() {
+    elements.loadingOverlay.classList.remove('active');
+  }
 
   // テンプレート画像の読み込み完了を待つ
   templateImage.onload = () => {
@@ -96,9 +108,7 @@ function initializeApp() {
         throw new Error('画像ファイルを選択してください。');
       }
 
-      // ローディング表示
-      elements.photoPreview.src = 'assets/img/loading.gif';
-      elements.photoPreview.style.display = 'block';
+      showLoading('写真をアップロード中...');
 
       // Cloudinaryにアップロード
       const formData = new FormData();
@@ -123,7 +133,12 @@ function initializeApp() {
       uploadedPhoto = new Image();
       uploadedPhoto.onload = () => {
         elements.photoPreview.src = data.secure_url;
-        elements.photoPreview.style.display = 'block';
+        elements.photoPreview.classList.add('loaded');
+        elements.previewContainer.classList.add('has-image');
+        hideLoading();
+      };
+      uploadedPhoto.onerror = () => {
+        throw new Error('画像の読み込みに失敗しました。');
       };
       uploadedPhoto.src = data.secure_url;
 
@@ -132,20 +147,27 @@ function initializeApp() {
       alert(error.message);
       elements.photoInput.value = '';
       elements.photoPreview.src = '';
-      elements.photoPreview.style.display = 'none';
+      elements.photoPreview.classList.remove('loaded');
+      elements.previewContainer.classList.remove('has-image');
+      hideLoading();
     }
   });
 
   // 学生証生成処理
   elements.generateBtn.addEventListener('click', () => {
     if (!validateInputs()) return;
-    drawStudentCard();
+    showLoading('学生証を生成中...');
+    setTimeout(() => {
+      drawStudentCard();
+      hideLoading();
+    }, 500);
   });
 
   // 入力値のバリデーション
   function validateInputs() {
     if (!uploadedPhoto) {
       alert('顔写真をアップロードしてください。');
+      elements.photoInput.focus();
       return false;
     }
 
@@ -177,6 +199,14 @@ function initializeApp() {
 
     if (day < 1 || day > 31) {
       alert('日は1～31の範囲で入力してください。');
+      elements.dobDay.focus();
+      return false;
+    }
+
+    // 月ごとの日数チェック
+    const daysInMonth = new Date(2024, month, 0).getDate();
+    if (day > daysInMonth) {
+      alert(`${month}月の日付は1～${daysInMonth}の範囲で入力してください。`);
       elements.dobDay.focus();
       return false;
     }
@@ -260,10 +290,15 @@ function initializeApp() {
 
   // ダウンロードボタン
   elements.downloadBtn.addEventListener('click', () => {
-    const link = document.createElement('a');
-    link.download = '学生証.png';
-    link.href = elements.cardCanvas.toDataURL('image/png');
-    link.click();
+    try {
+      const link = document.createElement('a');
+      link.download = '学生証.png';
+      link.href = elements.cardCanvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('ダウンロードエラー:', error);
+      alert('画像のダウンロードに失敗しました。');
+    }
   });
 
   // Twitterシェアボタン
@@ -287,6 +322,26 @@ function initializeApp() {
     } catch (err) {
       console.error('URLコピーエラー:', err);
       alert('URLのコピーに失敗しました。');
+    }
+  });
+
+  // ドラッグ&ドロップ対応
+  elements.previewContainer.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    elements.previewContainer.classList.add('dragover');
+  });
+
+  elements.previewContainer.addEventListener('dragleave', () => {
+    elements.previewContainer.classList.remove('dragover');
+  });
+
+  elements.previewContainer.addEventListener('drop', (e) => {
+    e.preventDefault();
+    elements.previewContainer.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      elements.photoInput.files = e.dataTransfer.files;
+      elements.photoInput.dispatchEvent(new Event('change'));
     }
   });
 } 

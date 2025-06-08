@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <title>放課後クロニクル 学生証ジェネレーター</title>
   <meta property="og:title" content="放課後クロニクル 学生証ジェネレーター">
   <meta property="og:description" content="あなただけの学生証を作成しよう！">
@@ -11,61 +11,125 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@YourTwitterHandle">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <script type="module" src="assets/js/app.js"></script>
 </head>
 <body>
   <header>
-    <h1>学生証</h1>
+    <h1>学生証ジェネレーター</h1>
+    <p class="subtitle">放課後クロニクル</p>
     <img class="logo" src="assets/img/crest.png" alt="校章">
   </header>
 
   <main>
     <section class="form-card">
-      <h2>顔写真アップロード</h2>
-      <input type="file" id="photoInput" accept="image/*">
-      <div class="preview-container">
-        <img id="photoPreview" alt="写真プレビュー">
-      </div>
-      <label>氏名（漢字）<input type="text" id="nameJa" placeholder="例：高森のばら"></label>
-      <label>氏名（ローマ字）<input type="text" id="nameEn" placeholder="例：Takamori Nobara"></label>
-      <label>学科
-        <select id="department">
-          <option value="">選択してください</option>
-          <option value="芸術">芸術</option>
-          <option value="文理">文理</option>
-          <option value="文芸">文芸</option>
-        </select>
-      </label>
-      <label>部活動
-        <select id="club">
-          <option value="">選択してください</option>
-          <option value="ホラー布教">ホラー布教</option>
-          <option value="文芸">文芸</option>
-          <option value="放課後探検">放課後探検</option>
-        </select>
-      </label>
-      <div class="birthday">
-        <label>生年月日</label>
-        <div class="date-inputs">
-          <input type="number" id="dobMonth" min="1" max="12" placeholder="月">
-          <input type="number" id="dobDay" min="1" max="31" placeholder="日">
+      <h2><i class="fas fa-id-card"></i> 学生証を作成</h2>
+      <div class="upload-section">
+        <label class="file-input-label" for="photoInput">
+          <i class="fas fa-camera"></i>
+          <span>顔写真を選択</span>
+          <input type="file" id="photoInput" accept="image/*" capture="user">
+        </label>
+        <div class="preview-container" id="previewContainer">
+          <img id="photoPreview" alt="写真プレビュー">
+          <div class="preview-placeholder">
+            <i class="fas fa-user"></i>
+            <p>ここに写真が表示されます</p>
+          </div>
         </div>
       </div>
-      <button id="generateBtn">学生証を作成</button>
+
+      <div class="form-group">
+        <label>
+          <i class="fas fa-user"></i>
+          氏名（漢字）
+          <input type="text" id="nameJa" placeholder="例：高森のばら" autocomplete="name">
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <i class="fas fa-signature"></i>
+          氏名（ローマ字）
+          <input type="text" id="nameEn" placeholder="例：Takamori Nobara">
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <i class="fas fa-school"></i>
+          学科
+          <select id="department">
+            <option value="">選択してください</option>
+            <option value="芸術">芸術</option>
+            <option value="文理">文理</option>
+            <option value="文芸">文芸</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <i class="fas fa-users"></i>
+          部活動
+          <select id="club">
+            <option value="">選択してください</option>
+            <option value="ホラー布教">ホラー布教</option>
+            <option value="文芸">文芸</option>
+            <option value="放課後探検">放課後探検</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <i class="fas fa-calendar"></i>
+          生年月日
+        </label>
+        <div class="date-inputs">
+          <div class="number-input">
+            <input type="number" id="dobMonth" min="1" max="12" placeholder="月">
+            <span class="unit">月</span>
+          </div>
+          <div class="number-input">
+            <input type="number" id="dobDay" min="1" max="31" placeholder="日">
+            <span class="unit">日</span>
+          </div>
+        </div>
+      </div>
+
+      <button id="generateBtn">
+        <i class="fas fa-magic"></i>
+        学生証を作成
+      </button>
     </section>
 
     <section class="preview-card">
-      <div class="card-header">学生証</div>
+      <div class="card-header">
+        <i class="fas fa-id-card"></i>
+        プレビュー
+      </div>
       <div class="card-body">
         <canvas id="cardCanvas" width="800" height="500"></canvas>
       </div>
       <div class="card-footer">
-        <button id="downloadBtn">画像をダウンロード</button>
-        <button id="twitterBtn">Xでシェア</button>
-        <button id="lineBtn">LINEでシェア</button>
-        <button id="urlBtn">URLをコピー</button>
+        <button id="downloadBtn">
+          <i class="fas fa-download"></i>
+          画像を保存
+        </button>
+        <button id="twitterBtn">
+          <i class="fab fa-x-twitter"></i>
+          Xでシェア
+        </button>
+        <button id="lineBtn">
+          <i class="fab fa-line"></i>
+          LINEで送る
+        </button>
+        <button id="urlBtn">
+          <i class="fas fa-link"></i>
+          URLをコピー
+        </button>
       </div>
     </section>
   </main>
@@ -73,5 +137,10 @@
   <footer>
     <p>&copy; 2024 放課後クロニクル 学生証ジェネレーター</p>
   </footer>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>処理中...</p>
+  </div>
 </body>
 </html> 
