@@ -1,88 +1,171 @@
 :root {
-  --theme-primary: #2c3e50;
-  --theme-secondary: #34495e;
-  --theme-accent: #3498db;
-  --theme-text: #ecf0f1;
-  --theme-background: #1a1a1a;
+  --grad: linear-gradient(135deg,#9b59b6,#2980b9);
+  --bg-form:#fff;
+  --bg-card:#2e2e2e;
+  --grid:#444;
+  --text-dark:#333;
+  --text-light:#f0f0f0;
+  --accent:#5dade2;
+  --accent-dark:#3498db;
+  --shadow-heavy:rgba(0,0,0,0.6);
+  --shadow-light:rgba(0,0,0,0.08);
 }
 
+* { box-sizing: border-box; margin:0; padding:0; }
+
 body {
-  background: var(--theme-background);
-  color: var(--theme-text);
-  font-family: 'Noto Sans JP', sans-serif;
-  margin: 0;
-  padding: 20px;
+  font-family: sans-serif;
+  background: var(--grad);
+  min-height:100vh;
+  padding:40px 0;
+}
+
+.header{
+  position:relative;
+  height:200px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.header .ui-logo{
+  width:100px;
+  opacity:0.2;
 }
 
 .container {
-  max-width: 800px;
+  width: 90%;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 20px;
-  background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.form-group {
-  margin-bottom: 20px;
+/* ─────────── フォームカード ─────────── */
+.card {
+  background: var(--bg-form);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 20px var(--shadow-light);
+  margin-bottom: 40px;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
+/* フォーム内の要素間の余白を統一 */
+.card > * + * {
+  margin-top: 16px;
 }
 
-.form-control {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid var(--theme-accent);
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--theme-text);
+.card label {
+  display:block;
+  margin-bottom:6px;
+  color:var(--text-dark);
 }
 
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
+.card input[type="file"] {
+  width:100%;
+  padding:6px;
+  border:1px solid #ddd;
+  border-radius:6px;
+  margin-bottom:20px;
 }
 
-.btn-primary {
-  background: var(--theme-accent);
-  color: var(--theme-text);
+.card input[type="text"],
+.card input[type="date"] {
+  width:100%;
+  padding:8px 6px;
+  margin-bottom:20px;
+  border:none;
+  border-bottom:2px solid #ddd;
+  font-size:1rem;
+  color:var(--text-dark);
 }
 
-.btn-primary:hover {
-  background: #2980b9;
+.card select {
+  width:100%;
+  padding:8px 6px;
+  border:2px solid #ddd;
+  border-radius:4px;
+  font-size:1rem;
+  background:#fff;
+  margin-bottom:20px;
+  cursor:pointer;
 }
 
-.preview-container {
-  margin: 20px 0;
-  text-align: center;
+.card button#createBtn {
+  padding:10px 16px;
+  background: var(--accent);
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  transition: background .2s;
 }
 
-#studentCardPreview {
-  max-width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+.card button#createBtn:hover {
+  background: var(--accent-dark);
 }
 
-.share-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 20px;
+/* ─────────── プレビューカード ─────────── */
+#previewArea {
+  display:none;
 }
 
-.grid-background {
-  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
-  background-position: center center;
+.preview-card {
+  background:var(--bg-card);
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:20px 20px;
+  border-radius:12px;
+  box-shadow:0 8px 20px var(--shadow-heavy);
+  overflow:hidden;
+  color:var(--text-light);
+}
+
+.preview-canvas-wrapper {
+  padding:16px;
+  background:transparent;
+}
+
+#studentCanvas {
+  width:100%;
+  border-radius:8px;
+  box-shadow:0 4px 12px var(--shadow-heavy);
+  background:#fff;
+  display:block;
+}
+
+/* ─────────── アクションボタン ─────────── */
+.preview-actions {
+  display:flex;
+  gap:8px;
+  padding:16px;
+  background:var(--bg-form);
+}
+
+.preview-actions button {
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  color:#fff;
+  cursor:pointer;
+  transition:transform .1s;
+  font-size:0.9rem;
+}
+
+#downloadBtn {
+  background:#1abc9c;
+}
+
+#twitterShareBtn {
+  background:#3498db;
+}
+
+#lineShareBtn {
+  background:#2ecc71;
+}
+
+.preview-actions button:hover {
+  transform:translateY(-2px);
 }
 
 /* アクセシビリティ用クラス */
@@ -98,72 +181,18 @@ body {
   border: 0;
 }
 
-/* ヘルプテキスト */
-.help-text {
-  font-size: 0.875rem;
-  color: var(--theme-text);
-  opacity: 0.8;
-  margin-top: 4px;
-}
-
-/* アイコン */
-.icon-download,
-.icon-twitter,
-.icon-line {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  margin-right: 0.5em;
-  vertical-align: middle;
-}
-
-/* フッター */
-.footer {
-  text-align: center;
-  padding: 20px;
-  margin-top: 40px;
-  color: var(--theme-text);
-  opacity: 0.8;
-}
-
-/* エラー状態 */
-.form-control:invalid {
-  border-color: #e74c3c;
-}
-
-.error-message {
-  color: #e74c3c;
-  font-size: 0.875rem;
-  margin-top: 4px;
-}
-
-/* ボタンバリエーション */
-.btn-download {
-  background: #27ae60;
-}
-
-.btn-twitter {
-  background: #1da1f2;
-}
-
-.btn-line {
-  background: #00b900;
-}
-
-/* アニメーション */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.preview-section:not([hidden]) {
-  animation: fadeIn 0.3s ease-out;
-}
-
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
+  body {
+    padding: 20px 0;
+  }
+  
+  .header {
+    height: 150px;
+  }
+  
   .container {
-    padding: 10px;
+    width: 95%;
   }
   
   .preview-actions {
@@ -171,7 +200,7 @@ body {
     gap: 10px;
   }
   
-  .btn {
+  .preview-actions button {
     width: 100%;
   }
 } 
