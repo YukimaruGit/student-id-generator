@@ -108,7 +108,7 @@ window.addEventListener("DOMContentLoaded", () => {
     prevBtn.style.display = currentPhotoIndex > 0 ? "block" : "none";
     nextBtn.style.display = currentPhotoIndex < uploadedPhotos.length - 1 ? "block" : "none";
 
-    if (bgImg) drawCard();
+    drawCard();
   };
 
   // 前の写真へ
@@ -142,6 +142,7 @@ window.addEventListener("DOMContentLoaded", () => {
         }
         updatePhotoPreview();
         previewArea.style.display = "block";
+        drawCard();
       };
       img.src = URL.createObjectURL(file);
     });
