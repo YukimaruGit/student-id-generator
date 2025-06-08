@@ -26,6 +26,11 @@
     <div class="card" id="formArea">
       <label>顔写真アップロード</label>
       <input type="file" id="photoInput" accept="image/*" class="photo-input">
+      <div class="photo-preview-container">
+        <button id="prevPhotoBtn" class="photo-nav-btn" aria-label="前の写真">&larr;</button>
+        <img id="photoPreview" class="photo-preview" alt="アップロードした写真のプレビュー">
+        <button id="nextPhotoBtn" class="photo-nav-btn" aria-label="次の写真">&rarr;</button>
+      </div>
 
       <label>氏名（漢字）</label>
       <input type="text" id="nameInput" placeholder="例：高森 のばら" class="text-input">

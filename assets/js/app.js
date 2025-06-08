@@ -16,32 +16,31 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("DOMContentLoaded: 初期化開始");
 
   // Elements
-  const photoInput  = document.getElementById("photoInput");
-  const nameI       = document.getElementById("nameInput");
-  const nameEnI     = document.getElementById("nameEnInput");
-  const deptI       = document.getElementById("deptInput");
-  const clubI       = document.getElementById("clubInput");
-  const monthI      = document.getElementById("birthMonth");
-  const dayI        = document.getElementById("birthDay");
-  const createBtn   = document.getElementById("createBtn");
+  const photoInput = document.getElementById("photoInput");
+  const photoPreview = document.getElementById("photoPreview");
+  const prevBtn = document.getElementById("prevPhotoBtn");
+  const nextBtn = document.getElementById("nextPhotoBtn");
+  const nameI = document.getElementById("nameInput");
+  const nameEnI = document.getElementById("nameEnInput");
+  const deptI = document.getElementById("deptInput");
+  const clubI = document.getElementById("clubInput");
+  const monthI = document.getElementById("birthMonth");
+  const dayI = document.getElementById("birthDay");
+  const createBtn = document.getElementById("createBtn");
   const previewArea = document.getElementById("previewArea");
-  const canvas      = document.getElementById("studentCanvas");
-  const ctx         = canvas.getContext("2d");
-  const dlBtn       = document.getElementById("downloadBtn");
-  const twBtn       = document.getElementById("twitterShareBtn");
-  const lnBtn       = document.getElementById("lineShareBtn");
+  const canvas = document.getElementById("studentCanvas");
+  const ctx = canvas.getContext("2d");
+  const dlBtn = document.getElementById("downloadBtn");
+  const twBtn = document.getElementById("twitterShareBtn");
+  const lnBtn = document.getElementById("lineShareBtn");
 
-  // 要素の存在チェック
-  if (!monthI || !dayI) {
-    console.error("birthMonth/birthDay が見つかりません");
-    return;
-  }
-
-  // 背景画像の読み込み
+  // 状態管理
+  let currentPhotoIndex = 0;
+  let uploadedPhotos = [];
   let bgImg = new Image();
   let photoImg = null;
 
-  // 背景画像のロード処理
+  // 背景画像のロード
   const loadBackgroundImage = () => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -71,11 +70,11 @@ window.addEventListener("DOMContentLoaded", () => {
   monthI.innerHTML = `<option value="">月</option>`;
   dayI.innerHTML = `<option value="">日</option>`;
 
-  for(let i=1; i<=12; i++){
+  for(let i=1; i<=12; i++) {
     const o = new Option(i, i);
     monthI.appendChild(o);
   }
-  for(let i=1; i<=31; i++){
+  for(let i=1; i<=31; i++) {
     const o = new Option(i, i);
     dayI.appendChild(o);
   }
@@ -90,29 +89,64 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 顔写真アップロード時
-  photoInput.addEventListener("change", e => {
-    const f = e.target.files[0]; 
-    if(!f) return;
-    const img = new Image();
-    img.onload = () => {
-      photoImg = img;
-      previewArea.style.display = "block";
-      if (bgImg) drawCard();
-    };
-    img.src = URL.createObjectURL(f);
+  // 写真プレビューの切り替え
+  const updatePhotoPreview = () => {
+    if (uploadedPhotos.length === 0) {
+      photoPreview.style.display = "none";
+      prevBtn.style.display = "none";
+      nextBtn.style.display = "none";
+      return;
+    }
+
+    photoPreview.style.display = "block";
+    photoImg = uploadedPhotos[currentPhotoIndex];
+    photoPreview.src = photoImg.src;
+
+    // 矢印ボタンの表示制御
+    prevBtn.style.display = currentPhotoIndex > 0 ? "block" : "none";
+    nextBtn.style.display = currentPhotoIndex < uploadedPhotos.length - 1 ? "block" : "none";
+
+    if (bgImg) drawCard();
+  };
+
+  // 前の写真へ
+  prevBtn.addEventListener("click", () => {
+    if (currentPhotoIndex > 0) {
+      currentPhotoIndex--;
+      updatePhotoPreview();
+    }
   });
 
-  // 学生証作成ボタン
-  createBtn.addEventListener("click", () => {
-    if(!photoImg) return alert("顔写真をアップしてください");
-    if(!bgImg) return alert("背景画像の読み込みを待っています...");
-    drawCard();
-    window.scrollTo({top:previewArea.offsetTop,behavior:"smooth"});
+  // 次の写真へ
+  nextBtn.addEventListener("click", () => {
+    if (currentPhotoIndex < uploadedPhotos.length - 1) {
+      currentPhotoIndex++;
+      updatePhotoPreview();
+    }
+  });
+
+  // 顔写真アップロード時
+  photoInput.addEventListener("change", e => {
+    const files = e.target.files;
+    if (!files.length) return;
+
+    Array.from(files).forEach(file => {
+      const img = new Image();
+      img.onload = () => {
+        uploadedPhotos.push(img);
+        if (uploadedPhotos.length === 1) {
+          currentPhotoIndex = 0;
+          photoImg = img;
+        }
+        updatePhotoPreview();
+        previewArea.style.display = "block";
+      };
+      img.src = URL.createObjectURL(file);
+    });
   });
 
   // カード描画処理
-  function drawCard(){
+  function drawCard() {
     try {
       if (!bgImg || !bgImg.complete) {
         console.log("背景画像がまだ読み込まれていません");
@@ -143,12 +177,12 @@ window.addEventListener("DOMContentLoaded", () => {
         ctx.restore();
       }
 
-      const name    = nameI.value||"——";
-      const nameEn  = nameEnI.value||"——";
-      const dept    = deptI.value||"——";
-      const club    = clubI.value||"——";
-      const month   = monthI.value||"–";
-      const day     = dayI.value||"–";
+      const name = nameI.value||"——";
+      const nameEn = nameEnI.value||"——";
+      const dept = deptI.value||"——";
+      const club = clubI.value||"——";
+      const month = monthI.value||"–";
+      const day = dayI.value||"–";
 
       ctx.textAlign = "left"; 
       ctx.textBaseline = "top";
@@ -173,6 +207,14 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // 学生証作成ボタン
+  createBtn.addEventListener("click", () => {
+    if(!photoImg) return alert("顔写真をアップしてください");
+    if(!bgImg) return alert("背景画像の読み込みを待っています...");
+    drawCard();
+    window.scrollTo({top:previewArea.offsetTop,behavior:"smooth"});
+  });
+
   // ダウンロード処理
   dlBtn.addEventListener("click", () => {
     try {
@@ -195,7 +237,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   // シェア処理
-  async function uploadAndShare(){
+  async function uploadAndShare(platform) {
     try {
       if (!bgImg || !bgImg.complete) {
         alert("背景画像の読み込みを待っています...");
@@ -229,12 +271,16 @@ window.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
       console.log("Share: アップロード完了", data);
 
-      // Intent URL に付与
       const text = encodeURIComponent("放課後クロニクル 学生証を作成しました！ #放課後クロニクル");
-      const intent = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(data.secure_url)}`;
-      console.log("Share: Intent URL生成", intent);
+      let shareUrl;
 
-      window.open(intent, "_blank");
+      if (platform === 'twitter') {
+        shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(data.secure_url)}`;
+      } else if (platform === 'line') {
+        shareUrl = `https://line.me/R/msg/text/?${text}%0D%0A${encodeURIComponent(data.secure_url)}`;
+      }
+
+      window.open(shareUrl, "_blank");
       console.log("Share: シェアウィンドウを開きました");
     } catch (err) {
       console.error("Share: シェア処理失敗", err);
@@ -245,11 +291,12 @@ window.addEventListener("DOMContentLoaded", () => {
   // シェアボタンのイベントリスナ
   twBtn.addEventListener("click", () => {
     console.log("▶︎ Twitter Share button clicked");
-    uploadAndShare();
+    uploadAndShare('twitter');
   });
+
   lnBtn.addEventListener("click", () => {
     console.log("▶︎ LINE Share button clicked");
-    uploadAndShare();
+    uploadAndShare('line');
   });
 
   console.log("Init: 初期化完了");
