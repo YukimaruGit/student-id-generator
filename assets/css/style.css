@@ -336,4 +336,18 @@ main {
   .btn-action {
     width: 100%;
   }
+}
+
+/* プレビュー画像 */
+.preview-template {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.preview-template img {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 } 

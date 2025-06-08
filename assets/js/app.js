@@ -19,12 +19,12 @@ const SOUNDS = {
 const IMG_BG = "assets/img/student_template.png";
 const BOX = { x: 72, y: 198, w: 379, h: 497 };
 const POS = {
-  name: { x: 735, y: 256, w: 408 },
-  nameEn: { x: 735, y: 321, w: 412 },
-  course: { x: 740, y: 395, w: 170 },
-  club: { x: 750, y: 466, w: 287 },
-  month: { x: 794, y: 529, w: 62 },
-  day: { x: 905, y: 531, w: 48 }
+  name: { x: 600, y: 280, w: 500 },
+  nameEn: { x: 600, y: 340, w: 500 },
+  course: { x: 600, y: 420 },
+  club: { x: 600, y: 500 },
+  month: { x: 600, y: 580 },
+  day: { x: 720, y: 580 }
 };
 
 // DOMContentLoadedで全体を囲む
@@ -35,8 +35,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const photoInput = document.getElementById("photoInput");
   const nameInput = document.getElementById("nameInput");
   const nameEnInput = document.getElementById("nameEnInput");
-  const courseInput = document.getElementById("courseInput");
-  const clubInput = document.getElementById("clubInput");
   const monthInput = document.getElementById("birthMonth");
   const dayInput = document.getElementById("birthDay");
   const idForm = document.getElementById("idForm");
@@ -46,6 +44,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // 状態管理
   let photoImg = null;
+  let courseResult = "";  // 診断結果の学科
+  let clubResult = "";    // 診断結果の部活動
 
   // 背景画像のロード
   const loadBackgroundImage = () => {
@@ -92,6 +92,12 @@ window.addEventListener("DOMContentLoaded", () => {
     img.src = URL.createObjectURL(file);
   });
 
+  // 診断結果を設定する関数
+  window.setDiagnosisResult = (course, club) => {
+    courseResult = course;
+    clubResult = club;
+  };
+
   // フォーム送信時
   idForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -134,16 +140,6 @@ window.addEventListener("DOMContentLoaded", () => {
       ctx.textBaseline = "top";
       ctx.fillStyle = "#333";
 
-      // デバッグログ
-      console.log('【DEBUG】学生証生成 →', {
-        name: nameInput.value || '未入力',
-        nameEn: nameEnInput.value || '未入力',
-        course: courseInput.value || '未設定',
-        club: clubInput.value || '未設定',
-        month: monthInput.value || '未設定',
-        day: dayInput.value || '未設定'
-      });
-
       ctx.font = "bold 48px serif";
       ctx.fillText(nameInput.value || '未入力', POS.name.x, POS.name.y, POS.name.w);
 
@@ -151,10 +147,10 @@ window.addEventListener("DOMContentLoaded", () => {
       ctx.fillText(nameEnInput.value || '未入力', POS.nameEn.x, POS.nameEn.y, POS.nameEn.w);
 
       ctx.font = "32px sans-serif";
-      ctx.fillText(courseInput.value || '未設定', POS.course.x, POS.course.y, POS.course.w);
-      ctx.fillText(clubInput.value || '未設定', POS.club.x, POS.club.y, POS.club.w);
-      ctx.fillText(monthInput.value || '–', POS.month.x, POS.month.y, POS.month.w);
-      ctx.fillText(dayInput.value || '–', POS.day.x, POS.day.y, POS.day.w);
+      ctx.fillText(courseResult, POS.course.x, POS.course.y);
+      ctx.fillText(clubResult, POS.club.x, POS.club.y);
+      ctx.fillText(monthInput.value || '–', POS.month.x, POS.month.y);
+      ctx.fillText(dayInput.value || '–', POS.day.x, POS.day.y);
 
       // プレビューを表示
       const previewCanvas = document.getElementById("studentCanvas");
@@ -177,6 +173,8 @@ window.addEventListener("DOMContentLoaded", () => {
     idForm.reset();
     photoImg = null;
     document.getElementById("photoPreview").style.display = "none";
+    courseResult = "";
+    clubResult = "";
 
     // 画面を非表示
     formArea.style.display = "none";
