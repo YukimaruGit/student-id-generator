@@ -78,19 +78,30 @@ document.getElementById('photo-input').addEventListener('change', e => {
 // テンプレート読み込み後に初回描画
 templateImg.onload = drawCard;
 
+// Cloudinaryへのアップロード
+async function uploadToCloudinary(imageData) {
+  const formData = new FormData();
+  formData.append('file', imageData);
+  formData.append('upload_preset', 'student_card_AS_chronicle');
+  formData.append('filename_override', 'student-card.png');
+
+  const response = await fetch('https://api.cloudinary.com/v1_1/di5rxlddy/image/upload', {
+    method: 'POST',
+    body: formData
+  });
+
+  const data = await response.json();
+  return data.secure_url;
+}
+
 // 「学生証を作成」→Cloudinaryアップロード
 document.getElementById('create-btn').addEventListener('click', () => {
   html2canvas(document.getElementById('card')).then(canvas => {
     canvas.toBlob(blob => {
-      const form = new FormData();
-      form.append('file', blob);
-      form.append('upload_preset', cloudinaryConfig.preset);
-      fetch(cloudinaryConfig.url, { method:'POST', body: form })
-        .then(r => r.json())
-        .then(data => {
-          window.latestImageUrl = data.secure_url;
-          alert('アップロード完了: ' + data.secure_url);
-        });
+      uploadToCloudinary(blob).then(url => {
+        window.latestImageUrl = url;
+        alert('アップロード完了: ' + url);
+      });
     });
   });
 });
@@ -272,17 +283,7 @@ window.addEventListener("DOMContentLoaded", () => {
     try {
       // Cloudinaryにアップロード
       const blob = await new Promise(resolve => studentCanvas.toBlob(resolve));
-      const formData = new FormData();
-      formData.append("file", blob);
-      formData.append("upload_preset", cloudinaryConfig.preset);
-      
-      const response = await fetch(cloudinaryConfig.url, {
-        method: "POST",
-        body: formData
-      });
-      
-      const data = await response.json();
-      const imageUrl = data.secure_url;
+      const imageUrl = await uploadToCloudinary(blob);
       
       // URLをクリップボードにコピー
       await navigator.clipboard.writeText(imageUrl);

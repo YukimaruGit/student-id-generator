@@ -11,7 +11,7 @@
     <img src="assets/img/crest.png" alt="校章" class="header-logo">
   </header>
 
-  <div class="container">
+  <main class="container">
     <div class="form-card">
       <div class="form-content">
         <div class="form-group">
@@ -20,26 +20,28 @@
         </div>
         <div class="form-group">
           <label>氏名（漢字）</label>
-          <input type="text" id="name-kanji" placeholder="例：夢見 花子">
+          <input type="text" id="name-kanji" placeholder="例：高森 のばら">
         </div>
         <div class="form-group">
           <label>氏名（ローマ字）</label>
-          <input type="text" id="name-romaji" placeholder="例：YUMEMI HANAKO">
+          <input type="text" id="name-romaji" placeholder="例：Takamori Nobara">
         </div>
         <div class="form-group">
           <label>学科</label>
           <select id="department">
-            <option value="普通科">普通科</option>
+            <option value="">選択してください</option>
             <option value="芸術科">芸術科</option>
+            <option value="文芸科">文芸科</option>
             <option value="理数科">理数科</option>
           </select>
         </div>
         <div class="form-group">
           <label>部活動</label>
           <select id="club">
-            <option value="帰宅部">帰宅部</option>
+            <option value="">選択してください</option>
+            <option value="ホラー布教部">ホラー布教部</option>
+            <option value="ミステリー研究部">ミステリー研究部</option>
             <option value="放課後探検部">放課後探検部</option>
-            <option value="ホラー研究部">ホラー研究部</option>
           </select>
         </div>
         <div class="form-group">
@@ -49,6 +51,7 @@
             <select id="birth-day"></select>
           </div>
         </div>
+        <button id="create-btn" class="button create-btn">学生証を作成</button>
       </div>
     </div>
 
@@ -58,16 +61,7 @@
         <img src="assets/img/crest.png" alt="校章" class="preview-logo">
       </div>
       <div class="preview-content">
-        <div class="photo-frame">
-          <img id="preview-photo" src="assets/img/default-photo.png" alt="写真">
-          <div class="carousel-arrows">
-            <button class="carousel-arrow" id="prev-photo">◀</button>
-            <button class="carousel-arrow" id="next-photo">▶</button>
-          </div>
-        </div>
-        <div class="student-info">
-          <canvas id="student-card" width="600" height="400"></canvas>
-        </div>
+        <canvas id="student-card" width="800" height="500"></canvas>
       </div>
     </div>
 
@@ -76,7 +70,7 @@
       <button class="button twitter-btn" id="twitter-btn">Xでシェア</button>
       <button class="button line-btn" id="line-btn">LINEでシェア</button>
     </div>
-  </div>
+  </main>
 
   <script src="assets/js/vendor/html2canvas.min.js"></script>
   <script type="module" src="assets/js/app.js"></script>
