@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>放課後クロニクル 学生証ジェネレーター</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>放課後クロニクル - 夢見が丘女子高等学校入学診断</title>
   <meta name="description" content="放課後クロニクルの世界観で、あなただけの学生証を作成できるジェネレーターです。">
   <meta property="og:title" content="放課後クロニクル 学生証ジェネレーター">
   <meta property="og:description" content="放課後クロニクルの世界観で、あなただけの学生証を作成できるジェネレーターです。">
@@ -15,7 +15,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/quiz.css">
   <link rel="stylesheet" href="assets/css/style.css">
+  <!-- Google Fonts - Chalk風フォント -->
+  <link href="https://fonts.googleapis.com/css2?family=Kalam&display=swap" rel="stylesheet">
+  <!-- 効果音ライブラリ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
 </head>
 <body>
   <header class="header">
@@ -26,103 +31,57 @@
     <!-- 診断開始画面 -->
     <div id="startContainer" class="start-container">
       <h1>夢見が丘女子高等学校<br>入学診断</h1>
-      <p>あなたに最適な学科と部活動を診断します</p>
+      <p>あなたに最適な学科と部活動を診断します！</p>
       <button id="startBtn" class="btn-start">診断を始める</button>
     </div>
 
     <!-- 診断ゲームエリア -->
-    <div id="quizContainer" style="display: none;"></div>
+    <div id="quizContainer" class="quiz-container" style="display: none;">
+      <!-- プログレスバー -->
+      <div class="progress-container">
+        <div class="progress-bar"></div>
+      </div>
+      
+      <!-- 質問カード（JavaScriptで動的に生成） -->
+    </div>
 
     <!-- フォームエリア（初期状態で非表示） -->
-    <div class="card" id="formArea" style="display: none;">
-      <label>顔写真アップロード</label>
-      <input type="file" id="photoInput" accept="image/*" class="photo-input">
-      <div class="photo-preview-container">
-        <button id="prevPhotoBtn" class="photo-nav-btn" aria-label="前の写真">&larr;</button>
-        <img id="photoPreview" class="photo-preview" alt="アップロードした写真のプレビュー">
-        <button id="nextPhotoBtn" class="photo-nav-btn" aria-label="次の写真">&rarr;</button>
+    <div id="formArea" class="container" style="display: none;">
+      <div class="form-content">
+        <h2>学生証を作成しましょう</h2>
+        <form id="idForm">
+          <div class="form-group">
+            <label for="nameInput">名前</label>
+            <input type="text" id="nameInput" required>
+          </div>
+          <div class="form-group">
+            <label for="deptInput">学科</label>
+            <input type="text" id="deptInput" readonly>
+          </div>
+          <div class="form-group">
+            <label for="clubInput">部活動</label>
+            <input type="text" id="clubInput" readonly>
+          </div>
+          <div class="form-group">
+            <label for="photoInput">写真</label>
+            <input type="file" id="photoInput" accept="image/*" required>
+          </div>
+          <button type="submit" class="btn-create">学生証を生成</button>
+        </form>
       </div>
-
-      <label>氏名（漢字）</label>
-      <input type="text" id="nameInput" placeholder="例：高森 のばら" class="text-input">
-
-      <label>氏名（ローマ字）</label>
-      <input type="text" id="nameEnInput" placeholder="例：Takamori Nobara" class="text-input">
-
-      <label>学科</label>
-      <input type="text" id="deptInput" class="text-input" readonly>
-
-      <label>部活動</label>
-      <input type="text" id="clubInput" class="text-input" readonly>
-
-      <label>生年月日</label>
-      <div class="birth-date-inputs">
-        <select id="birthMonth" class="select-input">
-          <option value="" selected disabled>月</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
-          <option value="9">9</option>
-          <option value="10">10</option>
-          <option value="11">11</option>
-          <option value="12">12</option>
-        </select>
-        <select id="birthDay" class="select-input">
-          <option value="" selected disabled>日</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
-          <option value="9">9</option>
-          <option value="10">10</option>
-          <option value="11">11</option>
-          <option value="12">12</option>
-          <option value="13">13</option>
-          <option value="14">14</option>
-          <option value="15">15</option>
-          <option value="16">16</option>
-          <option value="17">17</option>
-          <option value="18">18</option>
-          <option value="19">19</option>
-          <option value="20">20</option>
-          <option value="21">21</option>
-          <option value="22">22</option>
-          <option value="23">23</option>
-          <option value="24">24</option>
-          <option value="25">25</option>
-          <option value="26">26</option>
-          <option value="27">27</option>
-          <option value="28">28</option>
-          <option value="29">29</option>
-          <option value="30">30</option>
-          <option value="31">31</option>
-        </select>
-      </div>
-
-      <button id="createBtn" class="btn-create">学生証を作成</button>
     </div>
 
     <!-- プレビューエリア（初期状態で非表示） -->
-    <div id="previewArea" style="display: none;">
-      <div class="preview-card">
-        <div class="preview-canvas-wrapper">
-          <canvas id="studentCanvas" width="1222" height="768"></canvas>
+    <div id="previewArea" class="container" style="display: none;">
+      <div class="preview-content">
+        <div id="idCard" class="id-card">
+          <!-- 学生証のデザインはここに生成 -->
         </div>
-        <div class="preview-actions">
-          <button id="downloadBtn" class="btn-download">画像をダウンロード</button>
-          <button id="twitterShareBtn" class="btn-twitter">Xでシェア</button>
-          <button id="lineShareBtn" class="btn-line">LINEでシェア</button>
-          <button id="copyUrlBtn" class="btn-copy">URLをコピー</button>
+        <div class="share-buttons">
+          <button id="twitterShare" class="btn-share twitter">Twitterでシェア</button>
+          <button id="lineShare" class="btn-share line">LINEでシェア</button>
         </div>
+        <button id="resetBtn" class="btn-reset">もう一度診断する</button>
       </div>
     </div>
   </div>
@@ -130,6 +89,11 @@
   <footer class="footer">
     <p class="copyright">&copy; 2024 放課後クロニクル</p>
   </footer>
+
+  <!-- 効果音の定義 -->
+  <audio id="bellSound" src="assets/sounds/bell.mp3" preload="auto"></audio>
+  <audio id="chalkSound" src="assets/sounds/chalk.mp3" preload="auto"></audio>
+  <audio id="flipSound" src="assets/sounds/flip.mp3" preload="auto"></audio>
 
   <script type="module" src="assets/js/quiz.js"></script>
   <script type="module" src="assets/js/app.js"></script>
