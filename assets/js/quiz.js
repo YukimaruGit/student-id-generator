@@ -54,14 +54,18 @@ const results = {
 let currentQuestion = 0;
 let userAnswers = [];
 
+// 診断を開始する関数
+function startQuiz() {
+  document.getElementById('startContainer').style.display = 'none';
+  document.getElementById('quizContainer').style.display = 'block';
+  displayQuestion();
+}
+
 // 質問を表示する関数
 function displayQuestion() {
   const quizContainer = document.getElementById('quizContainer');
-  quizContainer.style.display = 'block';
-  document.getElementById('formArea').style.display = 'none';
-  document.getElementById('previewArea').style.display = 'none';
-  
   const question = questions[currentQuestion];
+  
   const html = `
     <div class="question-card">
       <h2>質問 ${currentQuestion + 1}</h2>
@@ -138,8 +142,21 @@ function showResult() {
 function resetQuiz() {
   currentQuestion = 0;
   userAnswers = [];
-  displayQuestion();
+  
+  // すべての画面を非表示
+  document.getElementById('quizContainer').style.display = 'none';
+  document.getElementById('formArea').style.display = 'none';
+  document.getElementById('previewArea').style.display = 'none';
+  
+  // 開始画面を表示
+  document.getElementById('startContainer').style.display = 'block';
 }
+
+// 初期化処理
+document.addEventListener('DOMContentLoaded', () => {
+  // 開始ボタンのイベントリスナーを設定
+  document.getElementById('startBtn').addEventListener('click', startQuiz);
+});
 
 // エクスポート
 export { displayQuestion, resetQuiz }; 
