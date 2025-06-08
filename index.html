@@ -2,105 +2,31 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>放課後クロニクル - 夢見が丘女子高等学校入学診断</title>
-  <meta name="description" content="放課後クロニクルの世界観で、あなただけの学生証を作成できるジェネレーターです。">
-  <meta property="og:title" content="放課後クロニクル 学生証ジェネレーター">
-  <meta property="og:description" content="放課後クロニクルの世界観で、あなただけの学生証を作成できるジェネレーターです。">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://YukimaruGit.github.io/student-id-generator/">
-  <meta property="og:image" content="https://YukimaruGit.github.io/student-id-generator/assets/img/ogp.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/quiz.css">
+  <title>放課後クロニクル 学生証ジェネレーター</title>
   <link rel="stylesheet" href="assets/css/style.css">
-  <!-- html2canvas -->
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 <body>
-  <main>
-    <!-- 開始画面 -->
-    <div id="startContainer" class="container">
-      <div class="start-content">
-        <h1>夢見が丘女子高等学校<br>入学診断</h1>
-        <p>あなたに最適な学科と部活動を診断します！</p>
-        <button id="startBtn" class="btn-start">診断を始める</button>
-      </div>
+  <div class="container">
+    <!-- カードエリア -->
+    <div id="card" class="card">
+      <canvas id="card-canvas" width="900" height="500"></canvas>
     </div>
 
-    <!-- 診断画面 -->
-    <div id="quizContainer" class="quiz-container" style="display: none;">
-      <!-- プログレスバー -->
-      <div class="progress-container">
-        <div class="progress-bar"></div>
-      </div>
-      
-      <!-- 質問カード（JavaScriptで動的に生成） -->
+    <!-- 入力フォーム -->
+    <div class="controls">
+      <input type="file" id="photo-input" accept="image/*">
+      <input id="name" type="text" placeholder="氏名" value="高森 のばら">
+      <input id="department" type="text" placeholder="学科／部活" value="芸術科／ホラー布教部">
+      <select id="month"></select>
+      <select id="day"></select>
+      <button id="create-btn">学生証を作成</button>
+      <button id="download-btn">画像をダウンロード</button>
+      <button id="twitter-btn">Xでシェア</button>
+      <button id="line-btn">LINEでシェア</button>
     </div>
+  </div>
 
-    <!-- 学生証作成フォーム -->
-    <div id="formArea" class="container" style="display: none;">
-      <div class="form-content">
-        <h2>学生証を作成しましょう</h2>
-        <form id="idForm">
-          <div class="form-group">
-            <label for="nameInput">名前</label>
-            <input type="text" id="nameInput" placeholder="例：宮森 のばら" required>
-          </div>
-          <div class="form-group">
-            <label for="nameEnInput">名前（ローマ字）</label>
-            <input type="text" id="nameEnInput" placeholder="例：Takamori Nobara" required>
-          </div>
-          <div class="form-group">
-            <label>誕生日</label>
-            <div class="birth-inputs">
-              <select id="birthMonth" required>
-                <option value="">月</option>
-              </select>
-              <select id="birthDay" required>
-                <option value="">日</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="photoInput">写真</label>
-            <input type="file" id="photoInput" accept="image/*" required>
-            <div class="photo-preview-container">
-              <img id="photoPreview" style="display: none;">
-            </div>
-          </div>
-          <button type="submit" class="btn-create">学生証を生成</button>
-        </form>
-      </div>
-      <!-- プレビュー画像 -->
-      <div class="preview-template">
-        <img src="assets/img/student_template.png" alt="学生証テンプレート">
-      </div>
-    </div>
-
-    <!-- プレビュー画面 -->
-    <div id="previewArea" class="container" style="display: none;">
-      <div class="preview-content">
-        <canvas id="studentCanvas"></canvas>
-        <div class="share-buttons">
-          <button id="downloadBtn" class="btn-share">ダウンロード</button>
-          <button id="twitterShareBtn" class="btn-share twitter">Twitterでシェア</button>
-          <button id="lineShareBtn" class="btn-share line">LINEでシェア</button>
-          <button id="copyUrlBtn" class="btn-share">URLをコピー</button>
-        </div>
-        <button id="resetBtn" class="btn-reset">もう一度診断する</button>
-      </div>
-    </div>
-  </main>
-
-  <footer class="footer">
-    <p class="copyright">&copy; 2024 放課後クロニクル</p>
-  </footer>
-
-  <script type="module" src="assets/js/quiz.js"></script>
+  <script src="assets/js/vendor/html2canvas.min.js"></script>
   <script type="module" src="assets/js/app.js"></script>
 </body>
 </html> 

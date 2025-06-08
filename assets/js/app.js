@@ -1,4 +1,5 @@
-import { cloudinaryConfig } from "./cloudinary.config.js";
+import { cloudinaryConfig } from '../cloudinary.config.js';
+import html2canvas from './vendor/html2canvas.min.js';
 
 // 効果音の準備（一時的にコメントアウト）
 /*
@@ -27,6 +28,97 @@ const POS = {
   day: { x: 720, y: 580 }
 };
 
+const templateImg = new Image();
+templateImg.src = 'assets/img/student_template.png';
+
+let photoImg = new Image();
+
+// ドロップダウン初期化
+const monthSel = document.getElementById('month');
+const daySel   = document.getElementById('day');
+for(let i=1; i<=12; i++) monthSel.add(new Option(i + '月', i));
+for(let i=1; i<=31; i++) daySel.add(new Option(i + '日', i));
+
+// Canvas 描画
+const canvas = document.getElementById('card-canvas');
+const ctx    = canvas.getContext('2d');
+
+function drawCard() {
+  // 背景テンプレート
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(templateImg, 0, 0, canvas.width, canvas.height);
+
+  // アップロード写真
+  if(photoImg.src) {
+    ctx.drawImage(photoImg,  50,  80, 300, 350);
+  }
+
+  // テキスト
+  ctx.fillStyle = '#333';
+  ctx.textBaseline = 'top';
+  ctx.font = '28px serif';
+  ctx.fillText('氏名：' + document.getElementById('name').value, 380, 100);
+  ctx.fillText('部活：' + document.getElementById('department').value, 380, 150);
+  ctx.fillText(
+    '生年月日：' +
+      monthSel.value + '月 ' +
+      daySel.value   + '日',
+    380, 200
+  );
+}
+
+// 画像選択 → プレビュー用 Image にセット
+document.getElementById('photo-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const url = URL.createObjectURL(file);
+  photoImg.src = url;
+  photoImg.onload = drawCard;
+});
+
+// テンプレート読み込み後に初回描画
+templateImg.onload = drawCard;
+
+// 「学生証を作成」→Cloudinaryアップロード
+document.getElementById('create-btn').addEventListener('click', () => {
+  html2canvas(document.getElementById('card')).then(canvas => {
+    canvas.toBlob(blob => {
+      const form = new FormData();
+      form.append('file', blob);
+      form.append('upload_preset', cloudinaryConfig.preset);
+      fetch(cloudinaryConfig.url, { method:'POST', body: form })
+        .then(r => r.json())
+        .then(data => {
+          window.latestImageUrl = data.secure_url;
+          alert('アップロード完了: ' + data.secure_url);
+        });
+    });
+  });
+});
+
+// 「画像をダウンロード」
+document.getElementById('download-btn').addEventListener('click', () => {
+  html2canvas(document.getElementById('card')).then(canvas => {
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = 'student_card.png';
+    link.click();
+  });
+});
+
+// 「Xでシェア」「LINEでシェア」
+document.getElementById('twitter-btn').addEventListener('click', () => {
+  const url = encodeURIComponent(window.latestImageUrl || '');
+  const text = encodeURIComponent('放課後クロニクル 学生証を作成しました！');
+  const shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=放課後クロニクル`;
+  window.open(shareUrl, '_blank', 'width=550,height=420');
+});
+document.getElementById('line-btn').addEventListener('click', () => {
+  const url = encodeURIComponent(window.latestImageUrl || '');
+  const shareUrl = `https://social-plugins.line.me/lineit/share?url=${url}`;
+  window.open(shareUrl, '_blank', 'width=600,height=600');
+});
+
 // DOMContentLoadedで全体を囲む
 window.addEventListener("DOMContentLoaded", () => {
   console.log("DOMContentLoaded: 初期化開始");
@@ -43,7 +135,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const resetBtn = document.getElementById("resetBtn");
 
   // 状態管理
-  let photoImg = null;
   let courseResult = "";  // 診断結果の学科
   let clubResult = "";    // 診断結果の部活動
 
@@ -61,41 +152,6 @@ window.addEventListener("DOMContentLoaded", () => {
       };
       img.src = IMG_BG;
     });
-  };
-
-  // 生年月日ドロップダウンの初期化
-  monthInput.innerHTML = `<option value="">月</option>`;
-  dayInput.innerHTML = `<option value="">日</option>`;
-
-  for(let i=1; i<=12; i++) {
-    const o = new Option(i, i);
-    monthInput.appendChild(o);
-  }
-  for(let i=1; i<=31; i++) {
-    const o = new Option(i, i);
-    dayInput.appendChild(o);
-  }
-
-  // 顔写真アップロード時
-  photoInput.addEventListener("change", e => {
-    const files = e.target.files;
-    if (!files.length) return;
-
-    const file = files[0];
-    const img = new Image();
-    img.onload = () => {
-      photoImg = img;
-      const preview = document.getElementById("photoPreview");
-      preview.src = img.src;
-      preview.style.display = "block";
-    };
-    img.src = URL.createObjectURL(file);
-  });
-
-  // 診断結果を設定する関数
-  window.setDiagnosisResult = (course, club) => {
-    courseResult = course;
-    clubResult = club;
   };
 
   // フォーム送信時

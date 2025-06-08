@@ -1,5 +1,5 @@
 // ES Module形式の名前付きエクスポート
 export const cloudinaryConfig = {
-  cloudName: "di5xqlddy",
-  uploadPreset: "student_card_AS_chronicle"
+  url:    'https://api.cloudinary.com/v1_1/<YOUR_CLOUD_NAME>/image/upload',
+  preset: '<YOUR_UNSIGNED_UPLOAD_PRESET>'
 }; 
