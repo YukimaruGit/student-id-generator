@@ -99,12 +99,19 @@ window.addEventListener("DOMContentLoaded", () => {
       ctx.textBaseline = "top";
       ctx.fillStyle = "#333";
 
+      // デバッグログ
+      console.log('【DEBUG】学生証生成 →', {
+        name: nameInput.value || '未入力',
+        course: courseInput.value || '未設定',
+        club: clubInput.value || '未設定'
+      });
+
       ctx.font = "bold 48px serif";
-      ctx.fillText(nameInput.value, POS.name.x, POS.name.y, POS.name.w);
+      ctx.fillText(nameInput.value || '未入力', POS.name.x, POS.name.y, POS.name.w);
 
       ctx.font = "32px sans-serif";
-      ctx.fillText(courseInput.value, POS.course.x, POS.course.y, POS.course.w);
-      ctx.fillText(clubInput.value, POS.club.x, POS.club.y, POS.club.w);
+      ctx.fillText(courseInput.value || '未設定', POS.course.x, POS.course.y, POS.course.w);
+      ctx.fillText(clubInput.value || '未設定', POS.club.x, POS.club.y, POS.club.w);
 
       // プレビューを表示
       const idCard = document.getElementById("idCard");
