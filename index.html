@@ -5,13 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>放課後クロニクル 学生証ジェネレーター</title>
   <link rel="stylesheet" href="assets/css/style.css">
+  <!-- html2canvas を確実に読み込む -->
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script type="module" src="assets/js/app.js"></script>
 </head>
 <body>
+  <!-- 紫→青のグラデーションヘッダー + 校章 -->
   <header>
     <img class="logo" src="assets/img/crest.png" alt="校章">
   </header>
 
   <main>
+    <!-- 入力フォーム -->
     <section class="form-card">
       <h2>顔写真アップロード</h2>
       <input type="file" id="photoInput" accept="image/*">
@@ -22,6 +27,7 @@
           <option value="">選択してください</option>
           <option>芸術科</option>
           <option>文理科</option>
+          <option>文芸科</option>
         </select>
       </label>
       <label>部活動
@@ -29,17 +35,19 @@
           <option value="">選択してください</option>
           <option>ホラー布教部</option>
           <option>文芸部</option>
+          <option>放課後探検部</option>
         </select>
       </label>
       <div class="dob">
         <label>生年月日
-          <input type="number" id="dobMonth" min="1" max="12" placeholder="月">
-          <input type="number" id="dobDay" min="1" max="31" placeholder="日">
+          <input type="number" id="dobMonth" min="1" max="12" placeholder="月">月
+          <input type="number" id="dobDay" min="1" max="31" placeholder="日">日
         </label>
       </div>
       <button id="createBtn">学生証を作成</button>
     </section>
 
+    <!-- プレビュー＆シェア -->
     <section class="card-preview">
       <div class="card-header">学生証</div>
       <div class="card-body">
@@ -63,12 +71,9 @@
         <button id="downloadBtn">画像をダウンロード</button>
         <button id="twitterBtn">Xでシェア</button>
         <button id="lineBtn">LINEでシェア</button>
-        <button id="urlBtn">URLシェア</button>
+        <button id="urlBtn">URLをコピー</button>
       </div>
     </section>
   </main>
-
-  <script src="assets/js/vendor/html2canvas.min.js"></script>
-  <script type="module" src="assets/js/app.js"></script>
 </body>
 </html> 

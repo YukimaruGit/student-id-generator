@@ -13,7 +13,7 @@ body {
 
 header {
   height: 180px;
-  background: linear-gradient(90deg,#8e44ad,#3498db);
+  background: linear-gradient(90deg, #8e44ad, #3498db);
   position: relative;
 }
 
@@ -53,11 +53,13 @@ section {
 
 .form-card h2 {
   margin-top: 0;
+  color: #333;
 }
 
 .form-card label {
   display: block;
   margin: 10px 0;
+  font-weight: 500;
 }
 
 .form-card input,
@@ -67,12 +69,14 @@ section {
   margin-top: 4px;
   box-sizing: border-box;
   font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .dob input {
-  width: 48%;
+  width: calc(50% - 20px);
   display: inline-block;
-  margin-right: 4%;
+  margin-right: 4px;
 }
 
 #createBtn {
@@ -83,8 +87,13 @@ section {
   color: #fff;
   border: none;
   border-radius: 6px;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#createBtn:hover {
+  background: #2980b9;
 }
 
 /* プレビューカード */
@@ -121,6 +130,8 @@ section {
   height: 250px;
   margin-right: 10px;
   overflow: hidden;
+  border-radius: 4px;
+  background: #f0f0f0;
 }
 
 .photo-frame img {
@@ -138,6 +149,12 @@ section {
   border: none;
   padding: 8px;
   cursor: pointer;
+  transition: background-color 0.3s;
+  z-index: 1;
+}
+
+.photo-frame button:hover {
+  background: rgba(0,0,0,0.7);
 }
 
 #prevBtn {
@@ -151,6 +168,7 @@ section {
 .template-frame {
   position: relative;
   flex: 1;
+  min-width: 300px;
 }
 
 .template-frame .template {
@@ -180,6 +198,7 @@ section {
 .student-number {
   top: 20px;
   right: 20px;
+  font-family: monospace;
 }
 
 .student-name-ja {
@@ -220,29 +239,46 @@ section {
 
 .card-footer button {
   flex: 1;
-  min-width: 100px;
+  min-width: 120px;
   padding: 10px;
   border: none;
   color: #fff;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
+  transition: background-color 0.3s;
 }
 
 #downloadBtn {
   background: #27ae60;
 }
 
+#downloadBtn:hover {
+  background: #219a52;
+}
+
 #twitterBtn {
   background: #1da1f2;
+}
+
+#twitterBtn:hover {
+  background: #1a91da;
 }
 
 #lineBtn {
   background: #00c300;
 }
 
+#lineBtn:hover {
+  background: #00b300;
+}
+
 #urlBtn {
   background: #7f8c8d;
+}
+
+#urlBtn:hover {
+  background: #6c7879;
 }
 
 /* レスポンシブ */
@@ -255,5 +291,13 @@ section {
   .photo-frame {
     margin-right: 0;
     margin-bottom: 10px;
+  }
+  
+  .template-frame {
+    width: 100%;
+  }
+  
+  .card-footer button {
+    min-width: calc(50% - 4px);
   }
 } 
