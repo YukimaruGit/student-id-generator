@@ -66,7 +66,7 @@ const bonus = 0.8 + Math.random() * 0.4;
 
 // 結果テンプレート
 const previewTemplates = [
-  '📘【${course}】優等生タイプ×${club}で放課後を制覟！',
+  '📘【${course}】優等生タイプ×${club}で放課後を制覇！',
   '🎵 リズムに乗る【${course}】×${club}、その才能開花中！',
   '🎨 【${course}】の感性に${club}の実力がプラス！',
   '💡 ${club}でアイデア爆発の【${course}】、次はあなたの番！',
@@ -91,11 +91,16 @@ function startQuiz() {
   };
   
   // 開始画面を非表示
-  document.getElementById('startContainer').style.display = 'none';
+  const startContainer = document.getElementById('startContainer');
+  if (startContainer) {
+    startContainer.style.display = 'none';
+  }
   
   // 診断画面を表示
   const quizContainer = document.getElementById('quizContainer');
-  quizContainer.style.display = 'block';
+  if (quizContainer) {
+    quizContainer.style.display = 'block';
+  }
   
   // プログレスバーを初期化
   updateProgress(0);
@@ -107,30 +112,32 @@ function startQuiz() {
 // 質問を表示する関数
 function displayQuestion() {
   const quizContainer = document.getElementById('quizContainer');
+  if (!quizContainer) return;
+
   const question = questions[currentQuestion];
   
   // ベル音を再生
   SOUNDS.bell.play();
   
   const html = `
-    <div class="question-card">
-      <div class="card-inner">
-        <div class="card-front">
-          <h2>質問 ${currentQuestion + 1}</h2>
-          <p>${question.q}</p>
-          <div class="choices">
-            ${question.choices.map((choice, index) => `
-              <button class="choice-btn" data-index="${index}">
-                ${choice.text}
-                <span class="chalk-dust"></span>
-              </button>
-            `).join('')}
-          </div>
-        </div>
+    <div class="question-card fade-in">
+      <h2>質問 ${currentQuestion + 1}</h2>
+      <p>${question.q}</p>
+      <div class="choices">
+        ${question.choices.map((choice, index) => `
+          <button class="choice-btn" data-index="${index}">
+            ${choice.text}
+            <span class="chalk-dust"></span>
+          </button>
+        `).join('')}
       </div>
     </div>
   `;
   
+  // プログレスバーの更新
+  updateProgress(currentQuestion);
+  
+  // 質問カードの表示
   quizContainer.innerHTML = html;
   
   // 選択肢のクリックイベントを設定
@@ -165,9 +172,7 @@ function handleChoice(event) {
     console.log('Sound playback failed:', error);
   }
   
-  // プログレスバーを更新
-  updateProgress(currentQuestion + 1);
-  
+  // 次の質問へ
   setTimeout(() => {
     if (currentQuestion < questions.length - 1) {
       currentQuestion++;
@@ -175,14 +180,16 @@ function handleChoice(event) {
     } else {
       showResult();
     }
-  }, 1000);
+  }, 500);
 }
 
 // プログレスバーを更新する関数
 function updateProgress(current) {
-  const progress = document.querySelector('.progress-bar');
+  const progressBar = document.querySelector('.progress-bar');
+  if (!progressBar) return;
+  
   const percentage = (current / questions.length) * 100;
-  progress.style.width = `${percentage}%`;
+  progressBar.style.width = `${percentage}%`;
 }
 
 // 結果を表示する関数
@@ -191,9 +198,10 @@ function showResult() {
   const message = makePreviewMessage(result);
   
   const quizContainer = document.getElementById('quizContainer');
+  if (!quizContainer) return;
+  
   quizContainer.innerHTML = `
-    <div class="result-card">
-      <div class="nobara-chan"></div>
+    <div class="result-card fade-in">
       <h2>診断結果</h2>
       <h3>${message}</h3>
       <div class="result-details">
@@ -213,16 +221,23 @@ function showResult() {
   `;
   
   // 学生証作成ボタンのイベントを設定
-  document.getElementById('createIdBtn').addEventListener('click', () => {
-    const formArea = document.getElementById('formArea');
-    formArea.style.display = 'block';
-    
-    // 診断結果に基づいて学科と部活を設定
-    document.getElementById('deptInput').value = result.course;
-    document.getElementById('clubInput').value = result.club;
-    
-    quizContainer.style.display = 'none';
-  });
+  const createIdBtn = document.getElementById('createIdBtn');
+  if (createIdBtn) {
+    createIdBtn.addEventListener('click', () => {
+      const formArea = document.getElementById('formArea');
+      if (formArea) {
+        formArea.style.display = 'block';
+        
+        // 診断結果に基づいて学科と部活を設定
+        const deptInput = document.getElementById('deptInput');
+        const clubInput = document.getElementById('clubInput');
+        if (deptInput) deptInput.value = result.course;
+        if (clubInput) clubInput.value = result.club;
+        
+        quizContainer.style.display = 'none';
+      }
+    });
+  }
 }
 
 // 結果を計算する関数
@@ -239,14 +254,20 @@ function calcResult() {
 
 // プレビューメッセージを生成する関数
 function makePreviewMessage(result) {
-  const tpl = previewTemplates[Math.floor(Math.random() * previewTemplates.length)];
+  const templates = [
+    '📘【${course}】優等生タイプ×${club}で放課後を制覇！',
+    '🎵 リズムに乗る【${course}】×${club}、その才能開花中！',
+    '🎨 【${course}】の感性に${club}の実力がプラス！',
+    '💡 ${club}でアイデア爆発の【${course}】、次はあなたの番！',
+    '🌟 【${course}】×${club}の最強コンボ、仲間が歓声！'
+  ];
+  const tpl = templates[Math.floor(Math.random() * templates.length)];
   return tpl.replace(/\$\{course\}/g, result.course)
             .replace(/\$\{club\}/g, result.club);
 }
 
 // 初期化処理
 document.addEventListener('DOMContentLoaded', () => {
-  // 開始ボタンのイベントリスナーを設定
   const startBtn = document.getElementById('startBtn');
   if (startBtn) {
     startBtn.addEventListener('click', startQuiz);
