@@ -1,4 +1,4 @@
-import { cloudinaryConfig } from './cloudinary.config.js';
+import cloudinaryConfig from './cloudinary.config.js';
 
 // html2canvasのインポートを削除（スクリプトタグで読み込む）
 
@@ -29,8 +29,8 @@ const POS = {
 };
 
 // Cloudinary設定
-const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/di5rxlddy/image/upload';
-const CLOUDINARY_UPLOAD_PRESET = 'student_card_AS_chronicle';
+const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`;
+const CLOUDINARY_UPLOAD_PRESET = cloudinaryConfig.uploadPreset;
 
 let photos = [], idx = 0;
 
@@ -47,7 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
     urlBtn: document.getElementById('urlBtn'),
     previewPhoto: document.getElementById('previewPhoto'),
     templateFrame: document.querySelector('.template-frame'),
-    cardPreview: document.querySelector('.card-preview')
+    cardPreview: document.querySelector('.preview-card'),
+    birthMonth: document.getElementById('birth-month'),
+    birthDay: document.getElementById('birth-day')
   };
 
   // 要素の存在確認
@@ -56,6 +58,21 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error(`Error: ${key} element not found`);
     }
   });
+
+  // 生年月日の選択肢を生成
+  if (elements.birthMonth && elements.birthDay) {
+    // 月の選択肢を追加
+    elements.birthMonth.innerHTML = '<option value="">月</option>' + 
+      Array.from({length: 12}, (_, i) => i + 1)
+        .map(i => `<option value="${i}">${i}</option>`)
+        .join('');
+
+    // 日の選択肢を追加
+    elements.birthDay.innerHTML = '<option value="">日</option>' + 
+      Array.from({length: 31}, (_, i) => i + 1)
+        .map(i => `<option value="${i}">${i}</option>`)
+        .join('');
+  }
 
   // 写真アップロード処理
   elements.photoInput.onchange = async (e) => {
@@ -217,27 +234,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // テキスト反映
-  ['nameJa', 'nameEn', 'department', 'club', 'dobMonth', 'dobDay'].forEach(id => {
+  ['nameJa', 'nameEn', 'department', 'club', 'birth-month', 'birth-day'].forEach(id => {
     const element = document.getElementById(id);
     if (!element) {
       console.error(`Error: ${id} element not found`);
       return;
     }
 
-    element.oninput = reflectText;
-    
-    // 数値入力のホイール操作
-    if (id === 'dobMonth' || id === 'dobDay') {
-      element.onwheel = e => {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -1 : 1;
-        const min = parseInt(element.min);
-        const max = parseInt(element.max);
-        const newValue = Math.min(max, Math.max(min, (parseInt(element.value) || 0) + delta));
-        element.value = newValue;
-        reflectText();
-      };
-    }
+    element.onchange = reflectText;
   });
 
   // テキスト反映処理
@@ -258,8 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
         nameEn: document.getElementById('nameEn')?.value || '',
         department: document.getElementById('department')?.value || '',
         club: document.getElementById('club')?.value || '',
-        month: document.getElementById('dobMonth')?.value || '',
-        day: document.getElementById('dobDay')?.value || ''
+        month: document.getElementById('birth-month')?.value || '',
+        day: document.getElementById('birth-day')?.value || ''
       };
 
       textElements.nameJa.textContent = values.nameJa;
