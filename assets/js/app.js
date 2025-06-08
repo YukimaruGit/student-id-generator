@@ -1,3 +1,5 @@
+import { cloudinaryConfig } from './cloudinary.config.js';
+
 // 効果音の準備（一時的にコメントアウト）
 /*
 const SOUNDS = {
@@ -143,11 +145,11 @@ window.addEventListener("DOMContentLoaded", () => {
   async function uploadToCloudinary(imageData) {
     const formData = new FormData();
     formData.append('file', imageData);
-    formData.append('upload_preset', 'student_card_AS_chronicle');
+    formData.append('upload_preset', cloudinaryConfig.uploadPreset);
     formData.append('filename_override', 'student-card.png');
 
     try {
-      const response = await fetch('https://api.cloudinary.com/v1_1/di5rxlddy/image/upload', {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`, {
         method: 'POST',
         body: formData
       });
