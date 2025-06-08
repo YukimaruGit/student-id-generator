@@ -1,4 +1,4 @@
-import { cloudinaryConfig } from '../cloudinary.config.js';
+import { cloudinaryConfig } from './cloudinary.config.js';
 import html2canvas from './vendor/html2canvas.min.js';
 
 // 効果音の準備（一時的にコメントアウト）
@@ -17,15 +17,14 @@ const SOUNDS = {
   flip: { play: () => console.log('Flip sound effect') }
 };
 
+// 定数定義
 const IMG_BG = "assets/img/student_template.png";
 const BOX = { x: 72, y: 198, w: 379, h: 497 };
 const POS = {
   name: { x: 600, y: 280, w: 500 },
   nameEn: { x: 600, y: 340, w: 500 },
-  course: { x: 600, y: 420 },
-  club: { x: 600, y: 500 },
-  month: { x: 600, y: 580 },
-  day: { x: 720, y: 580 }
+  department: { x: 600, y: 420 },
+  birth: { x: 600, y: 500 }
 };
 
 const templateImg = new Image();
@@ -125,18 +124,45 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Elements
   const photoInput = document.getElementById("photoInput");
+  const photoPreview = document.getElementById("photoPreview");
   const nameInput = document.getElementById("nameInput");
   const nameEnInput = document.getElementById("nameEnInput");
-  const monthInput = document.getElementById("birthMonth");
-  const dayInput = document.getElementById("birthDay");
+  const departmentSelect = document.getElementById("department");
+  const monthSelect = document.getElementById("birthMonth");
+  const daySelect = document.getElementById("birthDay");
   const idForm = document.getElementById("idForm");
-  const formArea = document.getElementById("formArea");
   const previewArea = document.getElementById("previewArea");
+  const studentCanvas = document.getElementById("studentCanvas");
+  const downloadBtn = document.getElementById("downloadBtn");
+  const copyUrlBtn = document.getElementById("copyUrlBtn");
   const resetBtn = document.getElementById("resetBtn");
 
-  // 状態管理
-  let courseResult = "";  // 診断結果の学科
-  let clubResult = "";    // 診断結果の部活動
+  // 生年月日の選択肢を生成
+  for (let i = 1; i <= 12; i++) {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = `${i}月`;
+    monthSelect.appendChild(option);
+  }
+  for (let i = 1; i <= 31; i++) {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = `${i}日`;
+    daySelect.appendChild(option);
+  }
+
+  // 写真アップロード時のプレビュー
+  photoInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        photoPreview.src = e.target.result;
+        photoPreview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 
   // 背景画像のロード
   const loadBackgroundImage = () => {
@@ -158,27 +184,32 @@ window.addEventListener("DOMContentLoaded", () => {
   idForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     
-    if (!photoImg) {
+    if (!photoPreview.src) {
       alert("写真を選択してください");
       return;
     }
 
     try {
       // 学生証を生成
-      const canvas = document.createElement("canvas");
-      canvas.width = 1200;
-      canvas.height = 750;
-      const ctx = canvas.getContext("2d");
+      studentCanvas.width = 1200;
+      studentCanvas.height = 750;
+      const ctx = studentCanvas.getContext("2d");
 
       // 背景画像を読み込んで描画
       const bgImg = await loadBackgroundImage();
-      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(bgImg, 0, 0, studentCanvas.width, studentCanvas.height);
 
       // 写真を描画
       ctx.save();
       ctx.beginPath();
       ctx.rect(BOX.x, BOX.y, BOX.w, BOX.h);
       ctx.clip();
+
+      const photoImg = new Image();
+      photoImg.src = photoPreview.src;
+      await new Promise((resolve) => {
+        photoImg.onload = resolve;
+      });
 
       const iw = photoImg.naturalWidth;
       const ih = photoImg.naturalHeight;
@@ -203,18 +234,15 @@ window.addEventListener("DOMContentLoaded", () => {
       ctx.fillText(nameEnInput.value || '未入力', POS.nameEn.x, POS.nameEn.y, POS.nameEn.w);
 
       ctx.font = "32px sans-serif";
-      ctx.fillText(courseResult, POS.course.x, POS.course.y);
-      ctx.fillText(clubResult, POS.club.x, POS.club.y);
-      ctx.fillText(monthInput.value || '–', POS.month.x, POS.month.y);
-      ctx.fillText(dayInput.value || '–', POS.day.x, POS.day.y);
+      ctx.fillText(departmentSelect.value, POS.department.x, POS.department.y);
+      ctx.fillText(
+        `${monthSelect.value}月${daySelect.value}日`,
+        POS.birth.x,
+        POS.birth.y
+      );
 
       // プレビューを表示
-      const previewCanvas = document.getElementById("studentCanvas");
-      previewCanvas.width = canvas.width;
-      previewCanvas.height = canvas.height;
-      previewCanvas.getContext("2d").drawImage(canvas, 0, 0);
-
-      formArea.style.display = "none";
+      idForm.style.display = "none";
       previewArea.style.display = "block";
 
     } catch (error) {
@@ -223,33 +251,10 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // リセットボタン
-  resetBtn.addEventListener("click", () => {
-    // フォームをリセット
-    idForm.reset();
-    photoImg = null;
-    document.getElementById("photoPreview").style.display = "none";
-    courseResult = "";
-    clubResult = "";
-
-    // 画面を非表示
-    formArea.style.display = "none";
-    previewArea.style.display = "none";
-
-    // 開始画面を表示
-    const startContainer = document.getElementById("startContainer");
-    if (startContainer) {
-      startContainer.style.display = "block";
-    }
-  });
-
   // ダウンロードボタン
-  document.getElementById("downloadBtn").addEventListener("click", () => {
-    const canvas = document.getElementById("studentCanvas");
-    if (!canvas) return;
-
+  downloadBtn.addEventListener("click", () => {
     try {
-      const dataURL = canvas.toDataURL("image/png");
+      const dataURL = studentCanvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = dataURL;
       a.download = "放課後クロニクル_学生証.png";
@@ -262,88 +267,43 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Twitterシェアボタン
-  document.getElementById("twitterShareBtn").addEventListener("click", () => {
-    const canvas = document.getElementById("studentCanvas");
-    if (!canvas) return;
-
-    canvas.toBlob(blob => {
-      const formData = new FormData();
-      formData.append("file", blob);
-      formData.append("upload_preset", "student_id_preset");
-
-      fetch("https://api.cloudinary.com/v1_1/your-cloud-name/image/upload", {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        const text = "放課後クロニクル 学生証を作成しました！\n#放課後クロニクル";
-        const url = data.secure_url;
-        const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-        window.open(shareUrl, "_blank");
-      })
-      .catch(error => {
-        console.error("シェアエラー:", error);
-        alert("シェアに失敗しました。もう一度お試しください。");
-      });
-    }, "image/png");
-  });
-
-  // LINEシェアボタン
-  document.getElementById("lineShareBtn").addEventListener("click", () => {
-    const canvas = document.getElementById("studentCanvas");
-    if (!canvas) return;
-
-    canvas.toBlob(blob => {
-      const formData = new FormData();
-      formData.append("file", blob);
-      formData.append("upload_preset", "student_id_preset");
-
-      fetch("https://api.cloudinary.com/v1_1/your-cloud-name/image/upload", {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        const text = "放課後クロニクル 学生証を作成しました！";
-        const url = data.secure_url;
-        const shareUrl = `https://line.me/R/share?text=${encodeURIComponent(text)}\n${encodeURIComponent(url)}`;
-        window.open(shareUrl, "_blank");
-      })
-      .catch(error => {
-        console.error("シェアエラー:", error);
-        alert("シェアに失敗しました。もう一度お試しください。");
-      });
-    }, "image/png");
-  });
-
   // URLコピーボタン
-  document.getElementById("copyUrlBtn").addEventListener("click", () => {
-    const canvas = document.getElementById("studentCanvas");
-    if (!canvas) return;
-
-    canvas.toBlob(blob => {
+  copyUrlBtn.addEventListener("click", async () => {
+    try {
+      // Cloudinaryにアップロード
+      const blob = await new Promise(resolve => studentCanvas.toBlob(resolve));
       const formData = new FormData();
       formData.append("file", blob);
-      formData.append("upload_preset", "student_id_preset");
-
-      fetch("https://api.cloudinary.com/v1_1/your-cloud-name/image/upload", {
+      formData.append("upload_preset", cloudinaryConfig.preset);
+      
+      const response = await fetch(cloudinaryConfig.url, {
         method: "POST",
         body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        const url = data.secure_url;
-        navigator.clipboard.writeText(url)
-          .then(() => alert("URLをクリップボードにコピーしました！"))
-          .catch(() => alert("URLのコピーに失敗しました。"));
-      })
-      .catch(error => {
-        console.error("アップロードエラー:", error);
-        alert("URLの生成に失敗しました。もう一度お試しください。");
       });
-    }, "image/png");
+      
+      const data = await response.json();
+      const imageUrl = data.secure_url;
+      
+      // URLをクリップボードにコピー
+      await navigator.clipboard.writeText(imageUrl);
+      alert("画像のURLをコピーしました！");
+      
+    } catch (error) {
+      console.error("URLコピーエラー:", error);
+      alert("URLのコピーに失敗しました。もう一度お試しください。");
+    }
+  });
+
+  // リセットボタン
+  resetBtn.addEventListener("click", () => {
+    // フォームをリセット
+    idForm.reset();
+    photoPreview.style.display = "none";
+    photoPreview.src = "";
+    
+    // 表示を切り替え
+    previewArea.style.display = "none";
+    idForm.style.display = "block";
   });
 
   console.log("Init: 初期化完了");

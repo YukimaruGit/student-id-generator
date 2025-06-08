@@ -2,31 +2,81 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>放課後クロニクル 学生証ジェネレーター</title>
   <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script src="assets/js/cloudinary.config.js" type="module"></script>
+  <script src="assets/js/app.js" type="module"></script>
 </head>
 <body>
-  <div class="container">
-    <!-- カードエリア -->
-    <div id="card" class="card">
-      <canvas id="card-canvas" width="900" height="500"></canvas>
-    </div>
+  <main>
+    <div class="container">
+      <h1>放課後クロニクル<br>学生証ジェネレーター</h1>
+      
+      <form id="idForm">
+        <div class="form-group">
+          <label for="photoInput">顔写真アップロード</label>
+          <input type="file" id="photoInput" accept="image/*" required>
+          <div class="photo-preview-container">
+            <img id="photoPreview" style="display: none;">
+          </div>
+        </div>
 
-    <!-- 入力フォーム -->
-    <div class="controls">
-      <input type="file" id="photo-input" accept="image/*">
-      <input id="name" type="text" placeholder="氏名" value="高森 のばら">
-      <input id="department" type="text" placeholder="学科／部活" value="芸術科／ホラー布教部">
-      <select id="month"></select>
-      <select id="day"></select>
-      <button id="create-btn">学生証を作成</button>
-      <button id="download-btn">画像をダウンロード</button>
-      <button id="twitter-btn">Xでシェア</button>
-      <button id="line-btn">LINEでシェア</button>
-    </div>
-  </div>
+        <div class="form-group">
+          <label for="nameInput">氏名（漢字）</label>
+          <input type="text" id="nameInput" placeholder="例：高森 のはら" required>
+        </div>
 
-  <script src="assets/js/vendor/html2canvas.min.js"></script>
-  <script type="module" src="assets/js/app.js"></script>
+        <div class="form-group">
+          <label for="nameEnInput">氏名（ローマ字）</label>
+          <input type="text" id="nameEnInput" placeholder="例：Takamori Nohara" required>
+        </div>
+
+        <div class="form-group">
+          <label for="department">学科/部活</label>
+          <select id="department" required>
+            <option value="">選択してください</option>
+            <option value="普通科">普通科</option>
+            <option value="文学科">文学科</option>
+            <option value="理数科">理数科</option>
+            <option value="美術科">美術科</option>
+            <option value="音楽科">音楽科</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>生年月日</label>
+          <div class="birth-inputs">
+            <select id="birthMonth" required>
+              <option value="">月</option>
+            </select>
+            <select id="birthDay" required>
+              <option value="">日</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary">学生証を作成</button>
+      </form>
+
+      <div id="previewArea" style="display: none;">
+        <div class="preview-content">
+          <canvas id="studentCanvas"></canvas>
+          
+          <div class="share-buttons">
+            <button id="downloadBtn" class="btn-share">画像をダウンロード</button>
+            <button id="copyUrlBtn" class="btn-share">URLをコピー</button>
+          </div>
+          
+          <button id="resetBtn" class="btn-reset">最初からやり直す</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2024 放課後クロニクル</p>
+  </footer>
 </body>
 </html> 
