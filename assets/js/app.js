@@ -1,4 +1,5 @@
-import { cloudinaryConfig } from './cloudinary.config.js';
+import { cloudinaryConfig } from '../cloudinary.config.js';
+import html2canvas from './vendor/html2canvas.min.js';
 
 // 効果音の準備（一時的にコメントアウト）
 /*
