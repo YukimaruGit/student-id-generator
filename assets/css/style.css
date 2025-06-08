@@ -156,30 +156,29 @@ select:focus {
   flex: 1;
 }
 
-input[type="number"] {
+.number-input select {
   width: 100%;
   padding: 0.75rem;
-  padding-right: 2.5rem;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 1rem;
-  -moz-appearance: textfield;
+  background-color: white;
+  cursor: pointer;
   transition: all var(--transition-duration);
-}
-
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
-  margin: 0;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1em;
+  padding-right: 2.5rem;
 }
 
-.unit {
-  position: absolute;
-  right: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #95a5a6;
-  pointer-events: none;
+.number-input select:focus {
+  border-color: var(--secondary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 /* ファイル入力 */
@@ -463,6 +462,12 @@ footer {
 
   .card-body {
     background: #34495e;
+  }
+
+  .number-input select {
+    background-color: #34495e;
+    border-color: #2c3e50;
+    color: #ecf0f1;
   }
 }
 /* 修正終了 */ 

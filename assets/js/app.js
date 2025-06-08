@@ -1,5 +1,3 @@
-
-
 // html2canvasのインポートを削除（スクリプトタグで読み込む）
 
 // 効果音の準備（一時的にコメントアウト）
@@ -86,32 +84,72 @@ function initializeApp() {
 
   templateImage.onerror = () => {
     console.error('テンプレート画像の読み込みに失敗しました');
-    // フォールバックとして空のカードを描画
     drawEmptyCard();
   };
+
+  // 生年月日の入力設定
+  function setupDateInputs() {
+    // 月の選択肢を生成
+    const monthSelect = document.createElement('select');
+    monthSelect.id = 'dobMonthSelect';
+    for (let i = 1; i <= 12; i++) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = `${i}月`;
+      monthSelect.appendChild(option);
+    }
+    elements.dobMonth.parentNode.replaceChild(monthSelect, elements.dobMonth);
+    elements.dobMonth = monthSelect;
+
+    // 日の選択肢を生成
+    const daySelect = document.createElement('select');
+    daySelect.id = 'dobDaySelect';
+    updateDayOptions(daySelect, monthSelect.value);
+    elements.dobDay.parentNode.replaceChild(daySelect, elements.dobDay);
+    elements.dobDay = daySelect;
+
+    // 月の変更時に日の選択肢を更新
+    monthSelect.addEventListener('change', () => {
+      updateDayOptions(daySelect, monthSelect.value);
+      if (validateInputs(true)) {
+        drawStudentCard();
+      }
+    });
+
+    // 日の変更時にプレビューを更新
+    daySelect.addEventListener('change', () => {
+      if (validateInputs(true)) {
+        drawStudentCard();
+      }
+    });
+  }
+
+  // 日の選択肢を更新
+  function updateDayOptions(daySelect, month) {
+    const currentDay = daySelect.value;
+    const daysInMonth = new Date(2024, month, 0).getDate();
+    
+    // 現在の選択肢をクリア
+    daySelect.innerHTML = '';
+    
+    // 選択肢を追加
+    for (let i = 1; i <= daysInMonth; i++) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = `${i}日`;
+      daySelect.appendChild(option);
+    }
+    
+    // 以前の選択を復元（可能な場合）
+    if (currentDay && currentDay <= daysInMonth) {
+      daySelect.value = currentDay;
+    }
+  }
 
   // 空の学生証を描画
   function drawEmptyCard() {
     ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-    
-    // 背景色
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-    
-    // ヘッダー部分
-    ctx.fillStyle = '#8e44ad';
-    ctx.fillRect(0, 0, CARD_WIDTH, 60);
-    
-    // 学校名
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 24px "Noto Serif JP"';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('夢見が丘女子高等学校', 20, 35);
-
-    // 枠線
-    ctx.strokeStyle = '#8e44ad';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+    ctx.drawImage(templateImage, 0, 0, CARD_WIDTH, CARD_HEIGHT);
 
     // 写真枠
     ctx.strokeStyle = '#e0e0e0';
@@ -131,18 +169,6 @@ function initializeApp() {
       PHOTO_FRAME.x + PHOTO_FRAME.width / 2,
       PHOTO_FRAME.y + PHOTO_FRAME.height / 2
     );
-
-    // 「学生証」の文字
-    ctx.fillStyle = '#2c3e50';
-    ctx.font = 'bold 36px "Noto Serif JP"';
-    ctx.textBaseline = 'top';
-    ctx.textAlign = 'center';
-    ctx.fillText('学生証', CARD_WIDTH / 2, 80);
-
-    // プレースホルダーテキスト
-    ctx.font = '16px "Noto Sans JP"';
-    ctx.fillStyle = '#95a5a6';
-    ctx.fillText('入力内容がここに表示されます', CARD_WIDTH / 2, CARD_HEIGHT / 2);
   }
 
   // 写真アップロードの処理
@@ -208,52 +234,19 @@ function initializeApp() {
   // 入力値のバリデーション
   function validateInputs(skipPhotoCheck = false) {
     if (!skipPhotoCheck && !uploadedPhoto) {
-      alert('顔写真をアップロードしてください。');
-      elements.photoInput.focus();
       return false;
     }
 
     const requiredFields = [
-      { element: elements.nameJa, message: '氏名（漢字）を入力してください。' },
-      { element: elements.nameEn, message: '氏名（ローマ字）を入力してください。' },
-      { element: elements.department, message: '学科を選択してください。' },
-      { element: elements.club, message: '部活動を選択してください。' },
-      { element: elements.dobMonth, message: '生年月日（月）を入力してください。' },
-      { element: elements.dobDay, message: '生年月日（日）を入力してください。' }
+      elements.nameJa,
+      elements.nameEn,
+      elements.department,
+      elements.club,
+      elements.dobMonth,
+      elements.dobDay
     ];
 
-    for (const field of requiredFields) {
-      if (!field.element.value) {
-        alert(field.message);
-        field.element.focus();
-        return false;
-      }
-    }
-
-    const month = parseInt(elements.dobMonth.value);
-    const day = parseInt(elements.dobDay.value);
-
-    if (month < 1 || month > 12) {
-      alert('月は1～12の範囲で入力してください。');
-      elements.dobMonth.focus();
-      return false;
-    }
-
-    if (day < 1 || day > 31) {
-      alert('日は1～31の範囲で入力してください。');
-      elements.dobDay.focus();
-      return false;
-    }
-
-    // 月ごとの日数チェック
-    const daysInMonth = new Date(2024, month, 0).getDate();
-    if (day > daysInMonth) {
-      alert(`${month}月の日付は1～${daysInMonth}の範囲で入力してください。`);
-      elements.dobDay.focus();
-      return false;
-    }
-
-    return true;
+    return requiredFields.every(field => field.value);
   }
 
   // 学生証の描画
@@ -261,25 +254,8 @@ function initializeApp() {
     // キャンバスをクリア
     ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
-    // 背景色
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-
-    // ヘッダー部分
-    ctx.fillStyle = '#8e44ad';
-    ctx.fillRect(0, 0, CARD_WIDTH, 60);
-
-    // 学校名（ヘッダー）
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 24px "Noto Serif JP"';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'left';
-    ctx.fillText('夢見が丘女子高等学校', 20, 35);
-
-    // 枠線
-    ctx.strokeStyle = '#8e44ad';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+    // テンプレート画像を描画
+    ctx.drawImage(templateImage, 0, 0, CARD_WIDTH, CARD_HEIGHT);
 
     // 写真を描画
     if (uploadedPhoto) {
@@ -330,12 +306,6 @@ function initializeApp() {
     // テキスト描画設定
     ctx.fillStyle = '#2c3e50';
     ctx.textBaseline = 'top';
-    ctx.textAlign = 'left';
-
-    // 「学生証」の文字
-    ctx.font = 'bold 36px "Noto Serif JP"';
-    ctx.textAlign = 'center';
-    ctx.fillText('学生証', CARD_WIDTH / 2, 80);
     ctx.textAlign = 'left';
 
     // 学籍番号（ランダム生成）
@@ -390,6 +360,10 @@ function initializeApp() {
 
   // ダウンロードボタン
   elements.downloadBtn.addEventListener('click', () => {
+    if (!validateInputs()) {
+      alert('必要な情報をすべて入力してください。');
+      return;
+    }
     try {
       const link = document.createElement('a');
       link.download = '学生証.png';
@@ -403,6 +377,10 @@ function initializeApp() {
 
   // Twitterシェアボタン
   elements.twitterBtn.addEventListener('click', () => {
+    if (!validateInputs()) {
+      alert('必要な情報をすべて入力してください。');
+      return;
+    }
     const text = encodeURIComponent('放課後クロニクルの学生証を作成しました！');
     const url = encodeURIComponent(window.location.href);
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`);
@@ -410,12 +388,20 @@ function initializeApp() {
 
   // LINEシェアボタン
   elements.lineBtn.addEventListener('click', () => {
+    if (!validateInputs()) {
+      alert('必要な情報をすべて入力してください。');
+      return;
+    }
     const url = encodeURIComponent(window.location.href);
     window.open(`https://line.me/R/msg/text/?放課後クロニクルの学生証を作成しました！%0D%0A${url}`);
   });
 
   // URLコピーボタン
   elements.urlBtn.addEventListener('click', async () => {
+    if (!validateInputs()) {
+      alert('必要な情報をすべて入力してください。');
+      return;
+    }
     try {
       await navigator.clipboard.writeText(window.location.href);
       alert('URLをクリップボードにコピーしました。');
@@ -430,9 +416,7 @@ function initializeApp() {
     elements.nameJa,
     elements.nameEn,
     elements.department,
-    elements.club,
-    elements.dobMonth,
-    elements.dobDay
+    elements.club
   ];
 
   formElements.forEach(element => {
@@ -442,4 +426,7 @@ function initializeApp() {
       }
     });
   });
+
+  // 生年月日の入力設定を初期化
+  setupDateInputs();
 } 
