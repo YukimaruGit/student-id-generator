@@ -1,5 +1,5 @@
 import { cloudinaryConfig } from "./cloudinary.config.js";
-import { displayQuestion, resetQuiz } from './quiz.js';
+import { startQuiz } from './quiz.js';
 
 const IMG_BG = "assets/img/student_template.png";
 const BOX = {x:72,y:198,w:379,h:497};
@@ -15,9 +15,6 @@ const POS = {
 // DOMContentLoadedで全体を囲む
 window.addEventListener("DOMContentLoaded", () => {
   console.log("DOMContentLoaded: 初期化開始");
-
-  // 診断ゲームの初期化
-  displayQuestion();
 
   // Elements
   const photoInput = document.getElementById("photoInput");

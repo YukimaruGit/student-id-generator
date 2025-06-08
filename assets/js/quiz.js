@@ -278,6 +278,7 @@ function makePreviewMessage(result) {
 
 // リセット機能
 function resetQuiz() {
+  // スコアと質問をリセット
   currentQuestion = 0;
   questions = [];
   tally = {
@@ -286,28 +287,46 @@ function resetQuiz() {
     vibe: 0
   };
   
+  // 表示をリセット
   const quizContainer = document.getElementById('quizContainer');
   const formArea = document.getElementById('formArea');
   const previewArea = document.getElementById('previewArea');
+  const startContainer = document.getElementById('startContainer');
   
   if (quizContainer) quizContainer.style.display = 'none';
   if (formArea) formArea.style.display = 'none';
   if (previewArea) previewArea.style.display = 'none';
-  
-  const startContainer = document.getElementById('startContainer');
   if (startContainer) startContainer.style.display = 'block';
+  
+  // フォームをリセット
+  const nameInput = document.getElementById('nameInput');
+  const deptInput = document.getElementById('deptInput');
+  const clubInput = document.getElementById('clubInput');
+  const photoInput = document.getElementById('photoInput');
+  
+  if (nameInput) nameInput.value = '';
+  if (deptInput) deptInput.value = '';
+  if (clubInput) clubInput.value = '';
+  if (photoInput) photoInput.value = '';
 }
 
 // 初期化処理
 document.addEventListener('DOMContentLoaded', () => {
+  // 開始ボタンのイベントリスナーを設定
   const startBtn = document.getElementById('startBtn');
   if (startBtn) {
     startBtn.addEventListener('click', startQuiz);
   }
   
+  // リセットボタンのイベントリスナーを設定
   const resetBtn = document.getElementById('resetBtn');
   if (resetBtn) {
-    resetBtn.addEventListener('click', resetQuiz);
+    resetBtn.addEventListener('click', () => {
+      resetQuiz();
+      // リセット後は開始画面を表示
+      const startContainer = document.getElementById('startContainer');
+      if (startContainer) startContainer.style.display = 'block';
+    });
   }
 });
 
