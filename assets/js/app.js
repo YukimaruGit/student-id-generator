@@ -135,6 +135,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // 既存の画像をクリア
     uploadedPhotos = [];
     currentPhotoIndex = 0;
+    photoImg = null;
 
     Array.from(files).forEach(file => {
       const img = new Image();
@@ -143,9 +144,10 @@ window.addEventListener("DOMContentLoaded", () => {
         if (uploadedPhotos.length === 1) {
           currentPhotoIndex = 0;
           photoImg = img;
+          updatePhotoPreview();
+          previewArea.style.display = "block";
+          drawCard();
         }
-        updatePhotoPreview();
-        previewArea.style.display = "block";
       };
       img.src = URL.createObjectURL(file);
     });
