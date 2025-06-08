@@ -229,6 +229,15 @@ main {
   color: var(--white);
 }
 
+.url-btn {
+  background-color: #808080;
+  color: white;
+}
+
+.url-btn:hover {
+  background-color: #666666;
+}
+
 @media (max-width: 600px) {
   .preview-content {
     flex-direction: column;

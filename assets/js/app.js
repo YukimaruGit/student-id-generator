@@ -1,6 +1,3 @@
-import { cloudinaryConfig } from './cloudinary.config.js';
-import html2canvas from 'https://html2canvas.hertzen.com/dist/html2canvas.min.js';
-
 // 効果音の準備（一時的にコメントアウト）
 /*
 const SOUNDS = {
@@ -27,284 +24,205 @@ const POS = {
   birth: { x: 600, y: 500 }
 };
 
-const templateImg = new Image();
-templateImg.src = 'assets/img/student_template.png';
-
-let photoImg = new Image();
-
-// ドロップダウン初期化
-const monthSel = document.getElementById('month');
-const daySel   = document.getElementById('day');
-for(let i=1; i<=12; i++) monthSel.add(new Option(i + '月', i));
-for(let i=1; i<=31; i++) daySel.add(new Option(i + '日', i));
-
-// Canvas 描画
-const canvas = document.getElementById('card-canvas');
-const ctx    = canvas.getContext('2d');
-
-function drawCard() {
-  // 背景テンプレート
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(templateImg, 0, 0, canvas.width, canvas.height);
-
-  // アップロード写真
-  if(photoImg.src) {
-    ctx.drawImage(photoImg,  50,  80, 300, 350);
-  }
-
-  // テキスト
-  ctx.fillStyle = '#333';
-  ctx.textBaseline = 'top';
-  ctx.font = '28px serif';
-  ctx.fillText('氏名：' + document.getElementById('name').value, 380, 100);
-  ctx.fillText('部活：' + document.getElementById('department').value, 380, 150);
-  ctx.fillText(
-    '生年月日：' +
-      monthSel.value + '月 ' +
-      daySel.value   + '日',
-    380, 200
-  );
-}
-
-// 画像選択 → プレビュー用 Image にセット
-document.getElementById('photo-input').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if(!file) return;
-  const url = URL.createObjectURL(file);
-  photoImg.src = url;
-  photoImg.onload = drawCard;
-});
-
-// テンプレート読み込み後に初回描画
-templateImg.onload = drawCard;
-
-// Cloudinaryへのアップロード
-async function uploadToCloudinary(imageData) {
-  const formData = new FormData();
-  formData.append('file', imageData);
-  formData.append('upload_preset', 'student_card_AS_chronicle');
-  formData.append('filename_override', 'student-card.png');
-
-  const response = await fetch('https://api.cloudinary.com/v1_1/di5rxlddy/image/upload', {
-    method: 'POST',
-    body: formData
-  });
-
-  const data = await response.json();
-  return data.secure_url;
-}
-
-// 「学生証を作成」→Cloudinaryアップロード
-document.getElementById('create-btn').addEventListener('click', () => {
-  html2canvas(document.getElementById('card')).then(canvas => {
-    canvas.toBlob(blob => {
-      uploadToCloudinary(blob).then(url => {
-        window.latestImageUrl = url;
-        alert('アップロード完了: ' + url);
-      });
-    });
-  });
-});
-
-// 「画像をダウンロード」
-document.getElementById('download-btn').addEventListener('click', () => {
-  html2canvas(document.getElementById('card')).then(canvas => {
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
-    link.download = 'student_card.png';
-    link.click();
-  });
-});
-
-// 「Xでシェア」「LINEでシェア」
-document.getElementById('twitter-btn').addEventListener('click', () => {
-  const url = encodeURIComponent(window.latestImageUrl || '');
-  const text = encodeURIComponent('放課後クロニクル 学生証を作成しました！');
-  const shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=放課後クロニクル`;
-  window.open(shareUrl, '_blank', 'width=550,height=420');
-});
-document.getElementById('line-btn').addEventListener('click', () => {
-  const url = encodeURIComponent(window.latestImageUrl || '');
-  const shareUrl = `https://social-plugins.line.me/lineit/share?url=${url}`;
-  window.open(shareUrl, '_blank', 'width=600,height=600');
-});
-
 // DOMContentLoadedで全体を囲む
 window.addEventListener("DOMContentLoaded", () => {
   console.log("DOMContentLoaded: 初期化開始");
 
-  // Elements
-  const photoInput = document.getElementById("photoInput");
-  const photoPreview = document.getElementById("photoPreview");
-  const nameInput = document.getElementById("nameInput");
-  const nameEnInput = document.getElementById("nameEnInput");
-  const departmentSelect = document.getElementById("department");
-  const monthSelect = document.getElementById("birthMonth");
-  const daySelect = document.getElementById("birthDay");
-  const idForm = document.getElementById("idForm");
-  const previewArea = document.getElementById("previewArea");
-  const studentCanvas = document.getElementById("studentCanvas");
-  const downloadBtn = document.getElementById("downloadBtn");
-  const copyUrlBtn = document.getElementById("copyUrlBtn");
-  const resetBtn = document.getElementById("resetBtn");
+  const canvas = document.getElementById('student-card');
+  const ctx = canvas.getContext('2d');
 
-  // 生年月日の選択肢を生成
-  for (let i = 1; i <= 12; i++) {
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = `${i}月`;
-    monthSelect.appendChild(option);
-  }
-  for (let i = 1; i <= 31; i++) {
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = `${i}日`;
-    daySelect.appendChild(option);
+  // 背景を白で塗りつぶす
+  function clearCanvas() {
+    if (!ctx) return;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
-  // 写真アップロード時のプレビュー
-  photoInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (file) {
+  function drawCard() {
+    if (!ctx) return;
+    
+    // 背景を白で塗りつぶす
+    clearCanvas();
+
+    // アップロード写真
+    if (photoImg.src && photoImg.src !== 'assets/img/default-photo.png') {
+      ctx.drawImage(photoImg, BOX.x, BOX.y, BOX.w, BOX.h);
+    }
+  }
+
+  let photoImg = new Image();
+
+  // ドロップダウン初期化
+  const monthSel = document.getElementById('birth-month');
+  const daySel = document.getElementById('birth-day');
+  
+  if (monthSel && daySel) {
+    for(let i=1; i<=12; i++) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = i + '月';
+      monthSel.appendChild(option);
+    }
+    for(let i=1; i<=31; i++) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = i + '日';
+      daySel.appendChild(option);
+    }
+  }
+
+  // 画像選択 → プレビュー用 Image にセット
+  const photoInput = document.getElementById('photo-input');
+  const previewPhoto = document.getElementById('preview-photo');
+  
+  if (photoInput) {
+    photoInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
       const reader = new FileReader();
       reader.onload = (e) => {
-        photoPreview.src = e.target.result;
-        photoPreview.style.display = "block";
+        photoImg.src = e.target.result;
+        if (previewPhoto) {
+          previewPhoto.src = e.target.result;
+          previewPhoto.style.display = 'block';
+        }
+        photoImg.onload = drawCard;
       };
       reader.readAsDataURL(file);
-    }
-  });
-
-  // 背景画像のロード
-  const loadBackgroundImage = () => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        console.log("背景画像の読み込み完了");
-        resolve(img);
-      };
-      img.onerror = (err) => {
-        console.error("背景画像の読み込みに失敗:", err);
-        reject(err);
-      };
-      img.src = IMG_BG;
     });
-  };
+  }
 
-  // フォーム送信時
-  idForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    
-    if (!photoPreview.src) {
-      alert("写真を選択してください");
-      return;
-    }
+  // 初回描画
+  clearCanvas();
+
+  // Cloudinaryへのアップロード
+  async function uploadToCloudinary(imageData) {
+    const formData = new FormData();
+    formData.append('file', imageData);
+    formData.append('upload_preset', 'student_card_AS_chronicle');
+    formData.append('filename_override', 'student-card.png');
 
     try {
-      // 学生証を生成
-      studentCanvas.width = 1200;
-      studentCanvas.height = 750;
-      const ctx = studentCanvas.getContext("2d");
-
-      // 背景画像を読み込んで描画
-      const bgImg = await loadBackgroundImage();
-      ctx.drawImage(bgImg, 0, 0, studentCanvas.width, studentCanvas.height);
-
-      // 写真を描画
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(BOX.x, BOX.y, BOX.w, BOX.h);
-      ctx.clip();
-
-      const photoImg = new Image();
-      photoImg.src = photoPreview.src;
-      await new Promise((resolve) => {
-        photoImg.onload = resolve;
+      const response = await fetch('https://api.cloudinary.com/v1_1/di5rxlddy/image/upload', {
+        method: 'POST',
+        body: formData
       });
 
-      const iw = photoImg.naturalWidth;
-      const ih = photoImg.naturalHeight;
-      const scale = Math.max(BOX.w/iw, BOX.h/ih);
-      const dw = iw * scale;
-      const dh = ih * scale;
-      const dx = BOX.x - (dw - BOX.w)/2;
-      const dy = BOX.y - (dh - BOX.h)/2;
-
-      ctx.drawImage(photoImg, 0, 0, iw, ih, dx, dy, dw, dh);
-      ctx.restore();
-
-      // テキストを描画
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      ctx.fillStyle = "#333";
-
-      ctx.font = "bold 48px serif";
-      ctx.fillText(nameInput.value || '未入力', POS.name.x, POS.name.y, POS.name.w);
-
-      ctx.font = "30px sans-serif";
-      ctx.fillText(nameEnInput.value || '未入力', POS.nameEn.x, POS.nameEn.y, POS.nameEn.w);
-
-      ctx.font = "32px sans-serif";
-      ctx.fillText(departmentSelect.value, POS.department.x, POS.department.y);
-      ctx.fillText(
-        `${monthSelect.value}月${daySelect.value}日`,
-        POS.birth.x,
-        POS.birth.y
-      );
-
-      // プレビューを表示
-      idForm.style.display = "none";
-      previewArea.style.display = "block";
-
+      const data = await response.json();
+      return data.secure_url;
     } catch (error) {
-      console.error("学生証生成エラー:", error);
-      alert("学生証の生成に失敗しました。もう一度お試しください。");
+      console.error('Cloudinaryアップロードエラー:', error);
+      alert('画像のアップロードに失敗しました。');
+      return null;
     }
-  });
+  }
 
-  // ダウンロードボタン
-  downloadBtn.addEventListener("click", () => {
-    try {
-      const dataURL = studentCanvas.toDataURL("image/png");
-      const a = document.createElement("a");
-      a.href = dataURL;
-      a.download = "放課後クロニクル_学生証.png";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("ダウンロードエラー:", error);
-      alert("ダウンロードに失敗しました。もう一度お試しください。");
+  // 「学生証を作成」→Cloudinaryアップロード
+  const createBtn = document.getElementById('create-btn');
+  if (createBtn) {
+    createBtn.addEventListener('click', async () => {
+      try {
+        const canvas = document.getElementById('student-card');
+        if (!canvas) throw new Error('キャンバスが見つかりません');
+        
+        const blob = await new Promise(resolve => canvas.toBlob(resolve));
+        const url = await uploadToCloudinary(blob);
+        
+        if (url) {
+          window.latestImageUrl = url;
+          // URLをコピー
+          await navigator.clipboard.writeText(url);
+          alert('画像をアップロードし、URLをコピーしました！');
+        }
+      } catch (error) {
+        console.error('学生証作成エラー:', error);
+        alert('学生証の作成に失敗しました。');
+      }
+    });
+  }
+
+  // 「画像をダウンロード」
+  const downloadBtn = document.getElementById('download-btn');
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', () => {
+      try {
+        const canvas = document.getElementById('student-card');
+        if (!canvas) throw new Error('キャンバスが見つかりません');
+        
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'student_card.png';
+        link.click();
+      } catch (error) {
+        console.error('ダウンロードエラー:', error);
+        alert('画像のダウンロードに失敗しました。');
+      }
+    });
+  }
+
+  // 「Xでシェア」「LINEでシェア」「URLでシェア」
+  const twitterBtn = document.getElementById('twitter-btn');
+  const lineBtn = document.getElementById('line-btn');
+  const urlBtn = document.getElementById('url-btn');
+  
+  if (twitterBtn) {
+    twitterBtn.addEventListener('click', () => {
+      if (!window.latestImageUrl) {
+        alert('先に「学生証を作成」ボタンを押して画像をアップロードしてください。');
+        return;
+      }
+      const url = encodeURIComponent(window.latestImageUrl);
+      const text = encodeURIComponent('放課後クロニクル 学生証を作成しました！');
+      const shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=放課後クロニクル`;
+      window.open(shareUrl, '_blank', 'width=550,height=420');
+    });
+  }
+  
+  if (lineBtn) {
+    lineBtn.addEventListener('click', () => {
+      if (!window.latestImageUrl) {
+        alert('先に「学生証を作成」ボタンを押して画像をアップロードしてください。');
+        return;
+      }
+      const url = encodeURIComponent(window.latestImageUrl);
+      const shareUrl = `https://social-plugins.line.me/lineit/share?url=${url}`;
+      window.open(shareUrl, '_blank', 'width=600,height=600');
+    });
+  }
+
+  if (urlBtn) {
+    urlBtn.addEventListener('click', async () => {
+      if (!window.latestImageUrl) {
+        alert('先に「学生証を作成」ボタンを押して画像をアップロードしてください。');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(window.latestImageUrl);
+        alert('画像のURLをコピーしました！');
+      } catch (error) {
+        console.error('URLコピーエラー:', error);
+        alert('URLのコピーに失敗しました。もう一度お試しください。');
+      }
+    });
+  }
+
+  // 入力フィールドの変更を監視してプレビューを更新
+  const formInputs = [
+    'name-kanji',
+    'name-romaji',
+    'department',
+    'club',
+    'birth-month',
+    'birth-day'
+  ];
+
+  formInputs.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.addEventListener('change', drawCard);
+      element.addEventListener('input', drawCard);
     }
-  });
-
-  // URLコピーボタン
-  copyUrlBtn.addEventListener("click", async () => {
-    try {
-      // Cloudinaryにアップロード
-      const blob = await new Promise(resolve => studentCanvas.toBlob(resolve));
-      const imageUrl = await uploadToCloudinary(blob);
-      
-      // URLをクリップボードにコピー
-      await navigator.clipboard.writeText(imageUrl);
-      alert("画像のURLをコピーしました！");
-      
-    } catch (error) {
-      console.error("URLコピーエラー:", error);
-      alert("URLのコピーに失敗しました。もう一度お試しください。");
-    }
-  });
-
-  // リセットボタン
-  resetBtn.addEventListener("click", () => {
-    // フォームをリセット
-    idForm.reset();
-    photoPreview.style.display = "none";
-    photoPreview.src = "";
-    
-    // 表示を切り替え
-    previewArea.style.display = "none";
-    idForm.style.display = "block";
   });
 
   console.log("Init: 初期化完了");
