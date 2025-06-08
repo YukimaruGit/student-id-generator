@@ -1,4 +1,4 @@
-import { cloudinaryConfig } from './cloudinary.config.js';
+import { cloudinaryConfig } from 'https://yukimarugit.github.io/student-id-generator/assets/js/cloudinary.config.js';
 import html2canvas from './vendor/html2canvas.min.js';
 
 // 効果音の準備（一時的にコメントアウト）
