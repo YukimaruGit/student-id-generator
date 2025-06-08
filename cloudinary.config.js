@@ -4,4 +4,4 @@ const cloudinaryConfig = {
   apiKey: 'your-api-key'
 };
 
-export default cloudinaryConfig; 
+module.exports = cloudinaryConfig; 

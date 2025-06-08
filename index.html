@@ -2,93 +2,81 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>学生証ジェネレーター</title>
-  <meta property="og:title" content="学生証ジェネレーター">
-  <meta property="og:description" content="オリジナルの学生証を作成できます">
-  <meta property="og:image" content="https://res.cloudinary.com/your-cloud-name/image/upload/v1/ogp.jpg">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>放課後クロニクル 学生証ジェネレーター</title>
+  <meta property="og:title" content="放課後クロニクル 学生証ジェネレーター">
+  <meta property="og:description" content="あなただけの学生証を作成しよう！">
+  <meta property="og:image" content="https://res.cloudinary.com/di5rxlddy/image/upload/v1/student_card_AS_chronicle/card_preview.png">
   <meta property="og:url" content="https://your-domain.com">
   <meta name="twitter:card" content="summary_large_image">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script type="module" src="assets/js/app.js"></script>
 </head>
 <body>
-  <div class="container">
-    <div class="input-form">
-      <div class="input-group">
-        <label for="photo-input">顔写真アップロード</label>
-        <input type="file" id="photo-input" accept="image/*">
-      </div>
-      
-      <div class="input-group">
-        <label for="name-ja">氏名（漢字）</label>
-        <input type="text" id="name-ja" placeholder="例：高森のばら">
-      </div>
-      
-      <div class="input-group">
-        <label for="name-en">氏名（ローマ字）</label>
-        <input type="text" id="name-en" placeholder="例：Takamori Nobara">
-      </div>
-      
-      <div class="input-group">
-        <label for="department">学科</label>
-        <input type="text" id="department" placeholder="例：芸術">
-      </div>
-      
-      <div class="input-group">
-        <label for="club">部活動</label>
-        <input type="text" id="club" placeholder="例：ホラー布教">
-      </div>
-      
-      <div class="input-group">
+  <header>
+    <img class="logo" src="assets/img/crest.png" alt="校章">
+  </header>
+
+  <main>
+    <section class="form-card">
+      <h2>顔写真アップロード</h2>
+      <input type="file" id="photoInput" accept="image/*">
+      <label>氏名（漢字）<input type="text" id="nameJa" placeholder="例：高森のばら"></label>
+      <label>氏名（ローマ字）<input type="text" id="nameEn" placeholder="例：Takamori Nobara"></label>
+      <label>学科
+        <select id="department">
+          <option value="">選択してください</option>
+          <option>芸術科</option>
+          <option>文理科</option>
+          <option>文芸科</option>
+        </select>
+      </label>
+      <label>部活動
+        <select id="club">
+          <option value="">選択してください</option>
+          <option>ホラー布教部</option>
+          <option>文芸部</option>
+          <option>放課後探検部</option>
+        </select>
+      </label>
+      <div class="birthday">
         <label>生年月日</label>
-        <select id="dob-month">
+        <select id="dobMonth">
           <option value="">月</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
-          <option value="9">9</option>
-          <option value="10">10</option>
-          <option value="11">11</option>
-          <option value="12">12</option>
         </select>
-        <select id="dob-day">
+        <select id="dobDay">
           <option value="">日</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <!-- ... 31日まで -->
         </select>
       </div>
-    </div>
+      <button id="createBtn">学生証を作成</button>
+    </section>
 
-    <div class="preview-card">
-      <div class="photo-frame">
-        <img id="preview-photo" alt="プレビュー">
+    <section class="preview-card">
+      <div class="card-header">学生証</div>
+      <div class="card-body">
+        <div class="template-frame">
+          <img src="assets/img/student_template.png" class="template" alt="学生証テンプレート">
+          <div class="photo-frame">
+            <!-- 写真がここに配置されます -->
+          </div>
+          <div class="overlay-text">
+            <div class="student-number">0000000000</div>
+            <div class="student-name-ja"></div>
+            <div class="student-name-en"></div>
+            <div class="student-info"></div>
+            <div class="school-name">夢見が丘女子高等学校</div>
+          </div>
+        </div>
       </div>
-      <div class="student-info">
-        <div id="preview-name-ja"></div>
-        <div id="preview-name-en"></div>
-        <div><span id="preview-department"></span>科</div>
-        <div><span id="preview-club"></span>部</div>
-        <div><span id="preview-dob-month"></span>月<span id="preview-dob-day"></span>日</div>
+      <div class="card-footer">
+        <button id="downloadBtn">画像をダウンロード</button>
+        <button id="twitterBtn">Xでシェア</button>
+        <button id="lineBtn">LINEでシェア</button>
+        <button id="urlBtn">URLをコピー</button>
       </div>
-    </div>
-
-    <div class="share-buttons">
-      <button id="download-btn" class="share-button">ダウンロード</button>
-      <button id="twitter-btn" class="share-button twitter-share">X（Twitter）</button>
-      <button id="line-btn" class="share-button line-share">LINE</button>
-      <button id="url-btn" class="share-button url-share">URLコピー</button>
-    </div>
-  </div>
-
-  <script type="module" src="assets/js/app.js"></script>
+    </section>
+  </main>
 </body>
 </html> 
