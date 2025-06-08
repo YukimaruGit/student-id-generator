@@ -1,4 +1,5 @@
 import { cloudinaryConfig } from "./cloudinary.config.js";
+import { displayQuestion, resetQuiz } from './quiz.js';
 
 const IMG_BG = "assets/img/student_template.png";
 const BOX = {x:72,y:198,w:379,h:497};
@@ -14,6 +15,9 @@ const POS = {
 // DOMContentLoadedで全体を囲む
 window.addEventListener("DOMContentLoaded", () => {
   console.log("DOMContentLoaded: 初期化開始");
+
+  // 診断ゲームの初期化
+  displayQuestion();
 
   // Elements
   const photoInput = document.getElementById("photoInput");
@@ -358,10 +362,41 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // シェアボタンのイベントリスナー
-  twBtn.addEventListener('click', () => uploadAndShare('twitter'));
-  lnBtn.addEventListener('click', () => uploadAndShare('line'));
-  copyBtn.addEventListener('click', copyShareUrl);
+  // シェア後のリセット処理を追加
+  async function afterShare() {
+    if (confirm('新しい診断を始めますか？')) {
+      resetQuiz();
+      previewArea.style.display = 'none';
+      document.getElementById('formArea').style.display = 'none';
+      // フォームをリセット
+      photoInput.value = '';
+      nameI.value = '';
+      nameEnI.value = '';
+      monthI.selectedIndex = 0;
+      dayI.selectedIndex = 0;
+      // プレビューをクリア
+      photoPreview.style.display = 'none';
+      uploadedPhotos = [];
+      currentPhotoIndex = 0;
+      photoImg = null;
+    }
+  }
+
+  // シェアボタンのイベントハンドラを更新
+  twBtn.addEventListener('click', async () => {
+    await uploadAndShare('twitter');
+    afterShare();
+  });
+
+  lnBtn.addEventListener('click', async () => {
+    await uploadAndShare('line');
+    afterShare();
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    await copyShareUrl();
+    afterShare();
+  });
 
   console.log("Init: 初期化完了");
 }); 

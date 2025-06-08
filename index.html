@@ -23,7 +23,11 @@
   </header>
 
   <div class="container">
-    <div class="card" id="formArea">
+    <!-- 診断ゲームエリア -->
+    <div id="quizContainer"></div>
+
+    <!-- フォームエリア（初期状態で非表示） -->
+    <div class="card" id="formArea" style="display: none;">
       <label>顔写真アップロード</label>
       <input type="file" id="photoInput" accept="image/*" class="photo-input">
       <div class="photo-preview-container">
@@ -131,6 +135,7 @@
     <p class="copyright">&copy; 2024 放課後クロニクル</p>
   </footer>
 
+  <script type="module" src="assets/js/quiz.js"></script>
   <script type="module" src="assets/js/app.js"></script>
 </body>
 </html> 
