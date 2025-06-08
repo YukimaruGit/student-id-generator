@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# SNSクローラー向けの特別な許可
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LINE-BOT
+Allow: / 
