@@ -25,16 +25,16 @@
   <div class="container">
     <div class="card" id="formArea">
       <label>顔写真アップロード</label>
-      <input type="file" id="photoInput" accept="image/*">
+      <input type="file" id="photoInput" accept="image/*" class="photo-input">
 
       <label>氏名（漢字）</label>
-      <input type="text" id="nameInput" placeholder="例：高森 のばら">
+      <input type="text" id="nameInput" placeholder="例：高森 のばら" class="text-input">
 
       <label>氏名（ローマ字）</label>
-      <input type="text" id="nameRomajiInput" placeholder="例：Takamori Nobara">
+      <input type="text" id="nameEnInput" placeholder="例：Takamori Nobara" class="text-input">
 
       <label>学科</label>
-      <select id="departmentSelect">
+      <select id="deptInput" class="select-input">
         <option value="">選択してください</option>
         <option value="芸術科">芸術科</option>
         <option value="文学科">文学科</option>
@@ -43,7 +43,7 @@
       </select>
 
       <label>部活動</label>
-      <select id="clubSelect">
+      <select id="clubInput" class="select-input">
         <option value="">選択してください</option>
         <option value="ホラー布教部">ホラー布教部</option>
         <option value="放課後探検部">放課後探検部</option>
@@ -52,9 +52,12 @@
       </select>
 
       <label>生年月日</label>
-      <input type="date" id="birthDateInput">
+      <div class="birth-date-inputs">
+        <select id="birthMonth" class="select-input"></select>
+        <select id="birthDay" class="select-input"></select>
+      </div>
 
-      <button id="createBtn">学生証を作成</button>
+      <button id="createBtn" class="btn-create">学生証を作成</button>
     </div>
 
     <div id="previewArea">
@@ -63,9 +66,9 @@
           <canvas id="studentCanvas" width="1222" height="768"></canvas>
         </div>
         <div class="preview-actions">
-          <button id="downloadBtn">画像をダウンロード</button>
-          <button id="twitterShareBtn">Xでシェア</button>
-          <button id="lineShareBtn">LINEでシェア</button>
+          <button id="downloadBtn" class="btn-download">画像をダウンロード</button>
+          <button id="twitterShareBtn" class="btn-twitter">Xでシェア</button>
+          <button id="lineShareBtn" class="btn-line">LINEでシェア</button>
         </div>
       </div>
     </div>
