@@ -5,7 +5,7 @@ const BOX = {x:72,y:198,w:379,h:497};
 const POS = {
   name: {x:735,y:256,w:408},
   nameEn: {x:735,y:321,w:412},
-  dept: {x:740,y:395,w:170},
+  course: {x:740,y:395,w:170},
   club: {x:750,y:466,w:287},
   month:{x:794,y:529,w:62},
   day:  {x:905,y:531,w:48}
@@ -18,7 +18,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // Elements
   const photoInput = document.getElementById("photoInput");
   const nameInput = document.getElementById("nameInput");
-  const deptInput = document.getElementById("deptInput");
+  const courseInput = document.getElementById("courseInput");
   const clubInput = document.getElementById("clubInput");
   const idForm = document.getElementById("idForm");
   const formArea = document.getElementById("formArea");
@@ -103,7 +103,7 @@ window.addEventListener("DOMContentLoaded", () => {
       ctx.fillText(nameInput.value, POS.name.x, POS.name.y, POS.name.w);
 
       ctx.font = "32px sans-serif";
-      ctx.fillText(deptInput.value, POS.dept.x, POS.dept.y, POS.dept.w);
+      ctx.fillText(courseInput.value, POS.course.x, POS.course.y, POS.course.w);
       ctx.fillText(clubInput.value, POS.club.x, POS.club.y, POS.club.w);
 
       // プレビューを表示

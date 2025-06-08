@@ -48,19 +48,19 @@ const questions = [
 // 診断結果データ
 const results = {
   science: {
-    department: "理数科学科",
+    course: "理数科学科",
     club: "科学部"
   },
   art: {
-    department: "芸術創作科",
+    course: "芸術創作科",
     club: "美術部"
   },
   sports: {
-    department: "スポーツ科学科",
+    course: "スポーツ科学科",
     club: "陸上競技部"
   },
   welfare: {
-    department: "生活福祉科",
+    course: "生活福祉科",
     club: "ボランティア部"
   }
 };
@@ -149,10 +149,10 @@ function showResult() {
   )[0];
 
   // 結果を学生証フォームに反映
-  const deptInput = document.getElementById("deptInput");
+  const courseInput = document.getElementById("courseInput");
   const clubInput = document.getElementById("clubInput");
   
-  deptInput.value = results[result].department;
+  courseInput.value = results[result].course;
   clubInput.value = results[result].club;
 
   // 画面遷移
