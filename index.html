@@ -17,8 +17,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/quiz.css">
   <link rel="stylesheet" href="assets/css/style.css">
-  <!-- Google Fonts - Chalk風フォント -->
-  <link href="https://fonts.googleapis.com/css2?family=Kalam&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
   <!-- html2canvas -->
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
@@ -26,9 +24,6 @@
   <main>
     <!-- 開始画面 -->
     <div id="startContainer" class="container">
-      <div class="header">
-        <img src="assets/img/logo.png" alt="放課後クロニクル" class="ui-logo">
-      </div>
       <div class="start-content">
         <h1>夢見が丘女子高等学校<br>入学診断</h1>
         <p>あなたに最適な学科と部活動を診断します！</p>
@@ -80,14 +75,12 @@
           </div>
           <div class="form-group">
             <label for="photoInput">写真</label>
-            <input type="file" id="photoInput" accept="image/*" required class="photo-input">
+            <input type="file" id="photoInput" accept="image/*" required>
             <div class="photo-preview-container">
               <img id="photoPreview" style="display: none;">
-              <button type="button" id="prevPhotoBtn" class="photo-nav-btn" style="display: none;">←</button>
-              <button type="button" id="nextPhotoBtn" class="photo-nav-btn" style="display: none;">→</button>
             </div>
           </div>
-          <button type="button" id="createBtn" class="btn-create">学生証を生成</button>
+          <button type="submit" class="btn-create">学生証を生成</button>
         </form>
       </div>
     </div>
@@ -95,16 +88,14 @@
     <!-- プレビュー画面 -->
     <div id="previewArea" class="container" style="display: none;">
       <div class="preview-content">
-        <div class="preview-card">
-          <div class="preview-canvas-wrapper">
-            <canvas id="studentCanvas"></canvas>
-          </div>
-          <div class="preview-actions">
-            <button id="downloadBtn" class="btn-action">ダウンロード</button>
-            <button id="twitterShareBtn" class="btn-action twitter">Twitterでシェア</button>
-            <button id="lineShareBtn" class="btn-action line">LINEでシェア</button>
-            <button id="copyUrlBtn" class="btn-action">URLをコピー</button>
-          </div>
+        <div id="idCard" class="id-card">
+          <!-- 学生証のデザインはここに生成 -->
+        </div>
+        <div class="share-buttons">
+          <button id="downloadBtn" class="btn-share">ダウンロード</button>
+          <button id="twitterShareBtn" class="btn-share twitter">Twitterでシェア</button>
+          <button id="lineShareBtn" class="btn-share line">LINEでシェア</button>
+          <button id="copyUrlBtn" class="btn-share">URLをコピー</button>
         </div>
         <button id="resetBtn" class="btn-reset">もう一度診断する</button>
       </div>

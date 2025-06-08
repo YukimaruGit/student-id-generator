@@ -17,14 +17,14 @@ const SOUNDS = {
 };
 
 const IMG_BG = "assets/img/student_template.png";
-const BOX = {x:72,y:198,w:379,h:497};
+const BOX = { x: 72, y: 198, w: 379, h: 497 };
 const POS = {
-  name: {x:735,y:256,w:408},
-  nameEn: {x:735,y:321,w:412},
-  course: {x:740,y:395,w:170},
-  club: {x:750,y:466,w:287},
-  month:{x:794,y:529,w:62},
-  day:  {x:905,y:531,w:48}
+  name: { x: 735, y: 256, w: 408 },
+  nameEn: { x: 735, y: 321, w: 412 },
+  course: { x: 740, y: 395, w: 170 },
+  club: { x: 750, y: 466, w: 287 },
+  month: { x: 794, y: 529, w: 62 },
+  day: { x: 905, y: 531, w: 48 }
 };
 
 // DOMContentLoadedで全体を囲む
