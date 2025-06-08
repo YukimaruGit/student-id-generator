@@ -10,7 +10,6 @@
   --color-twitter: #3498db;
   --color-line: #2ecc71;
   --color-copy: #95a5a6;
-  --color-discord: #7289da;
   --shadow-card: 0 8px 16px rgba(0,0,0,0.1);
   --shadow-button: 0 2px 4px rgba(0,0,0,0.2);
   --radius-card: 12px;
@@ -208,10 +207,6 @@ body {
 
 .btn-copy {
   background: var(--color-copy);
-}
-
-.btn-discord {
-  background: var(--color-discord);
 }
 
 .preview-actions button:hover {

@@ -34,7 +34,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const twBtn = document.getElementById("twitterShareBtn");
   const lnBtn = document.getElementById("lineShareBtn");
   const copyBtn = document.getElementById("copyUrlBtn");
-  const discordBtn = document.getElementById("discordShareBtn");
 
   // 状態管理
   let currentPhotoIndex = 0;
@@ -336,7 +335,6 @@ window.addEventListener("DOMContentLoaded", () => {
   // シェアボタンのイベントリスナー
   twBtn.addEventListener('click', () => uploadAndShare('twitter'));
   lnBtn.addEventListener('click', () => uploadAndShare('line'));
-  discordBtn.addEventListener('click', () => uploadAndShare('discord'));
   copyBtn.addEventListener('click', copyShareUrl);
 
   console.log("Init: 初期化完了");
