@@ -12,7 +12,7 @@ body {
 }
 
 header {
-  height: 200px;
+  height: 180px;
   background: linear-gradient(90deg,#8e44ad,#3498db);
   position: relative;
 }
@@ -23,6 +23,7 @@ header .logo {
   left: 50%;
   transform: translate(-50%,-50%);
   opacity: 0.2;
+  width: 120px;
 }
 
 header .logo img {
@@ -63,31 +64,27 @@ section {
 .form-card select {
   width: 100%;
   padding: 8px;
-  font-size: 1rem;
   margin-top: 4px;
   box-sizing: border-box;
+  font-size: 1rem;
 }
 
 .dob input {
   width: 48%;
   display: inline-block;
+  margin-right: 4%;
 }
 
 #createBtn {
   margin-top: 15px;
   width: 100%;
   padding: 12px;
-  font-size: 1.1rem;
   background: #3498db;
   color: #fff;
   border: none;
   border-radius: 6px;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-#createBtn:hover {
-  background: #2980b9;
 }
 
 /* プレビューカード */
@@ -116,15 +113,14 @@ section {
   flex-wrap: wrap;
   padding: 10px;
   background: rgba(255,255,255,0.8);
-  position: relative;
 }
 
 .photo-frame {
   position: relative;
   width: 200px;
   height: 250px;
-  overflow: hidden;
   margin-right: 10px;
+  overflow: hidden;
 }
 
 .photo-frame img {
@@ -142,11 +138,6 @@ section {
   border: none;
   padding: 8px;
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.photo-frame button:hover {
-  background: rgba(0,0,0,0.7);
 }
 
 #prevBtn {
@@ -167,6 +158,12 @@ section {
   display: block;
 }
 
+.photo-overlay {
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 .text-overlay {
   position: absolute;
   top: 0;
@@ -175,11 +172,7 @@ section {
   height: 100%;
 }
 
-.text-overlay .student-number,
-.text-overlay .student-name-ja,
-.text-overlay .student-name-en,
-.text-overlay .student-info,
-.text-overlay .school-name {
+.text-overlay div {
   position: absolute;
   white-space: nowrap;
 }
@@ -191,20 +184,20 @@ section {
 
 .student-name-ja {
   top: 60px;
-  left: 120px;
+  left: 140px;
   font-size: 1.5rem;
   font-weight: bold;
 }
 
 .student-name-en {
   top: 90px;
-  left: 120px;
+  left: 140px;
   font-size: 1rem;
 }
 
 .student-info {
   top: 130px;
-  left: 120px;
+  left: 140px;
   font-size: 1rem;
 }
 
@@ -218,10 +211,10 @@ section {
 /* フッターシェアボタン */
 .card-footer {
   display: flex;
-  gap: 8px;
-  padding: 10px;
   flex-wrap: wrap;
+  gap: 8px;
   justify-content: center;
+  padding: 10px;
   background: #f0f0f0;
 }
 
@@ -234,39 +227,22 @@ section {
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background-color 0.3s;
 }
 
 #downloadBtn {
   background: #27ae60;
 }
 
-#downloadBtn:hover {
-  background: #219a52;
-}
-
 #twitterBtn {
   background: #1da1f2;
-}
-
-#twitterBtn:hover {
-  background: #1a91da;
 }
 
 #lineBtn {
   background: #00c300;
 }
 
-#lineBtn:hover {
-  background: #00b300;
-}
-
 #urlBtn {
   background: #7f8c8d;
-}
-
-#urlBtn:hover {
-  background: #6c7879;
 }
 
 /* レスポンシブ */
@@ -279,9 +255,5 @@ section {
   .photo-frame {
     margin-right: 0;
     margin-bottom: 10px;
-  }
-  
-  .card-footer button {
-    min-width: calc(50% - 4px);
   }
 } 

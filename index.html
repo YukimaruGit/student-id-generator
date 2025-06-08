@@ -8,7 +8,7 @@
 </head>
 <body>
   <header>
-    <div class="logo"><img src="assets/img/crest.png" alt="校章"></div>
+    <img class="logo" src="assets/img/crest.png" alt="校章">
   </header>
 
   <main>
@@ -21,16 +21,14 @@
         <select id="department">
           <option value="">選択してください</option>
           <option>芸術科</option>
-          <option>文芸科</option>
-          <option>理数科</option>
+          <option>文理科</option>
         </select>
       </label>
       <label>部活動
         <select id="club">
           <option value="">選択してください</option>
           <option>ホラー布教部</option>
-          <option>ミステリー研究部</option>
-          <option>放課後探検部</option>
+          <option>文芸部</option>
         </select>
       </label>
       <div class="dob">
@@ -47,11 +45,11 @@
       <div class="card-body">
         <div class="photo-frame">
           <button id="prevBtn">◀</button>
-          <img id="previewPhoto" src="assets/img/default-photo.png" alt="">
+          <img id="previewPhoto" src="" alt="プレビュー写真">
           <button id="nextBtn">▶</button>
         </div>
         <div class="template-frame">
-          <img src="assets/img/student_template.png" alt="テンプレート" class="template">
+          <img src="assets/img/student_template.png" class="template" alt="学生証テンプレート">
           <div class="text-overlay">
             <div class="student-number">0000000000</div>
             <div class="student-name-ja"></div>
@@ -71,6 +69,6 @@
   </main>
 
   <script src="assets/js/vendor/html2canvas.min.js"></script>
-  <script src="assets/js/app.js"></script>
+  <script type="module" src="assets/js/app.js"></script>
 </body>
 </html> 

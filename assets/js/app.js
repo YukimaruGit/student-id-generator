@@ -32,7 +32,7 @@ const POS = {
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/di5rxlddy/image/upload';
 const CLOUDINARY_UPLOAD_PRESET = 'student_card_AS_chronicle';
 
-let photos = [], currentIndex = 0;
+let photos = [], idx = 0;
 
 // DOMContentLoadedで全体を囲む
 window.addEventListener("DOMContentLoaded", () => {
@@ -59,7 +59,7 @@ window.addEventListener("DOMContentLoaded", () => {
     clearCanvas();
 
     // アップロード写真
-    if (photos.length > 0 && photos[currentIndex]) {
+    if (photos.length > 0 && photos[idx]) {
       try {
         ctx.drawImage(new Image(), 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
       } catch (error) {
@@ -118,8 +118,8 @@ window.addEventListener("DOMContentLoaded", () => {
   
   if (photoInput) {
     photoInput.addEventListener('change', e => {
-      photos = Array.from(e.target.files).map(f => URL.createObjectURL(f));
-      currentIndex = 0;
+      photos = Array.from(e.target.files).map(file => URL.createObjectURL(file));
+      idx = 0;
       updatePhoto();
     });
   }
@@ -143,15 +143,15 @@ window.addEventListener("DOMContentLoaded", () => {
   
   if (prevBtn && nextBtn) {
     prevBtn.addEventListener('click', () => {
-      if (currentIndex > 0) {
-        currentIndex--;
+      if (idx > 0) {
+        idx--;
         updatePhoto();
       }
     });
 
     nextBtn.addEventListener('click', () => {
-      if (currentIndex < photos.length - 1) {
-        currentIndex++;
+      if (idx < photos.length - 1) {
+        idx++;
         updatePhoto();
       }
     });
@@ -159,13 +159,48 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // 写真更新処理
   function updatePhoto() {
-    previewPhoto.src = photos[currentIndex] || 'assets/img/default-photo.png';
+    const previewPhoto = document.getElementById('previewPhoto');
+    const templatePhoto = document.querySelector('.template-frame');
+    
+    if (photos.length > 0) {
+      // プレビュー写真を更新
+      previewPhoto.src = photos[idx];
+      previewPhoto.style.display = 'block';
+      
+      // テンプレートの写真部分を更新
+      const photoStyle = `
+        background-image: url('${photos[idx]}');
+        background-size: cover;
+        background-position: center;
+        position: absolute;
+        width: 120px;
+        height: 150px;
+        left: 20px;
+        top: 50px;
+      `;
+      
+      // 既存の写真要素があれば更新、なければ新規作成
+      let photoElement = templatePhoto.querySelector('.photo-overlay');
+      if (!photoElement) {
+        photoElement = document.createElement('div');
+        photoElement.className = 'photo-overlay';
+        templatePhoto.appendChild(photoElement);
+      }
+      photoElement.style.cssText = photoStyle;
+    } else {
+      // 写真がない場合は非表示
+      previewPhoto.src = 'assets/img/default-photo.png';
+      previewPhoto.style.display = 'none';
+      
+      const photoElement = templatePhoto.querySelector('.photo-overlay');
+      if (photoElement) {
+        photoElement.remove();
+      }
+    }
     
     // ボタンの表示制御
-    if (prevBtn && nextBtn) {
-      prevBtn.style.display = currentIndex > 0 ? 'block' : 'none';
-      nextBtn.style.display = currentIndex < photos.length - 1 ? 'block' : 'none';
-    }
+    prevBtn.style.display = idx > 0 ? 'block' : 'none';
+    nextBtn.style.display = idx < photos.length - 1 ? 'block' : 'none';
   }
 
   // 学生証生成処理
@@ -189,10 +224,7 @@ window.addEventListener("DOMContentLoaded", () => {
             body: form
           })
           .then(res => res.json())
-          .then(json => {
-            const imageUrl = json.secure_url;
-            setupShare(imageUrl);
-          })
+          .then(json => setupShare(json.secure_url))
           .catch(err => {
             console.error('画像アップロードエラー:', err);
             alert('画像のアップロードに失敗しました。もう一度お試しください。');
