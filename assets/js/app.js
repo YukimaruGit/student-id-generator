@@ -1,4 +1,4 @@
-import { cloudinaryConfig } from '../../cloudinary.config.js';
+
 
 // html2canvasのインポートを削除（スクリプトタグで読み込む）
 
@@ -37,8 +37,6 @@ function initializeApp() {
   // DOM要素の取得
   const elements = {
     photoInput: document.getElementById('photoInput'),
-    photoPreview: document.getElementById('photoPreview'),
-    previewContainer: document.getElementById('previewContainer'),
     nameJa: document.getElementById('nameJa'),
     nameEn: document.getElementById('nameEn'),
     department: document.getElementById('department'),
@@ -86,10 +84,65 @@ function initializeApp() {
     drawEmptyCard();
   };
 
+  templateImage.onerror = () => {
+    console.error('テンプレート画像の読み込みに失敗しました');
+    // フォールバックとして空のカードを描画
+    drawEmptyCard();
+  };
+
   // 空の学生証を描画
   function drawEmptyCard() {
     ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
-    ctx.drawImage(templateImage, 0, 0, CARD_WIDTH, CARD_HEIGHT);
+    
+    // 背景色
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+    
+    // ヘッダー部分
+    ctx.fillStyle = '#8e44ad';
+    ctx.fillRect(0, 0, CARD_WIDTH, 60);
+    
+    // 学校名
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 24px "Noto Serif JP"';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('夢見が丘女子高等学校', 20, 35);
+
+    // 枠線
+    ctx.strokeStyle = '#8e44ad';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+
+    // 写真枠
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.strokeRect(
+      PHOTO_FRAME.x,
+      PHOTO_FRAME.y,
+      PHOTO_FRAME.width,
+      PHOTO_FRAME.height
+    );
+
+    // 写真アイコン
+    ctx.fillStyle = '#e0e0e0';
+    ctx.font = '48px "Font Awesome 6 Free"';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('\uf007', // user icon
+      PHOTO_FRAME.x + PHOTO_FRAME.width / 2,
+      PHOTO_FRAME.y + PHOTO_FRAME.height / 2
+    );
+
+    // 「学生証」の文字
+    ctx.fillStyle = '#2c3e50';
+    ctx.font = 'bold 36px "Noto Serif JP"';
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'center';
+    ctx.fillText('学生証', CARD_WIDTH / 2, 80);
+
+    // プレースホルダーテキスト
+    ctx.font = '16px "Noto Sans JP"';
+    ctx.fillStyle = '#95a5a6';
+    ctx.fillText('入力内容がここに表示されます', CARD_WIDTH / 2, CARD_HEIGHT / 2);
   }
 
   // 写真アップロードの処理
@@ -108,48 +161,37 @@ function initializeApp() {
         throw new Error('画像ファイルを選択してください。');
       }
 
-      showLoading('写真をアップロード中...');
+      showLoading('写真を読み込み中...');
 
-      // Cloudinaryにアップロード
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', cloudinaryConfig.uploadPreset);
-
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`,
-        {
-          method: 'POST',
-          body: formData
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('画像のアップロードに失敗しました。');
-      }
-
-      const data = await response.json();
-      
-      // プレビュー表示
+      // 画像をロード
       uploadedPhoto = new Image();
       uploadedPhoto.onload = () => {
-        elements.photoPreview.src = data.secure_url;
-        elements.photoPreview.classList.add('loaded');
-        elements.previewContainer.classList.add('has-image');
         hideLoading();
+        if (validateInputs(true)) {
+          drawStudentCard();
+        }
       };
       uploadedPhoto.onerror = () => {
         throw new Error('画像の読み込みに失敗しました。');
       };
-      uploadedPhoto.src = data.secure_url;
+
+      // FileReaderで画像を読み込む
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        uploadedPhoto.src = e.target.result;
+      };
+      reader.onerror = () => {
+        throw new Error('画像の読み込みに失敗しました。');
+      };
+      reader.readAsDataURL(file);
 
     } catch (error) {
       console.error('アップロードエラー:', error);
       alert(error.message);
       elements.photoInput.value = '';
-      elements.photoPreview.src = '';
-      elements.photoPreview.classList.remove('loaded');
-      elements.previewContainer.classList.remove('has-image');
+      uploadedPhoto = null;
       hideLoading();
+      drawEmptyCard();
     }
   });
 
@@ -164,8 +206,8 @@ function initializeApp() {
   });
 
   // 入力値のバリデーション
-  function validateInputs() {
-    if (!uploadedPhoto) {
+  function validateInputs(skipPhotoCheck = false) {
+    if (!skipPhotoCheck && !uploadedPhoto) {
       alert('顔写真をアップロードしてください。');
       elements.photoInput.focus();
       return false;
@@ -219,68 +261,126 @@ function initializeApp() {
     // キャンバスをクリア
     ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
-    // テンプレート画像を描画
-    ctx.drawImage(templateImage, 0, 0, CARD_WIDTH, CARD_HEIGHT);
+    // 背景色
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
-    // 写真を描画（アスペクト比を保持）
-    const photoRatio = uploadedPhoto.width / uploadedPhoto.height;
-    let drawWidth = PHOTO_FRAME.width;
-    let drawHeight = PHOTO_FRAME.height;
-    
-    if (photoRatio > 1) {
-      drawWidth = PHOTO_FRAME.height * photoRatio;
-      ctx.drawImage(
-        uploadedPhoto,
-        PHOTO_FRAME.x - (drawWidth - PHOTO_FRAME.width) / 2,
+    // ヘッダー部分
+    ctx.fillStyle = '#8e44ad';
+    ctx.fillRect(0, 0, CARD_WIDTH, 60);
+
+    // 学校名（ヘッダー）
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 24px "Noto Serif JP"';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillText('夢見が丘女子高等学校', 20, 35);
+
+    // 枠線
+    ctx.strokeStyle = '#8e44ad';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+
+    // 写真を描画
+    if (uploadedPhoto) {
+      const photoRatio = uploadedPhoto.width / uploadedPhoto.height;
+      let drawWidth = PHOTO_FRAME.width;
+      let drawHeight = PHOTO_FRAME.height;
+      
+      if (photoRatio > 1) {
+        drawWidth = PHOTO_FRAME.height * photoRatio;
+        ctx.drawImage(
+          uploadedPhoto,
+          PHOTO_FRAME.x - (drawWidth - PHOTO_FRAME.width) / 2,
+          PHOTO_FRAME.y,
+          drawWidth,
+          PHOTO_FRAME.height
+        );
+      } else {
+        drawHeight = PHOTO_FRAME.width / photoRatio;
+        ctx.drawImage(
+          uploadedPhoto,
+          PHOTO_FRAME.x,
+          PHOTO_FRAME.y - (drawHeight - PHOTO_FRAME.height) / 2,
+          PHOTO_FRAME.width,
+          drawHeight
+        );
+      }
+    } else {
+      // 写真枠
+      ctx.strokeStyle = '#e0e0e0';
+      ctx.strokeRect(
+        PHOTO_FRAME.x,
         PHOTO_FRAME.y,
-        drawWidth,
+        PHOTO_FRAME.width,
         PHOTO_FRAME.height
       );
-    } else {
-      drawHeight = PHOTO_FRAME.width / photoRatio;
-      ctx.drawImage(
-        uploadedPhoto,
-        PHOTO_FRAME.x,
-        PHOTO_FRAME.y - (drawHeight - PHOTO_FRAME.height) / 2,
-        PHOTO_FRAME.width,
-        drawHeight
+
+      // 写真アイコン
+      ctx.fillStyle = '#e0e0e0';
+      ctx.font = '48px "Font Awesome 6 Free"';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('\uf007', // user icon
+        PHOTO_FRAME.x + PHOTO_FRAME.width / 2,
+        PHOTO_FRAME.y + PHOTO_FRAME.height / 2
       );
     }
 
     // テキスト描画設定
     ctx.fillStyle = '#2c3e50';
     ctx.textBaseline = 'top';
+    ctx.textAlign = 'left';
+
+    // 「学生証」の文字
+    ctx.font = 'bold 36px "Noto Serif JP"';
+    ctx.textAlign = 'center';
+    ctx.fillText('学生証', CARD_WIDTH / 2, 80);
+    ctx.textAlign = 'left';
 
     // 学籍番号（ランダム生成）
-    ctx.font = '14px monospace';
-    ctx.fillText(generateStudentNumber(), CARD_WIDTH - 150, 20);
+    ctx.font = '16px monospace';
+    ctx.fillText(generateStudentNumber(), CARD_WIDTH - 200, 40);
+
+    // 情報エリアの背景
+    ctx.fillStyle = '#f8f9fa';
+    ctx.fillRect(280, 140, CARD_WIDTH - 320, 280);
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.strokeRect(280, 140, CARD_WIDTH - 320, 280);
+
+    // 情報テキスト
+    ctx.fillStyle = '#2c3e50';
+    let startY = 160;
+    const lineHeight = 50;
 
     // 氏名（漢字）
     ctx.font = 'bold 24px "Noto Serif JP"';
-    ctx.fillText(elements.nameJa.value, 280, 60);
+    ctx.fillText(elements.nameJa.value, 300, startY);
+    startY += lineHeight;
 
     // 氏名（ローマ字）
     ctx.font = '16px "Noto Sans JP"';
-    ctx.fillText(elements.nameEn.value, 280, 100);
+    ctx.fillText(elements.nameEn.value, 300, startY);
+    startY += lineHeight;
 
     // 学科・部活
-    ctx.font = '14px "Noto Sans JP"';
     ctx.fillText(
       `${elements.department.value} / ${elements.club.value}`,
-      280,
-      140
+      300,
+      startY
     );
+    startY += lineHeight;
 
     // 生年月日
     ctx.fillText(
       `${elements.dobMonth.value}月${elements.dobDay.value}日生`,
-      280,
-      170
+      300,
+      startY
     );
 
-    // 学校名
+    // 学校名（フッター）
     ctx.font = 'bold 16px "Noto Serif JP"';
-    ctx.fillText('夢見が丘女子高等学校', CARD_WIDTH - 200, CARD_HEIGHT - 40);
+    ctx.fillText('夢見が丘女子高等学校', CARD_WIDTH - 250, CARD_HEIGHT - 40);
   }
 
   // 学籍番号生成（ランダム10桁）
@@ -325,23 +425,21 @@ function initializeApp() {
     }
   });
 
-  // ドラッグ&ドロップ対応
-  elements.previewContainer.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    elements.previewContainer.classList.add('dragover');
-  });
+  // フォーム入力時のリアルタイムプレビュー
+  const formElements = [
+    elements.nameJa,
+    elements.nameEn,
+    elements.department,
+    elements.club,
+    elements.dobMonth,
+    elements.dobDay
+  ];
 
-  elements.previewContainer.addEventListener('dragleave', () => {
-    elements.previewContainer.classList.remove('dragover');
-  });
-
-  elements.previewContainer.addEventListener('drop', (e) => {
-    e.preventDefault();
-    elements.previewContainer.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      elements.photoInput.files = e.dataTransfer.files;
-      elements.photoInput.dispatchEvent(new Event('change'));
-    }
+  formElements.forEach(element => {
+    element.addEventListener('input', () => {
+      if (validateInputs(true)) {
+        drawStudentCard();
+      }
+    });
   });
 } 
