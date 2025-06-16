@@ -809,11 +809,45 @@
             display: block !important;
         }
 
+        /* モード別コンテンツ表示制御 */
+        /* 九条あまねモード時：九条あまねのプロフィールのみ表示 */
+        .amane-mode #profile {
+            display: block !important;
+        }
+        .amane-mode #nobara-profile {
+            display: none !important;
+        }
+        .amane-mode #videos {
+            display: none !important;
+        }
+
+        /* 高森のばらモード時：高森のばらのプロフィールのみ表示 */
+        .nobara-mode #profile {
+            display: none !important;
+        }
+        .nobara-mode #nobara-profile {
+            display: block !important;
+        }
+        .nobara-mode #videos {
+            display: none !important;
+        }
+
+        /* 動画モード時：動画コンテンツのみ表示 */
+        .videos-mode #profile {
+            display: none !important;
+        }
+        .videos-mode #nobara-profile {
+            display: none !important;
+        }
+        .videos-mode #videos {
+            display: block !important;
+        }
+
 
 
         /* 動画コンテンツ専用スタイル - グレー配色 */
         #videos.content-card {
-            /* プロフィールと完全に同じノート風スタイルを適用 */
+            /* 動画ページ専用のグレーノート風スタイル */
             background: white !important;
             padding: 10px 45px 35px 45px !important;
             border-radius: 12px 0 0 12px !important;
@@ -821,15 +855,10 @@
             border: 2px solid var(--videos-color) !important;
             border-right: none !important;
             margin-bottom: 35px !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            /* プロフィールと完全に同じサイズ設定 */
+            position: relative !important;
             transition: all 0.4s ease !important;
             margin-left: 120px !important;
-            margin-right: 40px !important;
-            /* グレーのマージン線と薄い罫線（右側マージン） */
+            /* 動画ページ専用のグレーマージン線と薄い罫線（右側マージン） */
             background-image: 
                 /* グレーマージン線（右側） */
                 linear-gradient(270deg, transparent 50px, var(--videos-color) 50px, var(--videos-color) 52px, transparent 52px),
@@ -842,7 +871,9 @@
                     rgba(158, 158, 158, 0.3) 24px
                 ) !important;
             background-size: 100% 100%, 100% 24px !important;
-            /* プロフィールと同じアニメーション設定 */
+            /* 十分な最小高さを確保 */
+            min-height: 100vh !important;
+            /* アニメーション設定 */
             opacity: 0;
             transform: translateY(30px);
             pointer-events: none;
@@ -871,9 +902,44 @@
             color: var(--videos-orange-dark);
         }
 
+        /* 九条あまねプロフィール専用スタイル - 水色配色 */
+        #profile.content-card {
+            /* プロフィールのノート風スタイル */
+            background: white !important;
+            padding: 10px 45px 35px 45px !important;
+            border-radius: 12px 0 0 12px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+            border: 2px solid var(--amane-color) !important;
+            border-right: none !important;
+            margin-bottom: 35px !important;
+            position: relative !important;
+            transition: all 0.4s ease !important;
+            margin-left: 120px !important;
+            /* 水色のマージン線と薄い罫線（右側マージン） */
+            background-image: 
+                /* 水色マージン線（右側） */
+                linear-gradient(270deg, transparent 50px, var(--amane-color) 50px, var(--amane-color) 52px, transparent 52px),
+                /* 薄い横罫線 */
+                repeating-linear-gradient(
+                    0deg,
+                    transparent 0px,
+                    transparent 23px,
+                    rgba(173, 216, 230, 0.3) 23px,
+                    rgba(173, 216, 230, 0.3) 24px
+                ) !important;
+            background-size: 100% 100%, 100% 24px !important;
+            /* 十分な最小高さを確保 */
+            min-height: 100vh !important;
+            /* アニメーション設定 */
+            opacity: 0;
+            transform: translateY(30px);
+            pointer-events: none;
+            visibility: hidden;
+        }
+
         /* 高森のばらプロフィール専用スタイル - 深緑配色 */
         #nobara-profile.content-card {
-            /* プロフィールと完全に同じノート風スタイルを適用 */
+            /* 高森のばら専用の深緑ノート風スタイル */
             background: white !important;
             padding: 10px 45px 35px 45px !important;
             border-radius: 12px 0 0 12px !important;
@@ -881,15 +947,10 @@
             border: 2px solid var(--nobara-color) !important;
             border-right: none !important;
             margin-bottom: 35px !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            /* プロフィールと完全に同じサイズ設定 */
+            position: relative !important;
             transition: all 0.4s ease !important;
             margin-left: 120px !important;
-            margin-right: 40px !important;
-            /* 深緑のマージン線と薄い罫線（右側マージン） */
+            /* 高森のばら専用の深緑マージン線と薄い罫線（右側マージン） */
             background-image: 
                 /* 深緑マージン線（右側） */
                 linear-gradient(270deg, transparent 50px, var(--nobara-color) 50px, var(--nobara-color) 52px, transparent 52px),
@@ -902,7 +963,9 @@
                     rgba(34, 139, 34, 0.3) 24px
                 ) !important;
             background-size: 100% 100%, 100% 24px !important;
-            /* プロフィールと同じアニメーション設定 */
+            /* 十分な最小高さを確保 */
+            min-height: 100vh !important;
+            /* アニメーション設定 */
             opacity: 0;
             transform: translateY(30px);
             pointer-events: none;
@@ -933,9 +996,10 @@
         }
 
         #nobara-profile .school-note {
+            background: white !important;
             border-right: 2px solid var(--nobara-color);
             border: 1px solid rgba(34, 139, 34, 0.4);
-            /* 深緑のマージン線と薄い罫線（左側マージン） */
+            /* 高森のばら専用の深緑マージン線と薄い罫線（左側マージン） */
             background-image: 
                 /* 深緑マージン線（左側） */
                 linear-gradient(90deg, transparent 78px, var(--nobara-color) 78px, var(--nobara-color) 80px, transparent 80px),
@@ -946,7 +1010,8 @@
                     transparent 23px,
                     rgba(34, 139, 34, 0.3) 23px,
                     rgba(34, 139, 34, 0.3) 24px
-                );
+                ) !important;
+            background-size: 100% 100%, 100% 24px !important;
         }
 
         #nobara-profile .school-note:hover {
@@ -1317,60 +1382,339 @@
             opacity: 0.8;
         }
 
-        /* レスポンシブ */
+        /* レスポンシブデザイン - 厳密な要件対応 */
+        
+        /* タブレット・横持ち対応 (1024px以下) */
         @media (max-width: 1024px) {
+            /* キービジュアル & キャッチコピー: 横並び接触維持、はみ出し防止 */
             .character-image-outside {
-            position: relative;
-                width: 100vw;
+                position: fixed;
+                top: 5vh;
+                left: 1vw;
+                width: 32vw; /* はみ出し防止のため縮小 */
                 height: 50vh;
-            margin-bottom: 20px;
+                gap: 2px; /* 接触状態の微調整 */
+                z-index: 1;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+            }
+            
+            .character-keyword {
+                position: fixed;
+                left: 32vw; /* キービジュアル領域の右端に完全接触 */
+                top: 18vh;
+                font-size: 0.95rem;
+                padding: 10px 8px;
+                z-index: 2;
+                margin-left: 2px; /* 接触距離の微調整 */
             }
 
+            /* ノート背景 & スティッキータブ: 完全接触維持 */
             .content-section {
-                width: 100vw;
-                margin-left: 0;
-            padding: 20px;
-            }
-
-            .notification-nav {
-                max-width: 95vw;
-                padding: 8px 15px;
+                width: 62vw;
+                margin-left: 38vw; /* キービジュアル+キャッチコピー領域の右端から開始 */
+                padding: 10px 5px 10px 5px;
+                min-height: 100vh;
             }
 
             .content-card {
-                padding: 20px 15px 20px 60px !important;
+                padding: 8px 20px 20px 25px !important;
+                margin-left: 85px !important; /* タブとの完全接触 */
+                border-radius: 8px 0 0 8px !important;
             }
 
-            body::before {
-            display: none;
-        }
-        }
-
-        @media (max-width: 768px) {
-            .notification-nav {
-                flex-direction: column;
-                gap: 8px;
-                padding: 10px;
+            .sticky-tabs {
+                left: calc(38vw + 0px); /* ノート背景に完全接触 */
+                top: 22%;
+                transform: translateY(-50%) translateY(0);
             }
 
-            .character-selector,
-            .content-nav,
-            .social-nav {
+            .sticky-tab {
+                min-height: 42px;
+                width: 95px;
+                font-size: 0.7rem;
+                padding: 8px 6px;
+                border-radius: 10px 0 0 10px;
+            }
+
+            /* 学生証画像: 正確な比率対応 (2201×1440 = 約1.53:1) */
+            .student-id-views {
+                aspect-ratio: 2201/1440; /* 正確な比率 */
+                max-width: 280px;
                 width: 100%;
-                justify-content: center;
             }
 
-        .section-title {
-            font-size: 1.5rem;
+            .student-id-view img {
+                object-fit: cover;
+                aspect-ratio: 2201/1440; /* 正確な比率 */
+                width: 100%;
+                height: 100%;
+            }
+
+            /* キャラクター画像サイズ調整: はみ出し防止 */
+            .amane-key-visual, .nobara-key-visual {
+                height: 45vh;
+                max-width: 30vw; /* はみ出し防止 */
+                object-fit: contain;
+            }
+
+            /* あまねモード時の単体表示調整 */
+            .amane-mode .amane-key-visual {
+                height: 48vh;
+                max-width: 30vw;
+            }
+
+            /* のばらモード時の単体表示調整 */
+            .nobara-mode .nobara-key-visual {
+                height: 48vh;
+                max-width: 30vw;
+            }
+
+            /* 動画モード時の2キャラクター表示調整 */
+            .videos-mode .amane-key-visual,
+            .videos-mode .nobara-key-visual {
+                height: 40vh;
+                max-width: 15vw; /* 2人分のスペース確保 */
+            }
+
+            .videos-mode .character-keyword {
+                left: 16vw; /* 2人の間に配置 */
+            }
+
+            /* その他の調整 */
+            body::before {
+                display: none; /* ノート穴を非表示 */
+            }
+
+            /* スクロールインジケーター調整 */
+            .scroll-indicator {
+                right: 12px;
+                width: 5px;
+                height: 45vh;
+            }
+
+            /* グリッド調整 */
+            .info-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 8px;
+            }
+
+            .video-grid {
+                transform: scale(0.85);
+                margin: 15px 0;
+            }
+        }
+
+        /* スマートフォン・縦持ち対応 (768px以下) */
+        @media (max-width: 768px) {
+            /* キービジュアル & キャッチコピー: 縦並び接触、上部固定 */
+            .character-image-outside {
+                position: absolute; /* 追従しない */
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 35vh;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 5px; /* 縦並び時の接触距離 */
+                z-index: 2;
+            }
+
+            .amane-key-visual, .nobara-key-visual {
+                height: 25vh !important;
+                max-width: 80vw;
+            }
+
+            .character-keyword {
+                position: relative; /* キービジュアルに接触 */
+                left: auto;
+                top: auto;
+                writing-mode: horizontal-tb; /* 横書きに変更 */
+                text-orientation: mixed;
+                font-size: 0.9rem;
+                padding: 8px 15px;
+                margin-top: 0; /* 接触距離 */
+            }
+
+            /* ノート背景 & スティッキータブ: 縦画面用調整、接触維持 */
+            .content-section {
+                width: 100vw;
+                margin-left: 0;
+                margin-top: 37vh; /* キービジュアルの下に配置 */
+                padding: 15px;
+            }
+
+            .content-card {
+                padding: 15px 20px 20px 50px !important;
+                margin-left: 60px !important; /* タブとの接触距離 */
+                border-radius: 8px 0 0 8px !important;
+            }
+
+            .sticky-tabs {
+                left: 10px; /* ノート背景に接触 */
+                top: calc(37vh + 100px); /* コンテンツエリアに追従 */
+                position: fixed;
+            }
+
+            .content-nav-btn {
+                min-height: 40px;
+                width: 80px;
+                font-size: 0.7rem;
+                padding: 8px 6px;
+            }
+
+            /* 学生証画像: スマホ用aspect-ratio */
+            .student-id-views {
+                aspect-ratio: 4/3;
+                max-width: 280px;
+            }
+
+            .student-id-view img {
+                object-fit: cover;
+                aspect-ratio: 4/3;
+            }
+
+            /* グリッドレイアウト調整 */
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
             }
 
             .video-grid {
                 grid-template-columns: 1fr;
-            padding: 15px;
+                padding: 10px;
+                transform: scale(0.9);
             }
 
-            .info-grid {
-                grid-template-columns: 1fr;
+            /* セクションタイトル調整 */
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            /* スクロールインジケーター調整 */
+            .scroll-indicator {
+                right: 10px;
+                width: 6px;
+                height: 40vh;
+            }
+        }
+
+        /* 極小画面対応 (480px以下) */
+        @media (max-width: 480px) {
+            /* キービジュアル更に縮小、接触維持 */
+            .character-image-outside {
+                height: 30vh;
+            }
+
+            .amane-key-visual, .nobara-key-visual {
+                height: 20vh !important;
+                max-width: 70vw;
+            }
+
+            .character-keyword {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+
+            /* コンテンツエリア調整 */
+            .content-section {
+                margin-top: 32vh;
+                padding: 10px;
+            }
+
+            .content-card {
+                padding: 12px 15px 15px 40px !important;
+                margin-left: 50px !important;
+            }
+
+            .sticky-tabs {
+                left: 5px;
+                top: calc(32vh + 80px);
+            }
+
+            .content-nav-btn {
+                min-height: 35px;
+                width: 70px;
+                font-size: 0.6rem;
+            }
+
+            /* 学生証画像最小サイズ */
+            .student-id-views {
+                max-width: 240px;
+                aspect-ratio: 4/3;
+            }
+
+            /* その他微調整 */
+            .section-title {
+                font-size: 1.3rem;
+            }
+
+            .school-note {
+                padding: 12px 20px 12px 70px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 超縦長画面対応 (アスペクト比考慮) */
+        @media (max-aspect-ratio: 9/16) {
+            .character-image-outside {
+                height: 25vh; /* より縮小 */
+            }
+
+            .content-section {
+                margin-top: 27vh;
+            }
+
+            .sticky-tabs {
+                top: calc(27vh + 60px);
+            }
+        }
+
+        /* 動画モード専用レスポンシブ調整 */
+        @media (max-width: 768px) {
+            .videos-mode .character-image-outside {
+                height: 40vh; /* 動画モード時は2キャラクター表示のため高さ確保 */
+            }
+
+            .videos-mode .content-section {
+                margin-top: 42vh;
+            }
+
+            .videos-mode .sticky-tabs {
+                top: calc(42vh + 100px);
+            }
+
+            .videos-mode .amane-key-visual,
+            .videos-mode .nobara-key-visual {
+                height: 18vh !important; /* 2人並べるため縮小 */
+                max-width: 35vw;
+            }
+
+            .videos-mode .character-keyword {
+                font-size: 0.7rem;
+                padding: 5px 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .videos-mode .character-image-outside {
+                height: 35vh;
+            }
+
+            .videos-mode .content-section {
+                margin-top: 37vh;
+            }
+
+            .videos-mode .sticky-tabs {
+                top: calc(37vh + 80px);
+            }
+
+            .videos-mode .amane-key-visual,
+            .videos-mode .nobara-key-visual {
+                height: 15vh !important;
+                max-width: 32vw;
             }
         }
 
@@ -1500,7 +1844,7 @@
             <div class="content-container" style="position: relative;">
 
             <!-- プロフィールコンテンツ -->
-            <div id="profile" class="content-card active">
+            <div id="profile" class="content-card">
                 <h2 class="section-title">自己紹介ノート</h2>
                 
                 <!-- 学生証画像（3段階表示） -->
@@ -1957,6 +2301,12 @@
 
             // 初期状態で九条あまねモードを設定
             document.body.classList.add('amane-mode');
+            
+            // 初期状態で九条あまねのプロフィールを表示
+            const profileElement = document.getElementById('profile');
+            if (profileElement) {
+                profileElement.classList.add('active');
+            }
             
             // 初期スクロール進行状況を設定
             updateScrollProgress();
