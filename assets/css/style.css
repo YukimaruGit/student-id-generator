@@ -241,7 +241,7 @@ input[type="file"] {
   justify-content: center;
   align-items: center;
   margin-bottom: 1.5rem;
-  background: #fffef7;  /* 非常に淡いクリーム色 */
+  background: #fdf6e3;  /* より濃いクリーム色（より分かりやすい） */
   border-radius: 8px;
   padding: 1rem;
   min-height: 300px;
