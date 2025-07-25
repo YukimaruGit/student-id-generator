@@ -1,13 +1,13 @@
 /* 修正開始 */
 :root {
-  --primary-color: #ff9ac2;    /* 明るくやわらかいピンク */
-  --secondary-color: #7ec8e3;  /* パステルブルー */
-  --accent-color: #a8e6cf;     /* パステルグリーン */
+  --primary-color: #dda0dd;    /* 撫子色風の柔らかい紫がかったピンク */
+  --secondary-color: #b0c4de;  /* 水浅葱風の柔らかい青みのグレー */
+  --accent-color: #98d7a5;     /* 若葉色風の柔らかい黄緑 */
   --background-color: #1a1a1a; /* 黒方眼紙風背景は維持 */
   --card-background: #ffffff;
-  --text-color: #555555;       /* より柔らかいグレー */
-  --error-color: #ff8a95;      /* 柔らかいピンク系エラー色 */
-  --success-color: #98d8c8;    /* 柔らかいミント系成功色 */
+  --text-color: #787878;       /* 優しいミディアムグレー */
+  --error-color: #f8d7da;      /* 薄紅色風の非常に優しいピンク */
+  --success-color: #d4edda;    /* 白群色風の柔らかいミントグリーン */
   --border-radius: 12px;
   --transition-duration: 0.3s;
   --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -91,7 +91,7 @@ main {
 
 /* フォームカード */
 .form-card {
-  background: var(--card-background);
+  background: rgba(248, 246, 240, 0.7) !important;  /* 砥粉色風の透過色 - ダークモード優先 */
   border-radius: var(--border-radius);
   padding: 2rem;
   box-shadow: var(--box-shadow);
@@ -99,16 +99,19 @@ main {
 
 .form-card h2 {
   margin: 0 0 1.5rem;
-  color: var(--primary-color);
+  color: #666;  /* 淡いグレー */
   font-family: 'Noto Serif JP', serif;
   font-size: 1.5rem;
+  font-weight: 650;  /* 適度な太さで柔らかい印象 */
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8), 0 0 4px rgba(255, 255, 255, 0.3);  /* 柔らかく視認性の高い影 */
 }
 
 .form-card h2 i {
   font-size: 1.2em;
+  color: var(--primary-color);  /* 撫子色風の桃色 */
 }
 
 /* フォームグループ */
@@ -119,13 +122,14 @@ main {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: var(--text-color);
+  color: #666;  /* 淡いグレー */
   font-weight: 500;
 }
 
 .form-group label i {
   margin-right: 0.5rem;
-  color: var(--primary-color);
+  color: var(--primary-color);  /* 撫子色風の桃色 */
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8), 0 0 4px rgba(255, 255, 255, 0.3);  /* 柔らかく視認性の高い影 */
 }
 
 /* 入力フィールド */
@@ -136,6 +140,7 @@ select {
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 1rem;
+  color: #666;  /* 淡いグレー */
   transition: all var(--transition-duration);
 }
 
@@ -143,7 +148,7 @@ input[type="text"]:focus,
 select:focus {
   border-color: var(--secondary-color);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.2);
+  box-shadow: 0 0 0 3px rgba(176, 196, 222, 0.4);
 }
 
 /* 数値入力 */
@@ -163,6 +168,7 @@ select:focus {
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 1rem;
+  color: #666;  /* 淡いグレー */
   background-color: white;
   cursor: pointer;
   transition: all var(--transition-duration);
@@ -179,7 +185,7 @@ select:focus {
 .number-input select:focus {
   border-color: var(--secondary-color);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.2);
+  box-shadow: 0 0 0 3px rgba(176, 196, 222, 0.4);
 }
 
 /* ファイル入力 */
@@ -202,7 +208,7 @@ input[type="file"] {
 }
 
 .file-input-label:hover {
-  background: #5fb3d3;
+  background: #9bb6d6;
   transform: translateY(-1px);
 }
 
@@ -212,7 +218,7 @@ input[type="file"] {
 
 /* プレビューカード */
 .preview-card {
-  background: var(--card-background);
+  background: rgba(248, 246, 240, 0.7) !important;  /* 砥粉色風の透過色 - ダークモード優先 */
   border-radius: var(--border-radius);
   padding: 2rem;
   box-shadow: var(--box-shadow);
@@ -226,13 +232,19 @@ input[type="file"] {
 .card-header {
   font-family: 'Noto Serif JP', serif;
   font-size: 1.5rem;
+  font-weight: 650;  /* 適度な太さで柔らかい印象 */
   text-align: center;
   margin-bottom: 1.5rem;
-  color: var(--primary-color);
+  color: #666;  /* 淡いグレー */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8), 0 0 4px rgba(255, 255, 255, 0.3);  /* 柔らかく視認性の高い影 */
+}
+
+.card-header i {
+  color: var(--primary-color);  /* 撫子色風の桃色 */
 }
 
 .card-body {
@@ -241,7 +253,7 @@ input[type="file"] {
   justify-content: center;
   align-items: center;
   margin-bottom: 1.5rem;
-  background: #fdf6e3;  /* より濃いクリーム色（より分かりやすい） */
+  background: #f8f6f0;  /* 砥粉色風の非常に柔らかいクリーム色 */
   border-radius: 8px;
   padding: 1rem;
   min-height: 300px;
@@ -278,7 +290,7 @@ button {
 }
 
 #generateBtn:hover {
-  background: #ff7eb3;
+  background: #c29dc2;
   transform: translateY(-1px);
 }
 
@@ -294,37 +306,37 @@ button {
 }
 
 #downloadBtn:hover {
-  background: #87d5aa;
+  background: #89c89b;
   transform: translateY(-1px);
 }
 
 #twitterBtn {
-  background: #5cb3f0;
+  background: #a8bdd6;
   color: white;
 }
 
 #twitterBtn:hover {
-  background: #47b3f3;
+  background: #97add0;
   transform: translateY(-1px);
 }
 
 #lineBtn {
-  background: #68d368;
+  background: #a8c8a8;
   color: white;
 }
 
 #lineBtn:hover {
-  background: #5fd85f;
+  background: #97bd97;
   transform: translateY(-1px);
 }
 
 #urlBtn {
-  background: #95a5a6;
+  background: #a8a8a8;
   color: white;
 }
 
 #urlBtn:hover {
-  background: #a8b2b3;
+  background: #969696;
   transform: translateY(-1px);
 }
 
@@ -404,6 +416,7 @@ footer {
   .card-body {
     min-height: 200px;
     padding: 0.5rem;
+    background: #f8f6f0;  /* レスポンシブ版も砥粉色風の柔らかいクリーム色 */
   }
 
   .card-footer {
@@ -449,26 +462,26 @@ footer {
 @media (prefers-color-scheme: dark) {
   .form-card,
   .preview-card {
-    background: #2d3436;
-    color: #ecf0f1;
+    background: rgba(248, 246, 240, 0.7) !important;  /* ダークモードでも砥粉色風の透過色に統一 */
+    color: #555555;  /* 落ち着いたグレーテキスト */
   }
 
   input[type="text"],
   input[type="number"],
   select {
-    background: #34495e;
-    border-color: #2c3e50;
-    color: #ecf0f1;
+    background: #ffffff !important;  /* ダークモードでも白背景で統一 */
+    border-color: #e0e0e0 !important;  /* 明るいボーダー */
+    color: #666 !important;  /* 淡いグレー */
   }
 
   .card-body {
-    background: #2c2c1a;  /* ダークモード用のクリーム系暗色 */
+    background: #f8f6f0 !important;  /* ダークモードでも砥粉色風の柔らかいクリーム色で統一 */
   }
 
   .number-input select {
-    background-color: #34495e;
-    border-color: #2c3e50;
-    color: #ecf0f1;
+    background-color: #ffffff !important;  /* ダークモードでも白背景で統一 */
+    border-color: #e0e0e0 !important;  /* 明るいボーダー */
+    color: #666 !important;  /* 淡いグレー */
   }
 }
 /* 修正終了 */ 

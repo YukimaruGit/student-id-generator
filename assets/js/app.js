@@ -91,7 +91,7 @@ function initializeApp() {
   // テンプレート画像の読み込み完了を待つ
   templateImage.onload = () => {
     console.log('テンプレート画像の読み込みが完了しました');
-    drawEmptyCard();
+    drawStudentCard(); // 初期表示でもプレビューを表示
   };
 
   templateImage.onerror = () => {
@@ -123,16 +123,12 @@ function initializeApp() {
     // 月の変更時に日の選択肢を更新
     monthSelect.addEventListener('change', () => {
       updateDayOptions(daySelect, monthSelect.value);
-      if (validateInputs(true)) {
-        drawStudentCard();
-      }
+      drawStudentCard(); // 常にリアルタイム更新
     });
 
     // 日の変更時にプレビューを更新
     daySelect.addEventListener('change', () => {
-      if (validateInputs(true)) {
-        drawStudentCard();
-      }
+      drawStudentCard(); // 常にリアルタイム更新
     });
   }
 
@@ -424,28 +420,29 @@ function initializeApp() {
     }
   });
 
-  // フォーム入力時のリアルタイムプレビュー
-  const formElements = [
-    elements.nameJa,
-    elements.nameEn,
-    elements.department,
-    elements.club
-  ];
-
-  formElements.forEach(element => {
-    element.addEventListener('input', () => {
-      drawStudentCard(); // 常にプレビューを更新
+  // 完全なリアルタイムプレビュー機能
+  function setupRealtimePreview() {
+    // テキスト入力フィールドのリアルタイム更新
+    const textElements = [elements.nameJa, elements.nameEn];
+    textElements.forEach(element => {
+      element.addEventListener('input', () => {
+        drawStudentCard(); // 入力中にリアルタイム更新
+      });
     });
-  });
 
-  // 生年月日の選択時もリアルタイムプレビュー
-  elements.dobMonth.addEventListener('change', () => {
-    drawStudentCard();
-  });
+    // プルダウン（select）のリアルタイム更新
+    const selectElements = [elements.department, elements.club];
+    selectElements.forEach(element => {
+      element.addEventListener('change', () => {
+        drawStudentCard(); // 選択変更時にリアルタイム更新
+      });
+    });
 
-  elements.dobDay.addEventListener('change', () => {
-    drawStudentCard();
-  });
+    // 生年月日は既にsetupDateInputs()で設定済み
+  }
+
+  // リアルタイムプレビューを初期化
+  setupRealtimePreview();
 
   // 生年月日の入力設定を初期化
   setupDateInputs();
