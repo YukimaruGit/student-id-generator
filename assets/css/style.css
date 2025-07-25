@@ -1,13 +1,13 @@
 /* 修正開始 */
 :root {
-  --primary-color: #8e44ad;
-  --secondary-color: #3498db;
-  --accent-color: #2ecc71;
-  --background-color: #1a1a1a;
+  --primary-color: #ff9ac2;    /* 明るくやわらかいピンク */
+  --secondary-color: #7ec8e3;  /* パステルブルー */
+  --accent-color: #a8e6cf;     /* パステルグリーン */
+  --background-color: #1a1a1a; /* 黒方眼紙風背景は維持 */
   --card-background: #ffffff;
-  --text-color: #2c3e50;
-  --error-color: #e74c3c;
-  --success-color: #27ae60;
+  --text-color: #555555;       /* より柔らかいグレー */
+  --error-color: #ff8a95;      /* 柔らかいピンク系エラー色 */
+  --success-color: #98d8c8;    /* 柔らかいミント系成功色 */
   --border-radius: 12px;
   --transition-duration: 0.3s;
   --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -38,11 +38,12 @@ body {
 /* ヘッダー */
 header {
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  padding: 2rem 1rem;
+  padding: 1rem;  /* パディングを削減 */
   text-align: center;
   position: relative;
   overflow: hidden;
   box-shadow: var(--box-shadow);
+  min-height: 40px;  /* 最小高さを設定 */
 }
 
 header h1 {
@@ -142,7 +143,7 @@ input[type="text"]:focus,
 select:focus {
   border-color: var(--secondary-color);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.2);
 }
 
 /* 数値入力 */
@@ -178,7 +179,7 @@ select:focus {
 .number-input select:focus {
   border-color: var(--secondary-color);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.2);
 }
 
 /* ファイル入力 */
@@ -201,7 +202,7 @@ input[type="file"] {
 }
 
 .file-input-label:hover {
-  background: #2980b9;
+  background: #5fb3d3;
   transform: translateY(-1px);
 }
 
@@ -240,7 +241,7 @@ input[type="file"] {
   justify-content: center;
   align-items: center;
   margin-bottom: 1.5rem;
-  background: #f8f9fa;
+  background: #fffef7;  /* 非常に淡いクリーム色 */
   border-radius: 8px;
   padding: 1rem;
   min-height: 300px;
@@ -277,7 +278,7 @@ button {
 }
 
 #generateBtn:hover {
-  background: #763c8f;
+  background: #ff7eb3;
   transform: translateY(-1px);
 }
 
@@ -293,37 +294,37 @@ button {
 }
 
 #downloadBtn:hover {
-  background: #27ae60;
+  background: #87d5aa;
   transform: translateY(-1px);
 }
 
 #twitterBtn {
-  background: #1da1f2;
+  background: #5cb3f0;
   color: white;
 }
 
 #twitterBtn:hover {
-  background: #1a91da;
+  background: #47b3f3;
   transform: translateY(-1px);
 }
 
 #lineBtn {
-  background: #00c300;
+  background: #68d368;
   color: white;
 }
 
 #lineBtn:hover {
-  background: #00b300;
+  background: #5fd85f;
   transform: translateY(-1px);
 }
 
 #urlBtn {
-  background: #7f8c8d;
+  background: #95a5a6;
   color: white;
 }
 
 #urlBtn:hover {
-  background: #6c7879;
+  background: #a8b2b3;
   transform: translateY(-1px);
 }
 
@@ -461,7 +462,7 @@ footer {
   }
 
   .card-body {
-    background: #34495e;
+    background: #2c2c1a;  /* ダークモード用のクリーム系暗色 */
   }
 
   .number-input select {
