@@ -49,11 +49,8 @@ function initializeApp() {
     photoInput: document.getElementById('photoInput'),
     nameJa: document.getElementById('nameJa'),
     nameEn: document.getElementById('nameEn'),
-    department: document.getElementById('department'),
-    club: document.getElementById('club'),
     dobMonth: document.getElementById('dobMonth'),
     dobDay: document.getElementById('dobDay'),
-    generateBtn: document.getElementById('generateBtn'),
     cardCanvas: document.getElementById('cardCanvas'),
     downloadBtn: document.getElementById('downloadBtn'),
     twitterBtn: document.getElementById('twitterBtn'),
@@ -101,24 +98,9 @@ function initializeApp() {
 
   // 生年月日の入力設定
   function setupDateInputs() {
-    // 月の選択肢を生成
-    const monthSelect = document.createElement('select');
-    monthSelect.id = 'dobMonthSelect';
-    for (let i = 1; i <= 12; i++) {
-      const option = document.createElement('option');
-      option.value = i;
-      option.textContent = `${i}月`;
-      monthSelect.appendChild(option);
-    }
-    elements.dobMonth.parentNode.replaceChild(monthSelect, elements.dobMonth);
-    elements.dobMonth = monthSelect;
-
-    // 日の選択肢を生成
-    const daySelect = document.createElement('select');
-    daySelect.id = 'dobDaySelect';
-    updateDayOptions(daySelect, monthSelect.value);
-    elements.dobDay.parentNode.replaceChild(daySelect, elements.dobDay);
-    elements.dobDay = daySelect;
+    // 既存の月・日selectを使用（HTMLで定義済み）
+    const monthSelect = elements.dobMonth;
+    const daySelect = elements.dobDay;
 
     // 月の変更時に日の選択肢を更新
     monthSelect.addEventListener('change', () => {
@@ -135,22 +117,29 @@ function initializeApp() {
   // 日の選択肢を更新
   function updateDayOptions(daySelect, month) {
     const currentDay = daySelect.value;
-    const daysInMonth = new Date(2024, month, 0).getDate();
+    const daysInMonth = month ? new Date(2024, month, 0).getDate() : 31;
     
-    // 現在の選択肢をクリア
-    daySelect.innerHTML = '';
+    // すべてのoptionを取得
+    const options = daySelect.querySelectorAll('option');
     
-    // 選択肢を追加
-    for (let i = 1; i <= daysInMonth; i++) {
-      const option = document.createElement('option');
-      option.value = i;
-      option.textContent = `${i}日`;
-      daySelect.appendChild(option);
-    }
+    // 各optionの表示/非表示を設定
+    options.forEach(option => {
+      const value = parseInt(option.value);
+      if (isNaN(value) || value === 0) {
+        // プレースホルダー（""の場合）は常に表示
+        option.style.display = '';
+      } else if (value <= daysInMonth) {
+        // 月の日数以内は表示
+        option.style.display = '';
+      } else {
+        // 月の日数を超える場合は非表示
+        option.style.display = 'none';
+      }
+    });
     
-    // 以前の選択を復元（可能な場合）
-    if (currentDay && currentDay <= daysInMonth) {
-      daySelect.value = currentDay;
+    // 現在選択されている日が月の日数を超える場合はリセット
+    if (currentDay && parseInt(currentDay) > daysInMonth) {
+      daySelect.value = '';
     }
   }
 
@@ -208,15 +197,7 @@ function initializeApp() {
     }
   });
 
-  // 学生証生成処理
-  elements.generateBtn.addEventListener('click', () => {
-    if (!validateInputs()) return;
-    showLoading('学生証を生成中...');
-    setTimeout(() => {
-      drawStudentCard();
-      hideLoading();
-    }, 500);
-  });
+
 
   // 入力値のバリデーション
   function validateInputs(skipPhotoCheck = false) {
@@ -227,8 +208,6 @@ function initializeApp() {
     const requiredFields = [
       elements.nameJa,
       elements.nameEn,
-      elements.department,
-      elements.club,
       elements.dobMonth,
       elements.dobDay
     ];
@@ -293,9 +272,15 @@ function initializeApp() {
       drawPhotoInFrame(ctx, uploadedPhoto, PHOTO_FRAME);
     }
 
-    // 値の整形（テンプレートに既に「科」「部」があるため値のみ）
-    const departmentLabel = elements.department.value;
-    const clubLabel = elements.club.value;
+    // 値の整形（診断結果連携またはデフォルト値）
+    const params = new URLSearchParams(location.search);
+    const departmentLabel = params.get('course') || '';  // 診断結果からコース名を取得
+    let clubLabel = params.get('club') || '';             // 診断結果から部活動を取得
+    
+    // 部活動が「なし」や空の場合は文芸部をデフォルトに
+    if (!clubLabel || clubLabel === 'なし' || clubLabel === '') {
+      clubLabel = '文芸';
+    }
 
     // Webフォント読み込み確認後に描画
     document.fonts.ready.then(() => {
@@ -334,20 +319,78 @@ function initializeApp() {
         ctx.fillText(elements.nameEn.value, nameEnX, nameEnY);
       }
 
+      // 学科とコースを分けて生成
+      let actualDepartment = '';
+      let actualCourse = '';
+      
+      if (departmentLabel) {
+        switch(departmentLabel) {
+          case '特進':
+          case '特進コース':
+            actualDepartment = '普通科';
+            actualCourse = '特進コース';
+            break;
+          case '英語':
+          case '英語コース':
+            actualDepartment = '普通科';
+            actualCourse = '英語コース';
+            break;
+          case '音楽':
+          case '音楽コース':
+            actualDepartment = '芸術科';
+            actualCourse = '音楽コース';
+            break;
+          case '美術':
+          case '美術コース':
+            actualDepartment = '芸術科';
+            actualCourse = '美術コース';
+            break;
+          default:
+            // コース名が入っている場合は分離
+            if (departmentLabel.endsWith('コース')) {
+              const baseName = departmentLabel.replace('コース', '');
+              if (baseName === '特進' || baseName === '英語') {
+                actualDepartment = '普通科';
+              } else if (baseName === '音楽' || baseName === '美術') {
+                actualDepartment = '芸術科';
+              } else {
+                actualDepartment = '普通科';
+              }
+              actualCourse = departmentLabel;
+            } else {
+              actualDepartment = departmentLabel;
+              actualCourse = departmentLabel + 'コース';
+            }
+        }
+      }
+
       // 学科 - 完璧な位置に調整済み【絶対変更禁止】
       ctx.font = '22px "Noto Sans JP", sans-serif';
       ctx.fillStyle = '#000';
       ctx.textAlign = 'center';
       const [deptX, deptY] = pos(1520, 800);
-      if (departmentLabel) {
-        ctx.fillText(departmentLabel, deptX, deptY);
+      if (actualDepartment) {
+        // 学科から「科」の文字を削除
+        const cleanDepartment = actualDepartment.replace(/科$/, '');
+        ctx.fillText(cleanDepartment, deptX, deptY);
+      }
+
+      // コース - 完璧な位置に調整済み【絶対変更禁止】
+      ctx.font = '22px "Noto Sans JP", sans-serif';
+      ctx.fillStyle = '#000';
+      ctx.textAlign = 'center';
+      const [courseX, courseY] = pos(2000, 800); // 完璧に調整済み【変更厳禁】
+      if (actualCourse) {
+        ctx.fillText(actualCourse, courseX, courseY);
       }
 
       // 部活 - 完璧な位置に調整済み【絶対変更禁止】
       ctx.font = '22px "Noto Sans JP", sans-serif';
       const [clubX, clubY] = pos(1620, 920);
       if (clubLabel) {
-        ctx.fillText(clubLabel, clubX, clubY);
+        // 部活動名から「部」の文字を削除
+        const cleanClubName = clubLabel.replace(/部$/, '');
+        ctx.fillText(cleanClubName, clubX, clubY);
       }
 
       // 生年月日 - 完璧な位置に調整済み【絶対変更禁止】
@@ -427,14 +470,6 @@ function initializeApp() {
     textElements.forEach(element => {
       element.addEventListener('input', () => {
         drawStudentCard(); // 入力中にリアルタイム更新
-      });
-    });
-
-    // プルダウン（select）のリアルタイム更新
-    const selectElements = [elements.department, elements.club];
-    selectElements.forEach(element => {
-      element.addEventListener('change', () => {
-        drawStudentCard(); // 選択変更時にリアルタイム更新
       });
     });
 

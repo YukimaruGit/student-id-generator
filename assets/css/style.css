@@ -484,4 +484,27 @@ footer {
     color: #666 !important;  /* 淡いグレー */
   }
 }
+/* 診断結果表示用スタイル */
+.diagnosis-result-display {
+  padding: 0.75rem !important;
+  background: #f8f9fa !important;
+  border-radius: 8px !important;
+  color: #666 !important;
+  border: 2px solid #e0e0e0 !important;
+  display: block !important;
+  font-weight: 500 !important;
+}
+
+.diagnosis-result-display .result-badge {
+  font-size: 0.8em;
+  color: #999;
+  font-weight: 400;
+}
+
+/* 診断に戻るボタンのスタイル */
+#backToDiagnosisBtn:hover {
+  background: linear-gradient(135deg, #89c89b, #97bd97) !important;
+  transform: translateY(-1px);
+}
+
 /* 修正終了 */ 
