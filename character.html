@@ -1931,11 +1931,8 @@
                         <div class="student-id-view" id="view2">
                             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-family: 'Klee One', cursive; text-align: center;">
                                 <div>
-                                    <h3 style="margin: 10px 0; font-size: 1.2rem;">クラブ活動記録</h3>
                                     <p style="margin: 5px 0; font-size: 0.9rem;">帰宅部</p>
-                                    <p style="margin: 5px 0; font-size: 0.8rem;">図書委員会 - 委員</p>
-                                    <p style="margin: 5px 0; font-size: 0.8rem;">学業成績: 優秀</p>
-                                    <p style="margin: 8px 0; font-size: 0.7rem; opacity: 0.8;">表彰歴: 英語スピーチコンテスト優勝</p>
+                                    <p style="margin: 8px 0; font-size: 0.8rem; opacity: 0.9;">ここだけの話、部活動に興味はあるらしい。</p>
                                 </div>
                             </div>
                         </div>
@@ -1943,17 +1940,13 @@
                             <div style="background: linear-gradient(135deg, #2c1810 0%, #8B0000 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ff9999; font-family: 'Klee One', cursive; text-align: center;">
                                 <div>
                                     <h3 style="margin: 10px 0; font-size: 1.2rem; color: #ff6b6b;">隠された一面</h3>
-                                    <p style="margin: 5px 0; font-size: 0.9rem;">"静寂の中に潜む..."</p>
-                                    <p style="margin: 5px 0; font-size: 0.8rem;">読書の向こう側に</p>
-                                    <p style="margin: 5px 0; font-size: 0.8rem;">見えるもの</p>
-                                    <p style="margin: 8px 0; font-size: 0.7rem; color: #ff6b6b; opacity: 0.9;">"将来への漠然とした不安..."</p>
+                                    <p style="margin: 5px 0; font-size: 0.8rem;">目に映る景色が真実とは限らない。</p>
+                                    <p style="margin: 8px 0; font-size: 0.8rem; color: #ff6b6b; opacity: 0.9;">黄昏は、ふいに足元をさらっていく。</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div style="margin-top: 15px; font-size: 0.9rem; color: var(--amane-dark); text-align: center; font-weight: 600; text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);">
-                        <span>クリックで情報を切り替え</span> - <span id="clickCount">1</span>/3
-                    </div>
+
                 </div>
 
                 <!-- キャラクター情報 -->
@@ -2001,17 +1994,17 @@
                     
                 <div class="student-profile-section" style="margin-left: -30px;">
                     <div class="school-note">
-                        <p class="intro-text">初めまして。夢見が丘女子高等学校1年A組の<strong>九条あまね</strong>です。皆さんからは「あまねちゃん」と呼ばれています。</p>
+                        <p class="intro-text">初めまして、九条あまねだよ。皆からは「あまねちゃん」って呼ばれてるよ！<br>えっ、仲良くしてくれるの…？本当…？</p>
                 </div>
 
                     <div class="school-note">
                         <p class="intro-text"><strong>学校生活</strong></p>
-                        <p class="intro-text">水泳部で副部長をしており、毎日の練習に励んでいます。図書委員としても活動しており、図書館の整理や読書環境の維持に努めています。</p>
+                        <p class="intro-text">うぅーん…普通の学生生活を送ってる…よ！強いて言うなら…放課後に1人で読書するのが好き、かな？<br>最近『これで完璧！友達との会話術2』を読んでるよ、読む？</p>
                     </div>
                     
                     <div class="school-note">
-                        <p class="intro-text"><strong>水への想い</strong></p>
-                        <p class="intro-text">水泳を通して、水の力強さと美しさを学んでいます。特に長距離泳法に情熱を注いでおり、将来は海洋生物学者として海の神秘を解明したいと思っています。</p>
+                        <p class="intro-text"><strong>『これで完璧！友達との会話術2』について</strong></p>
+                        <p class="intro-text">毎日この本を持って学校に来てるよ！様々なシチュエーションへの対応が書かれていてとっても参考になるんだ…！<br>もちろん、1も持ってるよ！噂によると、今度3が出るみたいなの！楽しみ！</p>
                     </div>
                 </div>
             </div>
@@ -2044,9 +2037,7 @@
                             </div>
                         </div>
                     </div>
-                    <div style="margin-top: 15px; font-size: 0.9rem; color: var(--nobara-dark); text-align: center; font-weight: 600; text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);">
-                        <span>クリックで情報を切り替え</span> - <span id="nobaraClickCount">1</span>/3
-                    </div>
+
                 </div>
 
                 <!-- キャラクター情報 -->
@@ -2227,7 +2218,6 @@
             document.getElementById(`view${currentView}`).classList.remove('active');
             currentView = currentView >= 3 ? 1 : currentView + 1;
             document.getElementById(`view${currentView}`).classList.add('active');
-            document.getElementById('clickCount').textContent = currentView;
             console.log('Amane switched to view:', currentView);
         }
 
@@ -2236,7 +2226,6 @@
             document.getElementById(`nobara-view${nobaraCurrentView}`).classList.remove('active');
             nobaraCurrentView = nobaraCurrentView >= 3 ? 1 : nobaraCurrentView + 1;
             document.getElementById(`nobara-view${nobaraCurrentView}`).classList.add('active');
-            document.getElementById('nobaraClickCount').textContent = nobaraCurrentView;
             console.log('Nobara switched to view:', nobaraCurrentView);
         }
 
@@ -2354,10 +2343,7 @@
                 if (nextElement) {
                     nextElement.classList.add('active');
                 }
-                const clickCountElement = document.getElementById('nobaraClickCount');
-                if (clickCountElement) {
-                    clickCountElement.textContent = nobaraCurrentView;
-                }
+
                 console.log('Nobara switched to view:', nobaraCurrentView);
             } else {
                 // デフォルトであまねのプロフィール（amane-modeまたはその他の場合）
