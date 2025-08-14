@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>放課後クロニクル ― 診断ゲーム</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+    
+    .question-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      margin-bottom: 20px;
+    }
+    
+    .question-title {
+      font-size: 1.2rem;
+      color: #666;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .question-text {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 30px;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .answer-options {
+      display: grid;
+      gap: 15px;
+    }
+    
+    .answer-option {
+      padding: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+    
+    .answer-option:hover {
+      background: #f8f9fa;
+      border-color: #4ecdc4;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+    }
+    
+    .back-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    
+    .back-btn:hover {
+      background: #5a6268;
+    }
+    
+    .back-btn:disabled {
+      background: #e0e0e0;
+      color: #999;
+      cursor: not-allowed;
+    }
+    
+    .result-container {
+      display: none;
+    }
+    
+    .result-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+    
+    .result-title {
+      font-size: 2rem;
+      color: #4ecdc4;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+    
+    .result-details {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+      font-size: 1.1rem;
+    }
+    
+    .result-label {
+      font-weight: 600;
+      color: #666;
+    }
+    
+    .result-value {
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .episode-section {
+      margin: 30px 0;
+      padding: 20px;
+      background: #fff3cd;
+      border-radius: 12px;
+      border-left: 5px solid #ffc107;
+    }
+    
+    .episode-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #856404;
+      margin-bottom: 10px;
+    }
+    
+    .episode-text {
+      color: #856404;
+      font-style: italic;
+    }
+    
+    .buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+    
+    .btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #4ecdc4, #44a08d);
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      color: white;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .question-card {
+        padding: 20px;
+      }
+      
+      .question-text {
+        font-size: 1.2rem;
+      }
+      
+      .answer-option {
+        padding: 15px;
+        font-size: 1rem;
+      }
+      
+      .buttons {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 進捗バー -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- 質問表示エリア -->
+    <div id="questionContainer">
+      <!-- 質問がここに表示される -->
+    </div>
+
+    <!-- 結果表示エリア -->
+    <div class="result-container" id="resultContainer">
+      <div class="result-card">
+        <div class="result-title">🎓 診断結果発表！</div>
+        <div style="font-size: 1.2rem; color: #666; margin-bottom: 20px;">あなたの学校生活は...</div>
+        
+        <div id="previewMsg" style="font-size: 1.3rem; color: #4ecdc4; margin: 20px 0; font-weight: 600;">
+          <!-- プレビューメッセージ -->
+        </div>
+
+        <div class="result-details">
+          <div class="result-item">
+            <span class="result-label">📚 学科/コース</span>
+            <span class="result-value" id="resultCourse">-</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">🎭 部活動</span>
+            <span class="result-value" id="resultClub">-</span>
+          </div>
+        </div>
+
+        <div class="episode-section">
+          <div class="episode-title">🍃 ひとくちエピソード</div>
+          <div class="episode-text" id="episodeMsg">
+            <!-- エピソードメッセージ -->
+          </div>
+        </div>
+
+        <div class="buttons">
+          <button class="btn btn-primary" id="toGeneratorBtn">
+            <span>📋</span>
+            学生証を作成する
+          </button>
+          <button class="btn btn-secondary" id="restartBtn">
+            <span>🔄</span>
+            診断をやり直す
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    console.log('🚀 シンプル診断ゲーム開始');
+
+    // 質問データ
+    const questions = [
+      {
+        q: '朝の支度、どんな感じ？',
+        choices: [
+          { text:'ぎりぎりまで寝てる', scores:{ course:'', club:'軽音部', vibe:4 } },
+          { text:'支度は前日に完璧', scores:{ course:'特進コース', club:'', vibe:1 } },
+          { text:'なんとなくでOK', scores:{ course:'', club:'美術', vibe:3 } },
+          { text:'毎朝ドタバタしてる', scores:{ course:'', club:'ダンス部', vibe:5 } }
+        ]
+      },
+      {
+        q: '授業中によくあることは？',
+        choices: [
+          { text:'つい落書きしてしまう', scores:{ course:'美術コース', club:'', vibe:3 } },
+          { text:'ノートをきれいにまとめる', scores:{ course:'特進コース', club:'', vibe:1 } },
+          { text:'夢の中', scores:{ course:'', club:'図書', vibe:2 } },
+          { text:'友達にこっそりメモ渡す', scores:{ course:'', club:'文芸', vibe:4 } }
+        ]
+      },
+      {
+        q: 'お昼休みの過ごし方は？',
+        choices: [
+          { text:'友達とワイワイご飯', scores:{ course:'', club:'演劇部', vibe:4 } },
+          { text:'図書室でのんびり読書', scores:{ course:'', club:'図書', vibe:2 } },
+          { text:'校庭で遊ぶ', scores:{ course:'', club:'陸上部', vibe:3 } },
+          { text:'購買ダッシュ', scores:{ course:'', club:'バスケットボール部', vibe:5 } }
+        ]
+      },
+      {
+        q: '体育の時間といえば？',
+        choices: [
+          { text:'全力で勝ちにいく！', scores:{ course:'', club:'テニス部', vibe:2 } },
+          { text:'まあまあ楽しむ派', scores:{ course:'', club:'バレーボール部', vibe:3 } },
+          { text:'見学したい……', scores:{ course:'', club:'文芸', vibe:1 } },
+          { text:'体育祭だけ本気出す', scores:{ course:'', club:'ダンス部', vibe:4 } }
+        ]
+      },
+      {
+        q: '放課後の予定は？',
+        choices: [
+          { text:'部活に全力！', scores:{ course:'', club:'吹奏楽部', vibe:2 } },
+          { text:'友達と寄り道', scores:{ course:'', club:'軽音部', vibe:4 } },
+          { text:'即帰宅', scores:{ course:'', club:'帰宅', vibe:3 } },
+          { text:'学校に残って自主練や自習', scores:{ course:'特進コース', club:'', vibe:1 } }
+        ]
+      },
+      {
+        q: 'テスト期間中、あなたは…？',
+        choices: [
+          { text:'計画的にコツコツ', scores:{ course:'特進コース', club:'', vibe:1 } },
+          { text:'一夜漬け', scores:{ course:'', club:'軽音部', vibe:5 } },
+          { text:'勉強会を開催', scores:{ course:'', club:'演劇部', vibe:3 } },
+          { text:'ノリと勢い', scores:{ course:'', club:'ダンス部', vibe:4 } }
+        ]
+      },
+      {
+        q: '文化祭でやってみたいことは？',
+        choices: [
+          { text:'演劇やダンスのステージ', scores:{ course:'', club:'演劇部', vibe:3 } },
+          { text:'模擬店や屋台運営', scores:{ course:'', club:'バスケットボール部', vibe:4 } },
+          { text:'展示や制作系の出し物', scores:{ course:'美術コース', club:'', vibe:2 } },
+          { text:'お化け屋敷や脱出ゲーム', scores:{ course:'', club:'ホラー布教部', vibe:5 } }
+        ]
+      },
+      {
+        q: '忘れ物した時どうする？',
+        choices: [
+          { text:'正直に言って謝る', scores:{ course:'特進コース', club:'', vibe:1 } },
+          { text:'誰かに借りる', scores:{ course:'', club:'演劇部', vibe:3 } },
+          { text:'そもそも気づかない', scores:{ course:'', club:'美術', vibe:4 } },
+          { text:'なんとか誤魔化す', scores:{ course:'', club:'軽音部', vibe:5 } }
+        ]
+      },
+      {
+        q: 'テスト返却の日の気持ちは？',
+        choices: [
+          { text:'自信あり', scores:{ course:'特進コース', club:'', vibe:2 } },
+          { text:'とにかく祈る', scores:{ course:'', club:'文芸', vibe:3 } },
+          { text:'周りの点数が気になる', scores:{ course:'', club:'演劇部', vibe:4 } },
+          { text:'これ何の教科だっけ？', scores:{ course:'', club:'軽音部', vibe:5 } }
+        ]
+      },
+      {
+        q: '学校行事で一番燃えるのは？',
+        choices: [
+          { text:'体育祭', scores:{ course:'', club:'陸上部', vibe:3 } },
+          { text:'文化祭', scores:{ course:'', club:'演劇部', vibe:4 } },
+          { text:'合唱コンクール', scores:{ course:'音楽コース', club:'', vibe:2 } },
+          { text:'修学旅行', scores:{ course:'英語コース', club:'', vibe:5 } }
+        ]
+      }
+    ];
+
+    // ゲーム状態
+    let currentQuestion = 0;
+    let scores = {
+      course: { '特進コース': 0, '英語コース': 0, '音楽コース': 0, '美術コース': 0 },
+      club: {},
+      vibe: 0
+    };
+
+    // 質問表示
+    function showQuestion(index) {
+      if (index >= questions.length) {
+        showResult();
+        return;
+      }
+
+      const question = questions[index];
+      const container = document.getElementById('questionContainer');
+      
+      container.innerHTML = `
+        <div class="question-card">
+          <div class="question-title">質問 ${index + 1} / ${questions.length}</div>
+          <div class="question-text">${question.q}</div>
+          <div class="answer-options">
+            ${question.choices.map((choice, i) => 
+              `<div class="answer-option" onclick="selectAnswer(${i})">${choice.text}</div>`
+            ).join('')}
+          </div>
+          <div class="controls">
+            ${index > 0 ? 
+              `<button class="back-btn" onclick="goBack()">← 前の質問</button>` : 
+              '<div></div>'
+            }
+            <span style="color: #666;">${index + 1} / ${questions.length}</span>
+          </div>
+        </div>
+      `;
+
+      // 進捗バー更新
+      const progress = ((index + 1) / questions.length) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+    }
+
+    // 回答処理
+    function selectAnswer(answerIndex) {
+      console.log('回答選択:', answerIndex);
+      
+      const question = questions[currentQuestion];
+      const choice = question.choices[answerIndex];
+      
+      // スコア計算
+      if (choice.scores.course) {
+        scores.course[choice.scores.course] += 1;
+      }
+      if (choice.scores.club) {
+        scores.club[choice.scores.club] = (scores.club[choice.scores.club] || 0) + 1;
+      }
+      scores.vibe += choice.scores.vibe;
+      
+      currentQuestion++;
+      setTimeout(() => showQuestion(currentQuestion), 300);
+    }
+
+    // 戻る
+    function goBack() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        showQuestion(currentQuestion);
+      }
+    }
+
+    // 結果計算
+    function calculateResult() {
+      // コース決定
+      const courseEntries = Object.entries(scores.course);
+      const topCourse = courseEntries.reduce((a, b) => a[1] > b[1] ? a : b);
+      const courseName = topCourse[0];
+      
+      let department, course, displayCourse;
+      switch(courseName) {
+        case '特進コース':
+          department = '普通科';
+          course = '特進';
+          displayCourse = '普通科（特進コース）';
+          break;
+        case '英語コース':
+          department = '普通科';
+          course = '英語';
+          displayCourse = '普通科（英語コース）';
+          break;
+        case '音楽コース':
+          department = '芸術科';
+          course = '音楽';
+          displayCourse = '芸術科（音楽コース）';
+          break;
+        case '美術コース':
+          department = '芸術科';
+          course = '美術';
+          displayCourse = '芸術科（美術コース）';
+          break;
+        default:
+          department = '普通科';
+          course = '一般';
+          displayCourse = '普通科（一般コース）';
+      }
+      
+      // 部活決定
+      const clubEntries = Object.entries(scores.club);
+      const club = clubEntries.length > 0 ? 
+        clubEntries.reduce((a, b) => a[1] > b[1] ? a : b)[0] : '帰宅';
+      
+      return { department, course, displayCourse, club };
+    }
+
+    // プレビューメッセージ
+    const previewMessages = [
+      "${club}での活動が話題に！注目の存在です。",
+      "${club}のエースとして期待も大きいとか。",
+      "学業と${club}での経験が見事にマッチしています。",
+      "${club}で披露したパフォーマンスが印象的でした。",
+      "${club}の活動に打ち込む姿は、みんなから一目置かれています。"
+    ];
+
+    const episodes = [
+      "給食のゼリーを毎日友達とジャンケンで奪い合っている。",
+      "教室の隅っこでこっそり折り紙を量産している。",
+      "掃除の時間、ほうきでエアギターを始めがち。",
+      "体育の準備運動に全力すぎて毎回笑いが起きる。",
+      "宿題を忘れても「風のせい」と言い訳して乗り切る天才。",
+      "朝の挨拶がでかすぎて隣の教室まで聞こえる。",
+      "黒板に書いたイラストを勝手に\"連載化\"している。",
+      "ノートの端に毎回変なキャラが登場している。",
+      "図書室の隅でなぜか紙芝居をしていたことがある。",
+      "美術室で絵の具のフタを開ける係を勝手にしている。"
+    ];
+
+    // 結果表示
+    function showResult() {
+      document.getElementById('questionContainer').style.display = 'none';
+      document.getElementById('resultContainer').style.display = 'block';
+      
+      const result = calculateResult();
+      
+      document.getElementById('resultCourse').textContent = result.displayCourse;
+      
+      const clubDisplayName = result.club.endsWith('部') ? result.club : result.club + '部';
+      document.getElementById('resultClub').textContent = clubDisplayName;
+      
+      // プレビューメッセージ
+      const msgTemplate = previewMessages[Math.floor(Math.random() * previewMessages.length)];
+      const previewMessage = msgTemplate.replace('${club}', clubDisplayName);
+      document.getElementById('previewMsg').textContent = previewMessage;
+      
+      // エピソード
+      const episode = episodes[Math.floor(Math.random() * episodes.length)];
+      document.getElementById('episodeMsg').textContent = episode;
+      
+      // ボタン設定
+      document.getElementById('toGeneratorBtn').onclick = () => {
+        const clubMapping = {
+          '陸上部': '陸上部', 'テニス部': 'テニス部', 'バスケットボール部': 'バスケットボール部',
+          'バレーボール部': 'バレーボール部', 'バドミントン部': 'バドミントン部', '水泳部': '水泳部',
+          'ダンス部': 'ダンス部', '声楽部': '声楽部', '吹奏楽部': '吹奏楽部', '絵画部': '絵画部',
+          '彫刻部': '彫刻部', '放送部': '放送部', '英語研究部': '英語研究部', '演劇部': '演劇部',
+          '茶道部': '茶道部', '華道部': '華道部', 'ホラー布教部': 'ホラー布教部', '軽音部': '軽音部',
+          '帰宅': '文芸', 'なし': '文芸'
+        };
+        
+        const mappedClub = clubMapping[result.club] || '文芸';
+        
+        const url = new URL('generator.html', window.location.href);
+        url.searchParams.set('department', result.department);
+        url.searchParams.set('course', result.course);
+        url.searchParams.set('club', mappedClub);
+        url.searchParams.set('previewMessage', previewMessage);
+        url.searchParams.set('episodeMessage', episode);
+        window.location.href = url.toString();
+      };
+      
+      document.getElementById('restartBtn').onclick = () => {
+        window.location.reload();
+      };
+    }
+
+    // 開始
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('診断ゲーム初期化完了');
+      showQuestion(0);
+    });
+  </script>
+</body>
+</html> 

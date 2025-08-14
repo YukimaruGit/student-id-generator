@@ -14,10 +14,23 @@
       // 即座にTypeSquare関連を無効化
       console.log('🛡️ TypeSquare遮断システム起動');
       
+      // TypeSquareエラー検出カウンター
+      let typeSquareErrorCount = 0;
+      
       // すべてのエラーを無条件で抑制
       window.addEventListener('error', function(e) {
         if (e.filename && (e.filename.includes('typesquare') || e.filename.includes('ts?'))) {
-          console.warn('🚫 TypeSquareエラーを無効化:', e.message);
+          typeSquareErrorCount++;
+          console.warn('🚫 TypeSquareエラーを無効化:', e.message, '(カウント:', typeSquareErrorCount, ')');
+          
+          // 3回以上TypeSquareエラーが発生した場合、シンプル版にリダイレクト
+          if (typeSquareErrorCount >= 3) {
+            console.warn('🚨 TypeSquareエラーが多発しています。シンプル版にリダイレクトします。');
+            setTimeout(() => {
+              window.location.href = 'quiz.html';
+            }, 1000);
+          }
+          
           e.stopImmediatePropagation();
           e.preventDefault();
           return false;
@@ -26,7 +39,17 @@
       
       window.addEventListener('unhandledrejection', function(e) {
         if (e.reason && e.reason.toString().includes('typesquare')) {
-          console.warn('🚫 TypeSquare Promise rejection を無効化');
+          typeSquareErrorCount++;
+          console.warn('🚫 TypeSquare Promise rejection を無効化 (カウント:', typeSquareErrorCount, ')');
+          
+          // 3回以上エラーが発生した場合、シンプル版にリダイレクト
+          if (typeSquareErrorCount >= 3) {
+            console.warn('🚨 TypeSquareエラーが多発しています。シンプル版にリダイレクトします。');
+            setTimeout(() => {
+              window.location.href = 'quiz.html';
+            }, 1000);
+          }
+          
           e.stopImmediatePropagation();
           e.preventDefault();
           return false;
@@ -54,6 +77,20 @@
         }
         return originalConsoleError.apply(console, args);
       };
+      
+      // 5秒後に選択肢がクリックできない場合、シンプル版にリダイレクト
+      setTimeout(() => {
+        const questionContainer = document.getElementById('questionContainer');
+        const answerOptions = document.querySelectorAll('.answer-option');
+        
+        if (questionContainer && answerOptions.length === 0) {
+          console.warn('🚨 質問が正常に表示されていません。シンプル版にリダイレクトします。');
+          window.location.href = 'quiz.html';
+        } else if (typeof selectAnswer !== 'function') {
+          console.warn('🚨 selectAnswer関数が定義されていません。シンプル版にリダイレクトします。');
+          window.location.href = 'quiz.html';
+        }
+      }, 5000);
       
       console.log('✅ TypeSquare遮断システム完了');
     })();
