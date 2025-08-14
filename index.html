@@ -711,6 +711,101 @@
   </footer>
 
   <script>
+    // 埋め込み環境検出とTypeSquare完全遮断
+    (function() {
+      // 埋め込み環境かどうかを検出
+      const isEmbedded = window !== window.top;
+      const isStudio = /studio/i.test(window.location.hostname) || /studio/i.test(document.referrer);
+      
+      if (isEmbedded || isStudio) {
+        console.log('埋め込み環境を検出しました。強力なエラー対策を適用します。');
+      }
+
+      // すべてのTypeSquare関連を完全に遮断
+      const blockPatterns = [
+        'typesquare', 'ts.fontplus', 'fontplus', 'typekit',
+        'fonts.googleapis.com', 'use.typekit.net'
+      ];
+      
+      // グローバル変数の無効化
+      ['ts', 'TypeSquare', 'Typekit', 'WebFont'].forEach(varName => {
+        if (window[varName]) {
+          window[varName] = null;
+          delete window[varName];
+        }
+      });
+
+      // スクリプトタグの挿入を阻止
+      const originalAppendChild = Node.prototype.appendChild;
+      const originalInsertBefore = Node.prototype.insertBefore;
+      const originalRemoveChild = Node.prototype.removeChild;
+      
+      function shouldBlock(node) {
+        if (!node || node.nodeType !== 1) return false;
+        
+        if (node.tagName === 'SCRIPT' || node.tagName === 'LINK') {
+          const src = node.src || node.href || '';
+          return blockPatterns.some(pattern => src.includes(pattern));
+        }
+        return false;
+      }
+      
+      Node.prototype.appendChild = function(child) {
+        if (shouldBlock(child)) {
+          console.warn('ブロックしました:', child.src || child.href);
+          return child;
+        }
+        return originalAppendChild.call(this, child);
+      };
+      
+      Node.prototype.insertBefore = function(newNode, referenceNode) {
+        if (shouldBlock(newNode)) {
+          console.warn('ブロックしました:', newNode.src || newNode.href);
+          return newNode;
+        }
+        return originalInsertBefore.call(this, newNode, referenceNode);
+      };
+
+      // Fetch/XMLHttpRequestのインターセプト
+      const originalFetch = window.fetch;
+      const originalXHROpen = XMLHttpRequest.prototype.open;
+      
+      window.fetch = function(...args) {
+        const url = args[0];
+        if (typeof url === 'string' && blockPatterns.some(pattern => url.includes(pattern))) {
+          console.warn('Fetchリクエストをブロックしました:', url);
+          return Promise.reject(new Error('Request blocked'));
+        }
+        return originalFetch.apply(this, args);
+      };
+      
+      XMLHttpRequest.prototype.open = function(method, url, ...args) {
+        if (typeof url === 'string' && blockPatterns.some(pattern => url.includes(pattern))) {
+          console.warn('XHRリクエストをブロックしました:', url);
+          throw new Error('Request blocked');
+        }
+        return originalXHROpen.call(this, method, url, ...args);
+      };
+
+      // CSSの動的削除
+      function removeProblematicCSS() {
+        const links = document.querySelectorAll('link[rel="stylesheet"]');
+        links.forEach(link => {
+          const href = link.href || '';
+          if (blockPatterns.some(pattern => href.includes(pattern))) {
+            console.warn('問題のあるCSSを削除:', href);
+            link.remove();
+          }
+        });
+      }
+
+      // 定期的にチェック
+      setInterval(removeProblematicCSS, 1000);
+      
+      // 即座に実行
+      removeProblematicCSS();
+    })();
+
     // 質問プール（全22問／ランダム10問出題）
     const questionPool = [
       {
@@ -1082,7 +1177,7 @@
       return episodeTemplates[randomIndex];
     }
 
-    // 質問表示
+    // 質問表示（埋め込み環境対応版）
     function showQuestion(index) {
       if (index >= questions.length) {
         showResult();
@@ -1091,6 +1186,11 @@
 
       const question = questions[index];
       const container = document.getElementById('questionContainer');
+      
+      if (!container) {
+        console.error('questionContainer が見つかりません');
+        return;
+      }
       
       container.innerHTML = `
         <div class="question-card active fade-in">
@@ -1113,23 +1213,33 @@
         </div>
       `;
 
-      // 選択肢にイベントリスナーを追加
-      const answerOptions = container.querySelectorAll('.answer-option');
-      answerOptions.forEach((option, i) => {
-        option.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log('イベントリスナー: 選択肢', i, 'がクリックされました');
-          selectAnswer(i);
-        });
-      });
+      // 強化されたイベントリスナー設定
+      try {
+        attachAnswerListeners();
+      } catch (listenerError) {
+        console.error('イベントリスナー設定エラー:', listenerError);
+        // フォールバック処理
+        setTimeout(() => {
+          const answerOptions = container.querySelectorAll('.answer-option');
+          answerOptions.forEach((option, i) => {
+            option.onclick = () => selectAnswer(i);
+          });
+        }, 100);
+      }
 
       // 進捗バー更新
-      const progress = ((index + 1) / questions.length) * 100;
-      document.getElementById('progressFill').style.width = `${progress}%`;
+      try {
+        const progress = ((index + 1) / questions.length) * 100;
+        const progressFill = document.getElementById('progressFill');
+        if (progressFill) {
+          progressFill.style.width = `${progress}%`;
+        }
+      } catch (progressError) {
+        console.error('進捗バー更新エラー:', progressError);
+      }
     }
 
-    // 回答選択
+    // 回答選択（埋め込み環境対応強化版）
     function selectAnswer(answerIndex) {
       console.log('selectAnswer が呼ばれました:', { answerIndex, currentQuestionIndex });
       
@@ -1142,7 +1252,14 @@
       
       try {
         const question = questions[currentQuestionIndex];
+        if (!question) {
+          throw new Error('質問データが見つかりません');
+        }
+        
         const selectedChoice = question.choices[answerIndex];
+        if (!selectedChoice) {
+          throw new Error('選択肢データが見つかりません');
+        }
         
         console.log('選択された回答:', selectedChoice);
         
@@ -1165,15 +1282,93 @@
         // スコア計算
         answer(selectedChoice.scores);
         
-        setTimeout(() => {
-          currentQuestionIndex++;
-          showQuestion(currentQuestionIndex);
-          window.processingAnswer = false; // フラグをリセット
-        }, 400);
+        // 次の質問への遷移（エラー回復機能付き）
+        const transitionToNext = () => {
+          try {
+            currentQuestionIndex++;
+            showQuestion(currentQuestionIndex);
+            window.processingAnswer = false;
+          } catch (transitionError) {
+            console.error('画面遷移エラー:', transitionError);
+            // 強制的に次の質問へ
+            setTimeout(() => {
+              window.processingAnswer = false;
+              window.location.reload();
+            }, 1000);
+          }
+        };
+        
+        setTimeout(transitionToNext, 400);
+        
       } catch (error) {
         console.error('selectAnswer でエラーが発生しました:', error);
-        window.processingAnswer = false; // エラー時もフラグをリセット
+        
+        // エラー時の強制回復処理
+        alert('エラーが発生しました。次の質問に進みます。');
+        setTimeout(() => {
+          try {
+            currentQuestionIndex++;
+            showQuestion(currentQuestionIndex);
+          } catch (recoveryError) {
+            console.error('回復処理もエラー:', recoveryError);
+            window.location.reload();
+          }
+          window.processingAnswer = false;
+        }, 500);
       }
+    }
+
+    // 埋め込み環境対応の強化されたイベント処理
+    function attachAnswerListeners() {
+      // すべての既存のイベントリスナーを削除
+      const existingOptions = document.querySelectorAll('.answer-option');
+      existingOptions.forEach(option => {
+        option.replaceWith(option.cloneNode(true));
+      });
+      
+      // 新しいイベントリスナーを追加
+      const answerOptions = document.querySelectorAll('.answer-option');
+      answerOptions.forEach((option, i) => {
+        // 複数の方法でイベントを設定
+        
+        // 1. addEventListener
+        option.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('addEventListener: 選択肢', i, 'がクリックされました');
+          selectAnswer(i);
+        }, { once: true });
+        
+        // 2. onclick属性
+        option.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('onclick: 選択肢', i, 'がクリックされました');
+          selectAnswer(i);
+        };
+        
+        // 3. タッチイベント対応
+        option.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          console.log('touchstart: 選択肢', i, 'がタッチされました');
+          selectAnswer(i);
+        }, { passive: false, once: true });
+        
+        // 4. キーボード対応
+        option.setAttribute('tabindex', '0');
+        option.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            console.log('keyboard: 選択肢', i, 'がキーで選択されました');
+            selectAnswer(i);
+          }
+        });
+        
+        // 5. data属性設定
+        option.setAttribute('data-answer-index', i);
+        option.setAttribute('role', 'button');
+        option.setAttribute('aria-label', `選択肢 ${i + 1}: ${option.textContent}`);
+      });
     }
 
     // 前の質問に戻る
@@ -1375,46 +1570,6 @@
       }
     });
 
-    // アドブロッカー対策: TypeSquare完全無効化
-    (function() {
-      // TypeSquareスクリプトの動的挿入を阻止
-      const originalAppendChild = Node.prototype.appendChild;
-      const originalInsertBefore = Node.prototype.insertBefore;
-      
-      Node.prototype.appendChild = function(child) {
-        if (child.tagName === 'SCRIPT' && child.src && child.src.includes('typesquare')) {
-          console.warn('TypeSquareスクリプトの挿入を阻止しました:', child.src);
-          return child;
-        }
-        return originalAppendChild.call(this, child);
-      };
-      
-      Node.prototype.insertBefore = function(newNode, referenceNode) {
-        if (newNode.tagName === 'SCRIPT' && newNode.src && newNode.src.includes('typesquare')) {
-          console.warn('TypeSquareスクリプトの挿入を阻止しました:', newNode.src);
-          return newNode;
-        }
-        return originalInsertBefore.call(this, newNode, referenceNode);
-      };
-
-      // TypeSquareの既存のグローバル変数を無効化
-      if (window.ts) {
-        console.warn('TypeSquareグローバル変数を無効化しました');
-        window.ts = null;
-      }
-      
-      // Fetch APIのインターセプト（TypeSquare関連のリクエストを阻止）
-      const originalFetch = window.fetch;
-      window.fetch = function(...args) {
-        const url = args[0];
-        if (typeof url === 'string' && url.includes('typesquare')) {
-          console.warn('TypeSquareへのfetchリクエストを阻止しました:', url);
-          return Promise.reject(new Error('TypeSquare request blocked'));
-        }
-        return originalFetch.apply(this, args);
-      };
-    })();
-
     // TypeSquare フォントエラーのグローバルエラーハンドリング
     window.addEventListener('error', function(e) {
       // TypeSquareやフォント関連のエラーを無視
@@ -1444,17 +1599,92 @@
       }
     });
 
-    // クリックイベントの保護
+    // 埋め込み環境対応の包括的フォールバック処理
     document.addEventListener('click', function(e) {
-      // 選択肢のクリックが効かない場合のフォールバック
+      // 選択肢のクリックが効かない場合の強力なフォールバック
       if (e.target.classList.contains('answer-option')) {
+        console.log('フォールバック処理が発動しました');
+        
         const answerIndex = parseInt(e.target.getAttribute('data-answer-index'));
         if (!isNaN(answerIndex) && typeof selectAnswer === 'function') {
           console.log('フォールバック: 選択肢', answerIndex, 'がクリックされました');
-          selectAnswer(answerIndex);
+          
+          // 処理中フラグをチェック
+          if (!window.processingAnswer) {
+            selectAnswer(answerIndex);
+          }
         }
       }
-    });
+    }, true); // キャプチャフェーズで処理
+
+    // タッチイベントのフォールバック
+    document.addEventListener('touchend', function(e) {
+      if (e.target.classList.contains('answer-option')) {
+        e.preventDefault();
+        console.log('タッチフォールバック処理が発動しました');
+        
+        const answerIndex = parseInt(e.target.getAttribute('data-answer-index'));
+        if (!isNaN(answerIndex) && typeof selectAnswer === 'function') {
+          console.log('タッチフォールバック: 選択肢', answerIndex, 'がタッチされました');
+          
+          if (!window.processingAnswer) {
+            selectAnswer(answerIndex);
+          }
+        }
+      }
+    }, true);
+
+    // 緊急時の強制クリック処理（埋め込み環境用）
+    function forceAnswerSelection() {
+      if (window.processingAnswer) return;
+      
+      const activeOptions = document.querySelectorAll('.answer-option');
+      if (activeOptions.length === 0) return;
+      
+      console.log('緊急処理: 選択肢が見つかりません。強制的にフォーカスします。');
+      
+      activeOptions.forEach((option, i) => {
+        option.style.cursor = 'pointer';
+        option.style.backgroundColor = '#f0f0f0';
+        option.style.border = '2px solid #007bff';
+        
+        // 強制的にイベントを再設定
+        option.onclick = function() {
+          console.log('強制処理: 選択肢', i, 'が選択されました');
+          selectAnswer(i);
+        };
+        
+        // マウスオーバー効果も追加
+        option.onmouseover = function() {
+          this.style.backgroundColor = '#007bff';
+          this.style.color = 'white';
+        };
+        
+        option.onmouseout = function() {
+          this.style.backgroundColor = '#f0f0f0';
+          this.style.color = 'black';
+        };
+      });
+    }
+
+    // 定期的に選択肢の状態をチェック
+    setInterval(function() {
+      const activeOptions = document.querySelectorAll('.answer-option');
+      if (activeOptions.length > 0 && !window.processingAnswer) {
+        // 選択肢が存在するのにクリックできない場合の対策
+        let hasWorkingListener = false;
+        activeOptions.forEach(option => {
+          if (option.onclick || option.addEventListener) {
+            hasWorkingListener = true;
+          }
+        });
+        
+        if (!hasWorkingListener) {
+          console.warn('選択肢のイベントリスナーが機能していません。強制修復を実行します。');
+          forceAnswerSelection();
+        }
+      }
+    }, 2000);
   </script>
 </body>
 </html> 
