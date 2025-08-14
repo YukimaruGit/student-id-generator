@@ -58,13 +58,10 @@ async function uploadImageToCloudinary(canvas, cloudName, uploadPreset) {
 }
 
 function generateShareUrl(imageUrl, studentInfo = {}) {
-  // プレビュー特化型シェアページを使用
-  const shareUrl = new URL('share-preview.html', window.location.origin);
-  shareUrl.searchParams.set('image', imageUrl);
-  if (studentInfo.name) shareUrl.searchParams.set('name', studentInfo.name);
-  if (studentInfo.course) shareUrl.searchParams.set('course', studentInfo.course);
-  if (studentInfo.club) shareUrl.searchParams.set('club', studentInfo.club);
-  if (studentInfo.department) shareUrl.searchParams.set('department', studentInfo.department);
+  // 短縮URL対応の専用シェアページを使用
+  const shareUrl = new URL('s.html', window.location.origin);
+  shareUrl.searchParams.set('i', imageUrl); // 短縮パラメータ
+  if (studentInfo.name) shareUrl.searchParams.set('n', studentInfo.name); // 短縮パラメータ
   return shareUrl.toString();
 }
 
@@ -591,13 +588,10 @@ function initializeApp() {
       const params = new URLSearchParams(location.search);
       const department = params.get('department') || '';
       
-      // シェア用URLを生成（プレビュー特化型シェアページ）
-      const shareUrl = new URL('share-preview.html', window.location.origin);
-      shareUrl.searchParams.set('image', imageUrl);
-      if (nameJa) shareUrl.searchParams.set('name', nameJa);
-      if (course) shareUrl.searchParams.set('course', course);
-      if (club) shareUrl.searchParams.set('club', club);
-      if (department) shareUrl.searchParams.set('department', department);
+      // シェア用URLを生成（短縮URL対応）
+      const shareUrl = new URL('s.html', window.location.origin);
+      shareUrl.searchParams.set('i', imageUrl);
+      if (nameJa) shareUrl.searchParams.set('n', nameJa);
       
       // ツイート文を作成
       const tweetText = nameJa ? 
@@ -653,21 +647,12 @@ function initializeApp() {
         cloudinaryConfig.uploadPreset
       );
       
-      // 学生情報を取得
+      // 学生情報を取得（短縮URL対応）
       const nameJa = elements.nameJa.value.trim();
-      const course = elements.department ? elements.department.value : '';
-      const club = elements.club ? elements.club.value : '';
       
-      // URLパラメータから診断結果情報を取得
-      const params = new URLSearchParams(location.search);
-      const department = params.get('department') || '';
-      
-      // 学生情報をまとめる
+      // 学生情報をまとめる（最小限のデータのみ）
       const studentInfo = {
-        name: nameJa,
-        course: course,
-        club: club,
-        department: department
+        name: nameJa
       };
       
       const shareUrl = generateShareUrl(imageUrl, studentInfo);

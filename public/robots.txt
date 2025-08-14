@@ -2,7 +2,7 @@
 User-agent: *
 Allow: /index.html
 Allow: /generator.html
-Allow: /share-preview.html
+Allow: /s.html
 Allow: /privacy.html
 Allow: /assets/css/
 Allow: /assets/img/
