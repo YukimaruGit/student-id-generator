@@ -288,19 +288,13 @@
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Yu Gothic UI", "Yu Gothic", "Meiryo UI", "Meiryo", "MS PGothic", sans-serif !important;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      color: #333;
-    }
-    
-    /* 結果画面専用の背景 */
-    body.result-page {
       background: #2a2a2a;
       background-image: 
         linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
       background-size: 20px 20px;
-      color: #fff;
+      min-height: 100vh;
+      color: #333;
     }
     
     .container {
@@ -423,12 +417,7 @@
       font-weight: 700;
     }
     
-    .result-details {
-      background: #f8f9fa;
-      border-radius: 12px;
-      padding: 20px;
-      margin: 20px 0;
-    }
+
     
     .result-item {
       display: flex;
@@ -447,22 +436,36 @@
       color: #333;
     }
     
-    .preview-section {
-      margin: 20px 0;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.1);
+    .unified-result-section {
+      background: rgba(255, 255, 255, 0.05);
       border-radius: 8px;
-      border-left: 4px solid #dda0dd;
+      padding: 0;
+      margin: 20px 0;
       text-align: left;
     }
     
-    .episode-section {
-      margin: 30px 0;
+    .preview-message {
       padding: 20px;
-      background: rgba(152, 215, 165, 0.1);
-      border-radius: 12px;
+      border-left: 4px solid #dda0dd;
+      margin-bottom: 0;
+    }
+    
+    .result-details {
+      background: none;
+      border-radius: 0;
+      padding: 20px;
+      margin: 0;
+      border-left: 4px solid transparent;
+    }
+    
+    .episode-section {
+      padding: 20px;
+      background: none;
+      border-radius: 0;
       border-left: 4px solid #98d7a5;
       text-align: left;
+      margin: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     .episode-title {
@@ -565,27 +568,29 @@
         <div class="result-title"><i class="fas fa-graduation-cap"></i> 診断結果発表！</div>
         <div style="font-size: 1.2rem; color: #666; margin-bottom: 20px;">あなたの学校生活は...</div>
         
-        <div class="preview-section">
-          <div id="previewMsg" style="font-size: 1.1rem; color: #333; font-weight: 600; margin: 0;">
-            <!-- プレビューメッセージ -->
+        <div class="unified-result-section">
+          <div class="preview-message">
+            <div id="previewMsg" style="font-size: 1.1rem; color: #333; font-weight: 600; margin: 0;">
+              <!-- プレビューメッセージ -->
+            </div>
           </div>
-        </div>
 
-        <div class="result-details">
-          <div class="result-item">
-            <span class="result-label"><i class="fas fa-book"></i> 学科/コース</span>
-            <span class="result-value" id="resultCourse">-</span>
+          <div class="result-details">
+            <div class="result-item">
+              <span class="result-label"><i class="fas fa-book"></i> 学科/コース</span>
+              <span class="result-value" id="resultCourse">-</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label"><i class="fas fa-users"></i> 部活動</span>
+              <span class="result-value" id="resultClub">-</span>
+            </div>
           </div>
-          <div class="result-item">
-            <span class="result-label"><i class="fas fa-users"></i> 部活動</span>
-            <span class="result-value" id="resultClub">-</span>
-          </div>
-        </div>
 
-        <div class="episode-section">
-          <div class="episode-title"><i class="fas fa-leaf"></i> ひとくちエピソード</div>
-          <div class="episode-text" id="episodeMsg">
-            <!-- エピソードメッセージ -->
+          <div class="episode-section">
+            <div class="episode-title"><i class="fas fa-leaf"></i> ひとくちエピソード</div>
+            <div class="episode-text" id="episodeMsg">
+              <!-- エピソードメッセージ -->
+            </div>
           </div>
         </div>
 
@@ -954,9 +959,6 @@
       document.getElementById('questionContainer').style.display = 'none';
       document.getElementById('resultContainer').style.display = 'block';
       
-      // 背景を結果画面用に変更
-      document.body.classList.add('result-page');
-      
       const result = calculateResult();
       
       document.getElementById('resultCourse').textContent = result.displayCourse;
@@ -996,8 +998,6 @@
       };
       
       document.getElementById('restartBtn').onclick = () => {
-        // 背景を元に戻す
-        document.body.classList.remove('result-page');
         window.location.reload();
       };
     }
