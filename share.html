@@ -9,9 +9,13 @@
   <meta property="og:title" content="放課後クロニクル 学生証" id="ogTitle">
   <meta property="og:description" content="あなただけの学生証が完成しました！診断ゲームで自分の学校生活を見つけよう。" id="ogDescription">
   <meta property="og:image" content="" id="ogImage">
+  <meta property="og:image:width" content="800">
+  <meta property="og:image:height" content="500">
+  <meta property="og:image:type" content="image/png">
   <meta property="og:url" content="" id="ogUrl">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="放課後クロニクル">
+  <meta property="og:locale" content="ja_JP">
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
@@ -19,6 +23,8 @@
   <meta name="twitter:title" content="放課後クロニクル 学生証" id="twitterTitle">
   <meta name="twitter:description" content="あなただけの学生証が完成しました！診断ゲームで自分の学校生活を見つけよう。" id="twitterDescription">
   <meta name="twitter:image" content="" id="twitterImage">
+  <meta name="twitter:image:width" content="800">
+  <meta name="twitter:image:height" content="500">
   
   <link rel="icon" type="image/png" href="assets/img/crest.png">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -200,17 +206,46 @@
       </div>
     </div>
     
-    <div class="buttons">
-      <a href="index.html" class="btn btn-primary">
-        <i class="fas fa-dice"></i>
-        診断ゲームをプレイ
-      </a>
-      <a href="generator.html" class="btn btn-secondary">
-        <i class="fas fa-id-card"></i>
-        学生証を作成
-      </a>
-    </div>
+         <div class="buttons">
+       <a href="https://preview.studio.site/live/1Va6D4lMO7/student-id" class="btn btn-primary">
+         <i class="fas fa-dice"></i>
+         診断ゲームをプレイ
+       </a>
+       <a href="https://preview.studio.site/live/1Va6D4lMO7/student-id" class="btn btn-secondary">
+         <i class="fas fa-id-card"></i>
+         学生証を作成
+       </a>
+     </div>
   </div>
+
+  <!-- URLパラメータからメタタグを即座に設定 -->
+  <script>
+    // URLパラメータを即座に解析してメタタグを設定（SNSクローラー対応）
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const imageUrl = params.get('image');
+      const name = params.get('name');
+      
+      if (imageUrl) {
+        // OGタグとTwitter Cardの画像を即座に設定
+        const ogImage = document.getElementById('ogImage');
+        const twitterImage = document.getElementById('twitterImage');
+        if (ogImage) ogImage.setAttribute('content', imageUrl);
+        if (twitterImage) twitterImage.setAttribute('content', imageUrl);
+        
+        // タイトルも即座に設定
+        if (name) {
+          const title = `${name}の学生証 - 放課後クロニクル`;
+          const ogTitle = document.getElementById('ogTitle');
+          const twitterTitle = document.getElementById('twitterTitle');
+          const pageTitle = document.getElementById('pageTitle');
+          if (ogTitle) ogTitle.setAttribute('content', title);
+          if (twitterTitle) twitterTitle.setAttribute('content', title);
+          if (pageTitle) pageTitle.textContent = title;
+        }
+      }
+    })();
+  </script>
 
   <script>
     // URLパラメータを解析
@@ -231,18 +266,44 @@
       // ページタイトル
       document.getElementById('pageTitle').textContent = title;
       
-      // OGタグ
-      document.getElementById('ogTitle').setAttribute('content', title);
-      document.getElementById('ogDescription').setAttribute('content', description);
-      document.getElementById('ogUrl').setAttribute('content', window.location.href);
+      // OGタグ - Twitterのクローラー対応
+      const ogTitle = document.getElementById('ogTitle');
+      const ogDescription = document.getElementById('ogDescription');
+      const ogUrl = document.getElementById('ogUrl');
+      const ogImage = document.getElementById('ogImage');
+      const twitterTitle = document.getElementById('twitterTitle');
+      const twitterDescription = document.getElementById('twitterDescription');
+      const twitterImage = document.getElementById('twitterImage');
       
-      // Twitter Card
-      document.getElementById('twitterTitle').setAttribute('content', title);
-      document.getElementById('twitterDescription').setAttribute('content', description);
+      if (ogTitle) ogTitle.setAttribute('content', title);
+      if (ogDescription) ogDescription.setAttribute('content', description);
+      if (ogUrl) ogUrl.setAttribute('content', window.location.href);
+      if (twitterTitle) twitterTitle.setAttribute('content', title);
+      if (twitterDescription) twitterDescription.setAttribute('content', description);
       
       if (imageUrl) {
-        document.getElementById('ogImage').setAttribute('content', imageUrl);
-        document.getElementById('twitterImage').setAttribute('content', imageUrl);
+        if (ogImage) ogImage.setAttribute('content', imageUrl);
+        if (twitterImage) twitterImage.setAttribute('content', imageUrl);
+        
+        // HTMLのheadに直接メタタグを追加（Twitterクローラー対策）
+        const head = document.head;
+        
+        // 既存のタグを削除
+        const existingOgImage = head.querySelector('meta[property="og:image"]:not(#ogImage)');
+        const existingTwitterImage = head.querySelector('meta[name="twitter:image"]:not(#twitterImage)');
+        if (existingOgImage) existingOgImage.remove();
+        if (existingTwitterImage) existingTwitterImage.remove();
+        
+        // 新しいタグを追加
+        const newOgImage = document.createElement('meta');
+        newOgImage.setAttribute('property', 'og:image');
+        newOgImage.setAttribute('content', imageUrl);
+        head.appendChild(newOgImage);
+        
+        const newTwitterImage = document.createElement('meta');
+        newTwitterImage.setAttribute('name', 'twitter:image');
+        newTwitterImage.setAttribute('content', imageUrl);
+        head.appendChild(newTwitterImage);
       }
     }
 
@@ -273,10 +334,10 @@
       }
     }
 
-    // 診断ページへの移動
-    function goToDiagnosis() {
-      window.location.href = 'index.html';
-    }
+         // 診断ページへの移動
+     function goToDiagnosis() {
+       window.location.href = 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
+     }
 
     // 画像エラー処理
     function handleImageError() {

@@ -57,9 +57,15 @@ async function uploadImageToCloudinary(canvas, cloudName, uploadPreset) {
   });
 }
 
-function generateShareUrl(imageUrl) {
-  const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
-  return `${baseUrl}/share.html?img=${encodeURIComponent(imageUrl)}`;
+function generateShareUrl(imageUrl, studentInfo = {}) {
+  // GitHubを隠した指定されたURLを使用
+  const shareUrl = new URL('https://preview.studio.site/live/1Va6D4lMO7/student-id');
+  shareUrl.searchParams.set('image', imageUrl);
+  if (studentInfo.name) shareUrl.searchParams.set('name', studentInfo.name);
+  if (studentInfo.course) shareUrl.searchParams.set('course', studentInfo.course);
+  if (studentInfo.club) shareUrl.searchParams.set('club', studentInfo.club);
+  if (studentInfo.department) shareUrl.searchParams.set('department', studentInfo.department);
+  return shareUrl.toString();
 }
 
 function downloadCanvasAsImage(canvas, filename = '学生証.png') {
@@ -518,8 +524,8 @@ function initializeApp() {
       const params = new URLSearchParams(location.search);
       const department = params.get('department') || '';
       
-      // シェア用URLを生成（学生証専用ページ）
-      const shareUrl = new URL('share.html', window.location.origin);
+      // シェア用URLを生成（指定されたリンク）
+      const shareUrl = new URL('https://preview.studio.site/live/1Va6D4lMO7/student-id');
       shareUrl.searchParams.set('image', imageUrl);
       if (nameJa) shareUrl.searchParams.set('name', nameJa);
       if (course) shareUrl.searchParams.set('course', course);
@@ -581,7 +587,7 @@ function initializeApp() {
     }
     
     try {
-      showLoading('画像をアップロード中...');
+      showLoading('学生証をシェア用に準備中...');
       
       const imageUrl = await uploadImageToCloudinary(
         elements.cardCanvas, 
@@ -589,15 +595,47 @@ function initializeApp() {
         cloudinaryConfig.uploadPreset
       );
       
-      const shareUrl = generateShareUrl(imageUrl);
+      // 学生情報を取得
+      const nameJa = elements.nameJa.value.trim();
+      const course = elements.department ? elements.department.value : '';
+      const club = elements.club ? elements.club.value : '';
+      
+      // URLパラメータから診断結果情報を取得
+      const params = new URLSearchParams(location.search);
+      const department = params.get('department') || '';
+      
+      // 学生情報をまとめる
+      const studentInfo = {
+        name: nameJa,
+        course: course,
+        club: club,
+        department: department
+      };
+      
+      const shareUrl = generateShareUrl(imageUrl, studentInfo);
       const success = await copyUrlToClipboard(shareUrl);
       
       hideLoading();
       
       if (success) {
-        alert('シェア用URLをクリップボードにコピーしました。');
+        alert('✅ シェア用URLをクリップボードにコピーしました！\n\nDiscordやSNSに貼り付けると学生証画像がプレビューされます。');
       } else {
-        alert('URLのコピーに失敗しました。');
+        // フォールバック: テキストエリア方式
+        try {
+          const textArea = document.createElement('textarea');
+          textArea.value = shareUrl;
+          textArea.style.position = 'fixed';
+          textArea.style.left = '-999999px';
+          textArea.style.top = '-999999px';
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          alert('✅ シェア用URLをコピーしました！\n\nDiscordやSNSに貼り付けると学生証画像がプレビューされます。');
+        } catch (fallbackError) {
+          alert(`URLのコピーに失敗しました。\n\n以下のURLを手動でコピーしてください：\n${shareUrl}`);
+        }
       }
     } catch (error) {
       console.error('URLコピーエラー:', error);
@@ -615,18 +653,18 @@ function initializeApp() {
           // ローカル保存を実行
           try {
             const link = document.createElement('a');
-            link.download = '学生証.png';
+            link.download = '放課後クロニクル_学生証.png';
             link.href = elements.cardCanvas.toDataURL('image/png');
             link.click();
             
-            alert('画像がダウンロードされました。');
+            alert('📥 画像がダウンロードされました。\n\nSNSの投稿時に添付してください。');
           } catch (downloadError) {
             console.error('ダウンロードエラー:', downloadError);
-            alert('ダウンロードにも失敗しました。');
+            alert('ダウンロードにも失敗しました。しばらくしてからもう一度お試しください。');
           }
         }
       } else {
-        alert('画像のアップロードに失敗しました。もう一度お試しください。');
+        alert('⚠️ 画像のアップロードに失敗しました。\n\nネット接続を確認してもう一度お試しください。');
       }
     }
   });
