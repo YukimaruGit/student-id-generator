@@ -892,6 +892,87 @@
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 診断ゲーム開始');
       
+      // URLパラメータをチェック
+      const params = new URLSearchParams(location.search);
+      const showResult = params.get('showResult');
+      const department = params.get('department');
+      const course = params.get('course');
+      const club = params.get('club');
+      const previewMessage = params.get('previewMessage');
+      const episodeMessage = params.get('episodeMessage');
+      
+      // showResultがtrueで診断結果の情報がある場合、直接結果を表示
+      if (showResult === 'true' && department && course && club) {
+        console.log('🎯 診断結果表示モード');
+        
+        // 結果オブジェクトを作成
+        const result = {
+          department: department,
+          course: course,
+          displayCourse: `${department}（${course}コース）`,
+          club: club
+        };
+        
+        // 結果画面を表示
+        document.getElementById('questionContainer').style.display = 'none';
+        document.getElementById('resultContainer').style.display = 'block';
+        
+        // 結果をページに表示
+        document.getElementById('resultCourse').textContent = result.displayCourse;
+        
+        // 部活動名に「部」を付けて表示
+        const clubDisplayName = result.club.endsWith('部') ? result.club : result.club + '部';
+        document.getElementById('resultClub').textContent = clubDisplayName;
+        
+        // URLパラメータからメッセージを復元
+        if (previewMessage) {
+          document.getElementById('previewMsg').textContent = decodeURIComponent(previewMessage);
+        } else {
+          // フォールバック: 新しいメッセージを生成
+          const template = previewTemplates[Math.floor(Math.random() * previewTemplates.length)];
+          const fallbackMessage = template.replace(/\$\{club\}/g, clubDisplayName);
+          document.getElementById('previewMsg').textContent = fallbackMessage;
+        }
+        
+        if (episodeMessage) {
+          document.getElementById('episodeMsg').textContent = decodeURIComponent(episodeMessage);
+        } else {
+          // フォールバック: 新しいエピソードを生成
+          const fallbackEpisode = episodeTemplates[Math.floor(Math.random() * episodeTemplates.length)];
+          document.getElementById('episodeMsg').textContent = fallbackEpisode;
+        }
+        
+        // ボタンのアイコンを絵文字に置き換え
+        const toGeneratorBtn = document.getElementById('toGeneratorBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        
+        if (toGeneratorBtn) {
+          toGeneratorBtn.innerHTML = '<span style="margin-right: 0.5rem;">📋</span>学生証を作成する';
+          
+          // 学生証作成ボタンの処理（元の結果に戻る）
+          toGeneratorBtn.onclick = () => {
+            const url = new URL('generator.html', window.location.href);
+            url.searchParams.set('department', department);
+            url.searchParams.set('course', course);
+            url.searchParams.set('club', club);
+            url.searchParams.set('previewMessage', previewMessage || '');
+            url.searchParams.set('episodeMessage', episodeMessage || '');
+            window.location.href = url.toString();
+          };
+        }
+        
+        if (restartBtn) {
+          restartBtn.innerHTML = '<span style="margin-right: 0.5rem;">🔄</span>診断をやり直す';
+          restartBtn.onclick = () => {
+            // パラメータをクリアしてページをリロード
+            window.location.href = 'index.html';
+          };
+        }
+        
+        return; // 通常の診断フローはスキップ
+      }
+      
+      // 通常の診断フロー
       // 質問をシャッフルして10問選択
       for (let i = questionPool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));

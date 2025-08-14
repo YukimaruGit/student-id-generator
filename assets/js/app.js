@@ -500,30 +500,48 @@ function initializeApp() {
     }
     
     try {
-      showLoading('画像をアップロード中...');
+      showLoading('学生証をシェア用に準備中...');
       
+      // 学生証画像をCloudinaryにアップロード
       const imageUrl = await uploadImageToCloudinary(
         elements.cardCanvas, 
         cloudinaryConfig.cloudName, 
         cloudinaryConfig.uploadPreset
       );
       
-      // 画像をダウンロード
-      const link = document.createElement('a');
-      link.href = imageUrl;
-      link.download = '放課後クロニクル_学生証.png';
-      link.click();
+      // 学生情報を取得
+      const nameJa = elements.nameJa.value.trim();
+      const course = elements.department ? elements.department.value : '';
+      const club = elements.club ? elements.club.value : '';
       
-      // 少し遅延してからX投稿画面を開く
-      setTimeout(() => {
-        const twitterText = '放課後クロニクル 学生証を作成しました！ #放課後クロニクル #学生証ジェネレーター';
-        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(twitterText)}`;
-        window.open(twitterUrl);
-        
-        alert('📝 画像がダウンロードされました！\n\nX投稿画面で「メディアを追加」ボタンから学生証画像を添付してください。');
-      }, 1000);
+      // URLパラメータから診断結果情報を取得
+      const params = new URLSearchParams(location.search);
+      const department = params.get('department') || '';
+      
+      // シェア用URLを生成（学生証専用ページ）
+      const shareUrl = new URL('share.html', window.location.origin);
+      shareUrl.searchParams.set('image', imageUrl);
+      if (nameJa) shareUrl.searchParams.set('name', nameJa);
+      if (course) shareUrl.searchParams.set('course', course);
+      if (club) shareUrl.searchParams.set('club', club);
+      if (department) shareUrl.searchParams.set('department', department);
+      
+      // ツイート文を作成
+      const tweetText = nameJa ? 
+        `${nameJa}の学生証が完成しました！🎓\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター` :
+        `放課後クロニクル 学生証が完成しました！🎓\n\n診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター`;
+      
+      // X投稿画面を開く（画像URLを含める）
+      const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl.toString())}`;
       
       hideLoading();
+      
+      // 新しいタブでX投稿画面を開く
+      window.open(twitterIntentUrl, '_blank');
+      
+      // 成功メッセージ
+      alert('✅ Xの投稿画面が開きました！\n\n投稿すると学生証画像がプレビューされ、タップで診断ゲームに誘導されます。');
+      
     } catch (error) {
       console.error('Twitterシェアエラー:', error);
       hideLoading();

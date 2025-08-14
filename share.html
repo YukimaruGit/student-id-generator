@@ -1,203 +1,298 @@
 <!DOCTYPE html>
-<html lang="ja" prefix="og: https://ogp.me/ns#">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>放課後クロニクル 学生証</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="pageTitle">放課後クロニクル 学生証</title>
   
-  <!-- OGP 基本タグ -->
-  <meta property="og:title" content="放課後クロニクル 学生証を作成しました！" />
-  <meta property="og:description" content="放課後クロニクルの世界で自分だけの学生証を作成しよう！ #放課後クロニクル" />
-  <meta property="og:image" id="ogImage" content="" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" id="ogUrl" content="" />
-  <meta property="og:site_name" content="放課後クロニクル 学生証ジェネレーター" />
+  <!-- 動的OGタグ - URLパラメータから設定 -->
+  <meta property="og:title" content="放課後クロニクル 学生証" id="ogTitle">
+  <meta property="og:description" content="あなただけの学生証が完成しました！診断ゲームで自分の学校生活を見つけよう。" id="ogDescription">
+  <meta property="og:image" content="" id="ogImage">
+  <meta property="og:url" content="" id="ogUrl">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="放課後クロニクル">
   
-  <!-- Twitter カード -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@houkago_chronicle" />
-  <meta name="twitter:title" content="放課後クロニクル 学生証を作成しました！" />
-  <meta name="twitter:description" content="放課後クロニクルの世界で自分だけの学生証を作成しよう！ #放課後クロニクル" />
-  <meta name="twitter:image" id="twitterImage" content="" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@afterschool_chronicle">
+  <meta name="twitter:title" content="放課後クロニクル 学生証" id="twitterTitle">
+  <meta name="twitter:description" content="あなただけの学生証が完成しました！診断ゲームで自分の学校生活を見つけよう。" id="twitterDescription">
+  <meta name="twitter:image" content="" id="twitterImage">
   
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="icon" type="image/png" href="assets/img/crest.png">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
   <style>
-    body {
+    * {
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #6b46c1 0%, #3182ce 100%);
-      color: white;
-      font-family: 'Noto Sans JP', sans-serif;
+      padding: 20px;
     }
+
     .share-container {
-      max-width: 800px;
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px;
       width: 100%;
       text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     }
-    .student-card {
-      max-width: 100%;
-      height: auto;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      margin: 20px 0;
-    }
-    .share-message {
-      font-size: 1.5rem;
+
+    .logo {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #667eea;
       margin-bottom: 20px;
     }
-    .back-link {
-      color: white;
-      text-decoration: none;
-      padding: 10px 20px;
-      border: 2px solid white;
-      border-radius: 6px;
-      margin-top: 20px;
-      display: inline-block;
-      transition: all 0.3s ease;
+
+    .student-card-preview {
+      margin: 30px 0;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: transform 0.3s ease;
     }
-    .back-link:hover {
-      background: rgba(255, 255, 255, 0.1);
+
+    .student-card-preview:hover {
+      transform: scale(1.02);
+    }
+
+    .student-card-preview img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .description {
+      color: #666;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+      background: #f8f9fa;
+      color: #666;
+      border: 2px solid #e9ecef;
+    }
+
+    .btn-secondary:hover {
+      background: #e9ecef;
+      transform: translateY(-2px);
+    }
+
+    .details {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 5px 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .detail-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .detail-value {
+      color: #333;
+    }
+
+    @media (max-width: 768px) {
+      .share-container {
+        padding: 20px;
+      }
+
+      .buttons {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
     }
   </style>
 </head>
 <body>
   <div class="share-container">
-    <h1 class="share-message">放課後クロニクル 学生証を作成しました！</h1>
-    <div id="loadingMessage" style="font-size: 1.2rem; margin: 40px 0;">
-      🔄 学生証を読み込み中...
+    <div class="logo">
+      🎓 放課後クロニクル
     </div>
-    <img id="studentCard" class="student-card" alt="学生証" style="display: none;">
-    <a href="index.html" class="back-link">トップに戻る</a>
+    
+    <h1>学生証が完成しました！</h1>
+    
+    <div class="student-card-preview" id="cardPreview" onclick="goToDiagnosis()">
+      <img id="cardImage" src="" alt="学生証" onerror="handleImageError()">
+    </div>
+    
+    <div class="description">
+      あなただけの学生証が完成しました！<br>
+      <strong>学生証をタップして診断ゲームを体験しよう</strong>
+    </div>
+
+    <div class="details" id="studentDetails" style="display: none;">
+      <div class="detail-item">
+        <span class="detail-label">📚 学科/コース</span>
+        <span class="detail-value" id="courseInfo">-</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">🎭 部活動</span>
+        <span class="detail-value" id="clubInfo">-</span>
+      </div>
+    </div>
+    
+    <div class="buttons">
+      <a href="index.html" class="btn btn-primary">
+        <i class="fas fa-dice"></i>
+        診断ゲームをプレイ
+      </a>
+      <a href="generator.html" class="btn btn-secondary">
+        <i class="fas fa-id-card"></i>
+        学生証を作成
+      </a>
+    </div>
   </div>
 
   <script>
-    // URLパラメータから画像URLを取得して設定
-    window.addEventListener('DOMContentLoaded', () => {
-      const params = new URLSearchParams(window.location.search);
-      const imageUrl = params.get('img');
-      console.log('取得した画像URL:', imageUrl);
+    // URLパラメータを解析
+    const params = new URLSearchParams(window.location.search);
+    const imageUrl = params.get('image');
+    const name = params.get('name');
+    const course = params.get('course');
+    const club = params.get('club');
+    const department = params.get('department');
+
+    // メタタグの動的更新
+    function updateMetaTags() {
+      const title = name ? `${name}の学生証 - 放課後クロニクル` : '放課後クロニクル 学生証';
+      const description = name ? 
+        `${name}の学生証が完成しました！あなたも診断ゲームで自分だけの学校生活を見つけよう。` :
+        'あなただけの学生証が完成しました！診断ゲームで自分の学校生活を見つけよう。';
+      
+      // ページタイトル
+      document.getElementById('pageTitle').textContent = title;
+      
+      // OGタグ
+      document.getElementById('ogTitle').setAttribute('content', title);
+      document.getElementById('ogDescription').setAttribute('content', description);
+      document.getElementById('ogUrl').setAttribute('content', window.location.href);
+      
+      // Twitter Card
+      document.getElementById('twitterTitle').setAttribute('content', title);
+      document.getElementById('twitterDescription').setAttribute('content', description);
       
       if (imageUrl) {
-        const imgElement = document.getElementById('studentCard');
-        // 画像URLをセット
-        imgElement.src = decodeURIComponent(imageUrl);
-        imgElement.style.display = 'block';
-        
-        // 画像読み込み完了後の処理
-        imgElement.onload = () => {
-          console.log('画像読み込み完了');
-          document.getElementById('loadingMessage').style.display = 'none';
-        };
-        
-        imgElement.onerror = () => {
-          console.error('画像読み込みエラー:', imgElement.src);
-          document.getElementById('loadingMessage').innerHTML = '❌ 画像の読み込みに失敗しました';
-        };
-        
-        // 新しいシェアページのHTMLを生成
-        const sharePageContent = `
-<!DOCTYPE html>
-<html lang="ja" prefix="og: https://ogp.me/ns#">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>放課後クロニクル 学生証</title>
-  
-  <!-- OGP 基本タグ -->
-  <meta property="og:title" content="放課後クロニクル 学生証を作成しました！" />
-  <meta property="og:description" content="放課後クロニクルの世界で自分だけの学生証を作成しよう！ #放課後クロニクル" />
-  <meta property="og:image" content="${imageUrl}" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="${window.location.href}" />
-  <meta property="og:site_name" content="放課後クロニクル 学生証ジェネレーター" />
-  
-  <!-- Twitter カード -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="放課後クロニクル 学生証を作成しました！" />
-  <meta name="twitter:description" content="放課後クロニクルの世界で自分だけの学生証を作成しよう！ #放課後クロニクル" />
-  <meta name="twitter:image" content="${imageUrl}" />
-
-  <link rel="stylesheet" href="assets/css/style.css">
-  <style>
-    body {
-      margin: 0;
-      padding: 20px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #6b46c1 0%, #3182ce 100%);
-      color: white;
-      font-family: 'Noto Sans JP', sans-serif;
-    }
-    .share-container {
-      max-width: 800px;
-      width: 100%;
-      text-align: center;
-    }
-    .student-card {
-      max-width: 100%;
-      height: auto;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      margin: 20px 0;
-    }
-    .share-message {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-    }
-    .back-link {
-      color: white;
-      text-decoration: none;
-      padding: 10px 20px;
-      border: 2px solid white;
-      border-radius: 6px;
-      margin-top: 20px;
-      display: inline-block;
-      transition: all 0.3s ease;
-    }
-    .back-link:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-  </style>
-</head>
-<body>
-  <div class="share-container">
-    <h1 class="share-message">放課後クロニクル 学生証を作成しました！</h1>
-    <img src="${imageUrl}" class="student-card" alt="学生証">
-    <a href="index.html" class="back-link">トップに戻る</a>
-  </div>
-</body>
-</html>`;
-
-        // Blobとして保存
-        const blob = new Blob([sharePageContent], { type: 'text/html' });
-        const shareUrl = URL.createObjectURL(blob);
-        
-        // シェアボタンのURLを更新
-        const twitterShareBtn = document.querySelector('a[href*="twitter.com/share"]');
-        const lineShareBtn = document.querySelector('a[href*="line.me/R/msg"]');
-        
-        if (twitterShareBtn) {
-          twitterShareBtn.href = `https://twitter.com/share?url=${encodeURIComponent(shareUrl)}&text=放課後クロニクル 学生証を作成しました！`;
-        }
-        
-        if (lineShareBtn) {
-          lineShareBtn.href = `https://line.me/R/msg/text/?放課後クロニクル 学生証を作成しました！%0D%0A${encodeURIComponent(shareUrl)}`;
-        }
-      } else {
-        window.location.href = 'index.html';
+        document.getElementById('ogImage').setAttribute('content', imageUrl);
+        document.getElementById('twitterImage').setAttribute('content', imageUrl);
       }
+    }
+
+    // 学生証画像の表示
+    function displayStudentCard() {
+      if (imageUrl) {
+        document.getElementById('cardImage').src = imageUrl;
+      } else {
+        document.getElementById('cardPreview').style.display = 'none';
+      }
+    }
+
+    // 学生詳細情報の表示
+    function displayStudentDetails() {
+      if (course || club) {
+        document.getElementById('studentDetails').style.display = 'block';
+        
+        if (department && course) {
+          document.getElementById('courseInfo').textContent = `${department}（${course}コース）`;
+        } else if (course) {
+          document.getElementById('courseInfo').textContent = course;
+        }
+        
+        if (club) {
+          const clubDisplay = club.endsWith('部') ? club : club + '部';
+          document.getElementById('clubInfo').textContent = clubDisplay;
+        }
+      }
+    }
+
+    // 診断ページへの移動
+    function goToDiagnosis() {
+      window.location.href = 'index.html';
+    }
+
+    // 画像エラー処理
+    function handleImageError() {
+      document.getElementById('cardPreview').innerHTML = `
+        <div style="padding: 40px; background: #f8f9fa; color: #666;">
+          <i class="fas fa-id-card" style="font-size: 3rem; margin-bottom: 20px;"></i>
+          <p>学生証画像を読み込めませんでした</p>
+        </div>
+      `;
+    }
+
+    // 初期化
+    document.addEventListener('DOMContentLoaded', function() {
+      updateMetaTags();
+      displayStudentCard();
+      displayStudentDetails();
     });
   </script>
 </body>
