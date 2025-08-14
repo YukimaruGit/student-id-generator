@@ -293,6 +293,16 @@
       color: #333;
     }
     
+    /* 結果画面専用の背景 */
+    body.result-page {
+      background: #2a2a2a;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+      color: #fff;
+    }
+    
     .container {
       max-width: 800px;
       margin: 0 auto;
@@ -396,11 +406,14 @@
     }
     
     .result-card {
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(240, 240, 240, 0.95);
       border-radius: 16px;
       padding: 40px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       text-align: center;
+      max-width: 600px;
+      margin: 0 auto;
+      color: #333;
     }
     
     .result-title {
@@ -434,24 +447,39 @@
       color: #333;
     }
     
+    .preview-section {
+      margin: 20px 0;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      border-left: 4px solid #dda0dd;
+      text-align: left;
+    }
+    
     .episode-section {
       margin: 30px 0;
       padding: 20px;
-      background: #fff3cd;
+      background: rgba(152, 215, 165, 0.1);
       border-radius: 12px;
-      border-left: 5px solid #ffc107;
+      border-left: 4px solid #98d7a5;
+      text-align: left;
     }
     
     .episode-title {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: 700;
-      color: #856404;
+      color: #333;
       margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     .episode-text {
-      color: #856404;
+      color: #666;
       font-style: italic;
+      font-size: 0.95rem;
+      line-height: 1.5;
     }
     
     .buttons {
@@ -537,8 +565,10 @@
         <div class="result-title"><i class="fas fa-graduation-cap"></i> 診断結果発表！</div>
         <div style="font-size: 1.2rem; color: #666; margin-bottom: 20px;">あなたの学校生活は...</div>
         
-        <div id="previewMsg" style="font-size: 1.3rem; color: #dda0dd; margin: 20px 0; font-weight: 600;">
-          <!-- プレビューメッセージ -->
+        <div class="preview-section">
+          <div id="previewMsg" style="font-size: 1.1rem; color: #333; font-weight: 600; margin: 0;">
+            <!-- プレビューメッセージ -->
+          </div>
         </div>
 
         <div class="result-details">
@@ -924,6 +954,9 @@
       document.getElementById('questionContainer').style.display = 'none';
       document.getElementById('resultContainer').style.display = 'block';
       
+      // 背景を結果画面用に変更
+      document.body.classList.add('result-page');
+      
       const result = calculateResult();
       
       document.getElementById('resultCourse').textContent = result.displayCourse;
@@ -963,6 +996,8 @@
       };
       
       document.getElementById('restartBtn').onclick = () => {
+        // 背景を元に戻す
+        document.body.classList.remove('result-page');
         window.location.reload();
       };
     }
