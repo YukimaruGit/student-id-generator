@@ -1,15 +1,53 @@
+# セキュリティ強化版 robots.txt
 User-agent: *
-Allow: /
+Allow: /index.html
+Allow: /generator.html
+Allow: /share-preview.html
+Allow: /privacy.html
+Allow: /assets/css/
+Allow: /assets/img/
+Disallow: /assets/js/
+Disallow: /.git/
+Disallow: /.github/
+Disallow: /share.html
+Disallow: /share-dynamic.html
+Disallow: /character.html
+Disallow: /character_v2.html
+Disallow: /quiz.html
+Disallow: *.md
+Disallow: *.txt
+Disallow: *.json
 
-# SNSクローラー向けの特別な許可
+# SNSクローラー向けの特別な許可（プレビュー用）
 User-agent: Twitterbot
-Allow: /
+Allow: /share-preview.html
+Allow: /assets/img/
+Disallow: /assets/js/
 
 User-agent: LinkedInbot
-Allow: /
+Allow: /share-preview.html
+Allow: /assets/img/
+Disallow: /assets/js/
 
 User-agent: facebookexternalhit
-Allow: /
+Allow: /share-preview.html
+Allow: /assets/img/
+Disallow: /assets/js/
 
 User-agent: LINE-BOT
-Allow: / 
+Allow: /share-preview.html
+Allow: /assets/img/
+Disallow: /assets/js/
+
+# Git関連の完全ブロック
+User-agent: *
+Disallow: /*git*
+Disallow: /*github*
+Disallow: /*yukimaru*
+
+# 検索エンジン向けの制限
+User-agent: Googlebot
+Crawl-delay: 10
+
+User-agent: Bingbot
+Crawl-delay: 10 

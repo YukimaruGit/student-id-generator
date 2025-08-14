@@ -1,2 +1,19 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Git情報の隠蔽設定
+*.html linguist-vendored=false
+*.js linguist-vendored=false
+*.css linguist-vendored=false
+
+# セキュリティ関連ファイルの保護
+assets/js/security.js linguist-vendored=false
+.gitattributes linguist-vendored=false
+
+# 言語判定の調整（プロジェクトの本質を隠蔽）
+*.html linguist-language=Web
+*.js linguist-language=Web
+*.css linguist-language=Web
+
+# バイナリファイルとして扱う（内容の隠蔽）
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary

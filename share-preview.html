@@ -3,28 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="pageTitle">放課後クロニクル 学生証</title>
+  <title>放課後クロニクル 学生証</title>
   
-  <!-- 動的OGタグ - URLパラメータから設定 -->
-  <meta property="og:title" content="放課後クロニクル 学生証" id="ogTitle">
-  <meta property="og:description" content="あなただけの学生証が完成しました！診断ゲームで自分の学校生活を見つけよう。" id="ogDescription">
-  <meta property="og:image" content="" id="ogImage">
+  <!-- デフォルトのOGタグ（JavaScript読み込み前） -->
+  <meta property="og:title" content="放課後クロニクル 学生証">
+  <meta property="og:description" content="あなただけの学生証が完成しました！診断ゲームで自分の学校生活を見つけよう。">
+  <meta property="og:image" content="">
   <meta property="og:image:width" content="800">
   <meta property="og:image:height" content="500">
   <meta property="og:image:type" content="image/png">
-  <meta property="og:url" content="" id="ogUrl">
+  <meta property="og:url" content="">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="放課後クロニクル">
   <meta property="og:locale" content="ja_JP">
   
-  <!-- Twitter Card -->
+  <!-- デフォルトのTwitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@afterschool_chronicle">
-  <meta name="twitter:title" content="放課後クロニクル 学生証" id="twitterTitle">
-  <meta name="twitter:description" content="あなただけの学生証が完成しました！診断ゲームで自分の学校生活を見つけよう。" id="twitterDescription">
-  <meta name="twitter:image" content="" id="twitterImage">
+  <meta name="twitter:title" content="放課後クロニクル 学生証">
+  <meta name="twitter:description" content="あなただけの学生証が完成しました！診断ゲームで自分の学校生活を見つけよう。">
+  <meta name="twitter:image" content="">
   <meta name="twitter:image:width" content="800">
   <meta name="twitter:image:height" content="500">
+  
+  <!-- 即座にURLパラメータを読み取ってメタタグを更新 -->
+  <script>
+    // DOMが構築される前に即座に実行
+    (function() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const imageUrl = params.get('image');
+        const name = params.get('name');
+        
+        if (imageUrl) {
+          // 既存のメタタグを更新
+          const updateMeta = (selector, content) => {
+            const element = document.querySelector(selector);
+            if (element) element.setAttribute('content', content);
+          };
+          
+          // タイトルと説明を生成
+          const title = name ? `${name}の学生証 - 放課後クロニクル` : '放課後クロニクル 学生証';
+          const description = name ? 
+            `${name}の学生証が完成しました！あなたも診断ゲームで自分だけの学校生活を見つけよう。` :
+            'あなただけの学生証が完成しました！診断ゲームで自分の学校生活を見つけよう。';
+          
+          // ページタイトルを即座に設定
+          document.title = title;
+          
+          // DOMContentLoadedを待たずに即座に実行
+          const interval = setInterval(() => {
+            if (document.head) {
+              clearInterval(interval);
+              
+              // 既存のメタタグを検索して更新
+              const metaTags = document.head.querySelectorAll('meta');
+              metaTags.forEach(meta => {
+                const property = meta.getAttribute('property');
+                const name_attr = meta.getAttribute('name');
+                
+                if (property === 'og:title' || name_attr === 'twitter:title') {
+                  meta.setAttribute('content', title);
+                } else if (property === 'og:description' || name_attr === 'twitter:description') {
+                  meta.setAttribute('content', description);
+                } else if (property === 'og:image' || name_attr === 'twitter:image') {
+                  meta.setAttribute('content', imageUrl);
+                } else if (property === 'og:url') {
+                  meta.setAttribute('content', window.location.href);
+                }
+              });
+              
+              // 念のため追加のメタタグも挿入
+              const additionalMetas = [
+                { property: 'og:image:secure_url', content: imageUrl },
+                { property: 'og:image:alt', content: title },
+                { name: 'twitter:image:alt', content: title }
+              ];
+              
+              additionalMetas.forEach(metaData => {
+                const existingMeta = document.head.querySelector(
+                  metaData.property ? 
+                    `meta[property="${metaData.property}"]` : 
+                    `meta[name="${metaData.name}"]`
+                );
+                if (!existingMeta) {
+                  const meta = document.createElement('meta');
+                  if (metaData.property) {
+                    meta.setAttribute('property', metaData.property);
+                  } else {
+                    meta.setAttribute('name', metaData.name);
+                  }
+                  meta.setAttribute('content', metaData.content);
+                  document.head.appendChild(meta);
+                }
+              });
+            }
+          }, 1);
+        }
+      } catch (error) {
+        console.error('Meta tag update error:', error);
+      }
+    })();
+  </script>
   
   <link rel="icon" type="image/png" href="assets/img/crest.png">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -184,7 +264,7 @@
       🎓 放課後クロニクル
     </div>
     
-    <h1>学生証が完成しました！</h1>
+    <h1 id="pageHeading">学生証が完成しました！</h1>
     
     <div class="student-card-preview" id="cardPreview" onclick="goToDiagnosis()">
       <img id="cardImage" src="" alt="学生証" onerror="handleImageError()">
@@ -206,111 +286,36 @@
       </div>
     </div>
     
-         <div class="buttons">
-       <a href="https://preview.studio.site/live/1Va6D4lMO7/student-id" class="btn btn-primary">
-         <i class="fas fa-dice"></i>
-         診断ゲームをプレイ
-       </a>
-       <a href="https://preview.studio.site/live/1Va6D4lMO7/student-id" class="btn btn-secondary">
-         <i class="fas fa-id-card"></i>
-         学生証を作成
-       </a>
-     </div>
+    <div class="buttons">
+      <a href="https://preview.studio.site/live/1Va6D4lMO7/student-id" class="btn btn-primary">
+        <i class="fas fa-dice"></i>
+        診断ゲームをプレイ
+      </a>
+      <a href="https://preview.studio.site/live/1Va6D4lMO7/student-id" class="btn btn-secondary">
+        <i class="fas fa-id-card"></i>
+        学生証を作成
+      </a>
+    </div>
   </div>
 
-  <!-- URLパラメータからメタタグを即座に設定 -->
+  <script src="assets/js/security.js"></script>
   <script>
-    // URLパラメータを即座に解析してメタタグを設定（SNSクローラー対応）
-    (function() {
-      const params = new URLSearchParams(window.location.search);
-      const imageUrl = params.get('image');
-      const name = params.get('name');
-      
-      if (imageUrl) {
-        // OGタグとTwitter Cardの画像を即座に設定
-        const ogImage = document.getElementById('ogImage');
-        const twitterImage = document.getElementById('twitterImage');
-        if (ogImage) ogImage.setAttribute('content', imageUrl);
-        if (twitterImage) twitterImage.setAttribute('content', imageUrl);
-        
-        // タイトルも即座に設定
-        if (name) {
-          const title = `${name}の学生証 - 放課後クロニクル`;
-          const ogTitle = document.getElementById('ogTitle');
-          const twitterTitle = document.getElementById('twitterTitle');
-          const pageTitle = document.getElementById('pageTitle');
-          if (ogTitle) ogTitle.setAttribute('content', title);
-          if (twitterTitle) twitterTitle.setAttribute('content', title);
-          if (pageTitle) pageTitle.textContent = title;
-        }
-      }
-    })();
-  </script>
-
-  <script>
-    // URLパラメータを解析
-    const params = new URLSearchParams(window.location.search);
-    const imageUrl = params.get('image');
-    const name = params.get('name');
-    const course = params.get('course');
-    const club = params.get('club');
-    const department = params.get('department');
-
-    // メタタグの動的更新
-    function updateMetaTags() {
-      const title = name ? `${name}の学生証 - 放課後クロニクル` : '放課後クロニクル 学生証';
-      const description = name ? 
-        `${name}の学生証が完成しました！あなたも診断ゲームで自分だけの学校生活を見つけよう。` :
-        'あなただけの学生証が完成しました！診断ゲームで自分の学校生活を見つけよう。';
-      
-      // ページタイトル
-      document.getElementById('pageTitle').textContent = title;
-      
-      // OGタグ - Twitterのクローラー対応
-      const ogTitle = document.getElementById('ogTitle');
-      const ogDescription = document.getElementById('ogDescription');
-      const ogUrl = document.getElementById('ogUrl');
-      const ogImage = document.getElementById('ogImage');
-      const twitterTitle = document.getElementById('twitterTitle');
-      const twitterDescription = document.getElementById('twitterDescription');
-      const twitterImage = document.getElementById('twitterImage');
-      
-      if (ogTitle) ogTitle.setAttribute('content', title);
-      if (ogDescription) ogDescription.setAttribute('content', description);
-      if (ogUrl) ogUrl.setAttribute('content', window.location.href);
-      if (twitterTitle) twitterTitle.setAttribute('content', title);
-      if (twitterDescription) twitterDescription.setAttribute('content', description);
-      
-      if (imageUrl) {
-        if (ogImage) ogImage.setAttribute('content', imageUrl);
-        if (twitterImage) twitterImage.setAttribute('content', imageUrl);
-        
-        // HTMLのheadに直接メタタグを追加（Twitterクローラー対策）
-        const head = document.head;
-        
-        // 既存のタグを削除
-        const existingOgImage = head.querySelector('meta[property="og:image"]:not(#ogImage)');
-        const existingTwitterImage = head.querySelector('meta[name="twitter:image"]:not(#twitterImage)');
-        if (existingOgImage) existingOgImage.remove();
-        if (existingTwitterImage) existingTwitterImage.remove();
-        
-        // 新しいタグを追加
-        const newOgImage = document.createElement('meta');
-        newOgImage.setAttribute('property', 'og:image');
-        newOgImage.setAttribute('content', imageUrl);
-        head.appendChild(newOgImage);
-        
-        const newTwitterImage = document.createElement('meta');
-        newTwitterImage.setAttribute('name', 'twitter:image');
-        newTwitterImage.setAttribute('content', imageUrl);
-        head.appendChild(newTwitterImage);
-      }
-    }
+    // URLパラメータの安全な取得
+    const imageUrl = window.Security ? window.Security.getSafeUrlParam('image') : new URLSearchParams(window.location.search).get('image');
+    const name = window.Security ? window.Security.getSafeUrlParam('name') : new URLSearchParams(window.location.search).get('name');
+    const course = window.Security ? window.Security.getSafeUrlParam('course') : new URLSearchParams(window.location.search).get('course');
+    const club = window.Security ? window.Security.getSafeUrlParam('club') : new URLSearchParams(window.location.search).get('club');
+    const department = window.Security ? window.Security.getSafeUrlParam('department') : new URLSearchParams(window.location.search).get('department');
 
     // 学生証画像の表示
     function displayStudentCard() {
       if (imageUrl) {
         document.getElementById('cardImage').src = imageUrl;
+        
+        // 見出しも更新
+        if (name) {
+          document.getElementById('pageHeading').textContent = `${name}の学生証が完成しました！`;
+        }
       } else {
         document.getElementById('cardPreview').style.display = 'none';
       }
@@ -334,10 +339,10 @@
       }
     }
 
-         // 診断ページへの移動
-     function goToDiagnosis() {
-       window.location.href = 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
-     }
+    // 診断ページへの移動
+    function goToDiagnosis() {
+      window.location.href = 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
+    }
 
     // 画像エラー処理（セキュリティ強化版）
     function handleImageError() {
@@ -364,7 +369,6 @@
 
     // 初期化
     document.addEventListener('DOMContentLoaded', function() {
-      updateMetaTags();
       displayStudentCard();
       displayStudentDetails();
     });

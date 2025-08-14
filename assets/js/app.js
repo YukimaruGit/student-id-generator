@@ -58,8 +58,8 @@ async function uploadImageToCloudinary(canvas, cloudName, uploadPreset) {
 }
 
 function generateShareUrl(imageUrl, studentInfo = {}) {
-  // GitHubを隠した指定されたURLを使用
-  const shareUrl = new URL('https://preview.studio.site/live/1Va6D4lMO7/student-id');
+  // プレビュー特化型シェアページを使用
+  const shareUrl = new URL('share-preview.html', window.location.origin);
   shareUrl.searchParams.set('image', imageUrl);
   if (studentInfo.name) shareUrl.searchParams.set('name', studentInfo.name);
   if (studentInfo.course) shareUrl.searchParams.set('course', studentInfo.course);
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeApp() {
-  // DOM要素の取得
+  // DOM要素の取得（セキュリティ強化版）
   const elements = {
     photoInput: document.getElementById('photoInput'),
     nameJa: document.getElementById('nameJa'),
@@ -147,6 +147,57 @@ function initializeApp() {
     loadingOverlay: document.getElementById('loadingOverlay')
   };
 
+  // 入力値の安全性検証
+  function validateInput(value) {
+    if (!value || typeof value !== 'string') return '';
+    
+    // 危険なスクリプトタグやHTMLタグを除去
+    const sanitized = value
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<[^>]*>/g, '') // HTMLタグ除去
+      .replace(/javascript:/gi, '') // javascript: プロトコル除去
+      .replace(/on\w+\s*=/gi, '') // イベントハンドラ除去
+      .replace(/data:(?!image\/)/gi, '') // data:URIの制限（画像以外）
+      .replace(/vbscript:/gi, '') // VBScript除去
+      .trim();
+    
+    // 長すぎる入力値を制限
+    if (sanitized.length > 500) {
+      return sanitized.substring(0, 500);
+    }
+    
+    return sanitized;
+  }
+
+  // 入力フィールドの検証設定
+  function setupInputValidation() {
+    [elements.nameJa, elements.nameEn].forEach(element => {
+      if (element) {
+        element.addEventListener('input', function(e) {
+          const originalValue = e.target.value;
+          const sanitizedValue = validateInput(originalValue);
+          
+          if (originalValue !== sanitizedValue) {
+            e.target.value = sanitizedValue;
+            console.log('🧹 入力値をサニタイズしました');
+          }
+        });
+        
+        element.addEventListener('paste', function(e) {
+          setTimeout(() => {
+            const originalValue = e.target.value;
+            const sanitizedValue = validateInput(originalValue);
+            
+            if (originalValue !== sanitizedValue) {
+              e.target.value = sanitizedValue;
+              console.log('🧹 ペーストされた値をサニタイズしました');
+            }
+          }, 0);
+        });
+      }
+    });
+  }
+
   // DOM要素の存在チェック（必須要素のみ）
   const requiredElements = ['photoInput', 'nameJa', 'nameEn', 'dobMonth', 'dobDay', 'cardCanvas', 'downloadBtn', 'twitterBtn', 'urlBtn', 'loadingOverlay'];
   for (const key of requiredElements) {
@@ -155,6 +206,9 @@ function initializeApp() {
       return;
     }
   }
+
+  // セキュリティ機能の初期化
+  setupInputValidation();
 
   // Canvas コンテキストの取得
   const ctx = elements.cardCanvas.getContext('2d');
@@ -240,18 +294,31 @@ function initializeApp() {
     }
   }
 
-  // 写真アップロードの処理
+  // 写真アップロードの処理（セキュリティ強化版）
   elements.photoInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     try {
+      // セキュリティ検証を最初に実行
+      if (window.PrivacySecurity && !window.PrivacySecurity.validateFileUpload(file)) {
+        throw new Error('このファイルは安全性の理由でアップロードできません。\nJPEG、PNG、GIF、WebP形式の画像ファイルのみアップロード可能です。');
+      }
+
       if (file.size > 5 * 1024 * 1024) {
         throw new Error('ファイルサイズは5MB以下にしてください。');
       }
 
       if (!file.type.startsWith('image/')) {
         throw new Error('画像ファイルを選択してください。');
+      }
+
+      // 画像内容の詳細検証
+      if (window.PrivacySecurity) {
+        const isValidImage = await window.PrivacySecurity.validateImageContent(file);
+        if (!isValidImage) {
+          throw new Error('このファイルは有効な画像ファイルではないか、セキュリティ上の問題があります。');
+        }
       }
 
       showLoading('写真を読み込み中...');
@@ -524,8 +591,8 @@ function initializeApp() {
       const params = new URLSearchParams(location.search);
       const department = params.get('department') || '';
       
-      // シェア用URLを生成（指定されたリンク）
-      const shareUrl = new URL('https://preview.studio.site/live/1Va6D4lMO7/student-id');
+      // シェア用URLを生成（プレビュー特化型シェアページ）
+      const shareUrl = new URL('share-preview.html', window.location.origin);
       shareUrl.searchParams.set('image', imageUrl);
       if (nameJa) shareUrl.searchParams.set('name', nameJa);
       if (course) shareUrl.searchParams.set('course', course);
