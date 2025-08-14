@@ -126,18 +126,15 @@
   function validateFileUpload(file) {
     if (!file) return false;
 
-    // ファイルサイズ制限を大幅緩和（50MB）
-    const maxSize = 50 * 1024 * 1024;
-    if (file.size > maxSize) {
-      console.warn('🚨 ファイルサイズが大きすぎます:', file.size);
-      return false;
-    }
+    // 容量制限なし（JPEG/PNG専用のため安全）
+    // const maxSize = 50 * 1024 * 1024;
+    // if (file.size > maxSize) {
+    //   console.warn('🚨 ファイルサイズが大きすぎます:', file.size);
+    //   return false;
+    // }
 
-    // 基本的な画像形式チェック（より寛容に）
-    const allowedTypes = [
-      'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 
-      'image/bmp', 'image/tiff', 'image/svg+xml'
-    ];
+    // JPEG/JPG/PNGのみ許可（容量制限なし）
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     if (file.type && !allowedTypes.includes(file.type)) {
       console.warn('🚨 対応していないファイル形式:', file.type);
       return false;

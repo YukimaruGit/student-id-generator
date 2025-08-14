@@ -23,11 +23,13 @@
   <!-- 動的メタタグは即座にJavaScriptで設定（最適化版） -->
   <script src="assets/js/domain-masking.js"></script>
   <script>
-    // URL解析を同期的に実行（復号化対応）
+    // URL解析を同期的に実行（復号化対応・強化版）
     const urlParams = new URLSearchParams(window.location.search);
     const rawParams = {
       i: urlParams.get('i'),
-      n: urlParams.get('n')
+      n: urlParams.get('n'),
+      x: urlParams.get('x'), // 新しい短縮形式
+      y: urlParams.get('y')  // 新しい短縮形式
     };
     
     // パラメータ復号化（ドメインマスキング対応）

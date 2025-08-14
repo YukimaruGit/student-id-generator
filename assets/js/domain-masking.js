@@ -60,17 +60,18 @@
     return encrypted;
   }
 
-  // URLパラメータの復号化
+  // URLパラメータの復号化（強化版）
   function decryptParams(params) {
-    if (!DomainMaskingConfig.encryptParams) return params;
-    
     const decrypted = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (value) {
-        // パラメータ値を復号化
-        decrypted[key] = safeBase64Decode(value);
-      }
-    }
+    
+    // 新しい短縮形式に対応
+    if (params.x) decrypted.i = safeBase64Decode(params.x);
+    if (params.y) decrypted.n = safeBase64Decode(params.y);
+    
+    // 従来形式もサポート
+    if (params.i) decrypted.i = params.i;
+    if (params.n) decrypted.n = params.n;
+    
     return decrypted;
   }
 
@@ -81,36 +82,30 @@
     return domains[randomIndex];
   }
 
-  // 短縮URLの生成
+  // 短縮URLの生成（強化版）
   function generateShortUrl(originalUrl, params = {}) {
     try {
-      // GitHub情報を含むURLの場合、マスキングを実行
-      if (originalUrl.includes('github') || originalUrl.includes('yukimaru')) {
-        console.log('🎭 GitHub情報をマスキング中...');
-        
-        // パラメータを暗号化
-        const encryptedParams = encryptParams(params);
-        
-        // 代替ドメインを使用
-        const altDomain = generateAlternativeDomain();
-        
-        // 短縮URLを構築
-        const shortUrl = new URL(`https://${altDomain}/s`);
-        
-        // 暗号化されたパラメータを追加
-        Object.entries(encryptedParams).forEach(([key, value]) => {
-          if (value) shortUrl.searchParams.set(key, value);
-        });
-        
-        return shortUrl.toString();
-      }
+      // 常に代替ドメインを使用してGit情報を完全に隠蔽
+      console.log('🎭 URLマスキング実行中...');
       
-      // GitHub情報が含まれていない場合はそのまま返す
-      return originalUrl;
+      // 代替ドメインを使用
+      const altDomain = generateAlternativeDomain();
+      
+      // 短縮URLを構築
+      const shortUrl = new URL(`https://${altDomain}/c`);
+      
+      // パラメータをさらに短縮
+      if (params.i) shortUrl.searchParams.set('x', safeBase64Encode(params.i));
+      if (params.n) shortUrl.searchParams.set('y', safeBase64Encode(params.n));
+      
+      const finalUrl = shortUrl.toString();
+      console.log('🎭 マスキング完了:', finalUrl);
+      return finalUrl;
       
     } catch (e) {
       console.warn('URL短縮エラー:', e);
-      return originalUrl;
+      // フォールバック: 最低限のマスキング
+      return originalUrl.replace(/yukimaru/gi, 'dev').replace(/github/gi, 'app');
     }
   }
 
