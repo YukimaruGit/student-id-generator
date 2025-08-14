@@ -5,15 +5,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>放課後クロニクル ― 診断ゲーム</title>
   
+  <!-- Studio環境用meta refresh -->
+  <script>
+    if (window.parent !== window || window.top !== window || window.frameElement) {
+      document.write('<meta http-equiv="refresh" content="0;url=quiz.html">');
+    }
+  </script>
+  
   <!-- 最速Studio環境検出リダイレクト -->
   <script>
-    if (window.location.hostname.includes('studio') || 
-        (document.referrer && document.referrer.includes('studio')) ||
-        window.location.href.includes('studio') ||
-        /studio/i.test(window.location.toString())) {
-      console.log('🚀 Studio環境検出 - 即座にシンプル版へリダイレクト');
-      window.location.replace('quiz.html');
-    }
+    (function() {
+      'use strict';
+      
+      // 複数の方法でStudio環境を検出
+      const detectionMethods = [
+        () => window.location.hostname.includes('studio'),
+        () => window.location.href.includes('studio'),
+        () => document.referrer && document.referrer.includes('studio'),
+        () => /studio/i.test(window.location.toString()),
+        () => /studio/i.test(document.referrer || ''),
+        () => window.parent !== window, // iframe検出
+        () => window.top !== window,    // iframe検出
+        () => window.frameElement !== null, // iframe検出
+      ];
+      
+      const isStudioOrIframe = detectionMethods.some(method => {
+        try {
+          return method();
+        } catch (e) {
+          return false;
+        }
+      });
+      
+      if (isStudioOrIframe) {
+        console.log('🚀 Studio/iframe環境検出 - 強制リダイレクト実行');
+        
+        // 複数の方法でリダイレクトを試行
+        try {
+          window.location.replace('quiz.html');
+        } catch (e) {
+          try {
+            window.location.href = 'quiz.html';
+          } catch (e2) {
+            try {
+              window.location = 'quiz.html';
+            } catch (e3) {
+              console.error('リダイレクトに失敗しました');
+            }
+          }
+        }
+        
+        // さらに強制的な方法
+        setTimeout(() => {
+          window.location = 'quiz.html';
+        }, 100);
+        
+        // DOMが読み込まれる前にリダイレクトボタンを表示
+        document.addEventListener('DOMContentLoaded', () => {
+          const redirectHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: sans-serif;">' +
+            '<div style="background: white; padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">' +
+            '<h2 style="color: #333; margin-bottom: 20px;">🎬 Studio環境を検出しました</h2>' +
+            '<p style="color: #666; margin-bottom: 30px;">診断ゲームをシンプル版で表示します</p>' +
+            '<button onclick="window.location=\'quiz.html\'" style="background: linear-gradient(135deg, #4ecdc4, #44a08d); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; cursor: pointer;">' +
+            '📋 診断ゲームを開始' +
+            '</button>' +
+            '</div>' +
+            '</div>';
+          document.body.innerHTML = redirectHTML;
+        });
+        
+        return; // 後続の処理を停止
+      }
+    })();
   </script>
   
   <link rel="icon" type="image/png" href="assets/img/crest.png">
