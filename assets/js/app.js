@@ -612,36 +612,27 @@ function initializeApp() {
       // 新しいタブでX投稿画面を開く
       window.open(twitterIntentUrl, '_blank');
       
-      // 成功メッセージ
-      alert('✅ Xの投稿画面が開きました！\n\n投稿すると学生証画像がプレビューされ、タップで診断ゲームに誘導されます。');
+      // 成功時のフィードバック（ポップアップなし）
+      console.log('✅ X投稿画面が正常に開きました');
       
     } catch (error) {
       console.error('Twitterシェアエラー:', error);
       hideLoading();
       
-      // Cloudinaryエラーの場合、代替手段を提示
+      // Cloudinaryエラーの場合、自動的に画像をダウンロード
       if (error.message.includes('401') || error.message.includes('Cloudinary upload failed')) {
-        const confirmDownload = confirm(
-          '画像のアップロードに失敗しました。\n\n' +
-          '代わりに画像をダウンロードして、手動でXにシェアしますか？'
-        );
-        
-        if (confirmDownload) {
-          // ローカル保存を実行
-          try {
-            const link = document.createElement('a');
-            link.download = '学生証.png';
-            link.href = elements.cardCanvas.toDataURL('image/png');
-            link.click();
-            
-            alert('画像がダウンロードされました。Xの投稿時に添付してください。');
-          } catch (downloadError) {
-            console.error('ダウンロードエラー:', downloadError);
-            alert('ダウンロードにも失敗しました。');
-          }
+        console.log('画像アップロード失敗 - 自動ダウンロードを実行');
+        try {
+          const link = document.createElement('a');
+          link.download = '学生証.png';
+          link.href = elements.cardCanvas.toDataURL('image/png');
+          link.click();
+          console.log('✅ 画像が自動ダウンロードされました');
+        } catch (downloadError) {
+          console.error('ダウンロードエラー:', downloadError);
         }
       } else {
-        alert('画像のアップロードに失敗しました。もう一度お試しください。');
+        console.error('画像アップロードエラー:', error.message);
       }
     }
   });
@@ -685,7 +676,7 @@ function initializeApp() {
       hideLoading();
       
       if (success) {
-        alert('✅ シェア用URLをクリップボードにコピーしました！\n\nDiscordやSNSに貼り付けると学生証画像がプレビューされます。');
+        console.log('✅ シェア用URLをクリップボードにコピーしました');
       } else {
         // フォールバック: テキストエリア方式
         try {
@@ -699,9 +690,9 @@ function initializeApp() {
           textArea.select();
           document.execCommand('copy');
           document.body.removeChild(textArea);
-          alert('✅ シェア用URLをコピーしました！\n\nDiscordやSNSに貼り付けると学生証画像がプレビューされます。');
+          console.log('✅ シェア用URLをコピーしました（フォールバック方式）');
         } catch (fallbackError) {
-          alert(`URLのコピーに失敗しました。\n\n以下のURLを手動でコピーしてください：\n${shareUrl}`);
+          console.error('URLのコピーに失敗しました:', shareUrl);
         }
       }
     } catch (error) {
