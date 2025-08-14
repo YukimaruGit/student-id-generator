@@ -680,49 +680,135 @@
       const question = questions[index];
       const container = document.getElementById('questionContainer');
       
+      // 安全なHTML生成
+      const choicesHTML = question.choices.map((choice, i) => 
+        `<div class="answer-option" onclick="selectAnswer(${i})" data-answer="${i}" style="cursor: pointer;">${choice.text || '選択肢' + (i + 1)}</div>`
+      ).join('');
+      
+      const backButtonHTML = index > 0 ? 
+        `<button class="back-btn" onclick="goBack()" style="cursor: pointer;">← 前の質問</button>` : 
+        '<div></div>';
+      
       container.innerHTML = `
         <div class="question-card">
           <div class="question-title">質問 ${index + 1} / ${questions.length}</div>
-          <div class="question-text">${question.q}</div>
+          <div class="question-text">${question.q || '質問が読み込めませんでした'}</div>
           <div class="answer-options">
-            ${question.choices.map((choice, i) => 
-              `<div class="answer-option" onclick="selectAnswer(${i})">${choice.text}</div>`
-            ).join('')}
+            ${choicesHTML}
           </div>
           <div class="controls">
-            ${index > 0 ? 
-              `<button class="back-btn" onclick="goBack()">← 前の質問</button>` : 
-              '<div></div>'
-            }
+            ${backButtonHTML}
             <span style="color: #666;">${index + 1} / ${questions.length}</span>
           </div>
         </div>
       `;
+      
+      // 念のため、クリックイベントを手動で追加
+      setTimeout(function() {
+        const answerOptions = container.querySelectorAll('.answer-option');
+        answerOptions.forEach((option, i) => {
+          option.addEventListener('click', function() {
+            console.log('🖱️ 選択肢クリック (手動イベント):', i);
+            selectAnswer(i);
+          });
+        });
+      }, 100);
 
       // 進捗バー更新
       const progress = ((index + 1) / questions.length) * 100;
       document.getElementById('progressFill').style.width = progress + '%';
     }
 
-    // 回答処理
+    // 堅牢な回答処理（TypeSquareエラー対策強化版）
     function selectAnswer(answerIndex) {
-      console.log('回答選択:', answerIndex);
-      
-      const question = questions[currentQuestion];
-      const choice = question.choices[answerIndex];
-      
-      // スコア計算
-      if (choice.scores.course) {
-        scores.course[choice.scores.course] += 1;
+      try {
+        console.log('🎯 回答選択:', answerIndex);
+        
+        // 二重実行防止
+        if (window.answerProcessing) {
+          console.log('⏸️ 処理中のため無視');
+          return;
+        }
+        window.answerProcessing = true;
+        
+        // 安全性チェック
+        if (typeof answerIndex !== 'number' || answerIndex < 0) {
+          console.error('❌ 無効な回答インデックス:', answerIndex);
+          window.answerProcessing = false;
+          return;
+        }
+        
+        const question = questions[currentQuestion];
+        if (!question || !question.choices || !question.choices[answerIndex]) {
+          console.error('❌ 無効な質問または選択肢:', currentQuestion, answerIndex);
+          window.answerProcessing = false;
+          return;
+        }
+        
+        const choice = question.choices[answerIndex];
+        console.log('📝 選択した回答:', choice.text);
+        
+        // スコア計算（エラーハンドリング付き）
+        try {
+          if (choice.scores.course) {
+            scores.course[choice.scores.course] = (scores.course[choice.scores.course] || 0) + 1;
+          }
+          if (choice.scores.club) {
+            scores.club[choice.scores.club] = (scores.club[choice.scores.club] || 0) + 1;
+          }
+          scores.vibe += choice.scores.vibe || 0;
+          
+          console.log('📊 現在のスコア:', { course: scores.course, club: Object.keys(scores.club).length, vibe: scores.vibe });
+        } catch (scoreError) {
+          console.error('❌ スコア計算エラー:', scoreError);
+        }
+        
+        // 次の質問へ進む
+        currentQuestion++;
+        console.log('➡️ 次の質問へ:', currentQuestion);
+        
+        // 遅延実行でUI更新
+        setTimeout(function() {
+          try {
+            showQuestion(currentQuestion);
+          } catch (showError) {
+            console.error('❌ 質問表示エラー:', showError);
+            // 強制的に次に進む
+            if (currentQuestion < questions.length) {
+              currentQuestion++;
+              showQuestion(currentQuestion);
+            } else {
+              showResult();
+            }
+          } finally {
+            window.answerProcessing = false;
+          }
+        }, 300);
+        
+      } catch (error) {
+        console.error('❌ 回答処理の重大エラー:', error);
+        alert('エラーが発生しましたが、次の質問に進みます。');
+        
+        // 緊急復旧処理
+        try {
+          currentQuestion++;
+          if (currentQuestion >= questions.length) {
+            showResult();
+          } else {
+            showQuestion(currentQuestion);
+          }
+        } catch (recoveryError) {
+          console.error('❌ 復旧処理エラー:', recoveryError);
+          // 最後の手段：結果画面に強制遷移
+          showResult();
+        } finally {
+          window.answerProcessing = false;
+        }
       }
-      if (choice.scores.club) {
-        scores.club[choice.scores.club] = (scores.club[choice.scores.club] || 0) + 1;
-      }
-      scores.vibe += choice.scores.vibe;
-      
-      currentQuestion++;
-      setTimeout(() => showQuestion(currentQuestion), 300);
     }
+    
+    // グローバルに selectAnswer を確実に定義
+    window.selectAnswer = selectAnswer;
 
     // 戻る
     function goBack() {
@@ -845,11 +931,69 @@
       };
     }
 
-    // 開始
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('診断ゲーム初期化完了');
-      showQuestion(0);
-    });
+    // 診断ゲーム初期化（TypeSquareエラー対策強化版）
+    function initializeQuiz() {
+      try {
+        console.log('🚀 診断ゲーム初期化開始');
+        
+        // DOM要素の存在確認
+        const questionContainer = document.getElementById('questionContainer');
+        const progressFill = document.getElementById('progressFill');
+        
+        if (!questionContainer) {
+          console.error('❌ questionContainer が見つかりません');
+          document.body.innerHTML = '<div style="text-align: center; padding: 50px; color: red;">エラー: 診断ゲームを読み込めませんでした。ページを再読み込みしてください。</div>';
+          return;
+        }
+        
+        if (!progressFill) {
+          console.warn('⚠️ progressFill が見つかりません（進捗バーなしで続行）');
+        }
+        
+        // グローバル関数の確認・修正
+        if (typeof window.selectAnswer !== 'function') {
+          console.warn('⚠️ selectAnswer関数を再定義');
+          window.selectAnswer = selectAnswer;
+        }
+        
+        if (typeof window.goBack !== 'function') {
+          console.warn('⚠️ goBack関数を再定義');
+          window.goBack = goBack;
+        }
+        
+        // 質問データの検証
+        if (!questions || questions.length === 0) {
+          console.error('❌ 質問データが見つかりません');
+          questionContainer.innerHTML = '<div style="text-align: center; padding: 50px; color: red;">エラー: 質問データが読み込めませんでした。</div>';
+          return;
+        }
+        
+        console.log('✅ 診断ゲーム初期化完了:', questions.length + '問');
+        
+        // 最初の質問を表示
+        showQuestion(0);
+        
+      } catch (error) {
+        console.error('❌ 診断ゲーム初期化エラー:', error);
+        document.body.innerHTML = '<div style="text-align: center; padding: 50px; color: red;">重大エラー: 診断ゲームを開始できませんでした。<br><button onclick="location.reload()">ページを再読み込み</button></div>';
+      }
+    }
+    
+    // 複数の方法で初期化を試行
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeQuiz);
+    } else {
+      // すでに読み込み完了している場合は即座に実行
+      initializeQuiz();
+    }
+    
+    // 念のため、少し遅延してからも実行
+    setTimeout(function() {
+      if (!document.getElementById('questionContainer').innerHTML.trim()) {
+        console.warn('⚠️ 遅延初期化を実行');
+        initializeQuiz();
+      }
+    }, 1000);
   </script>
 </body>
 </html> 
