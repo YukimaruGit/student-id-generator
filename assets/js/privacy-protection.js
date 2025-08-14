@@ -122,46 +122,42 @@
     }
   };
 
-  // ファイルアップロード検証（ウイルス対策）
+  // ファイルアップロード検証（緩和版）
   function validateFileUpload(file) {
-    if (!file || !PrivacyConfig.strictFileValidation) return true;
+    if (!file) return false;
 
-    // ファイルサイズ制限（10MB）
-    const maxSize = 10 * 1024 * 1024;
+    // ファイルサイズ制限を大幅緩和（50MB）
+    const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
       console.warn('🚨 ファイルサイズが大きすぎます:', file.size);
       return false;
     }
 
-    // 許可された画像形式のみ
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      console.warn('🚨 許可されていないファイル形式:', file.type);
+    // 基本的な画像形式チェック（より寛容に）
+    const allowedTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 
+      'image/bmp', 'image/tiff', 'image/svg+xml'
+    ];
+    if (file.type && !allowedTypes.includes(file.type)) {
+      console.warn('🚨 対応していないファイル形式:', file.type);
       return false;
     }
 
-    // ファイル名の検証（危険な文字の除去）
-    const dangerousChars = /<|>|"|'|&|;|\||`|\$|\(|\)|{|}|\[|\]|\\|\/|exec|script|cmd|powershell/i;
+    // ファイル名の基本的な安全性チェック（緩和版）
+    const dangerousChars = /(<script|javascript:|data:(?!image)|vbscript:|file:|exec|cmd)/i;
     if (dangerousChars.test(file.name)) {
       console.warn('🚨 危険なファイル名が検出されました:', file.name);
-      return false;
-    }
-
-    // ファイル拡張子の二重チェック
-    const fileExtension = file.name.split('.').pop().toLowerCase();
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    if (!allowedExtensions.includes(fileExtension)) {
-      console.warn('🚨 許可されていない拡張子:', fileExtension);
       return false;
     }
 
     return true;
   }
 
-  // 画像ファイルの内容検証
+  // 画像ファイルの内容検証（緩和版）
   function validateImageContent(file) {
     return new Promise((resolve) => {
-      if (!PrivacyConfig.enableVirusProtection) {
+      // 基本的なケースでは検証をスキップ
+      if (!file || file.size < 100 * 1024 * 1024) { // 100MB未満は基本的に許可
         resolve(true);
         return;
       }

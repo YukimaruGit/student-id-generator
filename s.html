@@ -21,11 +21,21 @@
   <meta name="twitter:description" content="放課後クロニクル学生証が完成しました！診断ゲームで自分だけの学校生活を見つけよう。">
   
   <!-- 動的メタタグは即座にJavaScriptで設定（最適化版） -->
+  <script src="assets/js/domain-masking.js"></script>
   <script>
-    // URL解析を同期的に実行
-    const params = new URLSearchParams(window.location.search);
-    const imageUrl = params.get('i');
-    const name = params.get('n');
+    // URL解析を同期的に実行（復号化対応）
+    const urlParams = new URLSearchParams(window.location.search);
+    const rawParams = {
+      i: urlParams.get('i'),
+      n: urlParams.get('n')
+    };
+    
+    // パラメータ復号化（ドメインマスキング対応）
+    const decryptedParams = window.DomainMasking ? 
+      window.DomainMasking.decryptParams(rawParams) : rawParams;
+    
+    const imageUrl = decryptedParams.i;
+    const name = decryptedParams.n;
     
     // メタタグ作成関数
     function createMeta(attr, name, content) {

@@ -58,7 +58,18 @@ async function uploadImageToCloudinary(canvas, cloudName, uploadPreset) {
 }
 
 function generateShareUrl(imageUrl, studentInfo = {}) {
-  // 短縮URL対応の専用シェアページを使用
+  // ドメインマスキングを使用してGit情報を隠蔽
+  if (window.DomainMasking) {
+    const params = {
+      i: imageUrl
+    };
+    if (studentInfo.name) params.n = studentInfo.name;
+    
+    const originalUrl = new URL('s.html', window.location.origin).toString();
+    return window.DomainMasking.generateShortUrl(originalUrl, params);
+  }
+  
+  // フォールバック: 従来の方式
   const shareUrl = new URL('s.html', window.location.origin);
   shareUrl.searchParams.set('i', imageUrl); // 短縮パラメータ
   if (studentInfo.name) shareUrl.searchParams.set('n', studentInfo.name); // 短縮パラメータ
@@ -144,9 +155,42 @@ function initializeApp() {
     loadingOverlay: document.getElementById('loadingOverlay')
   };
 
-  // 入力値の安全性検証
+  // NGワードリスト
+  const ngWords = [
+    '死ね', 'しね', 'シネ',
+    'ちんこ', 'チンコ', 'ちんぽ', 'チンポ',
+    'うんこ', 'ウンコ', 'うんち', 'ウンチ',
+    'まんこ', 'マンコ',
+    'きちがい', 'キチガイ', '気違い',
+    'ばか', 'バカ', '馬鹿',
+    'あほ', 'アホ', '阿呆',
+    'くそ', 'クソ', '糞',
+    'やりまん', 'ヤリマン',
+    '殺す', 'ころす', 'コロス',
+    'レイプ', 'れいぷ'
+  ];
+
+  // 入力値の安全性検証（NGワード追加）
   function validateInput(value) {
     if (!value || typeof value !== 'string') return '';
+    
+    // NGワードチェック
+    const lowerValue = value.toLowerCase();
+    const hasNgWord = ngWords.some(ngWord => {
+      return lowerValue.includes(ngWord.toLowerCase()) || 
+             value.includes(ngWord);
+    });
+    
+    if (hasNgWord) {
+      console.warn('🚫 不適切な言葉が含まれています');
+      // NGワードを「*」で置換
+      let sanitized = value;
+      ngWords.forEach(ngWord => {
+        const regex = new RegExp(ngWord, 'gi');
+        sanitized = sanitized.replace(regex, '*'.repeat(ngWord.length));
+      });
+      return sanitized;
+    }
     
     // 危険なスクリプトタグやHTMLタグを除去
     const sanitized = value
