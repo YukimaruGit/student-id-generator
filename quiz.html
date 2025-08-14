@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>放課後クロニクル ― 診断ゲーム</title>
   
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
   <!-- 最優先TypeSquare完全遮断システム -->
   <script>
     (function() {
@@ -307,7 +310,7 @@
     
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+      background: linear-gradient(90deg, #dda0dd, #b0c4de);
       border-radius: 4px;
       transition: width 0.5s ease;
       width: 0%;
@@ -344,19 +347,21 @@
     .answer-option {
       padding: 20px;
       background: white;
-      border: 2px solid #e0e0e0;
+      border: 2px solid #dda0dd;
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
       font-size: 1.1rem;
       text-align: center;
+      color: #666;
     }
     
     .answer-option:hover {
       background: #f8f9fa;
-      border-color: #4ecdc4;
+      border-color: #c891c8;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+      box-shadow: 0 4px 12px rgba(221, 160, 221, 0.3);
+      color: #444;
     }
     
     .controls {
@@ -400,7 +405,7 @@
     
     .result-title {
       font-size: 2rem;
-      color: #4ecdc4;
+      color: #dda0dd;
       margin-bottom: 20px;
       font-weight: 700;
     }
@@ -471,12 +476,12 @@
     }
     
     .btn-primary {
-      background: linear-gradient(135deg, #4ecdc4, #44a08d);
+      background: linear-gradient(135deg, #dda0dd, #b0c4de);
       color: white;
     }
     
     .btn-secondary {
-      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      background: linear-gradient(135deg, #98d7a5, #b0c4de);
       color: white;
     }
     
@@ -529,26 +534,26 @@
     <!-- 結果表示エリア -->
     <div class="result-container" id="resultContainer">
       <div class="result-card">
-        <div class="result-title">🎓 診断結果発表！</div>
+        <div class="result-title"><i class="fas fa-graduation-cap"></i> 診断結果発表！</div>
         <div style="font-size: 1.2rem; color: #666; margin-bottom: 20px;">あなたの学校生活は...</div>
         
-        <div id="previewMsg" style="font-size: 1.3rem; color: #4ecdc4; margin: 20px 0; font-weight: 600;">
+        <div id="previewMsg" style="font-size: 1.3rem; color: #dda0dd; margin: 20px 0; font-weight: 600;">
           <!-- プレビューメッセージ -->
         </div>
 
         <div class="result-details">
           <div class="result-item">
-            <span class="result-label">📚 学科/コース</span>
+            <span class="result-label"><i class="fas fa-book"></i> 学科/コース</span>
             <span class="result-value" id="resultCourse">-</span>
           </div>
           <div class="result-item">
-            <span class="result-label">🎭 部活動</span>
+            <span class="result-label"><i class="fas fa-users"></i> 部活動</span>
             <span class="result-value" id="resultClub">-</span>
           </div>
         </div>
 
         <div class="episode-section">
-          <div class="episode-title">🍃 ひとくちエピソード</div>
+          <div class="episode-title"><i class="fas fa-leaf"></i> ひとくちエピソード</div>
           <div class="episode-text" id="episodeMsg">
             <!-- エピソードメッセージ -->
           </div>
@@ -556,11 +561,11 @@
 
         <div class="buttons">
           <button class="btn btn-primary" id="toGeneratorBtn">
-            <span>📋</span>
+            <i class="fas fa-id-card"></i>
             学生証を作成する
           </button>
           <button class="btn btn-secondary" id="restartBtn">
-            <span>🔄</span>
+            <i class="fas fa-redo"></i>
             診断をやり直す
           </button>
         </div>
