@@ -4,7 +4,84 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>放課後クロニクル ― 診断ゲーム</title>
+  
+  <!-- TypeSquareエラー対策スクリプト -->
+  <script>
+    (function() {
+      'use strict';
+      
+      console.log('🛡️ TypeSquareエラー対策システム起動（Quiz版）');
+      
+      // TypeSquareエラー検出カウンター
+      let typeSquareErrorCount = 0;
+      
+      // すべてのTypeSquareエラーを抑制
+      window.addEventListener('error', function(e) {
+        if (e.filename && (
+          e.filename.includes('typesquare') || 
+          e.filename.includes('ts?') ||
+          e.filename.includes('entry.') ||
+          e.message.includes('typesquare') ||
+          e.message.includes('ERR_BLOCKED_BY_CLIENT')
+        )) {
+          typeSquareErrorCount++;
+          console.warn('🚫 TypeSquareエラーを無効化 (Quiz):', e.message, '(カウント:', typeSquareErrorCount, ')');
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          return false;
+        }
+      }, true);
+      
+      window.addEventListener('unhandledrejection', function(e) {
+        if (e.reason && (
+          e.reason.toString().includes('typesquare') ||
+          e.reason.toString().includes('ERR_BLOCKED_BY_CLIENT') ||
+          e.reason.toString().includes('Failed to fetch')
+        )) {
+          typeSquareErrorCount++;
+          console.warn('🚫 TypeSquare Promise rejection を無効化 (Quiz) (カウント:', typeSquareErrorCount, ')');
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          return false;
+        }
+      }, true);
+      
+      // TypeSquare関連のグローバル変数を無効化
+      const tsVariables = ['ts', 'TypeSquare', 'Typekit', 'WebFont', 'Ts', 'TS'];
+      tsVariables.forEach(varName => {
+        Object.defineProperty(window, varName, {
+          get: function() { return null; },
+          set: function() { console.warn('🚫 TypeSquare変数設定を阻止 (Quiz):', varName); },
+          configurable: false,
+          enumerable: false
+        });
+      });
+      
+      // コンソールエラーも抑制
+      const originalConsoleError = console.error;
+      console.error = function(...args) {
+        const message = args.join(' ');
+        if (message.includes('typesquare') || 
+            message.includes('ERR_BLOCKED_BY_CLIENT') ||
+            message.includes('Failed to load resource')) {
+          console.warn('🔇 TypeSquareコンソールエラーを抑制 (Quiz):', message);
+          return;
+        }
+        return originalConsoleError.apply(console, args);
+      };
+      
+      console.log('✅ TypeSquareエラー対策完了（Quiz版）');
+    })();
+  </script>
+  
   <style>
+    /* TypeSquareの完全無効化 */
+    link[href*="typesquare"], 
+    script[src*="typesquare"],
+    script[src*="entry."] {
+      display: none !important;
+    }
+    
     * {
       margin: 0;
       padding: 0;
@@ -12,7 +89,7 @@
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Yu Gothic UI", "Yu Gothic", "Meiryo UI", "Meiryo", "MS PGothic", sans-serif !important;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       color: #333;
@@ -298,6 +375,32 @@
 
   <script>
     console.log('🚀 シンプル診断ゲーム開始');
+
+    // TypeSquareエラーの完全無視（メイン処理内）
+    window.addEventListener('error', function(e) {
+      if (e.message && (
+        e.message.includes('typesquare') || 
+        e.message.includes('ERR_BLOCKED_BY_CLIENT') ||
+        e.message.includes('net::') ||
+        e.message.includes('Failed to fetch') ||
+        e.message.includes('entry.b8fdbc69.js')
+      )) {
+        console.warn('🔇 エラーを無視 (Quiz):', e.message);
+        e.preventDefault();
+        return true;
+      }
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+      if (e.reason && (
+        e.reason.toString().includes('typesquare') ||
+        e.reason.toString().includes('ERR_BLOCKED_BY_CLIENT') ||
+        e.reason.toString().includes('Failed to fetch')
+      )) {
+        console.warn('🔇 Promise rejection を無視 (Quiz)');
+        e.preventDefault();
+      }
+    });
 
     // 質問データ
     const questions = [
