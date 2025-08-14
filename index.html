@@ -768,6 +768,14 @@
     // シンプルな初期化
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 診断ゲーム開始');
+      
+      // 質問をシャッフルして10問選択
+      for (let i = questionPool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [questionPool[i], questionPool[j]] = [questionPool[j], questionPool[i]];
+      }
+      
+      // 最初の質問を表示
       showQuestion(0);
     });
 
@@ -861,7 +869,7 @@
         q: '文化祭でやってみたいことは？',
         choices: [
           { text:'演劇やダンスのステージ', scores:{ course:null, club:'演劇部', vibe:3 } },
-          { text:'模擬店や屋台運営', scores:{ course:null, club:'バスケットボール部', vibe:4 } },
+          { text:'模擬店や屋台運営', scores:{ course:'バスケットボール部', club:null, vibe:4 } },
           { text:'展示や制作系の出し物', scores:{ course:'美術コース', club:null, vibe:2 } },
           { text:'お化け屋敷や脱出ゲーム', scores:{ course:null, club:'ホラー布教部', vibe:5 } }
         ]
@@ -1180,10 +1188,15 @@
         
         console.log('📝 回答:', choice.text);
         
-        // スコア計算
-        if (choice.scores.course) tally.course[choice.scores.course] += 1;
-        if (choice.scores.club) tally.club[choice.scores.club] = (tally.club[choice.scores.club] || 0) + 1;
-        tally.vibe += choice.scores.vibe;
+        // スコア計算（元の方式に戻す）
+        const bonus = 0.8 + Math.random() * 0.4;
+        if (choice.scores.course) {
+          tally.course[choice.scores.course] += bonus;
+        }
+        if (choice.scores.club) {
+          tally.club[choice.scores.club] = (tally.club[choice.scores.club] || 0) + bonus;
+        }
+        tally.vibe += choice.scores.vibe * bonus;
         
         // 次の質問へ
         currentQuestionIndex++;
@@ -1202,7 +1215,7 @@
       }
     };
 
-    // 最もシンプルな質問表示
+    // シンプルな質問表示
     function showQuestion(index) {
       if (index >= questions.length) {
         showResult();
@@ -1212,19 +1225,28 @@
       const question = questions[index];
       const container = document.getElementById('questionContainer');
       
-      // HTMLを直接設定
+      if (!container) {
+        console.error('questionContainer が見つかりません');
+        return;
+      }
+      
+      // HTMLを生成
       container.innerHTML = `
         <div class="question-card active fade-in">
           <div class="question-title">質問 ${index + 1} / ${questions.length}</div>
           <div class="question-text">${question.q}</div>
           <div class="answer-options">
-            <div class="answer-option" onclick="selectAnswer(0)" style="cursor: pointer; margin: 10px 0; padding: 15px; background: #f5f5f5; border-radius: 8px; border: 2px solid #ddd;">${question.choices[0].text}</div>
-            <div class="answer-option" onclick="selectAnswer(1)" style="cursor: pointer; margin: 10px 0; padding: 15px; background: #f5f5f5; border-radius: 8px; border: 2px solid #ddd;">${question.choices[1].text}</div>
-            <div class="answer-option" onclick="selectAnswer(2)" style="cursor: pointer; margin: 10px 0; padding: 15px; background: #f5f5f5; border-radius: 8px; border: 2px solid #ddd;">${question.choices[2].text}</div>
-            <div class="answer-option" onclick="selectAnswer(3)" style="cursor: pointer; margin: 10px 0; padding: 15px; background: #f5f5f5; border-radius: 8px; border: 2px solid #ddd;">${question.choices[3].text}</div>
+            ${question.choices.map((choice, i) => 
+              `<div class="answer-option" onclick="selectAnswer(${i})">${choice.text}</div>`
+            ).join('')}
           </div>
           <div class="question-controls">
-            ${index > 0 ? `<button onclick="goBack()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">← 前の質問</button>` : '<div></div>'}
+            ${index > 0 ? `
+              <button class="back-btn" onclick="goBack()">
+                <span>←</span>
+                前の質問
+              </button>
+            ` : '<div></div>'}
             <span class="question-number">${index + 1} / ${questions.length}</span>
           </div>
         </div>
@@ -1233,7 +1255,9 @@
       // 進捗バー更新
       const progress = ((index + 1) / questions.length) * 100;
       const progressFill = document.getElementById('progressFill');
-      if (progressFill) progressFill.style.width = progress + '%';
+      if (progressFill) {
+        progressFill.style.width = `${progress}%`;
+      }
       
       console.log('📄 質問表示完了:', question.q);
     }
@@ -1268,51 +1292,63 @@
       const episodeMessage = makeEpisodeMsg();
       document.getElementById('episodeMsg').textContent = episodeMessage;
       
+      // ボタンのアイコンを絵文字に置き換え（Font Awesome対策）
+      const toGeneratorBtn = document.getElementById('toGeneratorBtn');
+      const restartBtn = document.getElementById('restartBtn');
+      
+      if (toGeneratorBtn) {
+        toGeneratorBtn.innerHTML = '<span style="margin-right: 0.5rem;">📋</span>学生証を作成する';
+      }
+      
+      if (restartBtn) {
+        restartBtn.innerHTML = '<span style="margin-right: 0.5rem;">🔄</span>診断をやり直す';
+      }
+      
       // 学生証作成ボタンの処理
-      document.getElementById('toGeneratorBtn').onclick = () => {
-        // 部活動をgenerator.htmlの仕様に合わせてマッピング
-        const clubMapping = {
-          '陸上部': '陸上部',
-          'テニス部': 'テニス部', 
-          'バスケットボール部': 'バスケットボール部',
-          'バレーボール部': 'バレーボール部',
-          'バドミントン部': 'バドミントン部',
-          '水泳部': '水泳部',
-          'ダンス部': 'ダンス部',
-          '声楽部': '声楽部',
-          '吹奏楽部': '吹奏楽部',
-          '絵画部': '絵画部',
-          '彫刻部': '彫刻部',
-          '放送部': '放送部',
-          '英語研究部': '英語研究部',
-          '演劇部': '演劇部',
-          '茶道部': '茶道部',
-          '華道部': '華道部',
-          'ホラー布教部': 'ホラー布教部',
-          '軽音部': '軽音部',
-          '帰宅': '文芸',
-          'なし': '文芸'
+      if (toGeneratorBtn) {
+        toGeneratorBtn.onclick = () => {
+          // 部活動をgenerator.htmlの仕様に合わせてマッピング
+          const clubMapping = {
+            '陸上部': '陸上部',
+            'テニス部': 'テニス部', 
+            'バスケットボール部': 'バスケットボール部',
+            'バレーボール部': 'バレーボール部',
+            'バドミントン部': 'バドミントン部',
+            '水泳部': '水泳部',
+            'ダンス部': 'ダンス部',
+            '声楽部': '声楽部',
+            '吹奏楽部': '吹奏楽部',
+            '絵画部': '絵画部',
+            '彫刻部': '彫刻部',
+            '放送部': '放送部',
+            '英語研究部': '英語研究部',
+            '演劇部': '演劇部',
+            '茶道部': '茶道部',
+            '華道部': '華道部',
+            'ホラー布教部': 'ホラー布教部',
+            '軽音部': '軽音部',
+            '帰宅': '文芸',
+            'なし': '文芸'
+          };
+          
+          const mappedClub = clubMapping[result.club] || '文芸';
+          
+          const url = new URL('generator.html', window.location.href);
+          url.searchParams.set('department', result.department);
+          url.searchParams.set('course', result.course);
+          url.searchParams.set('club', mappedClub);
+          url.searchParams.set('previewMessage', previewMessage);
+          url.searchParams.set('episodeMessage', episodeMessage);
+          window.location.href = url.toString();
         };
-        
-        const mappedClub = clubMapping[result.club] || '文芸';
-        
-        const url = new URL('generator.html', window.location.href);
-        url.searchParams.set('department', result.department);
-        url.searchParams.set('course', result.course);
-        url.searchParams.set('club', mappedClub);
-        url.searchParams.set('previewMessage', previewMessage);
-        url.searchParams.set('episodeMessage', episodeMessage);
-        window.location.href = url.toString();
-      };
+      }
 
       // 診断をやり直すボタンの処理
-      document.getElementById('restartBtn').onclick = () => {
-        // ページをリロードして最初から開始
-        window.location.reload();
-      };
-      
-      // Font Awesome確認をボタン生成後に実行
-      setTimeout(checkFontAwesome, 100);
+      if (restartBtn) {
+        restartBtn.onclick = () => {
+          window.location.reload();
+        };
+      }
     }
 
 
