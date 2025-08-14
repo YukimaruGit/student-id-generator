@@ -25,8 +25,59 @@
       src: local('Yu Gothic UI'), local('Meiryo UI'), local('MS PGothic');
       font-display: swap;
     }
+
+    /* Font Awesome フォールバック対策 */
+    .fas, .fab {
+      font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", sans-serif;
+    }
+
+    /* アイコンが読み込まれない場合のフォールバック */
+    .fas::before, .fab::before {
+      font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", sans-serif;
+    }
+
+    /* 特定のアイコンが表示されない場合の代替表示 */
+    .fa-id-card::before {
+      content: "📋";
+      font-family: sans-serif;
+    }
+    
+    .fa-redo::before {
+      content: "🔄";
+      font-family: sans-serif;
+    }
+    
+    .fa-arrow-left::before {
+      content: "←";
+      font-family: sans-serif;
+    }
+
+    /* Font Awesomeが正常に読み込まれた場合は元のアイコンを使用 */
+    @supports (font-family: "Font Awesome 6 Free") {
+      .fa-id-card::before {
+        content: "\f2c2";
+        font-family: "Font Awesome 6 Free";
+      }
+      
+      .fa-redo::before {
+        content: "\f01e";
+        font-family: "Font Awesome 6 Free";
+      }
+      
+      .fa-arrow-left::before {
+        content: "\f060";
+        font-family: "Font Awesome 6 Free";
+      }
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Font Awesome フォールバック -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="none" onload="if(media!='all')media='all'">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css" media="none" onload="if(media!='all')media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
+  </noscript>
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
     /* 診断ゲーム専用スタイル */
@@ -656,7 +707,7 @@
 
 
   <footer>
-    <p>&copy; 2024 放課後クロニクル 診断ゲーム</p>
+    <p>&copy; 2025 放課後クロニクル 診断ゲーム</p>
   </footer>
 
   <script>
@@ -1047,7 +1098,7 @@
           <div class="question-text">${question.q}</div>
           <div class="answer-options">
             ${question.choices.map((choice, i) => 
-              `<div class="answer-option" onclick="selectAnswer(${i})">${choice.text}</div>`
+              `<div class="answer-option" data-answer-index="${i}">${choice.text}</div>`
             ).join('')}
           </div>
           <div class="question-controls">
@@ -1062,6 +1113,17 @@
         </div>
       `;
 
+      // 選択肢にイベントリスナーを追加
+      const answerOptions = container.querySelectorAll('.answer-option');
+      answerOptions.forEach((option, i) => {
+        option.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('イベントリスナー: 選択肢', i, 'がクリックされました');
+          selectAnswer(i);
+        });
+      });
+
       // 進捗バー更新
       const progress = ((index + 1) / questions.length) * 100;
       document.getElementById('progressFill').style.width = `${progress}%`;
@@ -1071,32 +1133,47 @@
     function selectAnswer(answerIndex) {
       console.log('selectAnswer が呼ばれました:', { answerIndex, currentQuestionIndex });
       
-      const question = questions[currentQuestionIndex];
-      const selectedChoice = question.choices[answerIndex];
+      // 重複実行を防ぐためのフラグチェック
+      if (window.processingAnswer) {
+        console.log('回答処理中のため、クリックを無視します');
+        return;
+      }
+      window.processingAnswer = true;
       
-      console.log('選択された回答:', selectedChoice);
-      
-      // 現在のスコア状態を履歴に保存（変更前）
-      tallyHistory[currentQuestionIndex] = JSON.parse(JSON.stringify(tally));
-      
-      // 回答履歴に保存
-      answerHistory[currentQuestionIndex] = {
-        questionIndex: currentQuestionIndex,
-        answerIndex: answerIndex,
-        choice: selectedChoice
-      };
-      
-      // カードフェードアウトエフェクト
-      const card = document.querySelector('.question-card.active');
-      card.classList.add('fade-out');
-      
-      // スコア計算
-      answer(selectedChoice.scores);
-      
-      setTimeout(() => {
-        currentQuestionIndex++;
-        showQuestion(currentQuestionIndex);
-      }, 400);
+      try {
+        const question = questions[currentQuestionIndex];
+        const selectedChoice = question.choices[answerIndex];
+        
+        console.log('選択された回答:', selectedChoice);
+        
+        // 現在のスコア状態を履歴に保存（変更前）
+        tallyHistory[currentQuestionIndex] = JSON.parse(JSON.stringify(tally));
+        
+        // 回答履歴に保存
+        answerHistory[currentQuestionIndex] = {
+          questionIndex: currentQuestionIndex,
+          answerIndex: answerIndex,
+          choice: selectedChoice
+        };
+        
+        // カードフェードアウトエフェクト
+        const card = document.querySelector('.question-card.active');
+        if (card) {
+          card.classList.add('fade-out');
+        }
+        
+        // スコア計算
+        answer(selectedChoice.scores);
+        
+        setTimeout(() => {
+          currentQuestionIndex++;
+          showQuestion(currentQuestionIndex);
+          window.processingAnswer = false; // フラグをリセット
+        }, 400);
+      } catch (error) {
+        console.error('selectAnswer でエラーが発生しました:', error);
+        window.processingAnswer = false; // エラー時もフラグをリセット
+      }
     }
 
     // 前の質問に戻る
@@ -1183,10 +1260,56 @@
         // ページをリロードして最初から開始
         window.location.reload();
       };
+      
+      // Font Awesome確認をボタン生成後に実行
+      setTimeout(checkFontAwesome, 100);
+    }
+
+    // Font Awesome 読み込み確認とフォールバック
+    function checkFontAwesome() {
+      // Font Awesomeが読み込まれているかチェック
+      const testElement = document.createElement('div');
+      testElement.className = 'fas fa-home';
+      testElement.style.position = 'absolute';
+      testElement.style.left = '-9999px';
+      document.body.appendChild(testElement);
+      
+      const computed = window.getComputedStyle(testElement, ':before');
+      const fontFamily = computed.getPropertyValue('font-family');
+      
+      document.body.removeChild(testElement);
+      
+      // Font Awesomeが読み込まれていない場合のフォールバック
+      if (!fontFamily.includes('Font Awesome')) {
+        console.warn('Font Awesomeが読み込まれていません。代替アイコンを使用します。');
+        
+        // ボタンのアイコンをテキストで置き換え
+        const toGeneratorBtn = document.getElementById('toGeneratorBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        
+        if (toGeneratorBtn) {
+          toGeneratorBtn.innerHTML = '<span style="margin-right: 0.5rem;">📋</span>学生証を作成する';
+        }
+        
+        if (restartBtn) {
+          restartBtn.innerHTML = '<span style="margin-right: 0.5rem;">🔄</span>診断をやり直す';
+        }
+        
+        // 戻るボタンのアイコンも置き換え
+        const backButtons = document.querySelectorAll('.back-btn i');
+        backButtons.forEach(icon => {
+          icon.textContent = '←';
+          icon.className = '';
+          icon.style.fontFamily = 'sans-serif';
+        });
+      }
     }
 
     // 初期化
     document.addEventListener('DOMContentLoaded', function() {
+      // Font Awesome読み込み確認（少し遅延させて確実にチェック）
+      setTimeout(checkFontAwesome, 100);
+      
       // URLパラメータを確認
       const params = new URLSearchParams(location.search);
       const showResult = params.get('showResult');
@@ -1243,6 +1366,9 @@
           // URLパラメータを削除してリロード
           window.location.href = 'index.html';
         };
+        
+        // Font Awesome確認を結果表示後にも実行
+        setTimeout(checkFontAwesome, 200);
       } else {
         // 通常の診断開始
         showQuestion(0);
@@ -1270,6 +1396,23 @@
         }
         return originalInsertBefore.call(this, newNode, referenceNode);
       };
+
+      // TypeSquareの既存のグローバル変数を無効化
+      if (window.ts) {
+        console.warn('TypeSquareグローバル変数を無効化しました');
+        window.ts = null;
+      }
+      
+      // Fetch APIのインターセプト（TypeSquare関連のリクエストを阻止）
+      const originalFetch = window.fetch;
+      window.fetch = function(...args) {
+        const url = args[0];
+        if (typeof url === 'string' && url.includes('typesquare')) {
+          console.warn('TypeSquareへのfetchリクエストを阻止しました:', url);
+          return Promise.reject(new Error('TypeSquare request blocked'));
+        }
+        return originalFetch.apply(this, args);
+      };
     })();
 
     // TypeSquare フォントエラーのグローバルエラーハンドリング
@@ -1278,16 +1421,24 @@
       if (e.message && (
         e.message.includes('typesquare') || 
         e.message.includes('ERR_BLOCKED_BY_CLIENT') ||
-        e.filename && e.filename.includes('typesquare')
+        e.message.includes('net::') ||
+        e.message.includes('Failed to fetch') ||
+        (e.filename && e.filename.includes('typesquare'))
       )) {
         console.warn('TypeSquareフォントエラーを検出しましたが、診断ゲームは継続します:', e.message);
+        e.preventDefault();
         return true; // エラーを捕捉して継続
       }
     });
 
     // Promise rejection のグローバルハンドリング
     window.addEventListener('unhandledrejection', function(e) {
-      if (e.reason && e.reason.toString().includes('typesquare')) {
+      if (e.reason && (
+        e.reason.toString().includes('typesquare') ||
+        e.reason.toString().includes('ERR_BLOCKED_BY_CLIENT') ||
+        e.reason.toString().includes('net::') ||
+        e.reason.toString().includes('Failed to fetch')
+      )) {
         console.warn('TypeSquare Promise rejection を検出しましたが、診断ゲームは継続します:', e.reason);
         e.preventDefault(); // デフォルトのエラー処理を阻止
       }
@@ -1297,11 +1448,10 @@
     document.addEventListener('click', function(e) {
       // 選択肢のクリックが効かない場合のフォールバック
       if (e.target.classList.contains('answer-option')) {
-        const options = Array.from(document.querySelectorAll('.answer-option'));
-        const index = options.indexOf(e.target);
-        if (index !== -1 && typeof selectAnswer === 'function') {
-          console.log('フォールバック: 選択肢', index, 'がクリックされました');
-          selectAnswer(index);
+        const answerIndex = parseInt(e.target.getAttribute('data-answer-index'));
+        if (!isNaN(answerIndex) && typeof selectAnswer === 'function') {
+          console.log('フォールバック: 選択肢', answerIndex, 'がクリックされました');
+          selectAnswer(answerIndex);
         }
       }
     });
