@@ -21,7 +21,9 @@
             message.includes('ERR_BLOCKED_BY_CLIENT') ||
             message.includes('Failed to load resource') ||
             message.includes('net::') ||
-            message.includes('Uncaught')) {
+            message.includes('GET https://l.typesquare.com') ||
+            message.includes('Uncaught (in promise) n') ||
+            (message.includes('Uncaught') && message.includes('typesquare'))) {
           return; // 完全に無視
         }
         return originalError.apply(console, args);
@@ -73,18 +75,30 @@
         }
       }, true);
       
-      // TypeSquare関連変数を完全にブロック
+      // TypeSquare関連変数を安全にブロック
       const blockedVariables = ['ts', 'TypeSquare', 'Typekit', 'WebFont', 'Ts', 'TS', 'typesquare'];
       blockedVariables.forEach(varName => {
         try {
-          Object.defineProperty(window, varName, {
-            get: function() { return null; },
-            set: function() { return false; },
-            configurable: false,
-            enumerable: false
-          });
+          // 既に定義されているかチェック
+          if (window.hasOwnProperty(varName)) {
+            console.log('🚫 既存の変数をnullに設定:', varName);
+            try {
+              window[varName] = null;
+            } catch(setError) {
+              console.warn('⚠️ 変数設定失敗:', varName, setError);
+            }
+          } else {
+            // 新規定義
+            Object.defineProperty(window, varName, {
+              get: function() { return null; },
+              set: function() { return false; },
+              configurable: true,
+              enumerable: false
+            });
+            console.log('🚫 新規変数ブロック設定:', varName);
+          }
         } catch(e) {
-          // 設定できない場合は無視
+          console.warn('⚠️ 変数ブロック設定失敗:', varName, e.message);
         }
       });
       
@@ -703,16 +717,23 @@
         </div>
       `;
       
-      // 念のため、クリックイベントを手動で追加
-      setTimeout(function() {
-        const answerOptions = container.querySelectorAll('.answer-option');
-        answerOptions.forEach((option, i) => {
-          option.addEventListener('click', function() {
-            console.log('🖱️ 選択肢クリック (手動イベント):', i);
-            selectAnswer(i);
-          });
-        });
-      }, 100);
+             // 念のため、クリックイベントを手動で追加
+       setTimeout(function() {
+         const answerOptions = container.querySelectorAll('.answer-option');
+         console.log('🔧 見つかった選択肢数:', answerOptions.length);
+         answerOptions.forEach((option, i) => {
+           option.addEventListener('click', function(event) {
+             console.log('🖱️🖱️🖱️ 選択肢がクリックされました (手動イベント):', i);
+             console.log('📍 クリックされた要素:', option.textContent);
+             event.preventDefault();
+             event.stopPropagation();
+             selectAnswer(i);
+           });
+           option.style.cursor = 'pointer';
+           option.style.border = '2px solid #e0e0e0';
+           console.log('🔧 選択肢', i, 'にイベントリスナー追加:', option.textContent);
+         });
+       }, 100);
 
       // 進捗バー更新
       const progress = ((index + 1) / questions.length) * 100;
@@ -722,7 +743,8 @@
     // 堅牢な回答処理（TypeSquareエラー対策強化版）
     function selectAnswer(answerIndex) {
       try {
-        console.log('🎯 回答選択:', answerIndex);
+        console.log('🎯🎯🎯 回答選択が呼び出されました！ インデックス:', answerIndex);
+        console.log('📍 現在の質問番号:', currentQuestion);
         
         // 二重実行防止
         if (window.answerProcessing) {
@@ -968,10 +990,23 @@
           return;
         }
         
-        console.log('✅ 診断ゲーム初期化完了:', questions.length + '問');
-        
-        // 最初の質問を表示
-        showQuestion(0);
+                 console.log('✅ 診断ゲーム初期化完了:', questions.length + '問');
+         console.log('🔧 デバッグ: selectAnswer関数確認:', typeof window.selectAnswer);
+         console.log('🔧 デバッグ: goBack関数確認:', typeof window.goBack);
+         
+         // 最初の質問を表示
+         showQuestion(0);
+         
+         // 5秒後に動作確認メッセージ
+         setTimeout(function() {
+           const firstOption = document.querySelector('.answer-option');
+           if (firstOption) {
+             console.log('✅ 選択肢が正常に表示されています。クリックしてテストしてください。');
+             console.log('🔧 デバッグ: 最初の選択肢のonclick:', firstOption.getAttribute('onclick'));
+           } else {
+             console.error('❌ 選択肢が見つかりません');
+           }
+         }, 5000);
         
       } catch (error) {
         console.error('❌ 診断ゲーム初期化エラー:', error);
