@@ -14,7 +14,7 @@ const SOUNDS = {
 
 // Cloudinary設定
 const cloudinaryConfig = {
-  cloudName: 'di5rxlddy',
+  cloudName: 'di5xqlddy',
   uploadPreset: 'student_card_AS_chronicle'
 };
 
@@ -508,15 +508,50 @@ function initializeApp() {
         cloudinaryConfig.uploadPreset
       );
       
-      const shareUrl = generateShareUrl(imageUrl);
-      const twitterUrl = generateTwitterShareUrl(shareUrl);
-      window.open(twitterUrl);
+      // 画像をダウンロード
+      const link = document.createElement('a');
+      link.href = imageUrl;
+      link.download = '放課後クロニクル_学生証.png';
+      link.click();
+      
+      // 少し遅延してからX投稿画面を開く
+      setTimeout(() => {
+        const twitterText = '放課後クロニクル 学生証を作成しました！ #放課後クロニクル #学生証ジェネレーター';
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(twitterText)}`;
+        window.open(twitterUrl);
+        
+        alert('📝 画像がダウンロードされました！\n\nX投稿画面で「メディアを追加」ボタンから学生証画像を添付してください。');
+      }, 1000);
       
       hideLoading();
     } catch (error) {
       console.error('Twitterシェアエラー:', error);
       hideLoading();
-      alert('画像のアップロードに失敗しました。もう一度お試しください。');
+      
+      // Cloudinaryエラーの場合、代替手段を提示
+      if (error.message.includes('401') || error.message.includes('Cloudinary upload failed')) {
+        const confirmDownload = confirm(
+          '画像のアップロードに失敗しました。\n\n' +
+          '代わりに画像をダウンロードして、手動でXにシェアしますか？'
+        );
+        
+        if (confirmDownload) {
+          // ローカル保存を実行
+          try {
+            const link = document.createElement('a');
+            link.download = '学生証.png';
+            link.href = elements.cardCanvas.toDataURL('image/png');
+            link.click();
+            
+            alert('画像がダウンロードされました。Xの投稿時に添付してください。');
+          } catch (downloadError) {
+            console.error('ダウンロードエラー:', downloadError);
+            alert('ダウンロードにも失敗しました。');
+          }
+        }
+      } else {
+        alert('画像のアップロードに失敗しました。もう一度お試しください。');
+      }
     }
   });
 
@@ -549,7 +584,32 @@ function initializeApp() {
     } catch (error) {
       console.error('URLコピーエラー:', error);
       hideLoading();
-      alert('画像のアップロードに失敗しました。もう一度お試しください。');
+      
+      // Cloudinaryエラーの場合、代替手段を提示
+      if (error.message.includes('401') || error.message.includes('Cloudinary upload failed')) {
+        const confirmDownload = confirm(
+          '画像のアップロードに失敗しました。\n\n' +
+          '代わりに画像をダウンロードしますか？\n' +
+          'ダウンロードした画像を使ってSNSでシェアできます。'
+        );
+        
+        if (confirmDownload) {
+          // ローカル保存を実行
+          try {
+            const link = document.createElement('a');
+            link.download = '学生証.png';
+            link.href = elements.cardCanvas.toDataURL('image/png');
+            link.click();
+            
+            alert('画像がダウンロードされました。');
+          } catch (downloadError) {
+            console.error('ダウンロードエラー:', downloadError);
+            alert('ダウンロードにも失敗しました。');
+          }
+        }
+      } else {
+        alert('画像のアップロードに失敗しました。もう一度お試しください。');
+      }
     }
   });
 

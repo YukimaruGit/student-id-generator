@@ -6,6 +6,26 @@
   <title>放課後クロニクル ― 診断ゲーム</title>
   <link rel="icon" type="image/png" href="assets/img/crest.png">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+  <!-- フォールバックフォント設定 -->
+  <style>
+    /* アドブロッカー対策: 完全なローカルフォントスタック */
+    body, html, * {
+      font-family: "Noto Sans JP", "Yu Gothic UI", "Yu Gothic", "Meiryo UI", "Meiryo", "MS PGothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", "BIZ UDGothic", sans-serif !important;
+    }
+    
+    /* TypeSquareのCSS読み込みを検出して無効化 */
+    link[href*="typesquare"], 
+    script[src*="typesquare"] {
+      display: none !important;
+    }
+    
+    /* フォント読み込み失敗時の保護 */
+    @font-face {
+      font-family: 'Fallback-Gothic';
+      src: local('Yu Gothic UI'), local('Meiryo UI'), local('MS PGothic');
+      font-display: swap;
+    }
+  </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
@@ -1049,8 +1069,12 @@
 
     // 回答選択
     function selectAnswer(answerIndex) {
+      console.log('selectAnswer が呼ばれました:', { answerIndex, currentQuestionIndex });
+      
       const question = questions[currentQuestionIndex];
       const selectedChoice = question.choices[answerIndex];
+      
+      console.log('選択された回答:', selectedChoice);
       
       // 現在のスコア状態を履歴に保存（変更前）
       tallyHistory[currentQuestionIndex] = JSON.parse(JSON.stringify(tally));
@@ -1222,6 +1246,63 @@
       } else {
         // 通常の診断開始
         showQuestion(0);
+      }
+    });
+
+    // アドブロッカー対策: TypeSquare完全無効化
+    (function() {
+      // TypeSquareスクリプトの動的挿入を阻止
+      const originalAppendChild = Node.prototype.appendChild;
+      const originalInsertBefore = Node.prototype.insertBefore;
+      
+      Node.prototype.appendChild = function(child) {
+        if (child.tagName === 'SCRIPT' && child.src && child.src.includes('typesquare')) {
+          console.warn('TypeSquareスクリプトの挿入を阻止しました:', child.src);
+          return child;
+        }
+        return originalAppendChild.call(this, child);
+      };
+      
+      Node.prototype.insertBefore = function(newNode, referenceNode) {
+        if (newNode.tagName === 'SCRIPT' && newNode.src && newNode.src.includes('typesquare')) {
+          console.warn('TypeSquareスクリプトの挿入を阻止しました:', newNode.src);
+          return newNode;
+        }
+        return originalInsertBefore.call(this, newNode, referenceNode);
+      };
+    })();
+
+    // TypeSquare フォントエラーのグローバルエラーハンドリング
+    window.addEventListener('error', function(e) {
+      // TypeSquareやフォント関連のエラーを無視
+      if (e.message && (
+        e.message.includes('typesquare') || 
+        e.message.includes('ERR_BLOCKED_BY_CLIENT') ||
+        e.filename && e.filename.includes('typesquare')
+      )) {
+        console.warn('TypeSquareフォントエラーを検出しましたが、診断ゲームは継続します:', e.message);
+        return true; // エラーを捕捉して継続
+      }
+    });
+
+    // Promise rejection のグローバルハンドリング
+    window.addEventListener('unhandledrejection', function(e) {
+      if (e.reason && e.reason.toString().includes('typesquare')) {
+        console.warn('TypeSquare Promise rejection を検出しましたが、診断ゲームは継続します:', e.reason);
+        e.preventDefault(); // デフォルトのエラー処理を阻止
+      }
+    });
+
+    // クリックイベントの保護
+    document.addEventListener('click', function(e) {
+      // 選択肢のクリックが効かない場合のフォールバック
+      if (e.target.classList.contains('answer-option')) {
+        const options = Array.from(document.querySelectorAll('.answer-option'));
+        const index = options.indexOf(e.target);
+        if (index !== -1 && typeof selectAnswer === 'function') {
+          console.log('フォールバック: 選択肢', index, 'がクリックされました');
+          selectAnswer(index);
+        }
       }
     });
   </script>

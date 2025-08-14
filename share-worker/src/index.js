@@ -1,30 +1,35 @@
+// Cloudflare Workers: OGP対応シェアページ生成
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     const url = new URL(request.url);
-    const img = url.searchParams.get("img") || "";
-    // 安全のため最低限エンコードだけする
-    const safeImg = encodeURI(img);
-    const title = "放課後クロニクル 学生証を作成しました！";
-    const desc  = "#放課後クロニクル";
-
+    const imageUrl = url.searchParams.get('img');
+    
+    if (!imageUrl) {
+      return new Response('画像URLが指定されていません', { status: 400 });
+    }
+    
     const html = `<!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" prefix="og: https://ogp.me/ns#">
 <head>
-  <meta charset="utf-8">
-  <title>${title}</title>
-  <!-- Open Graph -->
-  <meta property="og:title"       content="${title}" />
-  <meta property="og:description" content="${desc}" />
-  <meta property="og:image"       content="${safeImg}" />
-  <meta property="og:type"        content="website" />
-  <meta property="og:url"         content="${request.url}" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>放課後クロニクル 学生証</title>
+  
+  <!-- OGP タグ -->
+  <meta property="og:title" content="放課後クロニクル 学生証を作成しました！" />
+  <meta property="og:description" content="放課後クロニクルの世界で自分だけの学生証を作成しよう！ #放課後クロニクル" />
+  <meta property="og:image" content="${imageUrl}" />
+  <meta property="og:image:width" content="800" />
+  <meta property="og:image:height" content="500" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="${request.url}" />
+  
   <!-- Twitter Card -->
-  <meta name="twitter:card"       content="summary_large_image" />
-  <meta name="twitter:title"      content="${title}" />
-  <meta name="twitter:description" content="${desc}" />
-  <meta name="twitter:image"      content="${safeImg}" />
-
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="放課後クロニクル 学生証を作成しました！" />
+  <meta name="twitter:description" content="放課後クロニクルの世界で自分だけの学生証を作成しよう！ #放課後クロニクル" />
+  <meta name="twitter:image" content="${imageUrl}" />
+  
   <style>
     body {
       margin: 0;
@@ -72,16 +77,16 @@ export default {
 <body>
   <div class="share-container">
     <h1 class="share-message">放課後クロニクル 学生証を作成しました！</h1>
-    <img src="${safeImg}" alt="学生証" class="student-card">
-    <a href="/" class="back-link">トップに戻る</a>
+    <img src="${imageUrl}" class="student-card" alt="学生証">
+    <a href="https://your-domain.com" class="back-link">学生証を作成する</a>
   </div>
 </body>
 </html>`;
 
     return new Response(html, {
-      headers: { 
-        "content-type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=0, must-revalidate"
+      headers: {
+        'Content-Type': 'text/html;charset=UTF-8',
+        'Cache-Control': 'public, max-age=3600'
       }
     });
   }

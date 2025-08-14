@@ -70,7 +70,10 @@
 <body>
   <div class="share-container">
     <h1 class="share-message">放課後クロニクル 学生証を作成しました！</h1>
-    <img id="studentCard" class="student-card" alt="学生証">
+    <div id="loadingMessage" style="font-size: 1.2rem; margin: 40px 0;">
+      🔄 学生証を読み込み中...
+    </div>
+    <img id="studentCard" class="student-card" alt="学生証" style="display: none;">
     <a href="index.html" class="back-link">トップに戻る</a>
   </div>
 
@@ -79,9 +82,24 @@
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const imageUrl = params.get('img');
+      console.log('取得した画像URL:', imageUrl);
+      
       if (imageUrl) {
+        const imgElement = document.getElementById('studentCard');
         // 画像URLをセット
-        document.getElementById('studentCard').src = imageUrl;
+        imgElement.src = decodeURIComponent(imageUrl);
+        imgElement.style.display = 'block';
+        
+        // 画像読み込み完了後の処理
+        imgElement.onload = () => {
+          console.log('画像読み込み完了');
+          document.getElementById('loadingMessage').style.display = 'none';
+        };
+        
+        imgElement.onerror = () => {
+          console.error('画像読み込みエラー:', imgElement.src);
+          document.getElementById('loadingMessage').innerHTML = '❌ 画像の読み込みに失敗しました';
+        };
         
         // 新しいシェアページのHTMLを生成
         const sharePageContent = `
