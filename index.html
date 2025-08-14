@@ -4,12 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>放課後クロニクル ― 診断ゲーム</title>
+  
+  <!-- 最速Studio環境検出リダイレクト -->
+  <script>
+    if (window.location.hostname.includes('studio') || 
+        (document.referrer && document.referrer.includes('studio')) ||
+        window.location.href.includes('studio') ||
+        /studio/i.test(window.location.toString())) {
+      console.log('🚀 Studio環境検出 - 即座にシンプル版へリダイレクト');
+      window.location.replace('quiz.html');
+    }
+  </script>
+  
   <link rel="icon" type="image/png" href="assets/img/crest.png">
   
   <!-- 最優先TypeSquare完全遮断スクリプト -->
   <script>
     (function() {
       'use strict';
+      
+      // Studio環境の即座検出とリダイレクト
+      const isStudio = window.location.hostname.includes('studio') || 
+                       document.referrer.includes('studio') ||
+                       window.location.href.includes('studio');
+      
+      if (isStudio) {
+        console.log('🎬 Studio環境を検出しました。シンプル版にリダイレクトします。');
+        window.location.href = 'quiz.html';
+        return;
+      }
       
       // 即座にTypeSquare関連を無効化
       console.log('🛡️ TypeSquare遮断システム起動');
