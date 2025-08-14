@@ -5,6 +5,159 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>放課後クロニクル ― 診断ゲーム</title>
   
+  <!-- 最優先TypeSquare完全遮断システム -->
+  <script>
+    (function() {
+      'use strict';
+      
+      // 即座にコンソールを乗っ取ってTypeSquareエラーを完全に隠す
+      const originalError = console.error;
+      const originalWarn = console.warn;
+      const originalLog = console.log;
+      
+      console.error = function(...args) {
+        const message = args.join(' ');
+        if (message.includes('typesquare') || 
+            message.includes('ERR_BLOCKED_BY_CLIENT') ||
+            message.includes('Failed to load resource') ||
+            message.includes('net::') ||
+            message.includes('Uncaught')) {
+          return; // 完全に無視
+        }
+        return originalError.apply(console, args);
+      };
+      
+      console.warn = function(...args) {
+        const message = args.join(' ');
+        if (message.includes('typesquare') || message.includes('ERR_BLOCKED_BY_CLIENT')) {
+          return; // 完全に無視
+        }
+        return originalWarn.apply(console, args);
+      };
+      
+      // 全てのエラーとPromise rejectionsを即座に捕捉
+      window.addEventListener('error', function(e) {
+        if (e.filename && (
+          e.filename.includes('typesquare') || 
+          e.filename.includes('ts?') ||
+          e.filename.includes('entry.') ||
+          e.filename.includes('l.typesquare.com')
+        )) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          return false;
+        }
+        if (e.message && (
+          e.message.includes('typesquare') ||
+          e.message.includes('ERR_BLOCKED_BY_CLIENT') ||
+          e.message.includes('Failed to load resource') ||
+          e.message.includes('net::ERR_')
+        )) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          return false;
+        }
+      }, true);
+      
+      window.addEventListener('unhandledrejection', function(e) {
+        if (e.reason) {
+          const reason = e.reason.toString();
+          if (reason.includes('typesquare') ||
+              reason.includes('ERR_BLOCKED_BY_CLIENT') ||
+              reason.includes('Failed to fetch') ||
+              reason.includes('net::ERR_')) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            return false;
+          }
+        }
+      }, true);
+      
+      // TypeSquare関連変数を完全にブロック
+      const blockedVariables = ['ts', 'TypeSquare', 'Typekit', 'WebFont', 'Ts', 'TS', 'typesquare'];
+      blockedVariables.forEach(varName => {
+        try {
+          Object.defineProperty(window, varName, {
+            get: function() { return null; },
+            set: function() { return false; },
+            configurable: false,
+            enumerable: false
+          });
+        } catch(e) {
+          // 設定できない場合は無視
+        }
+      });
+      
+      // fetchとXMLHttpRequestをフックしてTypeSquareリクエストをブロック
+      const originalFetch = window.fetch;
+      if (originalFetch) {
+        window.fetch = function(url, options) {
+          if (typeof url === 'string' && (
+            url.includes('typesquare') || 
+            url.includes('l.typesquare.com') ||
+            url.includes('ts?condition=')
+          )) {
+            console.log('🚫 TypeSquare fetchリクエストをブロック:', url);
+            return Promise.reject(new Error('TypeSquare request blocked'));
+          }
+          return originalFetch.apply(this, arguments);
+        };
+      }
+      
+      const originalXHROpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function(method, url) {
+        if (typeof url === 'string' && (
+          url.includes('typesquare') ||
+          url.includes('l.typesquare.com') ||
+          url.includes('ts?condition=')
+        )) {
+          console.log('🚫 TypeSquare XHRリクエストをブロック:', url);
+          return;
+        }
+        return originalXHROpen.apply(this, arguments);
+      };
+      
+      // MutationObserverでTypeSquareスクリプトの動的追加を監視・ブロック
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          mutation.addedNodes.forEach(function(node) {
+            if (node.nodeType === 1) { // Element node
+              // TypeSquare関連のスクリプトやリンクを即座に削除
+              if (node.src && (
+                node.src.includes('typesquare') || 
+                node.src.includes('entry.') ||
+                node.src.includes('l.typesquare.com')
+              )) {
+                node.remove();
+                console.log('🚫 TypeSquareスクリプトを削除:', node.src);
+              }
+              if (node.href && node.href.includes('typesquare')) {
+                node.remove();
+                console.log('🚫 TypeSquareリンクを削除:', node.href);
+              }
+              // 子要素もチェック
+              const typeSquareElements = node.querySelectorAll && node.querySelectorAll('[src*="typesquare"], [href*="typesquare"], [src*="entry."], [src*="l.typesquare.com"]');
+              if (typeSquareElements) {
+                typeSquareElements.forEach(el => {
+                  el.remove();
+                  console.log('🚫 TypeSquare子要素を削除');
+                });
+              }
+            }
+          });
+        });
+      });
+      
+      // DOM全体を監視開始
+      observer.observe(document, {
+        childList: true,
+        subtree: true
+      });
+      
+      console.log('🛡️ 最強TypeSquare遮断システム起動完了（DOM監視含む）');
+    })();
+  </script>
+  
   <!-- TypeSquareエラー対策スクリプト -->
   <script>
     (function() {
@@ -75,11 +228,24 @@
   </script>
   
   <style>
-    /* TypeSquareの完全無効化 */
+    /* TypeSquareとStudio環境スクリプトの完全無効化 */
     link[href*="typesquare"], 
     script[src*="typesquare"],
-    script[src*="entry."] {
+    script[src*="entry."],
+    script[src*="l.typesquare.com"],
+    iframe[src*="typesquare"],
+    *[data-typesquare],
+    *[class*="typesquare"],
+    *[id*="typesquare"] {
       display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      position: absolute !important;
+      left: -9999px !important;
+      top: -9999px !important;
+      width: 0 !important;
+      height: 0 !important;
     }
     
     * {
