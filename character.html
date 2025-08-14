@@ -639,7 +639,7 @@
             transform: rotate(-0.4deg) scale(0.85);
             position: relative;
             min-height: 80px;
-            max-height: 120px;
+            /* max-height: 120px; 削除してテキストに応じて高さを調整 */
             /* 白い紙のノート風背景 - 水色マージン線と薄い罫線（左側マージン） */
             background-image: 
                 /* 水色マージン線（左側） */
@@ -653,6 +653,8 @@
                     rgba(173, 216, 230, 0.3) 24px
                 );
             background-size: 100% 100%, 100% 24px;
+            word-break: keep-all;
+            overflow-wrap: break-word;
         }
 
 
@@ -696,6 +698,9 @@
             color: #1A202C;
             font-weight: 500;
             text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.8);
+            word-break: keep-all;
+            overflow-wrap: break-word;
+            white-space: normal;
         }
 
         /* スティッキータブ */
@@ -799,6 +804,12 @@
             transition: all 0.4s ease;
             pointer-events: none;
             visibility: hidden;
+        }
+
+        /* 学生証部分は常にクリック可能 */
+        .student-id-views {
+            pointer-events: auto !important;
+            cursor: pointer;
         }
 
         .content-card.active {
@@ -1382,6 +1393,70 @@
             opacity: 0.8;
         }
 
+        /* Coming Soon スタイル */
+        .coming-soon-container {
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .coming-soon-card {
+            background: white;
+            padding: 60px 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--videos-orange);
+            max-width: 400px;
+            margin: 0 auto;
+            transform: rotate(-1deg);
+            transition: all 0.3s ease;
+        }
+
+        .coming-soon-card:hover {
+            transform: rotate(0deg) translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 138, 101, 0.2);
+        }
+
+        .coming-soon-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .coming-soon-title {
+            font-family: 'Caveat', 'Klee One', cursive;
+            font-size: 3rem;
+            color: var(--videos-orange-dark);
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
+        }
+
+        .coming-soon-description {
+            font-family: 'Klee One', cursive;
+            font-size: 1.2rem;
+            color: #2D3748;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .coming-soon-note {
+            background: linear-gradient(135deg, var(--videos-orange-light), var(--videos-orange));
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .coming-soon-note p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--videos-orange-dark);
+            font-weight: 600;
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+        }
+
         /* レスポンシブデザイン - 厳密な要件対応 */
         
         /* タブレット・横持ち対応 (1024px以下) */
@@ -1849,7 +1924,7 @@
                 
                 <!-- 学生証画像（3段階表示） -->
                 <div class="student-id-image-container">
-                    <div class="student-id-views" onclick="cycleStudentId()">
+                    <div class="student-id-views" id="amane-student-id">
                         <div class="student-id-view active" id="view1">
                             <img src="assets/img/amane.png" alt="九条あまね 学生証">
                         </div>
@@ -1857,10 +1932,10 @@
                             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-family: 'Klee One', cursive; text-align: center;">
                                 <div>
                                     <h3 style="margin: 10px 0; font-size: 1.2rem;">クラブ活動記録</h3>
-                                    <p style="margin: 5px 0; font-size: 0.9rem;">水泳部 - 副部長</p>
+                                    <p style="margin: 5px 0; font-size: 0.9rem;">帰宅部</p>
                                     <p style="margin: 5px 0; font-size: 0.8rem;">図書委員会 - 委員</p>
                                     <p style="margin: 5px 0; font-size: 0.8rem;">学業成績: 優秀</p>
-                                    <p style="margin: 8px 0; font-size: 0.7rem; opacity: 0.8;">表彰歴: 県大会水泳優勝</p>
+                                    <p style="margin: 8px 0; font-size: 0.7rem; opacity: 0.8;">表彰歴: 英語スピーチコンテスト優勝</p>
                                 </div>
                             </div>
                         </div>
@@ -1868,10 +1943,10 @@
                             <div style="background: linear-gradient(135deg, #2c1810 0%, #8B0000 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ff9999; font-family: 'Klee One', cursive; text-align: center;">
                                 <div>
                                     <h3 style="margin: 10px 0; font-size: 1.2rem; color: #ff6b6b;">隠された一面</h3>
-                                    <p style="margin: 5px 0; font-size: 0.9rem;">"水の流れのように..."</p>
-                                    <p style="margin: 5px 0; font-size: 0.8rem;">静かに見えても</p>
-                                    <p style="margin: 5px 0; font-size: 0.8rem;">内なる力は深い</p>
-                                    <p style="margin: 8px 0; font-size: 0.7rem; color: #ff6b6b; opacity: 0.9;">"澄んだ瞳に映る秘密..."</p>
+                                    <p style="margin: 5px 0; font-size: 0.9rem;">"静寂の中に潜む..."</p>
+                                    <p style="margin: 5px 0; font-size: 0.8rem;">読書の向こう側に</p>
+                                    <p style="margin: 5px 0; font-size: 0.8rem;">見えるもの</p>
+                                    <p style="margin: 8px 0; font-size: 0.7rem; color: #ff6b6b; opacity: 0.9;">"将来への漠然とした不安..."</p>
                                 </div>
                             </div>
                         </div>
@@ -1887,19 +1962,19 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <span class="info-label">年齢</span>
-                            <span class="info-value">16歳</span>
+                            <span class="info-value">15歳</span>
                     </div>
                         <div class="info-item">
                             <span class="info-label">血液型</span>
-                            <span class="info-value">A型</span>
+                            <span class="info-value">AB型</span>
                     </div>
                         <div class="info-item">
                             <span class="info-label">身長</span>
-                            <span class="info-value">162cm</span>
+                            <span class="info-value">155cm</span>
                 </div>
                         <div class="info-item">
                             <span class="info-label">部活動</span>
-                            <span class="info-value">水泳部</span>
+                            <span class="info-value">帰宅部</span>
                 </div>
                         <div class="info-item">
                             <span class="info-label">委員会</span>
@@ -1907,19 +1982,19 @@
                 </div>
                         <div class="info-item">
                             <span class="info-label">趣味</span>
-                            <span class="info-value">水泳・読書</span>
+                            <span class="info-value">読書</span>
                 </div>
                         <div class="info-item">
                             <span class="info-label">得意科目</span>
-                            <span class="info-value">数学・体育</span>
+                            <span class="info-value">英語・音楽</span>
                 </div>
                         <div class="info-item">
                             <span class="info-label">好きな花</span>
-                            <span class="info-value">睡蓮・紫陽花</span>
+                            <span class="info-value">アンズ・芍薬</span>
             </div>
                         <div class="info-item">
                             <span class="info-label">将来の夢</span>
-                            <span class="info-value">海洋生物学者</span>
+                            <span class="info-value">特になし</span>
         </div>
     </div>
                     </div>
@@ -1947,29 +2022,24 @@
                 
                 <!-- 学生証画像（3段階表示） -->
                 <div class="student-id-image-container">
-                    <div class="student-id-views" onclick="cycleStudentId()">
+                    <div class="student-id-views" id="nobara-student-id">
                         <div class="student-id-view active" id="nobara-view1">
                             <img src="assets/img/nobara_2.png" alt="高森のばら 学生証">
                         </div>
                         <div class="student-id-view" id="nobara-view2">
                             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-family: 'Klee One', cursive; text-align: center;">
                                 <div>
-                                    <h3 style="margin: 10px 0; font-size: 1.2rem;">クラブ活動記録</h3>
-                                    <p style="margin: 5px 0; font-size: 0.9rem;">園芸部 - 部長</p>
-                                    <p style="margin: 5px 0; font-size: 0.8rem;">美化委員会 - 委員</p>
-                                    <p style="margin: 5px 0; font-size: 0.8rem;">学業成績: 優秀</p>
-                                    <p style="margin: 8px 0; font-size: 0.7rem; opacity: 0.8;">表彰歴: 園芸コンクール金賞</p>
+                                    <h3 style="margin: 10px 0; font-size: 1.2rem;">ホラー布教部</h3>
+                                    <p style="margin: 8px 0; font-size: 0.85rem; line-height: 1.4;">夢見が丘女子高等学校には、<br>"あったりなかったりする部活"の噂がある。</p>
+                                    <p style="margin: 8px 0; font-size: 0.9rem; font-weight: bold;">その名も――ホラー布教部。</p>
+                                    <p style="margin: 8px 0; font-size: 0.75rem; line-height: 1.3; opacity: 0.9;">部長に会えば、昔からの友人のように感じるのに、<br>いなくなると、誰もその存在を思い出せなくなるという。</p>
                                 </div>
                             </div>
                         </div>
                         <div class="student-id-view" id="nobara-view3">
                             <div style="background: linear-gradient(135deg, #2c1810 0%, #8B0000 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ff9999; font-family: 'Klee One', cursive; text-align: center;">
                                 <div>
-                                    <h3 style="margin: 10px 0; font-size: 1.2rem; color: #ff6b6b;">隠された一面</h3>
-                                    <p style="margin: 5px 0; font-size: 0.9rem;">"花に宿る力を知る者..."</p>
-                                    <p style="margin: 5px 0; font-size: 0.8rem;">薔薇には棘があることを</p>
-                                    <p style="margin: 5px 0; font-size: 0.8rem;">忘れてはならない</p>
-                                    <p style="margin: 8px 0; font-size: 0.7rem; color: #ff6b6b; opacity: 0.9;">"美しさの裏に潜む真実..."</p>
+                                    <p style="margin: 0; font-size: 1.5rem; font-weight: bold; color: #ff6b6b;">バッドエンドも好き</p>
                                 </div>
                             </div>
                         </div>
@@ -1985,19 +2055,19 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <span class="info-label">年齢</span>
-                            <span class="info-value">16歳</span>
+                            <span class="info-value">15歳</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">血液型</span>
-                            <span class="info-value">A型</span>
+                            <span class="info-value">B型</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">身長</span>
-                            <span class="info-value">162cm</span>
+                            <span class="info-value">150cm</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">部活動</span>
-                            <span class="info-value">園芸部</span>
+                            <span class="info-value">ホラー布教部</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">委員会</span>
@@ -2005,41 +2075,45 @@
                         </div>
                         <div class="info-item">
                             <span class="info-label">趣味</span>
-                            <span class="info-value">園芸・読書</span>
+                            <span class="info-value">映画鑑賞</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">得意科目</span>
-                            <span class="info-value">生物・美術</span>
+                            <span class="info-value">国語</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">好きな花</span>
-                            <span class="info-value">薔薇・百合</span>
+                            <span class="info-value">金木犀・鈴蘭</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">将来の夢</span>
-                            <span class="info-value">園芸家</span>
+                            <span class="info-value">世界一周旅行</span>
                         </div>
                     </div>
                 </div>
                     
                 <div class="student-profile-section" style="margin-left: -30px;">
                     <div class="school-note">
-                        <p class="intro-text">初めまして。夢見が丘女子高等学校1年A組の<strong>高森のばら</strong>です。皆さんからは「のばらちゃん」と呼ばれています。</p>
+                        <p class="intro-text">初めまして！クラスメイトからは<strong>「のばらちゃん」</strong>と呼ばれています！よろしく～</p>
                     </div>
 
                     <div class="school-note">
                         <p class="intro-text"><strong>学校生活</strong></p>
-                        <p class="intro-text">園芸部で部長をしており、学校の花壇や植物の管理をしています。美化委員としても活動しており、校舎の美観を保つために日々努力しています。</p>
+                        <p class="intro-text">ホラー布教部の部長としてホラーの布教に心血を注いでいます！部員募集中！</p>
                     </div>
                     
                     <div class="school-note">
-                        <p class="intro-text"><strong>園芸への想い</strong></p>
-                        <p class="intro-text">植物を育てることを通して、生命の美しさと強さを学んでいます。特に薔薇の栽培に情熱を注いでおり、将来は園芸家として多くの人に植物の魅力を伝えたいと思っています。</p>
+                        <p class="intro-text"><strong>ホラーへの想い</strong></p>
+                        <p class="intro-text">ホラーは怖いだけじゃなく、生まれた理由や怖いと感じる理由など、様々な要因が折り重なっています！是非そんなところにも目を向けてくださいね～</p>
                     </div>
                 </div>
             </div>
 
-            <!-- 動画コンテンツ -->
+            <!-- 
+            =============================
+            動画コンテンツ（保管用バックアップ）
+            将来の更新時に復元予定
+            =============================
             <div id="videos" class="content-card">
                 <h2 class="section-title">動画</h2>
                 
@@ -2090,12 +2164,38 @@
                     </div>
                 </div>
 
-                <!-- 追加コンテンツでノート背景の高さを確保 -->
                 <div class="video-additional-content" style="margin-left: -30px;">
                     <div class="school-note">
                         <p class="intro-text">放課後クロニクルの映像作品は、青春の美しさと儚さを表現することを目指して制作されています。各楽曲もキャラクターの心情を丁寧に表現した楽曲ばかりです。</p>
                     </div>
                 </div>
+            </div>
+            -->
+
+            <!-- 動画コンテンツ（Coming Soon版） -->
+            <div id="videos" class="content-card">
+                <h2 class="section-title">動画</h2>
+                
+                <!-- Coming Soon メッセージ -->
+                <div class="coming-soon-container" style="margin-left: -30px; text-align: center; padding: 80px 20px;">
+                    <div class="coming-soon-card">
+                        <div class="coming-soon-icon">
+                            🎬
+                        </div>
+                        <h3 class="coming-soon-title">Coming Soon</h3>
+                        <p class="coming-soon-description">
+                            放課後クロニクルの動画コンテンツを<br>
+                            現在制作中です。<br><br>
+                            公開まで今しばらく<br>
+                            お待ちください。
+                        </p>
+                        <div class="coming-soon-note">
+                            <p>更新情報は<a href="https://x.com/as_chronicle" target="_blank" style="color: var(--videos-orange-dark); text-decoration: underline;">公式X</a>でお知らせします</p>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
             </div>
         </section>
@@ -2121,6 +2221,24 @@
     <script>
         let currentView = 1;
         let nobaraCurrentView = 1;
+
+        function cycleAmaneStudentId() {
+            console.log('Amane student ID clicked, current view:', currentView);
+            document.getElementById(`view${currentView}`).classList.remove('active');
+            currentView = currentView >= 3 ? 1 : currentView + 1;
+            document.getElementById(`view${currentView}`).classList.add('active');
+            document.getElementById('clickCount').textContent = currentView;
+            console.log('Amane switched to view:', currentView);
+        }
+
+        function cycleNobaraStudentId() {
+            console.log('Nobara student ID clicked, current view:', nobaraCurrentView);
+            document.getElementById(`nobara-view${nobaraCurrentView}`).classList.remove('active');
+            nobaraCurrentView = nobaraCurrentView >= 3 ? 1 : nobaraCurrentView + 1;
+            document.getElementById(`nobara-view${nobaraCurrentView}`).classList.add('active');
+            document.getElementById('nobaraClickCount').textContent = nobaraCurrentView;
+            console.log('Nobara switched to view:', nobaraCurrentView);
+        }
 
         function switchToCharacter(characterId, clickedElement) {
             // キービジュアルのモード切り替え
@@ -2208,31 +2326,65 @@
         }
 
         function cycleStudentId() {
+            console.log('cycleStudentId function called');
+            
             // 現在表示されているコンテンツを確認
             const profileActive = document.getElementById('profile').classList.contains('active');
             const nobaraProfileActive = document.getElementById('nobara-profile').classList.contains('active');
+            const bodyClasses = document.body.classList;
             
-            if (profileActive) {
-                // あまねのプロフィールの場合
-                document.getElementById(`view${currentView}`).classList.remove('active');
-                currentView = currentView >= 3 ? 1 : currentView + 1;
-                document.getElementById(`view${currentView}`).classList.add('active');
-                document.getElementById('clickCount').textContent = currentView;
-            } else if (nobaraProfileActive) {
+            console.log('Mode check:', { 
+                profileActive, 
+                nobaraProfileActive, 
+                bodyClasses: Array.from(bodyClasses),
+                currentView,
+                nobaraCurrentView
+            });
+            
+            // bodyクラスを優先して判定
+            if (bodyClasses.contains('nobara-mode')) {
                 // のばらのプロフィールの場合
-                document.getElementById(`nobara-view${nobaraCurrentView}`).classList.remove('active');
+                console.log('Processing Nobara mode');
+                const currentElement = document.getElementById(`nobara-view${nobaraCurrentView}`);
+                if (currentElement) {
+                    currentElement.classList.remove('active');
+                }
                 nobaraCurrentView = nobaraCurrentView >= 3 ? 1 : nobaraCurrentView + 1;
-                document.getElementById(`nobara-view${nobaraCurrentView}`).classList.add('active');
-                document.getElementById('nobaraClickCount').textContent = nobaraCurrentView;
+                const nextElement = document.getElementById(`nobara-view${nobaraCurrentView}`);
+                if (nextElement) {
+                    nextElement.classList.add('active');
+                }
+                const clickCountElement = document.getElementById('nobaraClickCount');
+                if (clickCountElement) {
+                    clickCountElement.textContent = nobaraCurrentView;
+                }
+                console.log('Nobara switched to view:', nobaraCurrentView);
+            } else {
+                // デフォルトであまねのプロフィール（amane-modeまたはその他の場合）
+                console.log('Processing Amane mode (default)');
+                const currentElement = document.getElementById(`view${currentView}`);
+                if (currentElement) {
+                    currentElement.classList.remove('active');
+                }
+                currentView = currentView >= 3 ? 1 : currentView + 1;
+                const nextElement = document.getElementById(`view${currentView}`);
+                if (nextElement) {
+                    nextElement.classList.add('active');
+                }
+                const clickCountElement = document.getElementById('clickCount');
+                if (clickCountElement) {
+                    clickCountElement.textContent = currentView;
+                }
+                console.log('Amane switched to view:', currentView);
             }
         }
 
         function openYouTube() {
-                window.open('https://www.youtube.com/@afterschoolchronicle', '_blank');
+                window.open('https://www.youtube.com/@AS_Chronicle', '_blank');
         }
 
         function openTwitter() {
-                window.open('https://x.com/afterschool_chr', '_blank');
+                window.open('https://x.com/as_chronicle', '_blank');
         }
 
         function openVideo(videoId) {
@@ -2306,6 +2458,33 @@
             const profileElement = document.getElementById('profile');
             if (profileElement) {
                 profileElement.classList.add('active');
+            }
+            
+            // 九条あまねの学生証クリックイベント（IDで直接取得）
+            setTimeout(() => {
+                const amaneStudentId = document.getElementById('amane-student-id');
+                if (amaneStudentId) {
+                    amaneStudentId.addEventListener('click', function(e) {
+                        console.log('Amane Student ID clicked!');
+                        e.stopPropagation(); // イベントの伝播を防ぐ
+                        cycleAmaneStudentId();
+                    });
+                    console.log('Amane student ID event listener added (delayed)');
+                } else {
+                    console.log('Amane student ID element not found (delayed)');
+                }
+            }, 500);
+
+            // 高森のばらの学生証クリックイベント（IDで直接取得）
+            const nobaraStudentId = document.getElementById('nobara-student-id');
+            if (nobaraStudentId) {
+                nobaraStudentId.addEventListener('click', function(e) {
+                    console.log('Nobara Student ID clicked!');
+                    cycleNobaraStudentId();
+                });
+                console.log('Nobara student ID event listener added');
+            } else {
+                console.log('Nobara student ID element not found');
             }
             
             // 初期スクロール進行状況を設定
