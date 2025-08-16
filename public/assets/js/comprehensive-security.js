@@ -224,7 +224,7 @@
       try {
         if (!__ALLOW_EMBED__) {
           window.top.location = window.self.location;
-        } else {
+        } else if (location.href !== String(window.self.location)) {
           location.assign(window.self.location);
         }
       } catch (e) {
