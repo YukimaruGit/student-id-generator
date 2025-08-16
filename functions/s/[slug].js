@@ -1,7 +1,7 @@
 // functions/s/[slug].js
 export async function onRequest({ params }) {
   const CLOUD_NAME   = 'di5xqlddy'; // Cloudinary設定と同値
-  const REDIRECT_TO  = 'https://preview.studio.site/live/1Va6D4lMO7/student-id'; // 人間の遷移先（暫定）
+  const REDIRECT_TO  = 'https://preview.studio.site/live/1Va6D4lMO7/student-id'; // 人間の遷移先
   const TWITTER_SITE = '@as_chronicle'; // 任意のTwitterアカウント
 
   try {

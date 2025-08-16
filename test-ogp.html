@@ -60,7 +60,7 @@
       }
       
       // 共有URL生成
-      const SHARE_BASE = 'https://<PAGES_PRODUCTION_DOMAIN>'; // Cloudflare PagesのProduction domain
+      const SHARE_BASE = 'https://student-id-generator.pages.dev'; // Cloudflare PagesのProduction domain
       const slug = toBase64Url(publicId) + '-' + Date.now();
       const shareUrl = `${SHARE_BASE}/s/${slug}`;
       
