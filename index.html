@@ -28,7 +28,13 @@
       // ローカル開発時は過剰ギミックを無効化
       if (location.protocol === 'file:') { return; }
       
-      // Studio環境の即座検出とリダイレクト
+      // Studio環境の即座検出とリダイレクト（結果表示モードでは無効化）
+      const checkParams = new URLSearchParams(location.search);
+      const checkShowResult = checkParams.get('showResult') === 'true';
+      if (checkShowResult) {
+        return; // 結果表示モードでは強制リダイレクトを実行しない
+      }
+      
       const isStudio = window.location.hostname.includes('studio') || 
                        document.referrer.includes('studio') ||
                        window.location.href.includes('studio');
@@ -106,7 +112,13 @@
         return originalConsoleError.apply(console, args);
       };
       
-      // 5秒後に選択肢がクリックできない場合、シンプル版にリダイレクト
+      // 5秒後に選択肢がクリックできない場合、シンプル版にリダイレクト（結果表示モードでは無効化）
+      const fallbackParams = new URLSearchParams(location.search);
+      const fallbackShowResult = fallbackParams.get('showResult') === 'true';
+      if (fallbackShowResult) {
+        return; // 結果表示モードではフォールバック処理を実行しない
+      }
+      
       if (location.protocol !== 'file:') {
         setTimeout(() => {
           const questionContainer = document.getElementById('questionContainer');
