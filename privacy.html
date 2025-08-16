@@ -12,8 +12,6 @@
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
-  <script src="assets/js/security.js"></script>
-  <script src="assets/js/privacy-protection.js"></script>
   
   <style>
     .privacy-container {
@@ -98,180 +96,129 @@
       align-items: center;
       background: #8B4513;
       color: white;
-      text-decoration: none;
       padding: 0.8rem 1.5rem;
+      text-decoration: none;
       border-radius: 8px;
-      margin-top: 2rem;
+      margin: 0.5rem;
       transition: background-color 0.3s;
     }
 
     .back-button:hover {
-      background: #654321;
+      background: #A0522D;
     }
 
     .back-button i {
       margin-right: 0.5rem;
     }
 
-    .contact-info {
-      background: #F0F8FF;
-      border: 1px solid #4682B4;
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 1rem 0;
-    }
-
     .last-updated {
       text-align: center;
-      color: #666;
-      font-size: 0.9rem;
       margin-top: 2rem;
       padding-top: 1rem;
-      border-top: 1px solid #ddd;
+      border-top: 1px solid #DAA520;
+      color: #666;
+    }
+
+    .contact-info {
+      background: #F5F5F5;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
     }
   </style>
 </head>
-
 <body>
   <div class="privacy-container">
     <div class="privacy-header">
-      <h1 class="privacy-title">
-        <i class="fas fa-shield-alt"></i>
-        プライバシーポリシー
-      </h1>
+      <h1 class="privacy-title">プライバシーポリシー</h1>
       <p class="privacy-subtitle">放課後クロニクル学生証ジェネレーター</p>
     </div>
 
-    <div class="highlight-box">
-      <h3 style="color: #2E8B57; margin-top: 0;">
-        <i class="fas fa-lock"></i>
-        あなたの個人情報を完全保護
-      </h3>
-      <p>当サービスは、ユーザーの個人情報保護を最優先に設計されています。</p>
-      
-      <div class="security-badges">
-        <span class="security-badge">
-          <i class="fas fa-eye-slash"></i>
-          データ収集なし
-        </span>
-        <span class="security-badge">
-          <i class="fas fa-server"></i>
-          サーバー送信なし
-        </span>
-        <span class="security-badge">
-          <i class="fas fa-desktop"></i>
-          完全ローカル処理
-        </span>
-        <span class="security-badge">
-          <i class="fas fa-shield-virus"></i>
-          ウイルス対策済み
-        </span>
-      </div>
-    </div>
-
     <div class="privacy-section">
-      <h2 class="section-title">1. 個人情報の取り扱いについて</h2>
+      <h2 class="section-title">1. 収集する情報</h2>
       <div class="section-content">
-        <p><strong>当サービスは一切の個人情報を収集・保存・送信いたしません。</strong></p>
+        <p>本サービスは次の情報を取り扱います。</p>
         <ul>
-          <li>アップロードされた写真は、お使いのブラウザ内でのみ処理されます</li>
-          <li>入力された名前や情報は、外部のサーバーに送信されません</li>
-          <li>学生証の生成は、すべてお使いのデバイス内で完結します</li>
-          <li>ブラウザを閉じると、すべてのデータは自動的に削除されます</li>
+          <li>生成画像：学生証画像をCloudinaryに保存します（公開用URLが発行されます）。</li>
+          <li>共有ページ情報：共有ページのURLに、画像の識別子を安全化（Base64URL＋タイムスタンプ）した<strong>スラッグ</strong>を含めます。</li>
+          <li>技術ログ：Cloudflare/Cloudinary等の提供基盤が、セキュリティと運用のためにIPアドレス・User-Agent等の<strong>アクセスログ</strong>を自動取得する場合があります。</li>
+          <li>クッキー/解析：本サービスは解析ツールを使用しません。必須でないクッキーも使用しません（将来導入時は本ポリシーを更新し、同意を取得します）。</li>
         </ul>
       </div>
     </div>
 
     <div class="privacy-section">
-      <h2 class="section-title">2. セキュリティ対策</h2>
+      <h2 class="section-title">2. 利用目的</h2>
       <div class="section-content">
-        <p>ユーザーの安全を守るため、以下のセキュリティ対策を実施しています：</p>
         <ul>
-          <li><strong>ファイル検証：</strong> アップロードされるファイルの安全性を厳密にチェック</li>
-          <li><strong>ウイルス対策：</strong> 悪意のあるファイルや危険なスクリプトを自動ブロック</li>
-          <li><strong>XSS保護：</strong> クロスサイトスクリプティング攻撃を防止</li>
-          <li><strong>入力検証：</strong> すべての入力値を自動的にサニタイズ</li>
-          <li><strong>暗号化保護：</strong> 一時的なデータは暗号化して保護</li>
+          <li>学生証画像の生成・表示・共有の提供</li>
+          <li>セキュリティの確保、障害対応、品質改善（不正利用の検知、障害調査など）</li>
         </ul>
       </div>
     </div>
 
     <div class="privacy-section">
-      <h2 class="section-title">3. 外部サービスとの連携</h2>
-      <div class="section-content">
-        <p>以下の場合のみ、最小限の外部サービスを利用します：</p>
-        <ul>
-          <li><strong>Cloudinary：</strong> SNSシェア時の画像ホスティング（シェア機能を使用した場合のみ）</li>
-          <li><strong>CDN：</strong> フォントやアイコンの読み込み（個人情報は含まれません）</li>
-        </ul>
-        <p><strong>重要：</strong> これらのサービスには、ユーザーが明示的にシェア機能を使用した場合のみ、生成された学生証画像が送信されます。個人を特定できる情報は含まれません。</p>
-      </div>
-    </div>
-
-    <div class="privacy-section">
-      <h2 class="section-title">4. Cookieとローカルストレージ</h2>
+      <h2 class="section-title">3. 保存期間と削除</h2>
       <div class="section-content">
         <ul>
-          <li><strong>Cookie：</strong> 当サービスは一切のCookieを使用しません</li>
-          <li><strong>ローカルストレージ：</strong> 設定の保存のみに使用し、暗号化して保護されます</li>
-          <li><strong>セッション管理：</strong> ブラウザセッション終了時に自動削除されます</li>
+          <li>画像：Cloudinary上に保存されます。削除を希望する場合は、後述の連絡先へ<strong>共有URL</strong>と共にご連絡ください。合理的な範囲で削除に対応します。</li>
+          <li>ログ：基盤側の規程に従い、一定期間後に自動削除または匿名化されます。</li>
         </ul>
       </div>
     </div>
 
     <div class="privacy-section">
-      <h2 class="section-title">5. アクセス解析とトラッキング</h2>
+      <h2 class="section-title">4. 第三者提供</h2>
       <div class="section-content">
-        <p><strong>当サービスは以下を一切行いません：</strong></p>
         <ul>
-          <li>Google Analyticsなどのアクセス解析ツールの使用</li>
-          <li>ユーザーの行動追跡（トラッキング）</li>
-          <li>広告配信のためのデータ収集</li>
-          <li>第三者への情報提供</li>
+          <li>送信先：画像の保存に<strong>Cloudinary</strong>、共有ページの配信に<strong>Cloudflare Pages</strong>を利用します。法令で認められる場合を除き、上記以外の第三者に個人データを販売・共有しません。</li>
         </ul>
       </div>
     </div>
 
     <div class="privacy-section">
-      <h2 class="section-title">6. ユーザーの権利と選択</h2>
+      <h2 class="section-title">5. 安全管理</h2>
       <div class="section-content">
         <ul>
-          <li>いつでもブラウザを閉じることで、すべてのデータを完全に削除できます</li>
-          <li>シェア機能を使用しない限り、データが外部に送信されることはありません</li>
-          <li>JavaScriptを無効にすることで、サービスの使用を完全に停止できます</li>
+          <li>通信の暗号化（HTTPS）</li>
+          <li>アクセス制御と保護設定（CSP等）</li>
+          <li>画像URLは推測困難なスラッグを採用</li>
         </ul>
       </div>
     </div>
 
     <div class="privacy-section">
-      <h2 class="section-title">7. 技術的な安全措置</h2>
+      <h2 class="section-title">6. 未成年の利用</h2>
+      <div class="section-content">
+        <p>13歳未満の方は、保護者の同意がある場合のみご利用ください。</p>
+      </div>
+    </div>
+
+    <div class="privacy-section">
+      <h2 class="section-title">7. ユーザーの権利</h2>
+      <div class="section-content">
+        <p>画像の削除依頼、問い合わせは<strong>[ご連絡先]</strong>までお願いします。対応に必要な情報（共有URLなど）の提示をお願いする場合があります。</p>
+      </div>
+    </div>
+
+    <div class="privacy-section">
+      <h2 class="section-title">8. 連絡先</h2>
       <div class="section-content">
         <ul>
-          <li><strong>HTTPS通信：</strong> すべての通信を暗号化</li>
-          <li><strong>CSP実装：</strong> Content Security Policyによる攻撃防止</li>
-          <li><strong>フィンガープリンティング防止：</strong> デバイス識別情報の収集を阻止</li>
-          <li><strong>リファラー制御：</strong> 外部サイトへの情報漏洩を防止</li>
+          <li>メール：<strong>（ご指定の窓口）</strong></li>
+          <li>管理者：放課後クロニクル学生証ジェネレーター運営</li>
         </ul>
       </div>
     </div>
 
     <div class="privacy-section">
-      <h2 class="section-title">8. お問い合わせ</h2>
+      <h2 class="section-title">9. 変更</h2>
       <div class="section-content">
-        <div class="contact-info">
-          <p>プライバシーに関するご質問がございましたら、以下の方法でお問い合わせください：</p>
-          <ul>
-            <li><strong>GitHub Issues：</strong> セキュリティ以外の一般的な質問</li>
-            <li><strong>セキュリティ報告：</strong> 重大なセキュリティ問題の場合は、非公開での報告をお願いします</li>
-          </ul>
-          <p><strong>注意：</strong> お問い合わせの際も、個人情報の記載は避けてください。</p>
-        </div>
+        <ul>
+          <li>本ポリシーは必要に応じて改定します。重要な変更はサイト上でお知らせします。</li>
+          <li>最終更新日：<strong>2025-08-17</strong></li>
+        </ul>
       </div>
-    </div>
-
-    <div class="last-updated">
-      <p>最終更新日：2024年12月</p>
-      <p>このプライバシーポリシーは、サービスの改善に伴い更新される場合があります。</p>
     </div>
 
     <div style="text-align: center;">

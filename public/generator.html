@@ -4,6 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  
+  <!-- 埋め込み用CSP（Studio埋め込みを許可） -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+    style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+    img-src 'self' data: https: blob:;
+    font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+    connect-src 'self' https://api.cloudinary.com;
+    frame-ancestors 'self' https://*.studio.site https://preview.studio.site;
+  ">
+  
   <title>放課後クロニクル 学生証ジェネレーター</title>
   <meta property="og:title" content="放課後クロニクル 学生証ジェネレーター">
   <meta property="og:description" content="あなただけの学生証を作成しよう！">
@@ -304,8 +316,11 @@
             backBtn.onclick = () => {
               const url = new URL('index.html', window.location.href);
               
-              // embedパラメータを引き継ぐ
-              if (window.location.search.includes('embed=1')) {
+              // 埋め込みモードの場合はembed=1を付与
+              if (window.parent !== window || window.top !== window || window.frameElement || 
+                  new URLSearchParams(location.search).has('embed') ||
+                  location.hostname.includes('studio') ||
+                  (document.referrer && document.referrer.includes('studio'))) {
                 url.searchParams.set('embed', '1');
               }
               
@@ -327,8 +342,11 @@
               diagnosisUrl.searchParams.set('previewMessage', currentParams.get('previewMessage') || '');
               diagnosisUrl.searchParams.set('episodeMessage', currentParams.get('episodeMessage') || '');
               
-              // embedパラメータを引き継ぐ
-              if (window.location.search.includes('embed=1')) {
+              // 埋め込みモードの場合はembed=1を付与
+              if (window.parent !== window || window.top !== window || window.frameElement || 
+                  new URLSearchParams(location.search).has('embed') ||
+                  location.hostname.includes('studio') ||
+                  (document.referrer && document.referrer.includes('studio'))) {
                 diagnosisUrl.searchParams.set('embed', '1');
               }
               
@@ -347,7 +365,7 @@
     });
   </script>
   
-  <!-- 埋め込みモード制御スクリプト -->
-  <script src="assets/js/embed-mode.js"></script>
+  <!-- 埋め込みモード対応 -->
+  <script src="assets/js/embed-mode.js" defer></script>
 </body>
 </html> 

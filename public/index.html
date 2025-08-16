@@ -4,90 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  
+  <!-- 埋め込み用CSP（Studio埋め込みを許可） -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+    style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+    img-src 'self' data: https: blob:;
+    font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+    connect-src 'self' https://api.cloudinary.com;
+    frame-ancestors 'self' https://*.studio.site https://preview.studio.site;
+  ">
+  
   <title>放課後クロニクル ― 診断ゲーム</title>
-  
-  <!-- Studio環境用meta refresh -->
-  <script>
-    if (location.protocol === 'file:') { /* ローカル確認中は検出ロジック無効化 */ } else {
-      if (window.parent !== window || window.top !== window || window.frameElement) {
-        var qs = location.search || '';
-        var hash = location.hash || '';
-        document.write('<meta http-equiv="refresh" content="0;url=quiz.html' + qs + hash + '">');
-      }
-    }
-  </script>
-  
-  <!-- 最速Studio環境検出リダイレクト -->
-  <script>
-    (function() {
-      'use strict';
-      
-      // ローカル開発時は過剰ギミックを無効化
-      if (location.protocol === 'file:') { return; }
-      
-      // 複数の方法でStudio環境を検出
-      const detectionMethods = [
-        () => window.location.hostname.includes('studio'),
-        () => window.location.href.includes('studio'),
-        () => document.referrer && document.referrer.includes('studio'),
-        () => /studio/i.test(window.location.toString()),
-        () => /studio/i.test(document.referrer || ''),
-        () => window.parent !== window, // iframe検出
-        () => window.top !== window,    // iframe検出
-        () => window.frameElement !== null, // iframe検出
-      ];
-      
-      const isStudioOrIframe = detectionMethods.some(method => {
-        try {
-          return method();
-        } catch (e) {
-          return false;
-        }
-      });
-      
-      if (isStudioOrIframe) {
-        console.log('🚀 Studio/iframe環境検出 - 強制リダイレクト実行');
-        
-        // 複数の方法でリダイレクトを試行（embedパラメータを引き継ぐ）
-        const qs = location.search || '';
-        const hash = location.hash || '';
-        try {
-          window.location.replace('quiz.html' + qs + hash);
-        } catch (e) {
-          try {
-            window.location.href = 'quiz.html' + qs + hash;
-          } catch (e2) {
-            try {
-              window.location = 'quiz.html' + qs + hash;
-            } catch (e3) {
-              console.error('リダイレクトに失敗しました');
-            }
-          }
-        }
-        
-        // さらに強制的な方法
-        setTimeout(() => {
-          window.location = 'quiz.html' + qs + hash;
-        }, 100);
-        
-        // DOMが読み込まれる前にリダイレクトボタンを表示
-        document.addEventListener('DOMContentLoaded', () => {
-          const redirectHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: sans-serif;">' +
-            '<div style="background: white; padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">' +
-            '<h2 style="color: #333; margin-bottom: 20px;">🎬 Studio環境を検出しました</h2>' +
-            '<p style="color: #666; margin-bottom: 30px;">診断ゲームをシンプル版で表示します</p>' +
-            '<button onclick="window.location=\'quiz.html' + qs + hash + '\'" style="background: linear-gradient(135deg, #4ecdc4, #44a08d); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; cursor: pointer;">' +
-            '📋 診断ゲームを開始' +
-            '</button>' +
-            '</div>' +
-            '</div>';
-          document.body.innerHTML = redirectHTML;
-        });
-        
-        return; // 後続の処理を停止
-      }
-    })();
-  </script>
   
   <link rel="icon" type="image/png" href="assets/img/crest.png">
   
@@ -978,8 +907,11 @@
             url.searchParams.set('previewMessage', previewMessage || '');
             url.searchParams.set('episodeMessage', episodeMessage || '');
             
-            // embedパラメータを引き継ぐ
-            if (window.location.search.includes('embed=1')) {
+            // 埋め込みモードの場合はembed=1を付与
+            if (window.parent !== window || window.top !== window || window.frameElement || 
+                new URLSearchParams(location.search).has('embed') ||
+                location.hostname.includes('studio') ||
+                (document.referrer && document.referrer.includes('studio'))) {
               url.searchParams.set('embed', '1');
             }
             
@@ -991,7 +923,17 @@
           restartBtn.innerHTML = '<span style="margin-right: 0.5rem;">🔄</span>診断をやり直す';
           restartBtn.onclick = () => {
             // パラメータをクリアしてページをリロード
-            window.location.href = 'index.html';
+            const url = new URL('index.html', window.location.href);
+            
+            // 埋め込みモードの場合はembed=1を付与
+            if (window.parent !== window || window.top !== window || window.frameElement || 
+                new URLSearchParams(location.search).has('embed') ||
+                location.hostname.includes('studio') ||
+                (document.referrer && document.referrer.includes('studio'))) {
+              url.searchParams.set('embed', '1');
+            }
+            
+            window.location.href = url.toString();
           };
         }
         
@@ -1570,8 +1512,11 @@
           url.searchParams.set('previewMessage', previewMessage);
           url.searchParams.set('episodeMessage', episodeMessage);
           
-          // embedパラメータを引き継ぐ
-          if (window.location.search.includes('embed=1')) {
+          // 埋め込みモードの場合はembed=1を付与
+          if (window.parent !== window || window.top !== window || window.frameElement || 
+              new URLSearchParams(location.search).has('embed') ||
+              location.hostname.includes('studio') ||
+              (document.referrer && document.referrer.includes('studio'))) {
             url.searchParams.set('embed', '1');
           }
           
@@ -1582,7 +1527,17 @@
       // 診断をやり直すボタンの処理
       if (restartBtn) {
         restartBtn.onclick = () => {
-          window.location.reload();
+          // 埋め込みモードの場合はembed=1を付与してリロード
+          if (window.parent !== window || window.top !== window || window.frameElement || 
+              new URLSearchParams(location.search).has('embed') ||
+              location.hostname.includes('studio') ||
+              (document.referrer && document.referrer.includes('studio'))) {
+            const url = new URL('index.html', window.location.href);
+            url.searchParams.set('embed', '1');
+            window.location.href = url.toString();
+          } else {
+            window.location.reload();
+          }
         };
       }
     }
@@ -1592,7 +1547,7 @@
 
   </script>
   
-  <!-- 埋め込みモード制御スクリプト -->
-  <script src="assets/js/embed-mode.js"></script>
+  <!-- 埋め込みモード対応 -->
+  <script src="assets/js/embed-mode.js" defer></script>
 </body>
 </html> 
