@@ -334,33 +334,49 @@
 
   // URL検証強化
   function enhanceUrlValidation() {
-    // URL constructor の監視
+    // === 開発時の file:///localhost だけ許容する URL ラッパー（本番は従来どおり厳格） ===
+    if (!('URL' in window)) return; // ない環境は何もしない
     const originalURL = window.URL;
-    window.URL = function(url, base) {
-      const urlObj = new originalURL(url, base);
-      
-      // 危険なプロトコルをブロック
-      const dangerousProtocols = [
-        'javascript:', 'data:', 'vbscript:', 'file:', 'ftp:',
-        'jar:', 'view-source:', 'resource:', 'chrome:', 'moz-extension:'
-      ];
-      
-      if (dangerousProtocols.some(protocol => urlObj.protocol.toLowerCase().startsWith(protocol))) {
-        console.warn('🚫 危険なプロトコルをブロック:', urlObj.protocol);
+
+    const isDev =
+      location.protocol === 'file:' ||
+      location.hostname === 'localhost' ||
+      location.hostname === '127.0.0.1';
+
+    const BLOCKED_IN_ANY = ['javascript:', 'data:']; // どの環境でも禁止
+    // 以前 'file:' をここに含めていた場合は削除すること
+
+    function SafeURL(...args) {
+      const u = new originalURL(...args); // 先に正規化
+
+      if (isDev) {
+        // 開発（file/localhost）は通す
+        return u;
+      }
+
+      const proto = (u.protocol || '').toLowerCase();
+      if (BLOCKED_IN_ANY.includes(proto)) {
+        console.warn('🚫 危険なプロトコルをブロック:', proto);
         throw new Error('Dangerous protocol blocked');
       }
-      
+      // 本番で 'file:' をブロックしたい場合は以下を有効化
+      // if (proto === 'file:') {
+      //   throw new Error('Dangerous protocol blocked');
+      // }
+
       // 異常に長いURLをブロック
-      if (urlObj.href.length > 2048) {
-        console.warn('🚫 異常に長いURLをブロック:', urlObj.href.length);
+      if (u.href.length > 2048) {
+        console.warn('🚫 異常に長いURLをブロック:', u.href.length);
         throw new Error('URL too long');
       }
-      
-      return urlObj;
-    };
+
+      return u;
+    }
+
+    SafeURL.prototype = originalURL.prototype;
+    window.URL = SafeURL;
     
     // 元のプロトタイプを維持
-    window.URL.prototype = originalURL.prototype;
     window.URL.createObjectURL = originalURL.createObjectURL;
     window.URL.revokeObjectURL = originalURL.revokeObjectURL;
   }

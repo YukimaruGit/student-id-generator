@@ -1,18 +1,5 @@
-name = "after-school-share"
-main = "workers/index.js"
+name = "student-id-generator-ogp"
 compatibility_date = "2024-01-01"
-compatibility_flags = ["nodejs_compat"]
 
-[site]
-bucket = "./public"
-
-[env.production]
-routes = [
-  { pattern = "after-school-share.*.workers.dev", custom_domain = true }
-]
-
-# セキュリティヘッダーの設定
-[env.production.security_headers]
-X-Content-Type-Options = "nosniff"
-X-Frame-Options = "DENY"
-Referrer-Policy = "strict-origin-when-cross-origin" 
+[functions]
+directory = "functions" 

@@ -510,3 +510,15 @@ footer {
 }
 
 /* 修正終了 */ 
+
+/* クリックUIの選択を禁止（見た目は一切変えない） */
+button, a, [role="button"], .btn, .answer-option, 
+#toGeneratorBtn, #restartBtn, #backToDiagnosisBtn, #viewDiagnosisResultBtn {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+img { -webkit-user-drag: none; }
+
+/* テキストコピーを許可したい要素には .copyable を付ける */
+.copyable { user-select: text !important; } 

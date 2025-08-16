@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OGPテスト - 学生証ジェネレーター</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+    .url-input { width: 100%; padding: 10px; margin: 10px 0; }
+    .test-btn { background: #007cba; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+    .result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>🔗 OGPテスト - 学生証ジェネレーター</h1>
+  
+  <div class="test-section">
+    <h2>1. 共有URL生成テスト</h2>
+    <p>Cloudinaryのpublic_idを入力して、共有URLを生成します。</p>
+    <input type="text" id="publicIdInput" class="url-input" placeholder="例: student_card_AS_chronicle/abc123" value="student_card_AS_chronicle/test">
+    <button onclick="generateShareUrl()" class="test-btn">共有URL生成</button>
+    <div id="shareUrlResult" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>2. OGPタグ確認</h2>
+    <p>生成された共有URLのページソースでOGPタグを確認します。</p>
+    <input type="text" id="shareUrlInput" class="url-input" placeholder="共有URLを入力">
+    <button onclick="checkOGPTags()" class="test-btn">OGPタグ確認</button>
+    <div id="ogpResult" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>3. X Card Validator テスト</h2>
+    <p>共有URLをX Card Validatorでテストします。</p>
+    <button onclick="openXCardValidator()" class="test-btn">X Card Validator を開く</button>
+    <p><small>※ 新しいタブで開きます</small></p>
+  </div>
+  
+  <div class="test-section">
+    <h2>4. Discord プレビューテスト</h2>
+    <p>Discordに共有URLを貼り付けて、サムネイルが表示されるかテストします。</p>
+    <p><small>※ DiscordのテストサーバーまたはDMで確認してください</small></p>
+  </div>
+
+  <script>
+    // 共有URL生成（generator.htmlと同じロジック）
+    function generateShareUrl() {
+      const publicId = document.getElementById('publicIdInput').value.trim();
+      if (!publicId) {
+        alert('public_idを入力してください');
+        return;
+      }
+      
+      // Base64URL変換
+      function toBase64Url(str) {
+        return btoa(unescape(encodeURIComponent(str)))
+          .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      }
+      
+      // 共有URL生成
+      const SHARE_BASE = 'https://<PAGES_PRODUCTION_DOMAIN>'; // Cloudflare PagesのProduction domain
+      const slug = toBase64Url(publicId) + '-' + Date.now();
+      const shareUrl = `${SHARE_BASE}/s/${slug}`;
+      
+      document.getElementById('shareUrlResult').innerHTML = `
+        <strong>生成された共有URL:</strong><br>
+        <a href="${shareUrl}" target="_blank">${shareUrl}</a><br><br>
+        <strong>元のpublic_id:</strong> ${publicId}<br>
+        <strong>生成時刻:</strong> ${new Date().toLocaleString()}
+      `;
+      
+      // 共有URL入力欄にも設定
+      document.getElementById('shareUrlInput').value = shareUrl;
+    }
+    
+    // OGPタグ確認
+    async function checkOGPTags() {
+      const shareUrl = document.getElementById('shareUrlInput').value.trim();
+      if (!shareUrl) {
+        alert('共有URLを入力してください');
+        return;
+      }
+      
+      try {
+        const response = await fetch(shareUrl);
+        const html = await response.text();
+        
+        // OGPタグを抽出
+        const ogImageMatch = html.match(/<meta property="og:image" content="([^"]+)"/);
+        const ogTitleMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
+        const ogDescMatch = html.match(/<meta property="og:description" content="([^"]+)"/);
+        const twitterCardMatch = html.match(/<meta name="twitter:card" content="([^"]+)"/);
+        
+        let result = '<strong>OGPタグ確認結果:</strong><br>';
+        
+        if (ogImageMatch) {
+          result += `✅ og:image: ${ogImageMatch[1]}<br>`;
+        } else {
+          result += '❌ og:image: 見つかりません<br>';
+        }
+        
+        if (ogTitleMatch) {
+          result += `✅ og:title: ${ogTitleMatch[1]}<br>`;
+        } else {
+          result += '❌ og:title: 見つかりません<br>';
+        }
+        
+        if (ogDescMatch) {
+          result += `✅ og:description: ${ogDescMatch[1]}<br>`;
+        } else {
+          result += '❌ og:description: 見つかりません<br>';
+        }
+        
+        if (twitterCardMatch) {
+          result += `✅ twitter:card: ${twitterCardMatch[1]}<br>`;
+        } else {
+          result += '❌ twitter:card: 見つかりません<br>';
+        }
+        
+        document.getElementById('ogpResult').innerHTML = result;
+        
+      } catch (error) {
+        document.getElementById('ogpResult').innerHTML = `❌ エラー: ${error.message}`;
+      }
+    }
+    
+    // X Card Validator を開く
+    function openXCardValidator() {
+      const shareUrl = document.getElementById('shareUrlInput').value.trim();
+      if (!shareUrl) {
+        alert('先に共有URLを生成してください');
+        return;
+      }
+      
+      const validatorUrl = `https://cards-dev.twitter.com/validator?url=${encodeURIComponent(shareUrl)}`;
+      window.open(validatorUrl, '_blank');
+    }
+    
+    // 初期化
+    document.addEventListener('DOMContentLoaded', function() {
+      // デフォルトのpublic_idで共有URLを生成
+      generateShareUrl();
+    });
+  </script>
+</body>
+</html>

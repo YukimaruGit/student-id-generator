@@ -44,7 +44,11 @@ async function uploadImageToCloudinary(canvas, cloudName, uploadPreset) {
           }
 
           const data = await response.json();
-          resolve(data.secure_url);
+          // public_idとsecure_urlの両方を返す
+          resolve({
+            public_id: data.public_id,
+            secure_url: data.secure_url
+          });
         } catch (error) {
           console.error('Cloudinary upload error:', error);
           reject(error);
@@ -65,15 +69,24 @@ function generateShareUrl(imageUrl, studentInfo = {}) {
     };
     if (studentInfo.name) params.n = studentInfo.name;
     
-    const originalUrl = new URL('s.html', window.location.origin).toString();
-    return window.DomainMasking.generateShortUrl(originalUrl, params);
+    // 古い共有方式（非推奨）
+    // const originalUrl = new URL('s.html', window.location.origin).toString();
+    // return window.DomainMasking.generateShortUrl(originalUrl, params);
+    
+    // 新しい短いURL方式を推奨
+    console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');
+    return '新しい短いURL方式が利用できません';
   }
   
-  // フォールバック: 従来の方式
-  const shareUrl = new URL('s.html', window.location.origin);
-  shareUrl.searchParams.set('i', imageUrl); // 短縮パラメータ
-  if (studentInfo.name) shareUrl.searchParams.set('n', studentInfo.name); // 短縮パラメータ
-  return shareUrl.toString();
+  // フォールバック: 従来の方式（非推奨 - 新しい短いURL方式を使用）
+  // const shareUrl = new URL('s.html', window.location.origin);
+  // shareUrl.searchParams.set('i', imageUrl); // 短縮パラメータ
+  // if (studentInfo.name) shareUrl.searchParams.set('n', studentInfo.name); // 短縮パラメータ
+  // return shareUrl.toString();
+  
+  // 新しい短いURL方式を推奨
+  console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');
+  return '新しい短いURL方式が利用できません';
 }
 
 function downloadCanvasAsImage(canvas, filename = '学生証.png') {
@@ -645,7 +658,7 @@ function initializeApp() {
       showLoading('学生証をシェア用に準備中...');
       
       // 学生証画像をCloudinaryにアップロード
-      const imageUrl = await uploadImageToCloudinary(
+      const imageData = await uploadImageToCloudinary(
         elements.cardCanvas, 
         cloudinaryConfig.cloudName, 
         cloudinaryConfig.uploadPreset
@@ -654,21 +667,43 @@ function initializeApp() {
       // 学生情報を取得
       const nameJa = elements.nameJa.value.trim();
       const course = elements.department ? elements.department.value : '';
-      const club = elements.club ? elements.club.value : '';
+      const club = elements.department ? elements.department.value : '';
       
       // URLパラメータから診断結果情報を取得
       const params = new URLSearchParams(location.search);
       const department = params.get('department') || '';
       
-      // シェア用URLを生成（短縮URL対応）
-      const shareUrl = new URL('s.html', window.location.origin);
-      shareUrl.searchParams.set('i', imageUrl);
-      if (nameJa) shareUrl.searchParams.set('n', nameJa);
+      // 新しい共有方式：短いURL（/s/{slug}形式）
+      let shareUrl;
       
-      // ツイート文を作成
+      // ツイート文を作成（先に定義）
       const tweetText = nameJa ? 
         `${nameJa}の学生証が完成しました！🎓\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター` :
         `放課後クロニクル 学生証が完成しました！🎓\n\n診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター`;
+      
+      if (window.buildShareUrl && imageData.public_id) {
+        // 新しい共有方式
+        shareUrl = window.buildShareUrl(imageData.public_id);
+        
+        // 共有リンクを更新（X intent、URLコピー欄等）
+        if (window.updateShareLinks) {
+          window.updateShareLinks(imageData.public_id, tweetText);
+        }
+      } else {
+        // フォールバック：従来方式（非推奨）
+        // shareUrl = new URL('s.html', window.location.origin);
+        // shareUrl.searchParams.set('i', imageData.secure_url || imageData);
+        // if (nameJa) shareUrl.searchParams.set('n', nameJa);
+        
+        // 新しい短いURL方式を推奨
+        console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');
+        shareUrl = '新しい短いURL方式が利用できません';
+      }
+      
+      // ツイート文を作成（重複削除）
+      // const tweetText = nameJa ? 
+      //   `${nameJa}の学生証が完成しました！🎓\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター` :
+      //   `放課後クロニクル 学生証が完成しました！🎓\n\n診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター`;
       
       // X投稿画面を開く（画像URLを含める）
       const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl.toString())}`;
@@ -713,7 +748,7 @@ function initializeApp() {
     try {
       showLoading('学生証をシェア用に準備中...');
       
-      const imageUrl = await uploadImageToCloudinary(
+      const imageData = await uploadImageToCloudinary(
         elements.cardCanvas, 
         cloudinaryConfig.cloudName, 
         cloudinaryConfig.uploadPreset
@@ -722,12 +757,21 @@ function initializeApp() {
       // 学生情報を取得（短縮URL対応）
       const nameJa = elements.nameJa.value.trim();
       
-      // 学生情報をまとめる（最小限のデータのみ）
-      const studentInfo = {
-        name: nameJa
-      };
-      
-      const shareUrl = generateShareUrl(imageUrl, studentInfo);
+      // 新しい共有方式：短いURL（/s/{slug}形式）
+      let shareUrl;
+      if (window.buildShareUrl && imageData.public_id) {
+        // 新しい共有方式
+        shareUrl = window.buildShareUrl(imageData.public_id);
+        
+        // 共有リンクを更新（X intent、URLコピー欄等）
+        if (window.updateShareLinks) {
+          window.updateShareLinks(imageData.public_id, '学生証を発行しました');
+        }
+      } else {
+        // フォールバック：従来方式（非推奨）
+        const studentInfo = { name: nameJa };
+        shareUrl = generateShareUrl(imageData.secure_url || imageData, studentInfo);
+      }
       const success = await copyUrlToClipboard(shareUrl);
       
       hideLoading();

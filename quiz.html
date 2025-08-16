@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>放課後クロニクル ― 診断ゲーム</title>
   
   <!-- Font Awesome -->
@@ -12,6 +13,9 @@
   <script>
     (function() {
       'use strict';
+      
+      // ローカル開発時は過剰ギミックを無効化
+      if (location.protocol === 'file:') { return; }
       
       // 安全なコンソール乗っ取り（F12開放時エラー対策）
       let originalError, originalWarn, originalLog;
@@ -194,6 +198,9 @@
   <script>
     (function() {
       'use strict';
+      
+      // ローカル開発時は過剰ギミックを無効化
+      if (location.protocol === 'file:') { return; }
       
       console.log('🛡️ TypeSquareエラー対策システム起動（Quiz版）');
       
@@ -549,6 +556,37 @@
       }
     }
   </style>
+  
+  <!-- showResult=true対応スクリプト -->
+  <script>
+    (function(){
+      const p = new URLSearchParams(location.search);
+      if (p.get('showResult') === 'true') {
+        document.addEventListener('DOMContentLoaded', () => {
+          // 既存要素のIDは現状のまま利用（無ければスキップ）
+          const qc = document.getElementById('questionContainer');
+          const rc = document.getElementById('resultContainer');
+          if (qc) qc.style.display = 'none';
+          if (rc) rc.style.display = 'block';
+
+          // 既存の結果表示要素への最小値流し込み（存在チェックして安全に）
+          const dept   = p.get('department') || '';
+          const course = p.get('course') || '';
+          const club   = p.get('club') || '';
+          const pm     = p.get('previewMessage') || '';
+          const em     = p.get('episodeMessage') || '';
+
+          const rCourseEl = document.getElementById('resultCourse');
+          const rClubEl   = document.getElementById('resultClub');
+          if (rCourseEl) rCourseEl.textContent = course || dept || rCourseEl.textContent;
+          if (rClubEl)   rClubEl.textContent   = (/部$/.test(club) ? club : (club ? club + '部' : rClubEl.textContent));
+
+          if (pm) { const el = document.getElementById('previewMsg'); if (el) el.textContent = pm; }
+          if (em) { const el = document.getElementById('episodeMsg'); if (el) el.textContent = em; }
+        });
+      }
+    })();
+  </script>
 </head>
 <body>
   <div class="container">
@@ -595,11 +633,11 @@
         </div>
 
         <div class="buttons">
-          <button class="btn btn-primary" id="toGeneratorBtn">
+          <button type="button" class="btn btn-primary" id="toGeneratorBtn">
             <i class="fas fa-id-card"></i>
             学生証を作成する
           </button>
-          <button class="btn btn-secondary" id="restartBtn">
+          <button type="button" class="btn btn-secondary" id="restartBtn">
             <i class="fas fa-redo"></i>
             診断をやり直す
           </button>
@@ -1064,7 +1102,7 @@
         
       } catch (error) {
         console.error('❌ 診断ゲーム初期化エラー:', error);
-        document.body.innerHTML = '<div style="text-align: center; padding: 50px; color: red;">重大エラー: 診断ゲームを開始できませんでした。<br><button onclick="location.reload()">ページを再読み込み</button></div>';
+        document.body.innerHTML = '<div style="text-align: center; padding: 50px; color: red;">重大エラー: 診断ゲームを開始できませんでした。<br><button type="button" onclick="location.reload()">ページを再読み込み</button></div>';
       }
     }
     

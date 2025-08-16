@@ -3,12 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>放課後クロニクル ― 診断ゲーム</title>
   
   <!-- Studio環境用meta refresh -->
   <script>
-    if (window.parent !== window || window.top !== window || window.frameElement) {
-      document.write('<meta http-equiv="refresh" content="0;url=quiz.html">');
+    if (location.protocol === 'file:') { /* ローカル確認中は検出ロジック無効化 */ } else {
+      if (window.parent !== window || window.top !== window || window.frameElement) {
+        var qs = location.search || '';
+        var hash = location.hash || '';
+        document.write('<meta http-equiv="refresh" content="0;url=quiz.html' + qs + hash + '">');
+      }
     }
   </script>
   
@@ -16,6 +21,9 @@
   <script>
     (function() {
       'use strict';
+      
+      // ローカル開発時は過剰ギミックを無効化
+      if (location.protocol === 'file:') { return; }
       
       // 複数の方法でStudio環境を検出
       const detectionMethods = [
@@ -85,6 +93,9 @@
   <script>
     (function() {
       'use strict';
+      
+      // ローカル開発時は過剰ギミックを無効化
+      if (location.protocol === 'file:') { return; }
       
       // Studio環境の即座検出とリダイレクト
       const isStudio = window.location.hostname.includes('studio') || 
@@ -165,18 +176,20 @@
       };
       
       // 5秒後に選択肢がクリックできない場合、シンプル版にリダイレクト
-      setTimeout(() => {
-        const questionContainer = document.getElementById('questionContainer');
-        const answerOptions = document.querySelectorAll('.answer-option');
-        
-        if (questionContainer && answerOptions.length === 0) {
-          console.warn('🚨 質問が正常に表示されていません。シンプル版にリダイレクトします。');
-          window.location.href = 'quiz.html';
-        } else if (typeof selectAnswer !== 'function') {
-          console.warn('🚨 selectAnswer関数が定義されていません。シンプル版にリダイレクトします。');
-          window.location.href = 'quiz.html';
-        }
-      }, 5000);
+      if (location.protocol !== 'file:') {
+        setTimeout(() => {
+          const questionContainer = document.getElementById('questionContainer');
+          const answerOptions = document.querySelectorAll('.answer-option');
+          
+          if (questionContainer && answerOptions.length === 0) {
+            console.warn('🚨 質問が正常に表示されていません。シンプル版にリダイレクトします。');
+            window.location.href = 'quiz.html';
+          } else if (typeof selectAnswer !== 'function') {
+            console.warn('🚨 selectAnswer関数が定義されていません。シンプル版にリダイレクトします。');
+            window.location.href = 'quiz.html';
+          }
+        }, 5000);
+      }
       
       console.log('✅ TypeSquare遮断システム完了');
     })();
@@ -250,13 +263,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- Font Awesome フォールバック -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="none" onload="if(media!='all')media='all'">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css" media="none" onload="if(media!='all')media='all'">
+          <!-- 不要・CSP外: <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css" media="none" onload="if(media!='all')media='all'"> -->
   <noscript>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
+            <!-- 不要・CSP外: <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css"> -->
   </noscript>
   <link rel="stylesheet" href="assets/css/style.css">
-  <script src="assets/js/domain-masking.js"></script>
+  <!-- <script src="assets/js/domain-masking.js"></script> -->
   <script src="assets/js/comprehensive-security.js"></script>
   <script src="assets/js/security.js"></script>
   <script src="assets/js/privacy-protection.js"></script>
@@ -873,11 +886,11 @@
         </div>
 
         <div class="button-container">
-          <button class="to-generator-btn" id="toGeneratorBtn">
+          <button type="button" class="to-generator-btn" id="toGeneratorBtn">
             <i class="fas fa-id-card"></i>
             学生証を作成する
           </button>
-          <button class="restart-btn" id="restartBtn">
+          <button type="button" class="restart-btn" id="restartBtn">
             <i class="fas fa-redo"></i>
             診断をやり直す
           </button>
