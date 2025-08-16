@@ -1,0 +1,2316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>九条あまね - 放課後クロニクル | 学生証データベース</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&family=Kalam:wght@300;400;700&family=Caveat:wght@400;500;600;700&family=Comic+Neue:wght@300;400;700&family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* 修正版 - 2024年12月更新 - コンテンツカード位置復元・学校ノート調整・スティッキータブ接触・YouTube文字化完了 */
+        :root {
+            --amane-color: #ADD8E6;
+            --amane-light: #E6F3FF;
+            --amane-dark: #4A90E2;
+            --amane-accent: #87CEEB;
+            --nobara-color: #228B22;
+            --nobara-light: #E8F5E8;
+            --nobara-dark: #1B5E20;
+            --nobara-accent: #4CAF50;
+            --nobara-soft: #A5D6A7;
+            --videos-color: #9E9E9E;
+            --videos-light: #F5F5F5;
+            --videos-dark: #424242;
+            --videos-accent: #757575;
+            --videos-orange: #FFCC80;
+            --videos-orange-dark: #FF8A65;
+            --videos-orange-light: #FFF3E0;
+            --notebook-bg: #2A2A2A;
+            --grid-color: #505050;
+            --margin-line: #EF4444;
+            --text-dark: #FFFFFF;
+        }
+
+        * {
+            font-family: 'Klee One', 'Caveat', 'Comic Neue', 'Noto Sans JP', cursive !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: 
+                linear-gradient(90deg, transparent 79px, #999999 79px, #999999 81px, transparent 81px),
+                repeating-linear-gradient(90deg, transparent 0px, transparent 19px, #AAAAAA 19px, #AAAAAA 20px),
+                repeating-linear-gradient(0deg, transparent 0px, transparent 19px, #AAAAAA 19px, #AAAAAA 20px),
+                #888888;
+            background-size: 100% 100%, 20px 20px, 20px 20px, 100% 100%;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            left: 30px;
+            top: 0;
+            width: 20px;
+            height: 100vh;
+            background: 
+                radial-gradient(circle at 10px 60px, #BBBBBB 6px, transparent 6px),
+                radial-gradient(circle at 10px 160px, #BBBBBB 6px, transparent 6px),
+                radial-gradient(circle at 10px 260px, #BBBBBB 6px, transparent 6px),
+                radial-gradient(circle at 10px 360px, #BBBBBB 6px, transparent 6px),
+                radial-gradient(circle at 10px 460px, #BBBBBB 6px, transparent 6px),
+                radial-gradient(circle at 10px 560px, #BBBBBB 6px, transparent 6px);
+            background-repeat: repeat-y;
+            background-size: 20px 100px;
+            z-index: -1;
+        }
+
+
+
+        /* スティッキータブをノート左辺に縦並びで配置 */
+        .sticky-tabs-container {
+            position: absolute;
+            top: 50px;
+            left: 0px;
+            z-index: 15;
+        }
+
+        .social-nav {
+            display: flex;
+            gap: 6px;
+            background: rgba(240, 240, 240, 0.6);
+            padding: 4px 6px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        /* トグルスイッチデザイン */
+        .character-selector {
+            position: relative;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            padding: 4px;
+            border: 2px solid var(--amane-color);
+            box-shadow: 0 4px 15px rgba(173, 216, 230, 0.3);
+            backdrop-filter: blur(10px);
+            display: flex;
+            width: 200px;
+        }
+
+        /* スティッキータブデザイン - 縦並び強制 - 2024更新 - 自の字より左側配置 */
+        .content-nav {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 3px;
+            background: transparent;
+            padding: 0;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+            position: relative;
+        }
+
+        .selector-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: none;
+            flex: 1;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--amane-dark);
+            white-space: nowrap;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* スティッキータブボタン（縦並び） */
+        .content-nav-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--amane-color);
+            border: 2px solid var(--amane-dark);
+            border-right: none;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--amane-dark);
+            white-space: nowrap;
+            text-align: center;
+            position: relative;
+            border-radius: 8px 0 0 8px;
+            margin-bottom: 0px;
+            transform: translateX(0px);
+            box-shadow: -2px 0 4px rgba(173, 216, 230, 0.3);
+            min-height: 50px;
+            width: 120px;
+        }
+
+        .selector-item.active {
+            color: white;
+            font-weight: 700;
+        }
+
+        /* トグルスイッチの背景スライダー */
+        .character-selector::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            background: linear-gradient(135deg, var(--amane-color), var(--amane-accent));
+            border-radius: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(173, 216, 230, 0.4);
+            z-index: 1;
+        }
+
+        /* のばらが選択された時のスライダー位置 */
+        .character-selector.nobara-active::before {
+            left: calc(50% + 0px);
+            background: linear-gradient(135deg, var(--nobara-color), #006400);
+            box-shadow: 0 2px 8px rgba(34, 139, 34, 0.4);
+        }
+
+        .content-nav-btn.active {
+            transform: translateX(-2px);
+            background: white;
+            color: var(--amane-dark);
+            font-weight: 700;
+            z-index: 10;
+            box-shadow: -3px 0 6px rgba(173, 216, 230, 0.4);
+            border-color: var(--amane-dark);
+        }
+
+        .content-nav-btn:hover:not(.active) {
+            transform: translateX(1px);
+            background: var(--amane-light);
+            color: var(--amane-dark);
+        }
+
+        /* SNSタブのスタイル（縦並び） */
+        .content-nav-btn.sns-tab {
+            background: var(--amane-accent);
+            color: white;
+            font-weight: 700;
+            min-height: 40px;
+            padding: 8px 6px;
+            font-size: 0.6rem;
+        }
+
+        .content-nav-btn.sns-tab:hover {
+            background: var(--amane-dark);
+            transform: translateX(1px);
+        }
+
+        .selector-logo {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+        }
+
+        .social-nav-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: none;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .social-nav-btn.youtube { background: #ff0000; }
+        .social-nav-btn.twitter { background: #000000; }
+
+        /* メインレイアウト */
+        .main-layout {
+            min-height: 100vh;
+            padding-top: 0px;
+        }
+
+        .character-image-outside {
+            position: fixed;
+            top: 5vh;
+            left: 7vw;
+            width: 50vw;
+            height: 100vh;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* 動画モード時のみキャラクター間隔を狭める */
+        .videos-mode .character-image-outside {
+            gap: 5px;
+        }
+
+        .amane-key-visual, .nobara-key-visual {
+            height: 110vh;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+            transition: all 0.4s ease;
+        }
+
+        /* 動画モード時のキャラクター画像サイズ調整 */
+        .videos-mode .amane-key-visual {
+            height: 95vh;
+            transform: translateY(-4vh);
+        }
+        
+        .videos-mode .nobara-key-visual {
+            height: 85vh;
+            transform: translateY(-5vh);
+        }
+
+        /* 九条あまねモード時のサイズ調整 */
+        .amane-mode .amane-key-visual {
+            height: 100vh;
+            max-width: 48vw;
+        }
+
+        .amane-key-visual {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .nobara-key-visual {
+            animation: float 3s ease-in-out infinite reverse;
+            display: none; /* 初期状態では非表示 */
+        }
+
+        .amane-key-visual:hover, .nobara-key-visual:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 15px 40px rgba(0, 0, 0, 0.4));
+        }
+
+        /* 九条あまねモード：あまね単体表示 */
+        .amane-mode .character-image-outside {
+            justify-content: center;
+            padding-left: 0vw;
+        }
+
+        .amane-mode .nobara-key-visual {
+            display: none;
+        }
+
+        /* 高森のばらモード：のばら単体表示 */
+        .nobara-mode .character-image-outside {
+            justify-content: center;
+            padding-left: 0vw;
+        }
+
+        .nobara-mode .amane-key-visual {
+            display: none;
+        }
+
+        .nobara-mode .nobara-key-visual {
+            display: block;
+        }
+
+        /* 高森のばらモード時ののばらのサイズ調整（あまねと同じサイズ） */
+        .nobara-mode .nobara-key-visual {
+            height: 95vh;
+            max-width: 45vw;
+            transform: translateY(-5vh) translateX(3vw);
+        }
+
+        /* 動画モード：2名キャラクター表示 */
+        .videos-mode .character-image-outside {
+            justify-content: center;
+        }
+
+        .videos-mode .nobara-key-visual {
+            display: block;
+        }
+
+        .videos-mode .amane-key-visual {
+            display: block;
+        }
+
+        /* キーワード縦書きテキスト */
+        .character-keyword {
+            position: fixed;
+            top: 8%;
+            left: 19vw;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--amane-dark);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 2px solid #4A4A4A;
+            z-index: 0;
+            font-family: 'Klee One', cursive;
+            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        /* 動画モード時のロゴ位置調整 - 2人の間に配置 */
+        .videos-mode .character-keyword {
+            left: 30.5vw;
+            transform: none;
+            top: 15%;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+
+
+
+
+
+        /* キーワード表示制御 */
+        .amane-keyword, .nobara-keyword {
+            display: none;
+            color: #4A4A4A;
+        }
+
+        .amane-mode .amane-keyword {
+            display: block;
+        }
+
+        .nobara-mode .nobara-keyword {
+            display: block;
+        }
+
+        .content-section {
+            width: 48vw;
+            margin-left: 48vw;
+            padding: 40px 30px 40px 40px;
+            position: relative;
+            z-index: 5;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* コンテンツカード - 白い紙のノート */
+        .content-card {
+            background: white !important;
+            padding: 10px 45px 35px 45px !important;
+            border-radius: 12px 0 0 12px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+            border: 2px solid var(--amane-color) !important;
+            border-right: none !important;
+            margin-bottom: 35px !important;
+            position: relative !important;
+            transition: all 0.4s ease !important;
+            opacity: 0;
+            transform: translateY(30px);
+            margin-left: 120px !important;
+            /* 白い紙のノート風背景 - 水色マージン線と薄い罫線（右側マージン） */
+            background-image: 
+                /* 水色マージン線（右側） */
+                linear-gradient(270deg, transparent 50px, var(--amane-color) 50px, var(--amane-color) 52px, transparent 52px),
+                /* 薄い横罫線 */
+                repeating-linear-gradient(
+                    0deg,
+                    transparent 0px,
+                    transparent 23px,
+                    rgba(173, 216, 230, 0.3) 23px,
+                    rgba(173, 216, 230, 0.3) 24px
+                ) !important;
+            background-size: 100% 100%, 100% 24px !important;
+        }
+
+        .content-card.active {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+
+
+        /* セクションタイトル */
+        .section-title {
+            font-family: 'Caveat', 'Klee One', cursive;
+            font-size: 2.2rem;
+            color: var(--amane-dark);
+            margin-bottom: 15px;
+            font-weight: 700;
+            transform: rotate(-1deg);
+            position: relative;
+            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: -5px;
+            right: 15px;
+            height: 6px;
+            background: linear-gradient(90deg, var(--amane-color), var(--amane-accent), var(--amane-color));
+            border-radius: 3px;
+                opacity: 0.8;
+        }
+
+        /* 学生証画像 */
+        .student-id-image-container {
+            text-align: center;
+            margin: 50px 0 5px 0;
+            position: relative;
+            z-index: 3;
+        }
+
+        .student-id-views {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            max-width: 400px;
+            height: 250px;
+        }
+
+        .student-id-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .student-id-view.active {
+            opacity: 1;
+        }
+
+        .student-id-view img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* キャラクター情報 */
+        .character-info {
+            background: transparent;
+            padding: 20px 0;
+            border-radius: 0;
+            margin: 20px 0 20px -30px;
+            border: none;
+            position: relative;
+            z-index: 2;
+            box-shadow: none;
+            transform: scale(0.9);
+        }
+
+        .character-info h3 {
+            font-family: 'Caveat', 'Klee One', cursive;
+            font-size: 1.8rem;
+            color: var(--amane-dark);
+            margin-bottom: 20px;
+            font-weight: 700;
+            transform: rotate(-0.8deg);
+            text-shadow: 1px 1px 3px rgba(173, 216, 230, 0.3);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #fff9c4 0%, #fff3a0 100%);
+            border-radius: 0;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 
+                0 2px 6px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            min-height: 32px;
+            transform: rotate(-1deg);
+            position: relative;
+            margin: 6px 3px;
+        }
+
+        .info-item::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 0 0 6px 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-item:nth-child(odd) {
+            background: linear-gradient(135deg, #ffe4e1 0%, #ffd1cc 100%);
+            transform: rotate(0.8deg);
+        }
+
+        .info-item:nth-child(3n) {
+            background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);
+            transform: rotate(-0.5deg);
+        }
+
+        .info-item:nth-child(4n) {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            transform: rotate(1.2deg);
+        }
+
+        .info-item:nth-child(5n) {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            transform: rotate(-0.8deg);
+        }
+
+        .info-item:hover {
+            transform: translateY(-3px) scale(1.05) rotate(0deg);
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            z-index: 10;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #2d3748;
+            font-weight: 600;
+            font-family: 'Klee One', cursive;
+            text-shadow: 0.5px 0.5px 1px rgba(255, 255, 255, 0.9);
+            transform: rotate(-0.3deg);
+            position: relative;
+        }
+
+        .info-label::after {
+            content: ':';
+            margin-left: 2px;
+            color: #4a5568;
+        }
+
+        .info-value {
+            font-size: 0.9rem;
+            color: #2d3748;
+            font-weight: 700;
+            font-family: 'Caveat', cursive;
+            transform: rotate(0.4deg);
+            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        /* 学校ノート風セクション - 白い紙（右開きページ） */
+        .school-note {
+            background: white;
+            margin: 15px 0;
+            padding: 15px 25px 15px 95px;
+            border-radius: 0 8px 8px 0;
+            border-right: 2px solid var(--amane-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(173, 216, 230, 0.4);
+            transition: all 0.3s ease;
+            transform: rotate(-0.4deg) scale(0.85);
+            position: relative;
+            min-height: 80px;
+            max-height: 120px;
+            /* 白い紙のノート風背景 - 水色マージン線と薄い罫線（左側マージン） */
+            background-image: 
+                /* 水色マージン線（左側） */
+                linear-gradient(90deg, transparent 78px, var(--amane-color) 78px, var(--amane-color) 80px, transparent 80px),
+                /* 薄い横罫線 */
+                repeating-linear-gradient(
+                    0deg,
+                    transparent 0px,
+                    transparent 23px,
+                    rgba(173, 216, 230, 0.3) 23px,
+                    rgba(173, 216, 230, 0.3) 24px
+                );
+            background-size: 100% 100%, 100% 24px;
+        }
+
+
+
+        .school-note:nth-child(even) {
+            transform: rotate(0.4deg) scale(0.85);
+        }
+
+        .school-note:hover {
+            transform: translateY(-2px) scale(0.87);
+            box-shadow: 0 4px 15px rgba(173, 216, 230, 0.2);
+        }
+
+        .school-note strong {
+            color: var(--amane-dark);
+            font-family: 'Caveat', 'Klee One', cursive;
+            font-size: 1.0rem !important;
+            font-weight: 700;
+            transform: rotate(-0.6deg);
+            display: inline;
+                position: relative;
+            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
+            line-height: 1.8 !important;
+        }
+
+        .school-note strong::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--amane-color), var(--amane-accent), var(--amane-color));
+            border-radius: 1px;
+            opacity: 0.8;
+        }
+
+        .intro-text {
+            font-size: 1.0rem;
+            line-height: 1.8;
+            color: #1A202C;
+            font-weight: 500;
+            text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        /* スティッキータブ */
+        .sticky-tabs {
+            position: fixed;
+            left: calc(48vw + 80px);
+            top: 30%;
+            transform: translateY(-50%) translateY(30px);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+                opacity: 0;
+            transition: all 0.4s ease;
+            }
+
+        .sticky-tabs.active {
+                opacity: 1;
+            transform: translateY(-50%) translateY(0);
+        }
+
+        .sticky-tab {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 12px 0 0 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.2);
+            font-family: 'Klee One', cursive;
+            min-width: 90px;
+            text-align: center;
+            border: 2px solid var(--amane-color);
+            border-right: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sticky-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .sticky-tab:active::before {
+            left: 100%;
+        }
+
+        /* パルスアニメーション */
+        @keyframes pulse {
+            0% {
+                transform: translateX(-5px) scale(1);
+            }
+            50% {
+                transform: translateX(-5px) scale(1.05);
+            }
+            100% {
+                transform: translateX(-5px) scale(1);
+            }
+        }
+
+        .sticky-tab:hover {
+            transform: translateX(-3px);
+            box-shadow: -3px 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .sticky-tab.youtube {
+            background: #FF0000;
+            color: white;
+            margin-top: 80px; /* ボタン二個分の間隔を追加 */
+        }
+
+        .sticky-tab.twitter {
+            background: #000000;
+            color: white;
+        }
+
+        /* 動画グリッド */
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 25px 0 15px 0;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            border: none;
+            transform: scale(0.8);
+        }
+
+        .content-card {
+            display: block;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.4s ease;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        .content-card.active {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+            pointer-events: auto;
+            visibility: visible !important;
+            display: block !important;
+        }
+
+        /* モード別コンテンツ表示制御 */
+        /* 九条あまねモード時：九条あまねのプロフィールのみ表示 */
+        .amane-mode #profile {
+            display: block !important;
+        }
+        .amane-mode #nobara-profile {
+            display: none !important;
+        }
+        .amane-mode #videos {
+            display: none !important;
+        }
+
+        /* 高森のばらモード時：高森のばらのプロフィールのみ表示 */
+        .nobara-mode #profile {
+            display: none !important;
+        }
+        .nobara-mode #nobara-profile {
+            display: block !important;
+        }
+        .nobara-mode #videos {
+            display: none !important;
+        }
+
+        /* 動画モード時：動画コンテンツのみ表示 */
+        .videos-mode #profile {
+            display: none !important;
+        }
+        .videos-mode #nobara-profile {
+            display: none !important;
+        }
+        .videos-mode #videos {
+            display: block !important;
+        }
+
+
+
+        /* 動画コンテンツ専用スタイル - グレー配色 */
+        #videos.content-card {
+            /* 動画ページ専用のグレーノート風スタイル */
+            background: white !important;
+            padding: 10px 45px 35px 45px !important;
+            border-radius: 12px 0 0 12px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+            border: 2px solid var(--videos-color) !important;
+            border-right: none !important;
+            margin-bottom: 35px !important;
+            position: relative !important;
+            transition: all 0.4s ease !important;
+            margin-left: 120px !important;
+            /* 動画ページ専用のグレーマージン線と薄い罫線（右側マージン） */
+            background-image: 
+                /* グレーマージン線（右側） */
+                linear-gradient(270deg, transparent 50px, var(--videos-color) 50px, var(--videos-color) 52px, transparent 52px),
+                /* 薄い横罫線 */
+                repeating-linear-gradient(
+                    0deg,
+                    transparent 0px,
+                    transparent 23px,
+                    rgba(158, 158, 158, 0.3) 23px,
+                    rgba(158, 158, 158, 0.3) 24px
+                ) !important;
+            background-size: 100% 100%, 100% 24px !important;
+            /* 十分な最小高さを確保 */
+            min-height: 100vh !important;
+            /* アニメーション設定 */
+            opacity: 0;
+            transform: translateY(30px);
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        #videos.content-card.active {
+            /* プロフィールと同じアクティブ状態 */
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+            pointer-events: auto !important;
+            visibility: visible !important;
+            display: block !important;
+        }
+
+        /* 動画ページ専用のオレンジ配色 */
+        #videos .section-title {
+            color: var(--videos-orange-dark);
+        }
+
+        #videos .section-title::after {
+            background: linear-gradient(90deg, var(--videos-orange), var(--videos-orange-dark), var(--videos-orange));
+        }
+
+        #videos .playlist-section h3 {
+            color: var(--videos-orange-dark);
+        }
+
+        /* 九条あまねプロフィール専用スタイル - 水色配色 */
+        #profile.content-card {
+            /* プロフィールのノート風スタイル */
+            background: white !important;
+            padding: 10px 45px 35px 45px !important;
+            border-radius: 12px 0 0 12px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+            border: 2px solid var(--amane-color) !important;
+            border-right: none !important;
+            margin-bottom: 35px !important;
+            position: relative !important;
+            transition: all 0.4s ease !important;
+            margin-left: 120px !important;
+            /* 水色のマージン線と薄い罫線（右側マージン） */
+            background-image: 
+                /* 水色マージン線（右側） */
+                linear-gradient(270deg, transparent 50px, var(--amane-color) 50px, var(--amane-color) 52px, transparent 52px),
+                /* 薄い横罫線 */
+                repeating-linear-gradient(
+                    0deg,
+                    transparent 0px,
+                    transparent 23px,
+                    rgba(173, 216, 230, 0.3) 23px,
+                    rgba(173, 216, 230, 0.3) 24px
+                ) !important;
+            background-size: 100% 100%, 100% 24px !important;
+            /* 十分な最小高さを確保 */
+            min-height: 100vh !important;
+            /* アニメーション設定 */
+            opacity: 0;
+            transform: translateY(30px);
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        /* 高森のばらプロフィール専用スタイル - 深緑配色 */
+        #nobara-profile.content-card {
+            /* 高森のばら専用の深緑ノート風スタイル */
+            background: white !important;
+            padding: 10px 45px 35px 45px !important;
+            border-radius: 12px 0 0 12px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+            border: 2px solid var(--nobara-color) !important;
+            border-right: none !important;
+            margin-bottom: 35px !important;
+            position: relative !important;
+            transition: all 0.4s ease !important;
+            margin-left: 120px !important;
+            /* 高森のばら専用の深緑マージン線と薄い罫線（右側マージン） */
+            background-image: 
+                /* 深緑マージン線（右側） */
+                linear-gradient(270deg, transparent 50px, var(--nobara-color) 50px, var(--nobara-color) 52px, transparent 52px),
+                /* 薄い横罫線 */
+                repeating-linear-gradient(
+                    0deg,
+                    transparent 0px,
+                    transparent 23px,
+                    rgba(34, 139, 34, 0.3) 23px,
+                    rgba(34, 139, 34, 0.3) 24px
+                ) !important;
+            background-size: 100% 100%, 100% 24px !important;
+            /* 十分な最小高さを確保 */
+            min-height: 100vh !important;
+            /* アニメーション設定 */
+            opacity: 0;
+            transform: translateY(30px);
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        #nobara-profile.content-card.active {
+            /* プロフィールと同じアクティブ状態 */
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+            pointer-events: auto !important;
+            visibility: visible !important;
+            display: block !important;
+        }
+
+        /* 高森のばら専用の深緑配色 - 九条あまねと同じバランス */
+        #nobara-profile .section-title {
+            color: var(--nobara-dark);
+        }
+
+        #nobara-profile .section-title::after {
+            background: linear-gradient(90deg, var(--nobara-color), var(--nobara-accent), var(--nobara-color));
+        }
+
+        #nobara-profile .character-info h3 {
+            color: var(--nobara-dark);
+            text-shadow: 1px 1px 3px rgba(34, 139, 34, 0.3);
+        }
+
+        #nobara-profile .school-note {
+            background: white !important;
+            border-right: 2px solid var(--nobara-color);
+            border: 1px solid rgba(34, 139, 34, 0.4);
+            /* 高森のばら専用の深緑マージン線と薄い罫線（左側マージン） */
+            background-image: 
+                /* 深緑マージン線（左側） */
+                linear-gradient(90deg, transparent 78px, var(--nobara-color) 78px, var(--nobara-color) 80px, transparent 80px),
+                /* 薄い横罫線 */
+                repeating-linear-gradient(
+                    0deg,
+                    transparent 0px,
+                    transparent 23px,
+                    rgba(34, 139, 34, 0.3) 23px,
+                    rgba(34, 139, 34, 0.3) 24px
+                ) !important;
+            background-size: 100% 100%, 100% 24px !important;
+        }
+
+        #nobara-profile .school-note:hover {
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+        }
+
+        #nobara-profile .school-note strong {
+            color: var(--nobara-dark);
+        }
+
+        #nobara-profile .school-note strong::after {
+            background: linear-gradient(90deg, var(--nobara-color), var(--nobara-accent), var(--nobara-color));
+        }
+
+        #nobara-profile .intro-text {
+            color: #1A202C;
+        }
+
+        /* 高森のばらのクリックカウンター */
+        #nobara-profile .student-id-image-container div[style*="color: var(--amane-dark)"] {
+            color: var(--nobara-dark) !important;
+        }
+
+        .video-card {
+            background: white;
+            border-radius: 12px;
+            overflow: visible;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            border: 2px solid rgba(173, 216, 230, 0.5);
+            transform: rotate(-1deg);
+            position: relative;
+        }
+
+        .video-card:nth-child(even) {
+            transform: rotate(1deg);
+        }
+
+        /* 小さな動画をテープで支えられているような角度 */
+        .video-card:nth-child(2) {
+            transform: rotate(3deg);
+        }
+
+        .video-card:nth-child(3) {
+            transform: rotate(2deg);
+        }
+
+        .video-card:hover {
+            transform: translateY(-8px) scale(1.02) rotate(0deg);
+            box-shadow: 0 15px 35px rgba(173, 216, 230, 0.4);
+        }
+
+        /* テープエフェクト - 八の字配置 */
+        .video-card::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 45px;
+            height: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.8));
+            border: 1px solid rgba(200, 200, 200, 0.6);
+            border-radius: 2px;
+            transform: rotate(25deg);
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-card::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 45px;
+            height: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.8));
+            border: 1px solid rgba(200, 200, 200, 0.6);
+            border-radius: 2px;
+            transform: rotate(-25deg);
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 各動画カードで異なるテープ色とデザイン - オレンジ系 */
+        /* メインPV - 八の字テープ */
+        .video-card:nth-child(1)::before {
+            background: linear-gradient(135deg, rgba(255, 204, 128, 0.9), rgba(255, 183, 77, 0.8));
+            border-color: rgba(255, 183, 77, 0.6);
+        }
+
+        .video-card:nth-child(1)::after {
+            background: linear-gradient(135deg, rgba(255, 204, 128, 0.9), rgba(255, 183, 77, 0.8));
+            border-color: rgba(255, 183, 77, 0.6);
+        }
+
+        /* キャラクター紹介 - 左上のテープ1本のみ */
+        .video-card:nth-child(2)::before {
+            background: linear-gradient(135deg, rgba(255, 171, 145, 0.9), rgba(255, 138, 101, 0.8));
+            border-color: rgba(255, 138, 101, 0.6);
+            top: -10px;
+            left: -10px;
+            width: 50px;
+            transform: rotate(15deg);
+        }
+
+        .video-card:nth-child(2)::after {
+            display: none;
+        }
+
+        /* 楽曲MV - 左上のテープ1本のみ */
+        .video-card:nth-child(3)::before {
+            background: linear-gradient(135deg, rgba(255, 112, 67, 0.9), rgba(239, 83, 80, 0.8));
+            border-color: rgba(239, 83, 80, 0.6);
+            top: -10px;
+            left: -10px;
+            width: 50px;
+            transform: rotate(15deg);
+        }
+
+        .video-card:nth-child(3)::after {
+            display: none;
+        }
+
+        /* ホバー時のテープエフェクト - テープは完全に固定 */
+        .video-card:nth-child(1):hover::before {
+            transform: rotate(25deg);
+        }
+
+        .video-card:nth-child(1):hover::after {
+            transform: rotate(-25deg);
+        }
+
+        /* 小さな動画のテープは完全に固定 */
+        .video-card:nth-child(2):hover::before {
+            transform: rotate(15deg);
+        }
+
+        .video-card:nth-child(3):hover::before {
+            transform: rotate(15deg);
+        }
+
+        /* 小さな動画のホバー時 - テープで支えられている感を維持 */
+        .video-card:nth-child(2):hover {
+            transform: rotate(3deg) translateY(-8px) scale(1.02);
+        }
+
+        .video-card:nth-child(3):hover {
+            transform: rotate(2deg) translateY(-8px) scale(1.02);
+        }
+
+        .video-thumbnail {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+
+        .thumbnail-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 75px;
+            height: 75px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(240,240,240,0.9));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #333;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            border: 3px solid white;
+        }
+
+        .video-card:hover .play-button {
+            background: linear-gradient(135deg, var(--videos-orange), var(--videos-orange-dark));
+            color: white;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .video-info {
+            padding: 18px;
+            background: white;
+        }
+
+        .video-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--videos-orange-dark);
+            margin-bottom: 8px;
+            font-family: 'Caveat', 'Klee One', cursive;
+            transform: rotate(-0.3deg);
+            text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .video-desc {
+            color: #2D3748;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            font-style: italic;
+            text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        /* 動画あらすじスタイル */
+        .video-synopsis {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            border-top: 2px solid var(--videos-orange);
+            margin-top: 0;
+        }
+
+        .video-synopsis h4 {
+            font-family: 'Caveat', 'Klee One', cursive;
+            font-size: 1.2rem;
+            color: var(--videos-orange-dark);
+            margin: 0 0 8px 0;
+            font-weight: 700;
+            transform: rotate(-0.5deg);
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .video-synopsis p {
+            color: #2D3748;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin: 0;
+            text-shadow: 0.5px 0.5px 1px rgba(255, 255, 255, 0.8);
+            font-family: 'Klee One', cursive;
+        }
+
+        .video-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #4A5568;
+            font-weight: 600;
+            text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .main-pv {
+            grid-column: 1 / -1;
+            transform: rotate(0deg) !important;
+            margin-bottom: 15px;
+        }
+
+        .main-pv .video-thumbnail {
+            padding-bottom: 45%;
+        }
+
+        .playlist-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px dashed var(--videos-orange);
+        }
+
+        .playlist-section h3 {
+            color: var(--videos-orange-dark);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
+            font-family: 'Caveat', 'Klee One', cursive;
+        }
+
+        .playlist-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .playlist-btn {
+            background: linear-gradient(135deg, var(--videos-orange-light), var(--videos-orange));
+            color: var(--videos-orange-dark);
+            border: none;
+            padding: 15px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Klee One', cursive;
+            position: relative;
+            transform: rotate(-2deg);
+            box-shadow: 
+                0 4px 8px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+            border-radius: 0;
+        }
+
+        .playlist-btn:nth-child(2) {
+            background: linear-gradient(135deg, var(--videos-orange), var(--videos-orange-dark));
+            color: white;
+            transform: rotate(1deg);
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+        }
+
+        .playlist-btn:nth-child(3) {
+            background: linear-gradient(135deg, #FFAB91, #FF7043);
+            color: white;
+            transform: rotate(-1.5deg);
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 角が折れた付箋効果 */
+        .playlist-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-top: 15px solid rgba(0, 0, 0, 0.1);
+            transform: rotate(45deg);
+            transform-origin: top right;
+        }
+
+        .playlist-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.2));
+            transform: rotate(45deg);
+            transform-origin: top right;
+            border-radius: 0 0 0 2px;
+        }
+
+        .playlist-btn:hover {
+            transform: rotate(0deg) translateY(-3px);
+            box-shadow: 
+                0 8px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .playlist-btn:hover::before,
+        .playlist-btn:hover::after {
+            opacity: 0.8;
+        }
+
+        /* レスポンシブデザイン - 厳密な要件対応 */
+        
+        /* タブレット・横持ち対応 (1024px以下) */
+        @media (max-width: 1024px) {
+            /* キービジュアル & キャッチコピー: 横並び接触維持、はみ出し防止 */
+            .character-image-outside {
+                position: fixed;
+                top: 5vh;
+                left: 1vw;
+                width: 32vw; /* はみ出し防止のため縮小 */
+                height: 50vh;
+                gap: 2px; /* 接触状態の微調整 */
+                z-index: 1;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+            }
+            
+            .character-keyword {
+                position: fixed;
+                left: 32vw; /* キービジュアル領域の右端に完全接触 */
+                top: 18vh;
+                font-size: 0.95rem;
+                padding: 10px 8px;
+                z-index: 2;
+                margin-left: 2px; /* 接触距離の微調整 */
+            }
+
+            /* ノート背景 & スティッキータブ: 完全接触維持 */
+            .content-section {
+                width: 62vw;
+                margin-left: 38vw; /* キービジュアル+キャッチコピー領域の右端から開始 */
+                padding: 10px 5px 10px 5px;
+                min-height: 100vh;
+            }
+
+            .content-card {
+                padding: 8px 20px 20px 25px !important;
+                margin-left: 85px !important; /* タブとの完全接触 */
+                border-radius: 8px 0 0 8px !important;
+            }
+
+            .sticky-tabs {
+                left: calc(38vw + 0px); /* ノート背景に完全接触 */
+                top: 22%;
+                transform: translateY(-50%) translateY(0);
+            }
+
+            .sticky-tab {
+                min-height: 42px;
+                width: 95px;
+                font-size: 0.7rem;
+                padding: 8px 6px;
+                border-radius: 10px 0 0 10px;
+            }
+
+            /* 学生証画像: 正確な比率対応 (2201×1440 = 約1.53:1) */
+            .student-id-views {
+                aspect-ratio: 2201/1440; /* 正確な比率 */
+                max-width: 280px;
+                width: 100%;
+            }
+
+            .student-id-view img {
+                object-fit: cover;
+                aspect-ratio: 2201/1440; /* 正確な比率 */
+                width: 100%;
+                height: 100%;
+            }
+
+            /* キャラクター画像サイズ調整: はみ出し防止 */
+            .amane-key-visual, .nobara-key-visual {
+                height: 45vh;
+                max-width: 30vw; /* はみ出し防止 */
+                object-fit: contain;
+            }
+
+            /* あまねモード時の単体表示調整 */
+            .amane-mode .amane-key-visual {
+                height: 48vh;
+                max-width: 30vw;
+            }
+
+            /* のばらモード時の単体表示調整 */
+            .nobara-mode .nobara-key-visual {
+                height: 48vh;
+                max-width: 30vw;
+            }
+
+            /* 動画モード時の2キャラクター表示調整 */
+            .videos-mode .amane-key-visual,
+            .videos-mode .nobara-key-visual {
+                height: 40vh;
+                max-width: 15vw; /* 2人分のスペース確保 */
+            }
+
+            .videos-mode .character-keyword {
+                left: 16vw; /* 2人の間に配置 */
+            }
+
+            /* その他の調整 */
+            body::before {
+                display: none; /* ノート穴を非表示 */
+            }
+
+            /* スクロールインジケーター調整 */
+            .scroll-indicator {
+                right: 12px;
+                width: 5px;
+                height: 45vh;
+            }
+
+            /* グリッド調整 */
+            .info-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 8px;
+            }
+
+            .video-grid {
+                transform: scale(0.85);
+                margin: 15px 0;
+            }
+        }
+
+        /* スマートフォン・縦持ち対応 (768px以下) */
+        @media (max-width: 768px) {
+            /* キービジュアル & キャッチコピー: 縦並び接触、上部固定 */
+            .character-image-outside {
+                position: absolute; /* 追従しない */
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 35vh;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 5px; /* 縦並び時の接触距離 */
+                z-index: 2;
+            }
+
+            .amane-key-visual, .nobara-key-visual {
+                height: 25vh !important;
+                max-width: 80vw;
+            }
+
+            .character-keyword {
+                position: relative; /* キービジュアルに接触 */
+                left: auto;
+                top: auto;
+                writing-mode: horizontal-tb; /* 横書きに変更 */
+                text-orientation: mixed;
+                font-size: 0.9rem;
+                padding: 8px 15px;
+                margin-top: 0; /* 接触距離 */
+            }
+
+            /* ノート背景 & スティッキータブ: 縦画面用調整、接触維持 */
+            .content-section {
+                width: 100vw;
+                margin-left: 0;
+                margin-top: 37vh; /* キービジュアルの下に配置 */
+                padding: 15px;
+            }
+
+            .content-card {
+                padding: 15px 20px 20px 50px !important;
+                margin-left: 60px !important; /* タブとの接触距離 */
+                border-radius: 8px 0 0 8px !important;
+            }
+
+            .sticky-tabs {
+                left: 10px; /* ノート背景に接触 */
+                top: calc(37vh + 100px); /* コンテンツエリアに追従 */
+                position: fixed;
+            }
+
+            .content-nav-btn {
+                min-height: 40px;
+                width: 80px;
+                font-size: 0.7rem;
+                padding: 8px 6px;
+            }
+
+            /* 学生証画像: スマホ用aspect-ratio */
+            .student-id-views {
+                aspect-ratio: 4/3;
+                max-width: 280px;
+            }
+
+            .student-id-view img {
+                object-fit: cover;
+                aspect-ratio: 4/3;
+            }
+
+            /* グリッドレイアウト調整 */
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .video-grid {
+                grid-template-columns: 1fr;
+                padding: 10px;
+                transform: scale(0.9);
+            }
+
+            /* セクションタイトル調整 */
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            /* スクロールインジケーター調整 */
+            .scroll-indicator {
+                right: 10px;
+                width: 6px;
+                height: 40vh;
+            }
+        }
+
+        /* 極小画面対応 (480px以下) */
+        @media (max-width: 480px) {
+            /* キービジュアル更に縮小、接触維持 */
+            .character-image-outside {
+                height: 30vh;
+            }
+
+            .amane-key-visual, .nobara-key-visual {
+                height: 20vh !important;
+                max-width: 70vw;
+            }
+
+            .character-keyword {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+
+            /* コンテンツエリア調整 */
+            .content-section {
+                margin-top: 32vh;
+                padding: 10px;
+            }
+
+            .content-card {
+                padding: 12px 15px 15px 40px !important;
+                margin-left: 50px !important;
+            }
+
+            .sticky-tabs {
+                left: 5px;
+                top: calc(32vh + 80px);
+            }
+
+            .content-nav-btn {
+                min-height: 35px;
+                width: 70px;
+                font-size: 0.6rem;
+            }
+
+            /* 学生証画像最小サイズ */
+            .student-id-views {
+                max-width: 240px;
+                aspect-ratio: 4/3;
+            }
+
+            /* その他微調整 */
+            .section-title {
+                font-size: 1.3rem;
+            }
+
+            .school-note {
+                padding: 12px 20px 12px 70px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 超縦長画面対応 (アスペクト比考慮) */
+        @media (max-aspect-ratio: 9/16) {
+            .character-image-outside {
+                height: 25vh; /* より縮小 */
+            }
+
+            .content-section {
+                margin-top: 27vh;
+            }
+
+            .sticky-tabs {
+                top: calc(27vh + 60px);
+            }
+        }
+
+        /* 動画モード専用レスポンシブ調整 */
+        @media (max-width: 768px) {
+            .videos-mode .character-image-outside {
+                height: 40vh; /* 動画モード時は2キャラクター表示のため高さ確保 */
+            }
+
+            .videos-mode .content-section {
+                margin-top: 42vh;
+            }
+
+            .videos-mode .sticky-tabs {
+                top: calc(42vh + 100px);
+            }
+
+            .videos-mode .amane-key-visual,
+            .videos-mode .nobara-key-visual {
+                height: 18vh !important; /* 2人並べるため縮小 */
+                max-width: 35vw;
+            }
+
+            .videos-mode .character-keyword {
+                font-size: 0.7rem;
+                padding: 5px 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .videos-mode .character-image-outside {
+                height: 35vh;
+            }
+
+            .videos-mode .content-section {
+                margin-top: 37vh;
+            }
+
+            .videos-mode .sticky-tabs {
+                top: calc(37vh + 80px);
+            }
+
+            .videos-mode .amane-key-visual,
+            .videos-mode .nobara-key-visual {
+                height: 15vh !important;
+                max-width: 32vw;
+            }
+        }
+
+        /* アクティブタブの強調表示 */
+        .sticky-tab.active {
+            transform: translateX(-8px) scale(1.05) !important;
+            box-shadow: 
+                -6px 6px 20px rgba(0, 0, 0, 0.4),
+                0 0 15px rgba(255, 255, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            border: 3px solid rgba(255, 255, 255, 0.4) !important;
+            border-right: none !important;
+            z-index: 10;
+            font-weight: 700 !important;
+        }
+
+        /* アクティブタブのパルス効果 */
+        @keyframes activeGlow {
+            0%, 100% {
+                box-shadow: 
+                    -6px 6px 20px rgba(0, 0, 0, 0.4),
+                    0 0 15px rgba(255, 255, 255, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            }
+            50% {
+                box-shadow: 
+                    -6px 6px 20px rgba(0, 0, 0, 0.4),
+                    0 0 25px rgba(255, 255, 255, 0.5),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            }
+        }
+
+        .sticky-tab.active {
+            animation: activeGlow 2s ease-in-out infinite;
+        }
+
+        /* スクロールインジケーター */
+        .scroll-indicator {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 60vh;
+            background: linear-gradient(180deg, 
+                rgba(255, 183, 77, 0.2) 0%,
+                rgba(255, 138, 101, 0.2) 25%,
+                rgba(255, 112, 67, 0.2) 50%,
+                rgba(156, 39, 176, 0.2) 75%,
+                rgba(63, 81, 181, 0.2) 100%
+            );
+            border-radius: 4px;
+            z-index: 500;
+            border: 1px solid rgba(255, 183, 77, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .scroll-progress {
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(180deg, 
+                #FFB74D 0%,
+                #FF8A65 25%,
+                #FF7043 50%,
+                #9C27B0 75%,
+                #3F51B5 100%
+            );
+            border-radius: 4px;
+            transition: height 0.1s ease-out;
+            position: absolute;
+            top: 0;
+            left: 0;
+            box-shadow: 0 0 10px rgba(255, 183, 77, 0.4);
+        }
+
+        /* スクロールインジケーターの装飾 */
+        .scroll-indicator::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 12px solid #FFB74D;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .scroll-indicator::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 12px solid #3F51B5;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        /* スクロールインジケーターのホバー効果 */
+        .scroll-indicator:hover {
+            width: 12px;
+            box-shadow: 0 4px 16px rgba(255, 183, 77, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+
+        <!-- スティッキータブ -->
+    <div class="sticky-tabs active">
+        <button class="sticky-tab" onclick="switchToCharacter('amane', this)" style="background: var(--amane-color); color: var(--amane-dark);">九条あまね</button>
+        <button class="sticky-tab" onclick="switchToCharacter('nobara', this)" style="background: var(--nobara-soft); color: var(--nobara-dark);">高森のばら</button>
+        <button class="sticky-tab" onclick="switchToCharacter('videos', this)" style="background: var(--videos-orange); color: var(--videos-orange-dark);">動画</button>
+        <button class="sticky-tab youtube" onclick="openYouTube()" title="YouTube">YouTube</button>
+        <button class="sticky-tab twitter" onclick="openTwitter()" title="X (Twitter)">X</button>
+                        </div>
+
+    <div class="main-layout">
+        <!-- コンテンツエリア -->
+        <section class="content-section">
+            <div class="content-container" style="position: relative;">
+
+            <!-- プロフィールコンテンツ -->
+            <div id="profile" class="content-card">
+                <h2 class="section-title">自己紹介ノート</h2>
+                
+                <!-- 学生証画像（3段階表示） -->
+                <div class="student-id-image-container">
+                    <div class="student-id-views" onclick="cycleStudentId()">
+                        <div class="student-id-view active" id="view1">
+                            <img src="assets/img/amane.png" alt="九条あまね 学生証">
+                        </div>
+                        <div class="student-id-view" id="view2">
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-family: 'Klee One', cursive; text-align: center;">
+                                <div>
+                                    <h3 style="margin: 10px 0; font-size: 1.2rem;">クラブ活動記録</h3>
+                                    <p style="margin: 5px 0; font-size: 0.9rem;">水泳部 - 副部長</p>
+                                    <p style="margin: 5px 0; font-size: 0.8rem;">図書委員会 - 委員</p>
+                                    <p style="margin: 5px 0; font-size: 0.8rem;">学業成績: 優秀</p>
+                                    <p style="margin: 8px 0; font-size: 0.7rem; opacity: 0.8;">表彰歴: 県大会水泳優勝</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="student-id-view" id="view3">
+                            <div style="background: linear-gradient(135deg, #2c1810 0%, #8B0000 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ff9999; font-family: 'Klee One', cursive; text-align: center;">
+                                <div>
+                                    <h3 style="margin: 10px 0; font-size: 1.2rem; color: #ff6b6b;">隠された一面</h3>
+                                    <p style="margin: 5px 0; font-size: 0.9rem;">"水の流れのように..."</p>
+                                    <p style="margin: 5px 0; font-size: 0.8rem;">静かに見えても</p>
+                                    <p style="margin: 5px 0; font-size: 0.8rem;">内なる力は深い</p>
+                                    <p style="margin: 8px 0; font-size: 0.7rem; color: #ff6b6b; opacity: 0.9;">"澄んだ瞳に映る秘密..."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; font-size: 0.9rem; color: var(--amane-dark); text-align: center; font-weight: 600; text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);">
+                        <span>クリックで情報を切り替え</span> - <span id="clickCount">1</span>/3
+                    </div>
+                </div>
+
+                <!-- キャラクター情報 -->
+                <div class="character-info">
+                    <h3>キャラクター詳細</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">年齢</span>
+                            <span class="info-value">16歳</span>
+                    </div>
+                        <div class="info-item">
+                            <span class="info-label">血液型</span>
+                            <span class="info-value">A型</span>
+                    </div>
+                        <div class="info-item">
+                            <span class="info-label">身長</span>
+                            <span class="info-value">162cm</span>
+                </div>
+                        <div class="info-item">
+                            <span class="info-label">部活動</span>
+                            <span class="info-value">水泳部</span>
+                </div>
+                        <div class="info-item">
+                            <span class="info-label">委員会</span>
+                            <span class="info-value">図書委員</span>
+                </div>
+                        <div class="info-item">
+                            <span class="info-label">趣味</span>
+                            <span class="info-value">水泳・読書</span>
+                </div>
+                        <div class="info-item">
+                            <span class="info-label">得意科目</span>
+                            <span class="info-value">数学・体育</span>
+                </div>
+                        <div class="info-item">
+                            <span class="info-label">好きな花</span>
+                            <span class="info-value">睡蓮・紫陽花</span>
+            </div>
+                        <div class="info-item">
+                            <span class="info-label">将来の夢</span>
+                            <span class="info-value">海洋生物学者</span>
+        </div>
+    </div>
+                    </div>
+                    
+                <div class="student-profile-section" style="margin-left: -30px;">
+                    <div class="school-note">
+                        <p class="intro-text">初めまして。夢見が丘女子高等学校1年A組の<strong>九条あまね</strong>です。皆さんからは「あまねちゃん」と呼ばれています。</p>
+                </div>
+
+                    <div class="school-note">
+                        <p class="intro-text"><strong>学校生活</strong></p>
+                        <p class="intro-text">水泳部で副部長をしており、毎日の練習に励んでいます。図書委員としても活動しており、図書館の整理や読書環境の維持に努めています。</p>
+                    </div>
+                    
+                    <div class="school-note">
+                        <p class="intro-text"><strong>水への想い</strong></p>
+                        <p class="intro-text">水泳を通して、水の力強さと美しさを学んでいます。特に長距離泳法に情熱を注いでおり、将来は海洋生物学者として海の神秘を解明したいと思っています。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 高森のばらプロフィールコンテンツ -->
+            <div id="nobara-profile" class="content-card">
+                <h2 class="section-title">自己紹介ノート</h2>
+                
+                <!-- 学生証画像（3段階表示） -->
+                <div class="student-id-image-container">
+                    <div class="student-id-views" onclick="cycleStudentId()">
+                        <div class="student-id-view active" id="nobara-view1">
+                            <img src="assets/img/nobara_2.png" alt="高森のばら 学生証">
+                        </div>
+                        <div class="student-id-view" id="nobara-view2">
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-family: 'Klee One', cursive; text-align: center;">
+                                <div>
+                                    <h3 style="margin: 10px 0; font-size: 1.2rem;">クラブ活動記録</h3>
+                                    <p style="margin: 5px 0; font-size: 0.9rem;">園芸部 - 部長</p>
+                                    <p style="margin: 5px 0; font-size: 0.8rem;">美化委員会 - 委員</p>
+                                    <p style="margin: 5px 0; font-size: 0.8rem;">学業成績: 優秀</p>
+                                    <p style="margin: 8px 0; font-size: 0.7rem; opacity: 0.8;">表彰歴: 園芸コンクール金賞</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="student-id-view" id="nobara-view3">
+                            <div style="background: linear-gradient(135deg, #2c1810 0%, #8B0000 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ff9999; font-family: 'Klee One', cursive; text-align: center;">
+                                <div>
+                                    <h3 style="margin: 10px 0; font-size: 1.2rem; color: #ff6b6b;">隠された一面</h3>
+                                    <p style="margin: 5px 0; font-size: 0.9rem;">"花に宿る力を知る者..."</p>
+                                    <p style="margin: 5px 0; font-size: 0.8rem;">薔薇には棘があることを</p>
+                                    <p style="margin: 5px 0; font-size: 0.8rem;">忘れてはならない</p>
+                                    <p style="margin: 8px 0; font-size: 0.7rem; color: #ff6b6b; opacity: 0.9;">"美しさの裏に潜む真実..."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; font-size: 0.9rem; color: var(--nobara-dark); text-align: center; font-weight: 600; text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);">
+                        <span>クリックで情報を切り替え</span> - <span id="nobaraClickCount">1</span>/3
+                    </div>
+                </div>
+
+                <!-- キャラクター情報 -->
+                <div class="character-info">
+                    <h3>キャラクター詳細</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">年齢</span>
+                            <span class="info-value">16歳</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">血液型</span>
+                            <span class="info-value">A型</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">身長</span>
+                            <span class="info-value">162cm</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">部活動</span>
+                            <span class="info-value">園芸部</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">委員会</span>
+                            <span class="info-value">美化委員</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">趣味</span>
+                            <span class="info-value">園芸・読書</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">得意科目</span>
+                            <span class="info-value">生物・美術</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">好きな花</span>
+                            <span class="info-value">薔薇・百合</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">将来の夢</span>
+                            <span class="info-value">園芸家</span>
+                        </div>
+                    </div>
+                </div>
+                    
+                <div class="student-profile-section" style="margin-left: -30px;">
+                    <div class="school-note">
+                        <p class="intro-text">初めまして。夢見が丘女子高等学校1年A組の<strong>高森のばら</strong>です。皆さんからは「のばらちゃん」と呼ばれています。</p>
+                    </div>
+
+                    <div class="school-note">
+                        <p class="intro-text"><strong>学校生活</strong></p>
+                        <p class="intro-text">園芸部で部長をしており、学校の花壇や植物の管理をしています。美化委員としても活動しており、校舎の美観を保つために日々努力しています。</p>
+                    </div>
+                    
+                    <div class="school-note">
+                        <p class="intro-text"><strong>園芸への想い</strong></p>
+                        <p class="intro-text">植物を育てることを通して、生命の美しさと強さを学んでいます。特に薔薇の栽培に情熱を注いでおり、将来は園芸家として多くの人に植物の魅力を伝えたいと思っています。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 動画コンテンツ -->
+            <div id="videos" class="content-card">
+                <h2 class="section-title">動画</h2>
+                
+                <div class="video-grid" style="margin-left: -30px;">
+                    <div class="video-card main-pv" onclick="openVideo('main-pv')">
+                        <div class="video-thumbnail">
+                            <img src="assets/img/ibara.png" alt="メインPV" class="thumbnail-img">
+                            <div class="play-button">▶️</div>
+                            <div class="video-duration">3:24</div>
+                        </div>
+                        <div class="video-synopsis">
+                            <h4>メインPV</h4>
+                            <p>放課後クロニクルの世界観を描いたメインプロモーション映像。九条あまねと高森のばらの出会いから始まる、不思議で美しい物語の序章。夕焼けに染まる学校で繰り広げられる、二人の特別な時間を描く。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="video-card" onclick="openVideo('character-intro')">
+                        <div class="video-thumbnail">
+                            <img src="assets/img/amane.png" alt="キャラクター紹介" class="thumbnail-img">
+                            <div class="play-button">▶️</div>
+                            <div class="video-duration">2:15</div>
+                        </div>
+                        <div class="video-synopsis">
+                            <h4>キャラクター紹介</h4>
+                            <p>九条あまねの日常と内面を深く掘り下げた紹介映像。水泳部での活動、図書委員としての責任感、そして海洋生物学者への夢。普通の女子高生に見えて、実は深い想いを秘めた彼女の魅力を余すことなく紹介。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="video-card" onclick="openVideo('music-video')">
+                        <div class="video-thumbnail">
+                            <img src="assets/img/8648248cc9168e7d.png" alt="楽曲MV" class="thumbnail-img">
+                            <div class="play-button">▶️</div>
+                            <div class="video-duration">4:02</div>
+                        </div>
+                        <div class="video-synopsis">
+                            <h4>楽曲MV「夕暮れの約束」</h4>
+                            <p>放課後クロニクルのテーマソング「夕暮れの約束」のミュージックビデオ。あまねとのばらの友情を歌った感動的な楽曲に、美しいアニメーション映像を組み合わせた珠玉の作品。涙なしには見られない名作。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="playlist-section">
+                    <h3>再生リスト</h3>
+                    <div class="playlist-buttons">
+                        <button class="playlist-btn" onclick="openPlaylist('story')">ストーリー編</button>
+                        <button class="playlist-btn" onclick="openPlaylist('music')">音楽編</button>
+                        <button class="playlist-btn" onclick="openPlaylist('behind')">舞台裏</button>
+                    </div>
+                </div>
+
+                <!-- 追加コンテンツでノート背景の高さを確保 -->
+                <div class="video-additional-content" style="margin-left: -30px;">
+                    <div class="school-note">
+                        <p class="intro-text">放課後クロニクルの映像作品は、青春の美しさと儚さを表現することを目指して制作されています。各楽曲もキャラクターの心情を丁寧に表現した楽曲ばかりです。</p>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </section>
+            </div>
+
+    <!-- 背景キービジュアル -->
+    <div class="character-image-outside">
+        <img src="assets/img/Amane_key.png" alt="九条あまね" class="character-image amane-key-visual">
+        <img src="assets/img/Nobara.png" alt="高森のばら" class="character-image nobara-key-visual">
+    </div>
+    
+    <!-- キーワード縦書きテキスト -->
+    <div class="character-keyword">
+        <span class="amane-keyword">ごく普通の女子高生</span>
+        <span class="nobara-keyword">不思議な転校生</span>
+    </div>
+
+    <!-- スクロールインジケーター -->
+    <div class="scroll-indicator">
+        <div class="scroll-progress" id="scrollProgress"></div>
+    </div>
+
+    <script>
+        let currentView = 1;
+        let nobaraCurrentView = 1;
+
+        function switchToCharacter(characterId, clickedElement) {
+            // キービジュアルのモード切り替え
+            const body = document.body;
+            body.classList.remove('amane-mode', 'nobara-mode', 'videos-mode');
+            
+            if (characterId === 'amane') {
+                body.classList.add('amane-mode');
+                // あまねのプロフィールを表示
+                switchContent('profile', clickedElement);
+            } else if (characterId === 'nobara') {
+                body.classList.add('nobara-mode');
+                // のばらの専用プロフィールを表示
+                switchContent('nobara-profile', clickedElement);
+            } else if (characterId === 'videos') {
+                body.classList.add('videos-mode');
+                // 動画コンテンツを表示
+                switchContent('videos', clickedElement);
+            }
+        }
+
+        function switchContent(contentId, clickedElement) {
+            // 現在のアクティブコンテンツとスティッキータブをフェードアウト
+            const contents = document.querySelectorAll('.content-card');
+            const stickyTabs = document.querySelector('.sticky-tabs');
+            
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+            stickyTabs.classList.remove('active');
+
+            // すべてのスティッキータブの状態をリセット
+            const allTabs = document.querySelectorAll('.sticky-tab');
+            allTabs.forEach(tab => {
+                const tabText = tab.textContent.trim();
+                tab.classList.remove('active'); // アクティブクラスを削除
+                if (tabText === '九条あまね') {
+                    tab.style.background = 'var(--amane-color)';
+                    tab.style.color = 'var(--amane-dark)';
+                    tab.style.transform = 'translateX(0)';
+                    tab.style.boxShadow = '-2px 2px 8px rgba(0, 0, 0, 0.2)';
+                } else if (tabText === '高森のばら') {
+                    tab.style.background = 'var(--nobara-soft)';
+                    tab.style.color = 'var(--nobara-dark)';
+                    tab.style.transform = 'translateX(0)';
+                    tab.style.boxShadow = '-2px 2px 8px rgba(0, 0, 0, 0.2)';
+                } else if (tabText === '動画') {
+                    tab.style.background = 'var(--videos-orange)';
+                    tab.style.color = 'var(--videos-orange-dark)';
+                    tab.style.transform = 'translateX(0)';
+                    tab.style.boxShadow = '-2px 2px 8px rgba(0, 0, 0, 0.2)';
+                }
+            });
+
+            // クリックされたタブのスタイルを更新
+            if (clickedElement) {
+                const tabText = clickedElement.textContent.trim();
+                clickedElement.classList.add('active'); // アクティブクラスを追加
+                if (tabText === '九条あまね') {
+                    clickedElement.style.background = 'var(--amane-dark)';
+                } else if (tabText === '高森のばら') {
+                    clickedElement.style.background = 'var(--nobara-dark)';
+                } else if (tabText === '動画') {
+                    clickedElement.style.background = 'var(--videos-orange-dark)';
+                }
+                clickedElement.style.color = 'white';
+                clickedElement.style.transform = 'translateX(-5px)';
+                clickedElement.style.boxShadow = '-4px 4px 12px rgba(0, 0, 0, 0.3)';
+                
+                // クリック時のパルスエフェクト
+                clickedElement.style.animation = 'pulse 0.3s ease-out';
+                setTimeout(() => {
+                    clickedElement.style.animation = '';
+                }, 300);
+            }
+
+            // 少し遅延してから新しいコンテンツとスティッキータブをフェードイン
+            setTimeout(() => {
+                const targetElement = document.getElementById(contentId);
+                if (targetElement) {
+                    targetElement.classList.add('active');
+                }
+                stickyTabs.classList.add('active');
+            }, 250);
+        }
+
+        function cycleStudentId() {
+            // 現在表示されているコンテンツを確認
+            const profileActive = document.getElementById('profile').classList.contains('active');
+            const nobaraProfileActive = document.getElementById('nobara-profile').classList.contains('active');
+            
+            if (profileActive) {
+                // あまねのプロフィールの場合
+                document.getElementById(`view${currentView}`).classList.remove('active');
+                currentView = currentView >= 3 ? 1 : currentView + 1;
+                document.getElementById(`view${currentView}`).classList.add('active');
+                document.getElementById('clickCount').textContent = currentView;
+            } else if (nobaraProfileActive) {
+                // のばらのプロフィールの場合
+                document.getElementById(`nobara-view${nobaraCurrentView}`).classList.remove('active');
+                nobaraCurrentView = nobaraCurrentView >= 3 ? 1 : nobaraCurrentView + 1;
+                document.getElementById(`nobara-view${nobaraCurrentView}`).classList.add('active');
+                document.getElementById('nobaraClickCount').textContent = nobaraCurrentView;
+            }
+        }
+
+        function openYouTube() {
+                window.open('https://www.youtube.com/@afterschoolchronicle', '_blank');
+        }
+
+        function openTwitter() {
+                window.open('https://x.com/afterschool_chr', '_blank');
+        }
+
+        function openVideo(videoId) {
+            alert(`動画「${videoId}」を再生します。\n（実際のサイトでは動画プレーヤーが開きます）`);
+        }
+
+        function openPlaylist(playlistType) {
+            alert(`「${playlistType}」プレイリストを開きます。\n（実際のサイトでは専用ページに遷移します）`);
+        }
+
+        function goToCharacterPage(characterId) {
+            // トグルスイッチの状態を更新
+            const characterSelector = document.querySelector('.character-selector');
+            const selectorItems = document.querySelectorAll('.selector-item');
+            
+            // 全てのアクティブ状態をリセット
+            selectorItems.forEach(item => item.classList.remove('active'));
+            characterSelector.classList.remove('nobara-active');
+            
+            if (characterId === 'amane') {
+                document.querySelector('[data-character="amane"]').classList.add('active');
+                // あまねが選択された状態（デフォルト位置）
+            } else if (characterId === 'nobara') {
+                document.querySelector('[data-character="nobara"]').classList.add('active');
+                characterSelector.classList.add('nobara-active');
+            }
+            
+            // 実際のページ遷移（必要に応じて）
+            // if (characterId === 'amane') {
+            //     window.location.href = 'character_amane.html';
+            // } else if (characterId === 'nobara') {
+            //     window.location.href = 'character_nobara.html';
+            // }
+        }
+
+        // スクロール進行状況の更新
+        function updateScrollProgress() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollProgress = Math.max(0, Math.min(100, (scrollTop / scrollHeight) * 100));
+            
+            const progressElement = document.getElementById('scrollProgress');
+            
+            if (progressElement) {
+                // 進行バーの高さを設定（上から下に伸びる）
+                progressElement.style.height = scrollProgress + '%';
+            }
+        }
+
+        // スクロールイベントリスナー
+        window.addEventListener('scroll', updateScrollProgress);
+        window.addEventListener('resize', updateScrollProgress);
+
+        window.addEventListener('load', () => {
+            // 初期状態で九条あまねタブをアクティブに設定
+            const allTabs = document.querySelectorAll('.sticky-tab');
+            allTabs.forEach(tab => {
+                if (tab.textContent.trim() === '九条あまね') {
+                    tab.classList.add('active'); // アクティブクラスを追加
+                    tab.style.background = 'var(--amane-dark)';
+                    tab.style.color = 'white';
+                    tab.style.transform = 'translateX(-5px)';
+                    tab.style.boxShadow = '-4px 4px 12px rgba(0, 0, 0, 0.3)';
+                }
+            });
+
+            // 初期状態で九条あまねモードを設定
+            document.body.classList.add('amane-mode');
+            
+            // 初期状態で九条あまねのプロフィールを表示
+            const profileElement = document.getElementById('profile');
+            if (profileElement) {
+                profileElement.classList.add('active');
+            }
+            
+            // 初期スクロール進行状況を設定
+            updateScrollProgress();
+        });
+    </script>
+</body>
+</html> 

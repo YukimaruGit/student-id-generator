@@ -1,0 +1,18 @@
+# カスタムドメイン用リダイレクト設定
+# s-id.app ドメイン用
+
+# 短縮URL（シェアページ）
+/s/* /s.html?:splat 200
+
+# メインページ
+/ /index.html 200
+
+# 学生証作成
+/create /generator.html 200
+/generator /generator.html 200
+
+# プライバシー
+/privacy /privacy.html 200
+
+# 404 リダイレクト
+/* /index.html 404 
