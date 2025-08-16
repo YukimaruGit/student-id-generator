@@ -314,7 +314,13 @@
           const backBtn = document.getElementById('backToDiagnosisBtn');
           if (backBtn) {
             backBtn.onclick = () => {
-              const url = new URL('index.html', window.location.href);
+              const url = new URL('quiz.html', window.location.href);
+              url.searchParams.set('showResult', '1');
+              url.searchParams.set('department', currentParams.get('department') || '');
+              url.searchParams.set('course', currentParams.get('course') || '');
+              url.searchParams.set('club', currentParams.get('club') || '');
+              url.searchParams.set('previewMessage', currentParams.get('previewMessage') || '');
+              url.searchParams.set('episodeMessage', currentParams.get('episodeMessage') || '');
               
               // 埋め込みモードの場合はembed=1を付与
               if (window.parent !== window || window.top !== window || window.frameElement || 
@@ -332,10 +338,10 @@
           const viewResultBtn = document.getElementById('viewDiagnosisResultBtn');
           if (viewResultBtn) {
             viewResultBtn.onclick = () => {
-              // URLパラメータを保持して診断結果ページに移動
+              // URLパラメータを保持してquiz.htmlの結果ページに移動
               const currentParams = new URLSearchParams(location.search);
-              const diagnosisUrl = new URL('index.html', window.location.href);
-              diagnosisUrl.searchParams.set('showResult', 'true');
+              const diagnosisUrl = new URL('quiz.html', window.location.href);
+              diagnosisUrl.searchParams.set('showResult', '1');
               diagnosisUrl.searchParams.set('department', currentParams.get('department') || '');
               diagnosisUrl.searchParams.set('course', currentParams.get('course') || '');
               diagnosisUrl.searchParams.set('club', currentParams.get('club') || '');

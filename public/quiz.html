@@ -573,7 +573,7 @@
   <script>
     (function(){
       const p = new URLSearchParams(location.search);
-      if (p.get('showResult') === 'true') {
+      if (p.get('showResult') === '1') {
         document.addEventListener('DOMContentLoaded', () => {
           // 既存要素のIDは現状のまま利用（無ければスキップ）
           const qc = document.getElementById('questionContainer');
@@ -1124,21 +1124,27 @@
       }
     }
     
-    // 複数の方法で初期化を試行
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initializeQuiz);
-    } else {
-      // すでに読み込み完了している場合は即座に実行
-      initializeQuiz();
-    }
+    // showResult=1の場合は初期化をスキップ
+    const params = new URLSearchParams(location.search);
+    const showResult = params.get('showResult');
     
-    // 念のため、少し遅延してからも実行
-    setTimeout(function() {
-      if (!document.getElementById('questionContainer').innerHTML.trim()) {
-        console.warn('⚠️ 遅延初期化を実行');
+    if (showResult !== '1') {
+      // 複数の方法で初期化を試行
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeQuiz);
+      } else {
+        // すでに読み込み完了している場合は即座に実行
         initializeQuiz();
       }
-    }, 1000);
+      
+      // 念のため、少し遅延してからも実行
+      setTimeout(function() {
+        if (!document.getElementById('questionContainer').innerHTML.trim()) {
+          console.warn('⚠️ 遅延初期化を実行');
+          initializeQuiz();
+        }
+      }, 1000);
+    }
   </script>
   
   <!-- 埋め込みモード制御スクリプト -->
