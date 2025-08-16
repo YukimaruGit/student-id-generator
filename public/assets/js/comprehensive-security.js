@@ -11,7 +11,7 @@
   // 高度なセキュリティ設定
   const AdvancedSecurityConfig = {
     // WebAssembly制限
-    blockWasm: true,
+    blockWasm: false,
     // メモリ攻撃対策
     preventMemoryAttacks: true,
     // タイミング攻撃対策
@@ -32,27 +32,26 @@
   function blockWebAssembly() {
     if (!AdvancedSecurityConfig.blockWasm) return;
 
-    // WebAssembly無効化
-    if (window.WebAssembly) {
-      window.WebAssembly = undefined;
-      delete window.WebAssembly;
-      console.log('🚫 WebAssemblyをブロックしました');
+    try {
+      if ('WebAssembly' in window) {
+        console.warn('ℹ️ WebAssembly present (not disabled to avoid runtime errors)');
+      }
+      if ('SharedArrayBuffer' in window) {
+        console.warn('ℹ️ SharedArrayBuffer present (not disabled to avoid runtime errors)');
+      }
+    } catch (e) {
+      console.warn('WASM guard skipped:', e);
     }
 
-    // Worker内でのWebAssembly制限
-    const originalWorker = window.Worker;
-    if (originalWorker) {
-      window.Worker = function(scriptURL, options) {
-        console.warn('🚫 Worker作成を制限しました');
-        throw new Error('Worker creation blocked for security');
-      };
-    }
-
-    // SharedArrayBuffer無効化
-    if (window.SharedArrayBuffer) {
-      window.SharedArrayBuffer = undefined;
-      delete window.SharedArrayBuffer;
-      console.log('🚫 SharedArrayBufferをブロックしました');
+    try {
+      const OriginalWorker = window.Worker;
+      if (OriginalWorker) {
+        // 監視だけに留め、塞がない（ライブラリ互換のため）
+        // 必要ならラッパーを噛ませてログのみ
+        // window.Worker = function(u, o){ return new OriginalWorker(u, o); };
+      }
+    } catch (e) {
+      console.warn('Worker guard skipped:', e);
     }
   }
 
@@ -487,7 +486,8 @@
     console.log('✅ 包括的セキュリティシステム初期化完了');
   }
 
-  // 即座に初期化
-  initAdvancedSecurity();
+  // 即座に初期化（失敗してもページは継続）
+  try { initAdvancedSecurity(); }
+  catch (e) { console.error('Security init failed:', e); }
 
 })(); 
