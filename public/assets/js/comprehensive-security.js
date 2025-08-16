@@ -2,6 +2,12 @@
 (function() {
   'use strict';
 
+  // 埋め込みモードフラグ（自己判定）
+  const __ALLOW_EMBED__ =
+    new URLSearchParams(location.search).has('embed') ||
+    /studio\.site/i.test(document.referrer || '') ||
+    (window.self !== window.top); // フレーム内＝埋め込みの可能性
+
   // 高度なセキュリティ設定
   const AdvancedSecurityConfig = {
     // WebAssembly制限
@@ -14,8 +20,8 @@
     preventPrototypePollution: true,
     // DOM Clobbering対策
     preventDomClobbering: true,
-    // ClickJacking対策
-    preventClickJacking: true,
+    // ClickJacking対策（埋め込み時は無効化）
+    preventClickJacking: !__ALLOW_EMBED__,
     // Side-Channel攻撃対策
     preventSideChannelAttacks: true,
     // CPU脆弱性対策
@@ -205,13 +211,23 @@
   function preventClickJacking() {
     if (!AdvancedSecurityConfig.preventClickJacking) return;
 
+    // 埋め込みモード時はフレームバストを無効化
+    if (__ALLOW_EMBED__) {
+      console.log('🎬 埋め込みモード: ClickJacking対策をスキップ');
+      return;
+    }
+
     // フレーム内で実行されているかチェック
     if (window.self !== window.top) {
       console.warn('🚫 フレーム内での実行を検出');
       
       // フレームから脱出を試行
       try {
-        window.top.location = window.self.location;
+        if (!__ALLOW_EMBED__) {
+          window.top.location = window.self.location;
+        } else {
+          location.assign(window.self.location);
+        }
       } catch (e) {
         // 脱出に失敗した場合、ページを隠蔽
         document.body.style.display = 'none';
