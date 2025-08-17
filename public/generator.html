@@ -354,7 +354,7 @@
         <div class="form-group">
           <label class="file-input-label" for="photoInput">
             画像を選択
-            <input type="file" id="photoInput" accept="image/*" capture="user">
+            <input type="file" id="photoInput" accept="image/*">
           </label>
         </div>
 
@@ -368,7 +368,7 @@
         <div class="form-group">
           <label>
             氏名（ローマ字）
-            <input type="text" id="nameEn" placeholder="例：Takamori Nobara">
+            <input type="text" id="nameEn" placeholder="例：Takamori Nobara" autocapitalize="words" inputmode="latin" spellcheck="false">
           </label>
         </div>
 
@@ -455,7 +455,8 @@
           <button type="button" id="downloadBtn">
             画像を保存
           </button>
-          <button type="button" id="twitterBtn">
+          <button type="button" id="twitterBtn" class="btn-twitter">
+            <i class="fab fa-x-twitter"></i>
             Xに投稿
           </button>
           <button type="button" id="urlBtn">

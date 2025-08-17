@@ -365,6 +365,15 @@
       height: 4px;
       background: #B997D6;
     }
+    
+    /* モバイル対応: 改行過多を防ぐ */
+    @media (max-width: 430px) {
+      .narrative-text,
+      .episode-msg {
+        white-space: normal; /* pre-line → normal に限定緩和 */
+        line-break: anywhere; /* 日本語の詰まり防止（対応ブラウザのみ適用） */
+      }
+    }
 
     .result-title {
       font-size: 1.8rem;

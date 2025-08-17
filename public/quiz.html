@@ -561,9 +561,11 @@
   
   <!-- showResult=true対応スクリプト -->
   <script>
-    (function(){
-      const p = new URLSearchParams(location.search);
-      if (p.get('showResult') === '1') {
+         (function(){
+       const p = new URLSearchParams(location.search);
+       // showResult判定を統一（'1' or 'true' の両方を受け入れる）
+       const isShowResult = p.get('showResult') === '1' || p.get('showResult') === 'true';
+       if (isShowResult) {
         document.addEventListener('DOMContentLoaded', () => {
           // 既存要素のIDは現状のまま利用（無ければスキップ）
           const qc = document.getElementById('questionContainer');

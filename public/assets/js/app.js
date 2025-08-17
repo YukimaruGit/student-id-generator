@@ -91,26 +91,35 @@ function generateShareUrl(imageUrl, studentInfo = {}) {
 
 function downloadCanvasAsImage(canvas, filename = '学生証.png') {
   try {
-    // Blob方式を優先（より安全）
-    canvas.toBlob((blob) => {
+    // iOS対応: toBlob方式で確実に保存
+    canvas.toBlob(async (blob) => {
       if (blob) {
         const url = URL.createObjectURL(blob);
+        
+        // iOS: まずはネイティブ共有を試す
+        if (window.tryNativeShare) {
+          try {
+            const file = new File([blob], filename, { type: 'image/png' });
+            const shared = await window.tryNativeShare(file, '学生証を作成しました');
+            if (shared) {
+              URL.revokeObjectURL(url);
+              return;
+            }
+          } catch (e) {
+            console.log('ネイティブ共有に失敗、通常ダウンロードにフォールバック');
+          }
+        }
+        
+        // 通常ダウンロード（iOS 15+はdownload動作、旧端末は新規タブ→長押し保存）
         const link = document.createElement('a');
         link.download = filename;
         link.href = url;
+        document.body.appendChild(link);
         link.click();
-        URL.revokeObjectURL(url);
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
       } else {
-        // フォールバック: toDataURL
-        try {
-          const link = document.createElement('a');
-          link.download = filename;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-        } catch (e) {
-          console.error('Download failed:', e);
-          alert('ダウンロードに失敗しました。ブラウザを変更するか、画像を右クリックして保存してください。');
-        }
+        alert('画像の生成に失敗しました。もう一度お試しください。');
       }
     }, 'image/png', 0.9);
   } catch (error) {
@@ -131,6 +140,53 @@ async function copyUrlToClipboard(url) {
     console.error('Failed to copy URL:', err);
     return false;
   }
+}
+
+// iOS対応: 堅牢なコピー機能（clipboard → execCommand の二段構え）
+async function copyTextReliable(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    // フォールバック: execCommand方式
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    ta.style.pointerEvents = 'none';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  }
+}
+
+// Xアプリ起動機能（アプリスキーム → Web intent の順でフォールバック）
+function openXAppOrIntent(text, url) {
+  const msg = `${text} ${url}`;
+  const twitterScheme = `twitter://post?message=${encodeURIComponent(msg)}`;
+  const xScheme = `x://post?message=${encodeURIComponent(msg)}`;
+  const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(msg)}`;
+
+  const tryScheme = (scheme) => new Promise((resolve) => {
+    const start = Date.now();
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = scheme;
+    document.body.appendChild(iframe);
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+      resolve(Date.now() - start < 1500); // 起動できたとみなす簡易判定
+    }, 1200);
+  });
+
+  (async () => {
+    if (await tryScheme(twitterScheme)) return;
+    if (await tryScheme(xScheme)) return;
+    window.open(webIntent, '_blank');
+  })();
 }
 
 // 定数定義
@@ -257,7 +313,14 @@ function initializeApp() {
       if (element) {
         element.addEventListener('input', function(e) {
           const originalValue = e.target.value;
-          const sanitizedValue = validateInput(originalValue);
+          let sanitizedValue = validateInput(originalValue);
+          
+          // 英字フィールドの場合はスペースを許容するサニタイズ
+          if (element.id === 'nameEn') {
+            sanitizedValue = originalValue
+              .replace(/[^A-Za-z .-]/g, '') // 英字・スペース・. と - のみ許可
+              .replace(/\s{2,}/g, ' '); // 連続空白は1つに
+          }
           
           if (originalValue !== sanitizedValue) {
             e.target.value = sanitizedValue;
@@ -705,16 +768,13 @@ function initializeApp() {
       //   `${nameJa}の学生証が完成しました！🎓\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター` :
       //   `放課後クロニクル 学生証が完成しました！🎓\n\n診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター`;
       
-      // X投稿画面を開く（画像URLを含める）
-      const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl.toString())}`;
-      
       hideLoading();
       
-      // 新しいタブでX投稿画面を開く
-      window.open(twitterIntentUrl, '_blank');
+      // Xアプリで開く（スマホの場合はアプリ起動、PCの場合はWeb intent）
+      openXAppOrIntent(tweetText, shareUrl.toString());
       
       // 成功時のフィードバック（ポップアップなし）
-      console.log('✅ X投稿画面が正常に開きました');
+      console.log('✅ X投稿処理が完了しました');
       
     } catch (error) {
       console.error('Twitterシェアエラー:', error);
@@ -737,6 +797,8 @@ function initializeApp() {
       }
     }
   });
+
+
 
   // URLコピーボタン
   elements.urlBtn.addEventListener('click', async () => {
