@@ -104,7 +104,7 @@
       "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com",
       "connect-src 'self' https://api.cloudinary.com",
       "form-action 'self'",
-      "frame-ancestors 'none'",
+      "frame-ancestors 'self' https://*.studio.site https://preview.studio.site",
       "base-uri 'self'"
     ].join('; ');
     

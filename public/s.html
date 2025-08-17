@@ -237,18 +237,45 @@
     const displayImageUrl = params.get('i');
     const displayName = params.get('n');
     
-         // 画像表示
-     if (displayImageUrl) {
-       const img = document.getElementById('cardImage');
-       img.onload = function() {
-         img.style.display = 'block';
-         document.getElementById('errorMessage').style.display = 'none';
-       };
-       img.onerror = function() {
-         img.style.display = 'none';
-         document.getElementById('errorMessage').style.display = 'block';
-       };
-       img.src = displayImageUrl;
+    // セキュリティ対策：Cloudinaryドメインのみ許可
+    function isAllowedImageUrl(url) {
+      if (!url) return false;
+      
+      try {
+        const urlObj = new URL(url);
+        // Cloudinaryのドメインのみ許可
+        const allowedDomains = [
+          'res.cloudinary.com',
+          'cloudinary.com'
+        ];
+        
+        return allowedDomains.some(domain => urlObj.hostname.endsWith(domain)) &&
+               urlObj.protocol === 'https:' &&
+               !urlObj.href.includes('javascript:') &&
+               !urlObj.href.includes('data:') &&
+               !urlObj.href.includes('blob:');
+      } catch (e) {
+        return false;
+      }
+    }
+    
+    // 画像表示（セキュリティ対策付き）
+    if (displayImageUrl && isAllowedImageUrl(displayImageUrl)) {
+      const img = document.getElementById('cardImage');
+      
+      // セキュリティ属性を追加
+      img.setAttribute('referrerpolicy', 'no-referrer');
+      img.setAttribute('crossorigin', 'anonymous');
+      
+      img.onload = function() {
+        img.style.display = 'block';
+        document.getElementById('errorMessage').style.display = 'none';
+      };
+      img.onerror = function() {
+        img.style.display = 'none';
+        document.getElementById('errorMessage').style.display = 'block';
+      };
+      img.src = displayImageUrl;
        
        // 画像クリックでリダイレクト
        document.getElementById('cardContainer').onclick = function() {

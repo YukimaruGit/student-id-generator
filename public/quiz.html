@@ -294,6 +294,84 @@
       padding: 0;
       box-sizing: border-box;
     }
+
+    /* ===== iPhone等の狭幅 最適化（見た目は据え置き） ===== */
+    @media (max-width: 430px) {
+      /* 全体のパディングを詰めて内容幅を確保 */
+      .diagnosis-container {
+        padding: 0.75rem;
+        margin: 0.75rem auto;
+        max-width: 92vw;
+      }
+
+      /* 結果カード：内側を少し詰める */
+      .result-card,
+      .unified-result-card {
+        padding: 0.9rem 0.9rem 1rem;
+        border-radius: 12px;
+      }
+
+      /* タイトル・サブタイトルはclampで自動調整し、行間を締める */
+      .result-title {
+        font-size: clamp(18px, 4.8vw, 22px);
+        line-height: 1.25;
+        letter-spacing: .03em;
+        margin-bottom: .4rem;
+        text-align: left; /* 中央でも可。左だと改行が整う */
+      }
+      .result-subtitle {
+        font-size: clamp(13px, 3.6vw, 15px);
+        line-height: 1.4;
+        margin-bottom: .8rem;
+        color: #666;
+      }
+
+      /* プレビューの一文は"折返し優先"に。余白を少しだけ */
+      .preview-msg,
+      .unified-result-card .preview-msg {
+        font-size: clamp(14px, 4vw, 16px);
+        line-height: 1.6;
+        white-space: normal;     /* pre-lineを解除して改行過多を抑える */
+        text-wrap: pretty;       /* 対応環境のみ効く。未対応でも害なし */
+        margin-bottom: .6rem;
+      }
+
+      /* ラベル/値の2列を"狭幅でも崩れない"1列グリッドに */
+      .result-details {
+        display: grid;
+        grid-template-columns: 1fr;
+        row-gap: .6rem;
+      }
+      .result-item {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        column-gap: .5rem;
+        align-items: start;
+      }
+      .result-label {
+        font-size: .95rem;
+        line-height: 1.4;
+        white-space: nowrap;
+      }
+      .result-value {
+        font-size: 1rem;
+        line-height: 1.6;
+        word-break: break-word;  /* 長い学科名でも折れて見切れない */
+      }
+
+      /* エピソード見出し・本文の詰め */
+      .episode-section { margin-top: .8rem; }
+      .episode-title { font-size: .95rem; }
+
+      /* "ひとくちエピソード"本文：改行を抑え、読みやすい行間に */
+      #episodeMsg,
+      .episode-msg,
+      .narrative-text {
+        white-space: normal;     /* pre-line→normal（見た目の改行だけに依存しない） */
+        line-height: 1.7;
+        letter-spacing: .01em;
+      }
+    }
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Yu Gothic UI", "Yu Gothic", "Meiryo UI", "Meiryo", "MS PGothic", sans-serif !important;

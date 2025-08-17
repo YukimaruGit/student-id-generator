@@ -585,15 +585,24 @@
           selDept.value = course;
           selDept.style.display = 'none';
           
-          // ラベルを診断結果表示に変更
+          // ラベルを診断結果表示に変更（XSS対策：textContent使用）
           const deptLabel = selDept.parentElement.querySelector('label');
           if (deptLabel) {
-            deptLabel.innerHTML = `
-              学科
-              <div style="padding: 0.75rem; background: #f8f9fa; border-radius: 8px; color: #666; border: 2px solid #e0e0e0;">
-                ${department}（${course}コース） <span style="font-size: 0.8em; color: #999;">（診断結果）</span>
-              </div>
-            `;
+            // 安全な表示用HTMLを構築
+            const safeDepartment = document.createElement('div');
+            safeDepartment.style.cssText = 'padding: 0.75rem; background: #f8f9fa; border-radius: 8px; color: #666; border: 2px solid #e0e0e0;';
+            
+            const deptText = document.createTextNode(`${department}（${course}コース） `);
+            const resultSpan = document.createElement('span');
+            resultSpan.style.cssText = 'font-size: 0.8em; color: #999;';
+            resultSpan.textContent = '（診断結果）';
+            
+            safeDepartment.appendChild(deptText);
+            safeDepartment.appendChild(resultSpan);
+            
+            // 既存の内容をクリアして安全に追加
+            deptLabel.textContent = '学科';
+            deptLabel.appendChild(safeDepartment);
           }
         }
       }
@@ -614,15 +623,24 @@
           selClub.value = club;
           selClub.style.display = 'none';
           
-          // ラベルを診断結果表示に変更
+          // ラベルを診断結果表示に変更（XSS対策：textContent使用）
           const clubLabel = selClub.parentElement.querySelector('label');
           if (clubLabel) {
-            clubLabel.innerHTML = `
-              部活動
-              <div style="padding: 0.75rem; background: #f8f9fa; border-radius: 8px; color: #666; border: 2px solid #e0e0e0;">
-                ${club} <span style="font-size: 0.8em; color: #999;">（診断結果）</span>
-              </div>
-            `;
+            // 安全な表示用HTMLを構築
+            const safeClub = document.createElement('div');
+            safeClub.style.cssText = 'padding: 0.75rem; background: #f8f9fa; border-radius: 8px; color: #666; border: 2px solid #e0e0e0;';
+            
+            const clubText = document.createTextNode(`${club} `);
+            const resultSpan = document.createElement('span');
+            resultSpan.style.cssText = 'font-size: 0.8em; color: #999;';
+            resultSpan.textContent = '（診断結果）';
+            
+            safeClub.appendChild(clubText);
+            safeClub.appendChild(resultSpan);
+            
+            // 既存の内容をクリアして安全に追加
+            clubLabel.textContent = '部活動';
+            clubLabel.appendChild(safeClub);
           }
         }
       }
