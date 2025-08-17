@@ -23,7 +23,7 @@
   <meta property="og:url" content="https://student-id.app/">
   <meta name="twitter:card" content="summary_large_image">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
   <link rel="stylesheet" href="assets/css/style.css">
   <!-- <script src="assets/js/domain-masking.js"></script> -->
   <script src="assets/js/comprehensive-security.js"></script>
@@ -90,10 +90,9 @@
 
   <main>
     <section class="form-card">
-      <h2><i class="fas fa-id-card"></i> 学生証を作成</h2>
+      <h2>学生証を作成</h2>
       <div class="form-group">
         <label class="file-input-label" for="photoInput">
-          <i class="fas fa-camera"></i>
           画像を選択
           <input type="file" id="photoInput" accept="image/*" capture="user">
         </label>
@@ -101,7 +100,6 @@
 
       <div class="form-group">
         <label>
-          <i class="fas fa-user"></i>
           氏名（漢字）
           <input type="text" id="nameJa" placeholder="例：高森のばら" autocomplete="name">
         </label>
@@ -109,7 +107,6 @@
 
       <div class="form-group">
         <label>
-          <i class="fas fa-signature"></i>
           氏名（ローマ字）
           <input type="text" id="nameEn" placeholder="例：Takamori Nobara">
         </label>
@@ -119,7 +116,6 @@
 
       <div class="form-group">
         <label>
-          <i class="fas fa-calendar"></i>
           生年月日
         </label>
         <div class="date-inputs">
@@ -183,12 +179,10 @@
 
       <!-- 診断ゲーム連携ボタン（診断結果設定時のみ表示） -->
               <div id="diagnosisButtons" style="display: none; margin-top: 1rem; gap: 0.5rem; flex-wrap: wrap;">
-        <button type="button" id="backToDiagnosisBtn" style="background: linear-gradient(135deg, #98d7a5, #a8c8a8); color: white; flex: 1; min-width: 120px;">
-          <i class="fas fa-arrow-left"></i>
+        <button type="button" id="backToDiagnosisBtn" style="background: linear-gradient(135deg, #98d7a5, #98c8a8); color: white; flex: 1; min-width: 120px;">
           診断に戻る
         </button>
         <button type="button" id="viewDiagnosisResultBtn" style="background: linear-gradient(135deg, #87ceeb, #98c8e8); color: white; flex: 1; min-width: 120px;">
-          <i class="fas fa-search"></i>
           診断結果を見る
         </button>
       </div>
@@ -196,7 +190,6 @@
 
     <section class="preview-card">
       <div class="card-header">
-        <i class="fas fa-id-card"></i>
         プレビュー
       </div>
       <div class="card-body">
@@ -204,15 +197,12 @@
       </div>
       <div class="card-footer">
         <button type="button" id="downloadBtn">
-          <i class="fas fa-download"></i>
           画像を保存
         </button>
         <button type="button" id="twitterBtn">
-          <i class="fab fa-x-twitter"></i>
           Xに投稿
         </button>
         <button type="button" id="urlBtn">
-          <i class="fas fa-link"></i>
           URLをコピー
         </button>
       </div>
@@ -222,7 +212,7 @@
   <footer>
           <div class="footer-content" style="text-align: center; padding: 1rem; color: #666;">
         <a href="./privacy.html" style="color: #2E8B57; text-decoration: none; margin: 0 1rem;">
-          <i class="fas fa-shield-alt"></i> プライバシーポリシー
+          プライバシーポリシー
         </a>
       </div>
   </footer>
@@ -236,6 +226,11 @@
   <script>
     // 放課後クロニクル診断ゲームからの連携処理（セキュリティ強化版）
     document.addEventListener('DOMContentLoaded', function() {
+      // 診断情報をsessionStorageにバックアップ（クエリがある場合のみ）
+      if (location.search) {
+        sessionStorage.setItem('diagCtx', location.search);
+      }
+      
       // 安全なURLパラメータ取得
       const department = window.Security ? window.Security.getSafeUrlParam('department') : new URLSearchParams(location.search).get('department');
       const course = window.Security ? window.Security.getSafeUrlParam('course') : new URLSearchParams(location.search).get('course');
@@ -263,7 +258,6 @@
           const deptLabel = selDept.parentElement.querySelector('label');
           if (deptLabel) {
             deptLabel.innerHTML = `
-              <i class="fas fa-school"></i>
               学科
               <div style="padding: 0.75rem; background: #f8f9fa; border-radius: 8px; color: #666; border: 2px solid #e0e0e0;">
                 ${department}（${course}コース） <span style="font-size: 0.8em; color: #999;">（診断結果）</span>
@@ -293,7 +287,6 @@
           const clubLabel = selClub.parentElement.querySelector('label');
           if (clubLabel) {
             clubLabel.innerHTML = `
-              <i class="fas fa-users"></i>
               部活動
               <div style="padding: 0.75rem; background: #f8f9fa; border-radius: 8px; color: #666; border: 2px solid #e0e0e0;">
                 ${club} <span style="font-size: 0.8em; color: #999;">（診断結果）</span>

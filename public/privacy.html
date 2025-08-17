@@ -7,7 +7,15 @@
   
   <!-- セキュリティヘッダー -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+    style-src  'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+    img-src    'self' data: https: blob:;
+    font-src   'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+    connect-src 'self' https://api.cloudinary.com;
+    frame-ancestors 'self' https://*.studio.site https://preview.studio.site;
+  ">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -135,14 +143,13 @@
     </div>
 
     <div class="privacy-section">
-      <h2 class="section-title">1. 収集する情報</h2>
+      <h2 class="section-title">1. 取り扱う情報</h2>
       <div class="section-content">
-        <p>本サービスは次の情報を取り扱います。</p>
         <ul>
-          <li>生成画像：学生証画像をCloudinaryに保存します（公開用URLが発行されます）。</li>
-          <li>共有ページ情報：共有ページのURLに、画像の識別子を安全化（Base64URL＋タイムスタンプ）した<strong>スラッグ</strong>を含めます。</li>
-          <li>技術ログ：Cloudflare/Cloudinary等の提供基盤が、セキュリティと運用のためにIPアドレス・User-Agent等の<strong>アクセスログ</strong>を自動取得する場合があります。</li>
-          <li>クッキー/解析：本サービスは解析ツールを使用しません。必須でないクッキーも使用しません（将来導入時は本ポリシーを更新し、同意を取得します）。</li>
+          <li><strong>生成画像</strong>：学生証画像は Cloudinary に保存され、公開用 URL が発行されます。</li>
+          <li><strong>共有ページ情報</strong>：共有 URL には画像識別子を安全化したスラッグ（Base64URL＋タイムスタンプ）を含みます。</li>
+          <li><strong>技術ログ</strong>：Cloudflare / Cloudinary 等の基盤が、運用・セキュリティ目的で IP・User-Agent 等のアクセスログを自動取得する場合があります。</li>
+          <li><strong>クッキー/解析</strong>：解析ツールは使用しません。任意クッキーも使用しません（導入時は本ポリシーを更新し、必要な同意を取得します）。</li>
         </ul>
       </div>
     </div>
@@ -152,7 +159,7 @@
       <div class="section-content">
         <ul>
           <li>学生証画像の生成・表示・共有の提供</li>
-          <li>セキュリティの確保、障害対応、品質改善（不正利用の検知、障害調査など）</li>
+          <li>不正利用の抑止、障害対応、品質改善</li>
         </ul>
       </div>
     </div>
@@ -161,8 +168,8 @@
       <h2 class="section-title">3. 保存期間と削除</h2>
       <div class="section-content">
         <ul>
-          <li>画像：Cloudinary上に保存されます。削除を希望する場合は、後述の連絡先へ<strong>共有URL</strong>と共にご連絡ください。合理的な範囲で削除に対応します。</li>
-          <li>ログ：基盤側の規程に従い、一定期間後に自動削除または匿名化されます。</li>
+          <li><strong>画像</strong>：Cloudinary 上に保存。削除希望は<strong>共有 URL</strong>を添えてご連絡ください。合理的な範囲で対応します。</li>
+          <li><strong>ログ</strong>：各基盤の規程に従い、一定期間後に自動削除または匿名化されます。</li>
         </ul>
       </div>
     </div>
@@ -171,7 +178,7 @@
       <h2 class="section-title">4. 第三者提供</h2>
       <div class="section-content">
         <ul>
-          <li>送信先：画像の保存に<strong>Cloudinary</strong>、共有ページの配信に<strong>Cloudflare Pages</strong>を利用します。法令で認められる場合を除き、上記以外の第三者に個人データを販売・共有しません。</li>
+          <li>画像保存に <strong>Cloudinary</strong>、配信に <strong>Cloudflare Pages</strong> を利用。法令で認められる場合を除き、これら以外へ個人データを販売・共有しません。</li>
         </ul>
       </div>
     </div>
@@ -180,9 +187,8 @@
       <h2 class="section-title">5. 安全管理</h2>
       <div class="section-content">
         <ul>
-          <li>通信の暗号化（HTTPS）</li>
-          <li>アクセス制御と保護設定（CSP等）</li>
-          <li>画像URLは推測困難なスラッグを採用</li>
+          <li>HTTPS による暗号化、適切なコンテンツセキュリティポリシー（CSP）</li>
+          <li>推測困難な共有 URL の採用</li>
         </ul>
       </div>
     </div>
@@ -190,32 +196,22 @@
     <div class="privacy-section">
       <h2 class="section-title">6. 未成年の利用</h2>
       <div class="section-content">
-        <p>13歳未満の方は、保護者の同意がある場合のみご利用ください。</p>
+        <p>13 歳未満は保護者の同意がある場合のみご利用ください。</p>
       </div>
     </div>
 
     <div class="privacy-section">
-      <h2 class="section-title">7. ユーザーの権利</h2>
+      <h2 class="section-title">7. お問い合わせ</h2>
       <div class="section-content">
-        <p>画像の削除依頼、問い合わせは<strong>[ご連絡先]</strong>までお願いします。対応に必要な情報（共有URLなど）の提示をお願いする場合があります。</p>
+        <p>お問い合わせは<a href="https://preview.studio.site/live/1Va6D4lMO7/top-1#form" target="_blank" rel="noopener noreferrer">上記フォーム</a>からお願いいたします。</p>
       </div>
     </div>
 
     <div class="privacy-section">
-      <h2 class="section-title">8. 連絡先</h2>
-      <div class="section-content">
-        <ul>
-          <li>メール：<strong>（ご指定の窓口）</strong></li>
-          <li>管理者：放課後クロニクル学生証ジェネレーター運営</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="privacy-section">
-      <h2 class="section-title">9. 変更</h2>
+      <h2 class="section-title">8. 変更</h2>
       <div class="section-content">
         <ul>
-          <li>本ポリシーは必要に応じて改定します。重要な変更はサイト上でお知らせします。</li>
+          <li>本ポリシーは必要に応じて改定します。重要な変更は当サイトでお知らせします。</li>
           <li>最終更新日：<strong>2025-08-17</strong></li>
         </ul>
       </div>
@@ -232,5 +228,23 @@
       </a>
     </div>
   </div>
+
+  <script>
+    // 現在の ? クエリを generator / index へそのまま引き継ぐ（クエリが無いときのフォールバック付き）
+    (function () {
+      var qs = location.search || sessionStorage.getItem('diagCtx') || ''; // クエリが空ならsessionStorageから復元
+      var sel = [
+        'a[href="generator.html"]',
+        'a[href="index.html"]'
+      ];
+      sel.forEach(function (s) {
+        var a = document.querySelector(s);
+        if (!a) return;
+        var url = new URL(a.getAttribute('href'), location.href);
+        if (qs) url.search = qs;     // すべての既存クエリを丸ごと引き継ぐ
+        a.href = url.toString();
+      });
+    })();
+  </script>
 </body>
 </html> 

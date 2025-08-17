@@ -236,6 +236,11 @@
   <script>
     // 放課後クロニクル診断ゲームからの連携処理（セキュリティ強化版）
     document.addEventListener('DOMContentLoaded', function() {
+      // 診断情報をsessionStorageにバックアップ（クエリがある場合のみ）
+      if (location.search) {
+        sessionStorage.setItem('diagCtx', location.search);
+      }
+      
       // 安全なURLパラメータ取得
       const department = window.Security ? window.Security.getSafeUrlParam('department') : new URLSearchParams(location.search).get('department');
       const course = window.Security ? window.Security.getSafeUrlParam('course') : new URLSearchParams(location.search).get('course');

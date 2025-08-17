@@ -206,10 +206,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- Font Awesome フォールバック -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="none" onload="if(media!='all')media='all'">
-          <!-- 不要・CSP外: <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css" media="none" onload="if(media!='all')media='all'"> -->
   <noscript>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-            <!-- 不要・CSP外: <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css"> -->
   </noscript>
   <link rel="stylesheet" href="assets/css/style.css">
   <!-- <script src="assets/js/domain-masking.js"></script> -->
@@ -345,7 +343,7 @@
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #dda0dd, #b0c4de);
+      background: #B997D6;
       border-radius: 4px;
       transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
       width: 0%;
@@ -357,14 +355,12 @@
     }
 
     .result-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.9));
+      background: rgba(255, 255, 255, 0.98);
       border-radius: 16px;
       padding: 3rem 2.5rem;
       margin-bottom: 2rem;
-      box-shadow: 
-        0 8px 32px rgba(221, 160, 221, 0.15),
-        0 4px 16px rgba(0, 0, 0, 0.08);
-      border: 2px solid rgba(221, 160, 221, 0.2);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(185, 151, 214, 0.2);
       max-width: 650px;
       margin-left: auto;
       margin-right: auto;
@@ -379,20 +375,21 @@
       left: 0;
       right: 0;
       height: 4px;
-      background: linear-gradient(90deg, #dda0dd, #b0c4de, #98d7a5);
+      background: #B997D6;
     }
 
     .result-title {
       font-size: 2.2rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #dda0dd, #b0c4de);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-weight: 800;
+      color: #B997D6;
       margin-bottom: 0.75rem;
       text-align: center;
-      text-shadow: 0 2px 4px rgba(221, 160, 221, 0.3);
-      letter-spacing: -0.02em;
+      letter-spacing: 0.05em;
+    }
+    
+    .result-title i {
+      margin-right: 0.5rem;
+      color: #B997D6;
     }
 
     .result-subtitle {
@@ -445,6 +442,12 @@
       display: flex;
       align-items: center;
       gap: 0.4rem;
+    }
+    
+    .result-label i {
+      color: #666;
+      font-size: 18px;
+      margin-right: 8px;
     }
 
     .result-value {
@@ -578,6 +581,12 @@
       gap: 0.4rem;
       text-shadow: none;
     }
+    
+    .episode-title i {
+      color: #666;
+      font-size: 16px;
+      margin-right: 6px;
+    }
 
     .unified-result-card .episode-msg {
       background: none;
@@ -596,53 +605,49 @@
     }
 
     .to-generator-btn {
-      background: linear-gradient(135deg, #dda0dd, #b0c4de);
+      background: #BBA6E3;
       color: white;
-      border: 2px solid rgba(221, 160, 221, 0.3);
+      border: none;
       padding: 1rem 2rem;
       font-size: 1.1rem;
       font-weight: 600;
-      border-radius: 12px;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s ease;
       display: inline-flex;
       align-items: center;
       gap: 0.75rem;
-      box-shadow: 0 4px 12px rgba(221, 160, 221, 0.3);
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      box-shadow: none;
       letter-spacing: 0.02em;
     }
 
     .to-generator-btn:hover {
-      background: linear-gradient(135deg, #e0a8e0, #b8ccde);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(221, 160, 221, 0.4);
-      border-color: rgba(221, 160, 221, 0.5);
+      background: #A895D0;
+      transform: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
     .restart-btn {
-      background: linear-gradient(135deg, #98d7a5, #b0c4de);
+      background: #9FD6B0;
       color: white;
-      border: 2px solid rgba(152, 215, 165, 0.3);
+      border: none;
       padding: 1rem 2rem;
       font-size: 1.1rem;
       font-weight: 600;
-      border-radius: 12px;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s ease;
       display: inline-flex;
       align-items: center;
       gap: 0.75rem;
-      box-shadow: 0 4px 12px rgba(152, 215, 165, 0.3);
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      box-shadow: none;
       letter-spacing: 0.02em;
     }
 
     .restart-btn:hover {
-      background: linear-gradient(135deg, #a0daa8, #b8ccde);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(152, 215, 165, 0.4);
-      border-color: rgba(152, 215, 165, 0.5);
+      background: #8EC9A0;
+      transform: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
     .button-container {
@@ -801,7 +806,7 @@
     <!-- 結果表示エリア -->
     <div class="result-container" id="resultContainer">
       <div class="result-card">
-        <div class="result-title">🎓 診断結果発表！</div>
+        <div class="result-title"><i class="fas fa-graduation-cap"></i> 診断結果発表！</div>
         <div class="result-subtitle">あなたの学校生活は...</div>
         
         <div class="unified-result-card">
@@ -811,17 +816,17 @@
 
           <div class="result-details">
             <div class="result-item">
-              <span class="result-label">📚 学科/コース</span>
+              <span class="result-label"><i class="fas fa-book"></i> 学科/コース</span>
               <span class="result-value" id="resultCourse">-</span>
             </div>
             <div class="result-item">
-              <span class="result-label">🎭 部活動</span>
+              <span class="result-label"><i class="fas fa-theater-masks"></i> 部活動</span>
               <span class="result-value" id="resultClub">-</span>
             </div>
           </div>
 
           <div class="episode-section">
-            <div class="episode-title">🍃 ひとくちエピソード</div>
+            <div class="episode-title"><i class="fas fa-leaf"></i> ひとくちエピソード</div>
             <div class="episode-msg" id="episodeMsg">
               <!-- 個性エピソードがここに表示される -->
             </div>
@@ -844,14 +849,17 @@
 
 
 
-  <footer>
-    <p>&copy; 2025 放課後クロニクル 診断ゲーム</p>
-  </footer>
+
 
   <script>
     // シンプルな初期化
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 診断ゲーム開始');
+      
+      // 診断情報をsessionStorageにバックアップ（クエリがある場合のみ）
+      if (location.search) {
+        sessionStorage.setItem('diagCtx', location.search);
+      }
       
       // URLパラメータをチェック
       const params = new URLSearchParams(location.search);
@@ -903,36 +911,33 @@
           document.getElementById('episodeMsg').textContent = fallbackEpisode;
         }
         
-        // ボタンのアイコンを絵文字に置き換え
+        // ボタンの処理
         const toGeneratorBtn = document.getElementById('toGeneratorBtn');
         const restartBtn = document.getElementById('restartBtn');
         
         if (toGeneratorBtn) {
-          toGeneratorBtn.innerHTML = '<span style="margin-right: 0.5rem;">📋</span>学生証を作成する';
-          
-                  // 学生証作成ボタンの処理（元の結果に戻る）
-        toGeneratorBtn.onclick = () => {
-          const url = new URL('generator.html', window.location.href);
-          url.searchParams.set('department', department);
-          url.searchParams.set('course', course);
-          url.searchParams.set('club', club);
-          url.searchParams.set('previewMessage', previewMessage || '');
-          url.searchParams.set('episodeMessage', episodeMessage || '');
-          
-          // 埋め込みモードの場合はembed=1を付与
-          if (window.parent !== window || window.top !== window || window.frameElement || 
-              new URLSearchParams(location.search).has('embed') ||
-              location.hostname.includes('studio') ||
-              (document.referrer && document.referrer.includes('studio'))) {
-            url.searchParams.set('embed', '1');
-          }
-          
-          window.location.href = url.toString();
-        };
+          // 学生証作成ボタンの処理（元の結果に戻る）
+          toGeneratorBtn.onclick = () => {
+            const url = new URL('generator.html', window.location.href);
+            url.searchParams.set('department', department);
+            url.searchParams.set('course', course);
+            url.searchParams.set('club', club);
+            url.searchParams.set('previewMessage', previewMessage || '');
+            url.searchParams.set('episodeMessage', episodeMessage || '');
+            
+            // 埋め込みモードの場合はembed=1を付与
+            if (window.parent !== window || window.top !== window || window.frameElement || 
+                new URLSearchParams(location.search).has('embed') ||
+                location.hostname.includes('studio') ||
+                (document.referrer && document.referrer.includes('studio'))) {
+              url.searchParams.set('embed', '1');
+            }
+            
+            window.location.href = url.toString();
+          };
         }
         
         if (restartBtn) {
-          restartBtn.innerHTML = '<span style="margin-right: 0.5rem;">🔄</span>診断をやり直す';
           restartBtn.onclick = () => {
             // パラメータをクリアしてページをリロード
             window.location.href = 'index.html';
@@ -1466,17 +1471,9 @@
       const episodeMessage = makeEpisodeMsg();
       document.getElementById('episodeMsg').textContent = episodeMessage;
       
-      // ボタンのアイコンを絵文字に置き換え（Font Awesome対策）
+      // ボタンの処理
       const toGeneratorBtn = document.getElementById('toGeneratorBtn');
       const restartBtn = document.getElementById('restartBtn');
-      
-      if (toGeneratorBtn) {
-        toGeneratorBtn.innerHTML = '<span style="margin-right: 0.5rem;">📋</span>学生証を作成する';
-      }
-      
-      if (restartBtn) {
-        restartBtn.innerHTML = '<span style="margin-right: 0.5rem;">🔄</span>診断をやり直す';
-      }
       
       // 学生証作成ボタンの処理
       if (toGeneratorBtn) {
