@@ -35,15 +35,7 @@
         return; // showResult=1の場合は強制リダイレクトを実行しない
       }
       
-      const isStudio = window.location.hostname.includes('studio') || 
-                       document.referrer.includes('studio') ||
-                       window.location.href.includes('studio');
-      
-      if (isStudio) {
-        console.log('🎬 Studio環境を検出しました。シンプル版にリダイレクトします。');
-        window.location.href = 'quiz.html';
-        return;
-      }
+      // Studio/iframe検出による強制リダイレクトは削除（embed-mode.jsに委任）
       
       // 即座にTypeSquare関連を無効化
       console.log('🛡️ TypeSquare遮断システム起動');
@@ -112,24 +104,30 @@
         return originalConsoleError.apply(console, args);
       };
       
-      // 5秒後に選択肢がクリックできない場合、シンプル版にリダイレクト（showResult=1の場合は無効化）
-      if (showResult === '1') {
-        return; // showResult=1の場合はフォールバック処理を実行しない
-      }
+      // 5秒後に選択肢がクリックできない場合、シンプル版にリダイレクト
+      // 追加：結果表示や通常直アクセスではフォールバック無効
+      const qs = new URLSearchParams(location.search);
+      const showingResult = qs.get('showResult') === '1';
+      const inEmbed = qs.get('embed') === '1' || window !== window.top;
       
-      if (location.protocol !== 'file:') {
-        setTimeout(() => {
-          const questionContainer = document.getElementById('questionContainer');
-          const answerOptions = document.querySelectorAll('.answer-option');
-          
-          if (questionContainer && answerOptions.length === 0) {
-            console.warn('🚨 質問が正常に表示されていません。シンプル版にリダイレクトします。');
-            window.location.href = 'quiz.html';
-          } else if (typeof selectAnswer !== 'function') {
-            console.warn('🚨 selectAnswer関数が定義されていません。シンプル版にリダイレクトします。');
-            window.location.href = 'quiz.html';
-          }
-        }, 5000);
+      if (!inEmbed || showingResult) {
+        // 以降の5秒フォールバック(setTimeout)は実行しない
+      } else {
+        // ここから下に既存の setTimeout(...) が続く（元コードは残す）
+        if (location.protocol !== 'file:') {
+          setTimeout(() => {
+            const questionContainer = document.getElementById('questionContainer');
+            const answerOptions = document.querySelectorAll('.answer-option');
+            
+            if (questionContainer && answerOptions.length === 0) {
+              console.warn('🚨 質問が正常に表示されていません。シンプル版にリダイレクトします。');
+              window.location.href = 'quiz.html';
+            } else if (typeof selectAnswer !== 'function') {
+              console.warn('🚨 selectAnswer関数が定義されていません。シンプル版にリダイレクトします。');
+              window.location.href = 'quiz.html';
+            }
+          }, 5000);
+        }
       }
       
       console.log('✅ TypeSquare遮断システム完了');
