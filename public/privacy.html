@@ -3,248 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>プライバシーポリシー - 放課後クロニクル学生証ジェネレーター</title>
-  
-  <!-- セキュリティヘッダー -->
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
-    style-src  'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
-    img-src    'self' data: https: blob:;
-    font-src   'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-    connect-src 'self' https://api.cloudinary.com;
-    frame-ancestors 'self' https://*.studio.site https://preview.studio.site;
-  ">
+  <title>プライバシーポリシー - 放課後クロニクル 学生証ジェネレーター</title>
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/style.css">
-  
   <style>
-    .privacy-container {
-      max-width: 800px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background: rgba(248, 246, 240, 0.95);
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .privacy-header {
-      text-align: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid #8B4513;
-    }
-
-    .privacy-title {
-      font-size: 2rem;
-      color: #8B4513;
-      margin-bottom: 0.5rem;
-    }
-
-    .privacy-subtitle {
-      color: #666;
-      font-size: 1.1rem;
-    }
-
-    .privacy-section {
-      margin-bottom: 2rem;
-    }
-
-    .section-title {
-      font-size: 1.3rem;
-      color: #8B4513;
-      margin-bottom: 1rem;
-      padding-left: 1rem;
-      border-left: 4px solid #DAA520;
-    }
-
-    .section-content {
-      line-height: 1.7;
-      color: #444;
-      margin-left: 1rem;
-    }
-
-    .section-content ul {
-      margin: 1rem 0;
-      padding-left: 2rem;
-    }
-
-    .section-content li {
-      margin-bottom: 0.5rem;
-    }
-
-    .highlight-box {
-      background: #FFF8DC;
-      border: 2px solid #DAA520;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin: 1rem 0;
-    }
-
-    .security-badge {
-      display: inline-flex;
-      align-items: center;
-      background: #2E8B57;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      margin: 0.3rem;
-    }
-
-    .security-badge i {
-      margin-right: 0.5rem;
-    }
-
-    .back-button {
-      display: inline-flex;
-      align-items: center;
-      background: #8B4513;
-      color: white;
-      padding: 0.8rem 1.5rem;
-      text-decoration: none;
-      border-radius: 8px;
-      margin: 0.5rem;
-      transition: background-color 0.3s;
-    }
-
-    .back-button:hover {
-      background: #A0522D;
-    }
-
-    .back-button i {
-      margin-right: 0.5rem;
-    }
-
-    .last-updated {
-      text-align: center;
-      margin-top: 2rem;
-      padding-top: 1rem;
-      border-top: 1px solid #DAA520;
-      color: #666;
-    }
-
-    .contact-info {
-      background: #F5F5F5;
-      padding: 1rem;
-      border-radius: 8px;
-      margin: 1rem 0;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans JP', Segoe UI, Roboto, Helvetica, Arial, sans-serif; line-height: 1.8; color: #333; background: #fafafa; margin: 0; }
+    .container { max-width: 900px; margin: 2rem auto; background: #fff; border-radius: 12px; padding: 2rem; box-shadow: 0 6px 24px rgba(0,0,0,.06); }
+    h1 { font-size: 1.8rem; margin: 0 0 0.25rem; }
+    .sub { color: #666; margin-bottom: 1.5rem; }
+    h2 { font-size: 1.2rem; margin-top: 2rem; border-left: 4px solid #8b5cf6; padding-left: .6rem; }
+    ul { padding-left: 1.2rem; }
+    code { background: #f3f4f6; padding: .1rem .3rem; border-radius: 4px; }
+    .badge { display: inline-block; background: #10b981; color: #fff; border-radius: 999px; padding: .25rem .6rem; font-size: .85rem; margin-right: .4rem; }
+    .muted { color: #666; }
+    .footer { margin-top: 2rem; font-size: .9rem; color: #555; }
   </style>
 </head>
 <body>
-  <div class="privacy-container">
-    <div class="privacy-header">
-      <h1 class="privacy-title">プライバシーポリシー</h1>
-      <p class="privacy-subtitle">放課後クロニクル学生証ジェネレーター</p>
-    </div>
+  <main class="container">
+    <header>
+      <h1>プライバシーポリシー</h1>
+      <p class="sub">放課後クロニクル 学生証ジェネレーター（以下「本サービス」）における個人情報等の取扱いについて定めます。</p>
+      <span class="badge"><i class="fa-solid fa-shield-halved"></i> 解析ツール不使用</span>
+      <span class="badge"><i class="fa-solid fa-lock"></i> 最小限の収集</span>
+    </header>
 
-    <div class="privacy-section">
-      <h2 class="section-title">1. 取り扱う情報</h2>
-      <div class="section-content">
-        <ul>
-          <li><strong>生成画像</strong>：学生証画像は Cloudinary に保存され、公開用 URL が発行されます。</li>
-          <li><strong>共有ページ情報</strong>：共有 URL には画像識別子を安全化したスラッグ（Base64URL＋タイムスタンプ）を含みます。</li>
-          <li><strong>技術ログ</strong>：Cloudflare / Cloudinary 等の基盤が、運用・セキュリティ目的で IP・User-Agent 等のアクセスログを自動取得する場合があります。</li>
-          <li><strong>クッキー/解析</strong>：解析ツールは使用しません。任意クッキーも使用しません（導入時は本ポリシーを更新し、必要な同意を取得します）。</li>
-        </ul>
-      </div>
-    </div>
+    <section>
+      <h2>1. 収集する情報</h2>
+      <p>本サービスは、通常の利用（診断ゲーム・学生証の生成）において、入力内容を当方サーバーへ送信しません。<strong>ただし、ユーザーが明示的に「画像を保存／共有」した場合に限り、生成された学生証画像を Cloudinary にアップロード</strong>し、インターネットからアクセス可能なURLが発行されます。</p>
+      <ul>
+        <li><strong>アプリ内データ</strong>：診断回答・氏名等のテキストはブラウザ内で処理され、当方サーバーに保存しません。</li>
+        <li><strong>共有時の画像</strong>：ユーザー操作により Cloudinary へアップロードし、公開URL（推測困難なパス）が発行されます。画像には学生証のレンダリング結果が含まれます。</li>
+        <li><strong>運用上の技術ログ</strong>：配信・保守のため、<em>Cloudflare Pages/CDN</em> および <em>Cloudinary</em> が、アクセス日時、IPアドレス、User-Agent、参照元URL等の技術的情報を取得します。これらは各社のプライバシーポリシーに基づいて保存・処理されます。</li>
+        <li><strong>ブラウザストレージ</strong>：利便性のため <code>sessionStorage</code> 等に進行状態やUI設定を保存することがあります（保存されるのは端末内のみ）。</li>
+      </ul>
+    </section>
 
-    <div class="privacy-section">
-      <h2 class="section-title">2. 利用目的</h2>
-      <div class="section-content">
-        <ul>
-          <li>学生証画像の生成・表示・共有の提供</li>
-          <li>不正利用の抑止、障害対応、品質改善</li>
-        </ul>
-      </div>
-    </div>
+    <section>
+      <h2>2. 利用目的</h2>
+      <ul>
+        <li>学生証画像の生成・保存・共有など、本サービスの提供・改善のため</li>
+        <li>不正利用の検知・防止、セキュリティ確保のため</li>
+        <li>問い合わせ対応、削除依頼への対応のため</li>
+      </ul>
+    </section>
 
-    <div class="privacy-section">
-      <h2 class="section-title">3. 保存期間と削除</h2>
-      <div class="section-content">
-        <ul>
-          <li><strong>画像</strong>：Cloudinary 上に保存。削除希望は<strong>共有 URL</strong>を添えてご連絡ください。合理的な範囲で対応します。</li>
-          <li><strong>ログ</strong>：各基盤の規程に従い、一定期間後に自動削除または匿名化されます。</li>
-        </ul>
-      </div>
-    </div>
+    <section>
+      <h2>3. 共有・第三者提供</h2>
+      <ul>
+        <li><strong>Cloudinary</strong>：学生証画像の保存・配信に利用します（画像URLは原則公開扱い）。</li>
+        <li><strong>Cloudflare</strong>：本サービスの配信・キャッシュ・WAF 等に利用します。</li>
+        <li>法令に基づく照会等があった場合を除き、これら以外の第三者へ個人情報を販売・貸与しません。</li>
+      </ul>
+    </section>
 
-    <div class="privacy-section">
-      <h2 class="section-title">4. 第三者提供</h2>
-      <div class="section-content">
-        <ul>
-          <li>画像保存に <strong>Cloudinary</strong>、配信に <strong>Cloudflare Pages</strong> を利用。法令で認められる場合を除き、これら以外へ個人データを販売・共有しません。</li>
-        </ul>
-      </div>
-    </div>
+    <section>
+      <h2>4. 保存期間</h2>
+      <ul>
+        <li><strong>Cloudinaryの画像</strong>：ユーザーから削除依頼があるまで保存されます（運用上の自動クリーンアップが導入されている場合を除く）。</li>
+        <li><strong>ブラウザ内データ</strong>：<code>sessionStorage</code> はブラウザを閉じると削除されます。<code>localStorage</code> を使用する場合は、ユーザーが手動で削除するまで残ります。</li>
+        <li><strong>技術ログ</strong>：保存期間は各提供事業者の規程に従います。</li>
+      </ul>
+    </section>
 
-    <div class="privacy-section">
-      <h2 class="section-title">5. 安全管理</h2>
-      <div class="section-content">
-        <ul>
-          <li>HTTPS による暗号化、適切なコンテンツセキュリティポリシー（CSP）</li>
-          <li>推測困難な共有 URL の採用</li>
-        </ul>
-      </div>
-    </div>
+    <section>
+      <h2>5. ユーザーの権利</h2>
+      <ul>
+        <li>Cloudinary に保存された画像の<strong>削除依頼</strong>に対応します。共有URL（例：画像のフルURL）をご提示ください。</li>
+        <li>個人情報の開示・訂正・利用停止等のご希望は、下記「お問い合わせ」までご連絡ください。</li>
+      </ul>
+    </section>
 
-    <div class="privacy-section">
-      <h2 class="section-title">6. 未成年の利用</h2>
-      <div class="section-content">
-        <p>13 歳未満は保護者の同意がある場合のみご利用ください。</p>
-      </div>
-    </div>
+    <section>
+      <h2>6. セキュリティ</h2>
+      <ul>
+        <li>配信時のセキュリティヘッダー（CSP、Referrer-Policy、X-Content-Type-Options 等）を適用し、クリックジャッキングや混在コンテンツを抑止します。</li>
+        <li>入力値は DOM 反映時に危険な挙動を避けるよう実装し、外部スクリプトは最小限に制限しています。</li>
+        <li>なお、インターネット上での完全な安全性は保証できません。ユーザーも公開範囲や共有URLの取り扱いにご注意ください。</li>
+      </ul>
+    </section>
 
-    <div class="privacy-section">
-      <h2 class="section-title">7. お問い合わせ</h2>
-      <div class="section-content">
-        <p>お問い合わせは<a href="https://preview.studio.site/live/1Va6D4lMO7/top-1#form" target="_blank" rel="noopener noreferrer">上記フォーム</a>からお願いいたします。</p>
-      </div>
-    </div>
+    <section>
+      <h2>7. クッキー・トラッキング</h2>
+      <p>本サービスはアクセス解析ツールや行動ターゲティング広告を使用しません。必要最小限の技術的Cookie/ストレージのみを用います。</p>
+    </section>
 
-    <div class="privacy-section">
-      <h2 class="section-title">8. 変更</h2>
-      <div class="section-content">
-        <ul>
-          <li>本ポリシーは必要に応じて改定します。重要な変更は当サイトでお知らせします。</li>
-          <li>最終更新日：<strong>2025-08-17</strong></li>
-        </ul>
-      </div>
-    </div>
+    <section>
+      <h2>8. 国際的なデータ移転</h2>
+      <p>Cloudinary 等の第三者サービスは、域外（日本国外）でデータを保存・処理する場合があります。</p>
+    </section>
 
-    <div style="text-align: center;">
-      <a href="index.html" class="back-button">
-        <i class="fas fa-arrow-left"></i>
-        診断ゲームに戻る
-      </a>
-      <a href="generator.html" class="back-button">
-        <i class="fas fa-id-card"></i>
-        学生証作成へ
-      </a>
-    </div>
-  </div>
+    <section>
+      <h2>9. 未成年の利用</h2>
+      <p>13歳未満の方は、保護者の同意のもとでご利用ください。</li>
+    </section>
 
-  <script>
-    // 現在の ? クエリを generator / index へそのまま引き継ぐ（クエリが無いときのフォールバック付き）
-    (function () {
-      var qs = location.search || sessionStorage.getItem('diagCtx') || ''; // クエリが空ならsessionStorageから復元
-      var sel = [
-        'a[href="generator.html"]',
-        'a[href="index.html"]'
-      ];
-      sel.forEach(function (s) {
-        var a = document.querySelector(s);
-        if (!a) return;
-        var url = new URL(a.getAttribute('href'), location.href);
-        if (qs) url.search = qs;     // すべての既存クエリを丸ごと引き継ぐ
-        a.href = url.toString();
-      });
-    })();
-  </script>
+    <section>
+      <h2>10. 変更</h2>
+      <p>本ポリシーの内容は、法令の改正やサービス内容の変更等に応じて更新することがあります。重要な変更はサイト上で告知します。</p>
+    </section>
+
+    <section>
+      <h2>11. お問い合わせ</h2>
+      <p>削除依頼・各種お問い合わせは、X（Twitter）公式アカウント <a href="https://x.com/afterschool_chronicle">@afterschool_chronicle</a> のDM、またはサイト上の連絡手段からご連絡ください。</p>
+    </section>
+
+    <div class="footer muted">
+      施行日：2025-08-17
+    </div>
+  </main>
 </body>
 </html> 

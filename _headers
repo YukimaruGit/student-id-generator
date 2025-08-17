@@ -1,0 +1,16 @@
+/*
+  Content-Security-Policy: default-src 'self';
+  Content-Security-Policy: script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+  Content-Security-Policy: style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+  Content-Security-Policy: img-src 'self' data: https: blob:;
+  Content-Security-Policy: font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+  Content-Security-Policy: connect-src 'self' https://api.cloudinary.com;
+  Content-Security-Policy: frame-ancestors 'self' https://*.studio.site https://preview.studio.site;
+  Content-Security-Policy: base-uri 'self';
+  Content-Security-Policy: form-action 'self';
+  Content-Security-Policy: upgrade-insecure-requests;
+  Content-Security-Policy: block-all-mixed-content
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Cross-Origin-Resource-Policy: same-origin

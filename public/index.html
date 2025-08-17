@@ -5,16 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   
-  <!-- 埋め込み用CSP（Studio埋め込みを許可） -->
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
-    style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
-    img-src 'self' data: https: blob:;
-    font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-    connect-src 'self' https://api.cloudinary.com;
-    frame-ancestors 'self' https://*.studio.site https://preview.studio.site;
-  ">
+  <!-- セキュリティヘッダーは _headers で統一管理（Studio埋め込み許可） -->
   
   <title>放課後クロニクル ― 診断ゲーム</title>
   
