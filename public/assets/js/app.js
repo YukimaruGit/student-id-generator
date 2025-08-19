@@ -752,16 +752,16 @@ function initializeApp() {
       // 埋め込み環境ではCloudinary画像を新規タブ表示（iOS長押し保存対応）
       if (window.top !== window.self) {
         if (window.__lastImageData && window.__lastImageData.public_id) {
-          // 既にアップロード済みの場合はOGP画像を表示
-          const og = buildCldOgUrl({
-            cloudName: cloudinaryConfig.cloudName,
-            public_id: window.__lastImageData.public_id,
-            version: window.__lastImageData.version,
-            eager_url: window.__lastImageData.eager_url,
-            namedTransform: null // 後日Cloudinaryで作るなら 'ogp_card'
-          });
-          safeOpen(og, '_blank');
-          return;
+                     // 既にアップロード済みの場合はOGP画像を表示
+           const pid = window.__lastImageData.public_id
+             .split('/')                       // スラッシュは保持
+             .map(encodeURIComponent)          // 各セグメントのみエンコード
+             .join('/');                       
+           const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
+                      `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
+                      `${pid}`;                // 拡張子は不要（付けても可）
+           safeOpen(og, '_blank');
+           return;
         } else {
           // 初回保存時は即アップロードしてOGP画像を表示
           showLoading('画像を準備中...');
@@ -774,15 +774,15 @@ function initializeApp() {
             window.__lastImageData = imageData;
             hideLoading();
             
-            const og = buildCldOgUrl({
-              cloudName: cloudinaryConfig.cloudName,
-              public_id: imageData.public_id,
-              version: imageData.version,
-              eager_url: imageData.eager_url,
-              namedTransform: null // 後日Cloudinaryで作るなら 'ogp_card'
-            });
-            safeOpen(og, '_blank');
-            return;
+                         const pid2 = imageData.public_id
+               .split('/')                       // スラッシュは保持
+               .map(encodeURIComponent)          // 各セグメントのみエンコード
+               .join('/');                       
+             const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
+                        `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
+                        `${pid2}`;               // 拡張子は不要（付けても可）
+             safeOpen(og, '_blank');
+             return;
           } catch (uploadError) {
             hideLoading();
             console.warn('埋め込み時のアップロードに失敗、ローカル保存にフォールバック:', uploadError);
@@ -931,17 +931,22 @@ function initializeApp() {
         console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');
         shareUrl = '新しい短いURL方式が利用できません';
       }
-      const success = await copyTextReliable(String(shareUrl));
-      
-      hideLoading();
-      
-      if (success) {
-        console.log('✅ シェア用URLをクリップボードにコピーしました');
-      } else {
-        // フォールバック: コピー専用ページを新規タブで開く
-        window.open(`/copy.html?u=${encodeURIComponent(shareUrl)}`, '_blank', 'noopener');
-        console.log('✅ コピー専用ページを開きました');
-      }
+             // 共有URLを文字列化
+       const urlToCopy = shareUrl.toString();
+
+       // まずは堅牢コピー（iframeでも成功率高）
+       const ok = await copyTextReliable(urlToCopy);  // ← 既存関数を活用
+       hideLoading();
+
+       if (ok) {
+         console.log('✅ シェア用URLをクリップボードにコピーしました');
+       } else {
+         // 最終手段：自動コピー専用ページ（新規タブ）。埋め込みやiOSでも通る
+         const u = new URL('copy.html', location.origin);
+         u.searchParams.set('u', urlToCopy);
+         window.open(u.toString(), '_blank', 'noopener');  // ここは新規タブ
+         console.log('✅ コピーできない環境のため、専用タブを開きました。数秒後に閉じます。');
+       }
     } catch (error) {
       console.error('URLコピーエラー:', error);
       hideLoading();
