@@ -1,112 +1,64 @@
-// functions/s/[slug].js
-export async function onRequest({ params }) {
-  const CLOUD_NAME   = 'di5xqlddy'; // Cloudinary設定と同値
-  const REDIRECT_TO  = 'https://preview.studio.site/live/1Va6D4lMO7/student-id'; // 人間の遷移先
-  const TWITTER_SITE = '@as_chronicle'; // 任意のTwitterアカウント
+// /functions/s/[slug].js
+export async function onRequest(context) {
+  const { slug } = context.params;
+  const CLOUD = (context.env && context.env.CLOUD_NAME) || 'di5xqlddy';
 
-  try {
-    // slugパラメータを取得
-    const { slug } = params;
-    
-    if (!slug) {
-      return new Response('Invalid slug', { status: 400 });
-    }
-
-    // slugからpublic_idを復元（Base64URLデコード）
-    const publicId = decodeBase64Url(slug.split('-')[0]);
-    
-    if (!publicId) {
-      return new Response('Invalid public_id', { status: 400 });
-    }
-
-    // Cloudinaryの画像URLを生成（1200x630変換）
-    const imageUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/w_1200,h_630,c_fill,q_auto,f_auto/${publicId}`;
-
-    // OGP付きHTMLを生成（サーバーサイドレンダリング）
-    const html = `<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>放課後クロニクル 学生証</title>
-  
-  <!-- OGPタグ（JS後入れ禁止） -->
-  <meta property="og:title" content="放課後クロニクル 学生証">
-  <meta property="og:description" content="あなただけの学生証を作成しよう！">
-  <meta property="og:image" content="${imageUrl}">
-  <meta property="og:url" content="https://student-id.app/">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="放課後クロニクル">
-  
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="${TWITTER_SITE}">
-  <meta name="twitter:title" content="放課後クロニクル 学生証">
-  <meta name="twitter:description" content="あなただけの学生証を作成しよう！">
-  <meta name="twitter:image" content="${imageUrl}">
-  
-  <!-- リダイレクト用メタタグ -->
-  <meta http-equiv="refresh" content="0;url=${REDIRECT_TO}">
-  
-  <style>
-    body { 
-      font-family: 'Noto Sans JP', sans-serif; 
-      text-align: center; 
-      padding: 50px 20px; 
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      margin: 0;
-    }
-    .container { max-width: 600px; margin: 0 auto; }
-    .loading { font-size: 18px; margin: 20px 0; }
-    .spinner { 
-      width: 40px; 
-      height: 40px; 
-      border: 4px solid rgba(255,255,255,0.3); 
-      border-top: 4px solid white; 
-      border-radius: 50%; 
-      animation: spin 1s linear infinite; 
-      margin: 20px auto; 
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>🎓 放課後クロニクル 学生証</h1>
-    <div class="loading">学生証を読み込み中...</div>
-    <div class="spinner"></div>
-    <p>自動的に診断ゲームに移動します...</p>
-    <p><small>移動しない場合は<a href="${REDIRECT_TO}" style="color: #ffd700;">こちら</a>をクリック</small></p>
-  </div>
-</body>
-</html>`;
-
-    return new Response(html, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600'
-      }
-    });
-
-  } catch (error) {
-    console.error('Error in [slug].js:', error);
-    return new Response('Internal Server Error', { status: 500 });
+  // ---- helpers ----
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function b64urlDecodeSafe(s){
+    try {
+      s = s.replace(/-/g,'+').replace(/_/g,'/'); while (s.length % 4) s += '=';
+      return atob(s);
+    } catch { return null; }
   }
-}
 
-// Base64URLデコード関数
-function decodeBase64Url(str) {
-  try {
-    // Base64URLをBase64に変換
-    const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-    // パディングを追加
-    const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
-    // デコード
-    return decodeURIComponent(escape(atob(padded)));
-  } catch (error) {
-    console.error('Base64URL decode error:', error);
-    return null;
+  // 旧形式 slug-<ts> にも耐える（先頭だけ使う）
+  const head = String(slug).split('-')[0];
+  const decoded = b64urlDecodeSafe(head);
+
+  let image = '', title = '放課後クロニクル 学生証', desc = 'あなただけの学生証を作成しよう！';
+
+  if (decoded) {
+    // まずJSON試行（旧形式）
+    try {
+      const data = JSON.parse(decodeURIComponent(escape(decoded)));
+      if (typeof data.i === 'string') image = data.i;
+      if (typeof data.n === 'string' && data.n) title = `${data.n} の学生証`;
+    } catch {
+      // 新形式：decoded は public_id とみなす → ここでCloudinaryのOGP画像URLを組み立て
+      const pid = decoded;
+      image = `https://res.cloudinary.com/${CLOUD}/image/upload/` +
+              `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
+              `${encodeURIComponent(pid)}.png`;
+    }
   }
+
+  const canonical = new URL(context.request.url).toString();
+  const html = `<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)}</title><meta name="description" content="${esc(desc)}">
+<link rel="canonical" href="${canonical}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:url" content="${canonical}">
+${image ? `<meta property="og:image" content="${image}">` : ''}
+<meta name="twitter:card" content="summary_large_image">
+${image ? `<meta name="twitter:image" content="${image}">` : ''}
+<meta name="twitter:title" content="${esc(title)}">
+<meta name="twitter:description" content="${esc(desc)}">
+<style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans JP";padding:24px}</style>
+</head><body>
+<h1>${esc(title)}</h1><p>${esc(desc)}</p>
+${image ? `<img src="${image}" alt="preview" style="max-width:640px;width:100%;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.12)">` : ''}
+<p><a href="/generator.html">学生証を作成する</a></p>
+</body></html>`;
+
+  return new Response(html, {
+    headers: {
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'public, max-age=31536000, immutable'
+    }
+  });
 }

@@ -90,56 +90,74 @@ function generateShareUrl(imageUrl, studentInfo = {}) {
 }
 
 function downloadCanvasAsImage(canvas, filename = '学生証.png') {
-  try {
-    // iOS対応: toBlob方式で確実に保存
-    canvas.toBlob(async (blob) => {
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-        
-        // iOS: まずはネイティブ共有を試す
-        if (window.tryNativeShare) {
-          try {
-            const file = new File([blob], filename, { type: 'image/png' });
-            const shared = await window.tryNativeShare(file, '学生証を作成しました');
-            if (shared) {
-              URL.revokeObjectURL(url);
-              return;
-            }
-          } catch (e) {
-            console.log('ネイティブ共有に失敗、通常ダウンロードにフォールバック');
-          }
-        }
-        
-        // 通常ダウンロード（iOS 15+はdownload動作、旧端末は新規タブ→長押し保存）
-        const link = document.createElement('a');
-        link.download = filename;
-        link.href = url;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      } else {
-        alert('画像の生成に失敗しました。もう一度お試しください。');
+  const isIOS = /iP(hone|ad|od)/.test(navigator.platform) ||
+                (/Macintosh/.test(navigator.userAgent) && 'ontouchend' in document);
+
+  canvas.toBlob(async (blob) => {
+    if (!blob) {
+      // 最終フォールバック：表示→長押し保存
+      try {
+        const dataUrl = canvas.toDataURL('image/png', 0.92);
+        window.location.href = dataUrl;
+      } catch (_) {}
+      return;
+    }
+
+    // 1) まずはシェア（保存も選べる）
+    try {
+      const file = new File([blob], filename, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], text: '学生証を保存' });
+        return;
       }
-    }, 'image/png', 0.9);
-  } catch (error) {
-    console.error('Canvas download failed:', error);
-    alert('ダウンロードに失敗しました。もう一度お試しください。');
-  }
+    } catch (_) { /* ユーザーキャンセル含む */ }
+
+    // 2) Blob URL + a.click（iOSはdownload無視→新規タブで画像表示）
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    if (!isIOS) a.download = filename;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }, 'image/png', 0.92);
 }
 
 function generateTwitterShareUrl(shareUrl, text = '放課後クロニクル 学生証を作成しました！') {
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
 }
 
-async function copyUrlToClipboard(url) {
+async function copyUrlToClipboard(text){
+  // 1) 標準API（トップレベル & HTTPS）
   try {
-    await navigator.clipboard.writeText(url);
-    return true;
-  } catch (err) {
-    console.error('Failed to copy URL:', err);
-    return false;
-  }
+    const topLevel = (window.top === window.self);
+    if (navigator.clipboard && window.isSecureContext && topLevel) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch(_) {}
+
+  // 2) execCommand フォールバック
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-99999px';
+    ta.style.top = '-99999px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (ok) return true;
+  } catch(_) {}
+
+  // 3) 埋め込み環境など → 最終手段：アラートで見せる（UIは既存のまま）
+  alert('URLをコピーできない環境です。下記のURLを長押しでコピーしてください：\n\n' + text);
+  return false;
 }
 
 // iOS対応: 堅牢なコピー機能（clipboard → execCommand の二段構え）
@@ -163,30 +181,52 @@ async function copyTextReliable(text) {
   }
 }
 
-// Xアプリ起動機能（アプリスキーム → Web intent の順でフォールバック）
+// Xアプリ起動機能（アプリスキーム → 失敗時 Intent）
 function openXAppOrIntent(text, url) {
   const msg = `${text} ${url}`;
-  const twitterScheme = `twitter://post?message=${encodeURIComponent(msg)}`;
-  const xScheme = `x://post?message=${encodeURIComponent(msg)}`;
   const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(msg)}`;
 
-  const tryScheme = (scheme) => new Promise((resolve) => {
-    const start = Date.now();
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = scheme;
-    document.body.appendChild(iframe);
-    setTimeout(() => {
-      document.body.removeChild(iframe);
-      resolve(Date.now() - start < 1500); // 起動できたとみなす簡易判定
-    }, 1200);
-  });
+  // iFrame（STUDIOの埋め込み）なら最初から新規タブでWeb intentへ
+  if (window.top !== window.self) {
+    window.open(webIntent, '_blank', 'noopener');
+    return;
+  }
 
-  (async () => {
-    if (await tryScheme(twitterScheme)) return;
-    if (await tryScheme(xScheme)) return;
-    window.open(webIntent, '_blank');
-  })();
+  // インアプリブラウザも最初から Intent
+  const ua = navigator.userAgent;
+  const inApp = /Line\/|FBAN|FBAV|Instagram|Twitter|CriOS GSA|YaBrowser/.test(ua);
+  if (inApp) {
+    window.open(webIntent, '_blank', 'noopener');
+    return;
+  }
+
+  // トップレベルのみアプリスキームを試す（twitter:// → x://）
+  const schemes = [
+    `twitter://post?message=${encodeURIComponent(msg)}`,
+    `x://post?message=${encodeURIComponent(msg)}`
+  ];
+
+  let done = false;
+  const fallback = setTimeout(() => {
+    if (!done) window.open(intent, '_blank', 'noopener');
+  }, 800);
+
+  // アプリに切り替わったら visibilitychange でキャンセル
+  const onHide = () => { done = true; clearTimeout(fallback); document.removeEventListener('visibilitychange', onHide); };
+  document.addEventListener('visibilitychange', onHide);
+
+  // ユーザー操作の直後に遷移（ポップアップブロック回避）
+  try {
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.rel = 'noopener';
+    a.target = '_self';
+    a.href = schemes[0];
+    document.body.appendChild(a);
+    a.click();
+    // 2本目は少し遅延
+    setTimeout(() => { if (!done) location.href = schemes[1]; }, 200);
+  } catch(_) { /* 失敗しても fallback が拾う */ }
 }
 
 // 定数定義
@@ -703,6 +743,14 @@ function initializeApp() {
       return;
     }
     try {
+      // 埋め込み環境ではCloudinary画像を新規タブ表示（iOS長押し保存対応）
+      if (window.top !== window.self && window.__lastImageData && window.__lastImageData.public_id) {
+        const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
+                   `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
+                   `${encodeURIComponent(window.__lastImageData.public_id)}.png`;
+        window.open(og, '_blank', 'noopener');
+        return;
+      }
       downloadCanvasAsImage(elements.cardCanvas, '学生証.png');
     } catch (error) {
       console.error('ダウンロードエラー:', error);
@@ -744,15 +792,18 @@ function initializeApp() {
         `${nameJa}の学生証が完成しました！🎓\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター` :
         `放課後クロニクル 学生証が完成しました！🎓\n\n診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター`;
       
-      if (window.buildShareUrl && imageData.public_id) {
-        // 新しい共有方式
-        shareUrl = window.buildShareUrl(imageData.public_id);
-        
-        // 共有リンクを更新（X intent、URLコピー欄等）
-        if (window.updateShareLinks) {
-          window.updateShareLinks(imageData.public_id, tweetText);
-        }
-      } else {
+             if (window.buildShareUrl && imageData.public_id) {
+         // 新しい共有方式
+         shareUrl = window.buildShareUrl(imageData.public_id);
+         
+         // 画像データを保存（埋め込み時の保存対応用）
+         window.__lastImageData = imageData;
+         
+         // 共有リンクを更新（X intent、URLコピー欄等）
+         if (window.updateShareLinks) {
+           window.updateShareLinks(imageData.public_id, tweetText);
+         }
+       } else {
         // フォールバック：従来方式（非推奨）
         // shareUrl = new URL('s.html', window.location.origin);
         // shareUrl.searchParams.set('i', imageData.secure_url || imageData);
@@ -821,15 +872,18 @@ function initializeApp() {
       
       // 新しい共有方式：短いURL（/s/{slug}形式）
       let shareUrl;
-      if (window.buildShareUrl && imageData.public_id) {
-        // 新しい共有方式
-        shareUrl = window.buildShareUrl(imageData.public_id);
-        
-        // 共有リンクを更新（X intent、URLコピー欄等）
-        if (window.updateShareLinks) {
-          window.updateShareLinks(imageData.public_id, '学生証を発行しました');
-        }
-      } else {
+             if (window.buildShareUrl && imageData.public_id) {
+         // 新しい共有方式
+         shareUrl = window.buildShareUrl(imageData.public_id);
+         
+         // 画像データを保存（埋め込み時の保存対応用）
+         window.__lastImageData = imageData;
+         
+         // 共有リンクを更新（X intent、URLコピー欄等）
+         if (window.updateShareLinks) {
+           window.updateShareLinks(imageData.public_id, '学生証を発行しました');
+         }
+       } else {
         // フォールバック：従来方式（非推奨）
         const studentInfo = { name: nameJa };
         shareUrl = generateShareUrl(imageData.secure_url || imageData, studentInfo);
@@ -841,22 +895,9 @@ function initializeApp() {
       if (success) {
         console.log('✅ シェア用URLをクリップボードにコピーしました');
       } else {
-        // フォールバック: テキストエリア方式
-        try {
-          const textArea = document.createElement('textarea');
-          textArea.value = shareUrl;
-          textArea.style.position = 'fixed';
-          textArea.style.left = '-999999px';
-          textArea.style.top = '-999999px';
-          document.body.appendChild(textArea);
-          textArea.focus();
-          textArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textArea);
-          console.log('✅ シェア用URLをコピーしました（フォールバック方式）');
-        } catch (fallbackError) {
-          console.error('URLのコピーに失敗しました:', shareUrl);
-        }
+        // フォールバック: コピー専用ページを新規タブで開く
+        window.open(`/copy.html?u=${encodeURIComponent(shareUrl)}`, '_blank', 'noopener');
+        console.log('✅ コピー専用ページを開きました');
       }
     } catch (error) {
       console.error('URLコピーエラー:', error);

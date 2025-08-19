@@ -288,24 +288,20 @@
   
   <!-- 共有URL生成機能 -->
   <script>
-    // 共有用ドメイン定数
-    const SHARE_BASE = 'https://student-id-generator.pages.dev'; // Cloudflare PagesのProduction domain
-    // 後で独自ドメイン化する場合: https://ogp.<your-domain> に変更可能
-    
-    // Base64URL変換ユーティリティ
-    function toBase64Url(str){
+    // 共有用ドメイン
+    const SHARE_BASE = 'https://student-id-generator.pages.dev';
+
+    // Base64URL（短く安全）
+    function b64url(str){
       return btoa(unescape(encodeURIComponent(str)))
         .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
     }
-    
-    // Cloudinary へ保存完了後の処理に追加：public_idから共有URLを作る
+
+    // public_id -> /s/:slug だけ返す（画像URLやJSONは入れない）
     function buildShareUrl(public_id){
-      const slug = toBase64Url(public_id) + '-' + Date.now();
-      return `${SHARE_BASE}/s/${slug}`;
+      return `${SHARE_BASE}/s/${b64url(public_id)}`;
     }
-    
-    // グローバル関数として公開（app.jsから呼び出し可能）
-    window.buildShareUrl = buildShareUrl;
+    window.buildShareUrl = buildShareUrl; // 既存呼び出し互換
     
     // 共有ボタンの href を差し替える（既存ボタンやリンクID/クラスは変更しない）
     function updateShareLinks(public_id, text){
@@ -335,6 +331,8 @@
       // 非対応なら通常のX intent（上記 updateShareLinks 済み）へ誘導
       return false;
     }
+    
+
   </script>
 </head>
 <body>
@@ -701,6 +699,11 @@
   <!-- 埋め込みモード対応 -->
   <script src="assets/js/embed-mode.js" defer></script>
   
+  <!-- iPhoneでカメラが起動する件を修正 -->
+  <script>
+    document.getElementById('photoInput')?.removeAttribute('capture');
+  </script>
+  
   <script>
 (function() {
   'use strict';
@@ -773,52 +776,9 @@
     });
   }
 
-  function shareToX() {
-    const text = '放課後クロニクル 学生証を作成しました';
-    const url = getShareUrl();
 
-    canvasToFile(async ({ file }) => {
-      // 1) 画像付きネイティブ共有（対応端末はXアプリへそのまま渡せる）
-      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], text: `${text} ${url}` });
-          return;
-        } catch (_) {}
-      }
 
-      // 2) アプリスキーム（失敗時はWeb intentへ）
-      const scheme = `twitter://post?message=${encodeURIComponent(`${text} ${url}`)}`;
-      const start = Date.now();
-      location.href = scheme;
 
-      setTimeout(() => {
-        if (Date.now() - start < 1800) {
-          const intent = new URL('https://x.com/intent/post');
-          intent.searchParams.set('text', text);
-          intent.searchParams.set('url', url);
-          location.href = intent.toString();
-        }
-      }, 800);
-    });
-  }
-
-  // ===== 既存ボタンにイベント割当（UI不変） =====
-  document.getElementById('downloadBtn')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    saveImage();
-  });
-
-  // 互換：#twitterBtn / #btnShareX / a.btn-twitter のいずれでも動く
-  const xButton = document.querySelector('#twitterBtn, #btnShareX, a.btn-twitter');
-  xButton?.addEventListener('click', (e) => {
-    e.preventDefault();
-    shareToX();
-  });
-
-  document.getElementById('urlBtn')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    copyText(getShareUrl());
-  });
 
   // ===== 既存 updateShareLinks を互換拡張（元の動作は保持） =====
   const _origUpdate = window.updateShareLinks;
