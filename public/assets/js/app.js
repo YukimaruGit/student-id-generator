@@ -659,9 +659,9 @@ function initializeApp() {
       if (window.top !== window.self) {
         if (window.__lastImageData && window.__lastImageData.public_id) {
           // 既にアップロード済みの場合はOGP画像を表示
+          const pid = window.__lastImageData.public_id.split('/').map(encodeURIComponent).join('/');
           const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
-                     `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
-                     `${encodeURIComponent(window.__lastImageData.public_id)}.png`;
+                     `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/${pid}.png`;
           window.open(og, '_blank', 'noopener');
           return;
         } else {
@@ -676,9 +676,9 @@ function initializeApp() {
             window.__lastImageData = imageData;
             hideLoading();
             
+            const pid2 = imageData.public_id.split('/').map(encodeURIComponent).join('/');
             const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
-                       `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
-                       `${encodeURIComponent(imageData.public_id)}.png`;
+                       `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/${pid2}.png`;
             window.open(og, '_blank', 'noopener');
             return;
           } catch (uploadError) {

@@ -27,9 +27,9 @@ export async function onRequest(context) {
     } catch {
       // 新形式：decoded は public_id とみなす → ここでCloudinaryのOGP画像URLを組み立て
       const pid = decoded;
+      const safePid = pid.split('/').map(encodeURIComponent).join('/');
       image = `https://res.cloudinary.com/${CLOUD}/image/upload/` +
-              `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
-              `${encodeURIComponent(pid)}.png`;
+              `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/${safePid}.png`;
     }
   }
 
