@@ -1,15 +1,16 @@
+// 定数定義
+const CARD_WIDTH = 800;
+const CARD_HEIGHT = 500;
 // ================================================================================
-// ⚠️ 【重要な注意事項】
-// ⚠️ このファイルの画像処理（PHOTO_FRAME）と文字位置座標は完璧に調整済みです！
-// ⚠️ 今後診断テスト機能を追加する際も、画像・位置関連の設定は絶対に変更しないでください！
-// ⚠️ 変更が必要な場合は必ず事前確認を取ってください！
+// ⚠️ 【超重要・変更厳禁】写真フレームの座標とサイズは完璧に調整済みです！
+// ⚠️ 今後絶対に変更しないでください！変更が必要な場合は必ず事前確認を取ってください！
+// ⚠️ この設定により画像のアスペクト比保持とクリッピングが完璧に動作しています！
 // ================================================================================
-
-// 効果音の準備（一時的にコメントアウト）
-const SOUNDS = {
-  bell: { play: () => console.log('Bell sound effect') },
-  chalk: { play: () => console.log('Chalk sound effect') },
-  flip: { play: () => console.log('Flip sound effect') }
+const PHOTO_FRAME = {
+  x: 42,   // 完璧に調整済み【変更厳禁】
+  y: 125,   // 完璧に調整済み【変更厳禁】
+  width: 255,  // 完璧に調整済み【変更厳禁】
+  height: 324  // 完璧に調整済み【変更厳禁】
 };
 
 // Cloudinary設定
@@ -61,34 +62,6 @@ async function uploadImageToCloudinary(canvas, cloudName, uploadPreset) {
   });
 }
 
-function generateShareUrl(imageUrl, studentInfo = {}) {
-  // ドメインマスキングを使用してGit情報を隠蔽
-  if (window.DomainMasking) {
-    const params = {
-      i: imageUrl
-    };
-    if (studentInfo.name) params.n = studentInfo.name;
-    
-    // 古い共有方式（非推奨）
-    // const originalUrl = new URL('s.html', window.location.origin).toString();
-    // return window.DomainMasking.generateShortUrl(originalUrl, params);
-    
-    // 新しい短いURL方式を推奨
-    console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');
-    return '新しい短いURL方式が利用できません';
-  }
-  
-  // フォールバック: 従来の方式（非推奨 - 新しい短いURL方式を使用）
-  // const shareUrl = new URL('s.html', window.location.origin);
-  // shareUrl.searchParams.set('i', imageUrl); // 短縮パラメータ
-  // if (studentInfo.name) shareUrl.searchParams.set('n', studentInfo.name); // 短縮パラメータ
-  // return shareUrl.toString();
-  
-  // 新しい短いURL方式を推奨
-  console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');
-  return '新しい短いURL方式が利用できません';
-}
-
 function downloadCanvasAsImage(canvas, filename = '学生証.png') {
   try {
     const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
@@ -99,129 +72,86 @@ function downloadCanvasAsImage(canvas, filename = '学生証.png') {
 
       const url = URL.createObjectURL(blob);
       if (isIOS) {
-        // iOSは新規タブで表示して「画像を保存」
-        if (pre) pre.location.href = url;
-        setTimeout(() => URL.revokeObjectURL(url), 2000);
-        return;
+        // iOSの場合は新規タブで開いて長押し保存を案内
+        if (pre) pre.close();
+        const newTab = window.open(url, '_blank', 'noopener');
+        if (newTab) {
+          setTimeout(() => {
+            newTab.close();
+            URL.revokeObjectURL(url);
+          }, 1000);
+        }
+      } else {
+        // 通常のブラウザはダウンロード
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+        if (pre) pre.close();
       }
-      // 通常ブラウザ：ダウンロード属性
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 2000);
-      if (pre) pre.close();
-    }, 'image/png', 0.95);
-    return true;
-  } catch (e) { console.warn(e); return false; }
+    }, 'image/png', 0.9);
+  } catch (error) {
+    console.error('ダウンロードエラー:', error);
+    alert('画像のダウンロードに失敗しました。');
+  }
 }
 
-function generateTwitterShareUrl(shareUrl, text = '放課後クロニクル 学生証を作成しました！') {
-  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
+// X共有機能（白画面回避対応）
+function openXAppOrIntent(webIntent) {
+  // 埋め込み or インアプリ → 最初から Web Intent（白画面回避）
+  const isEmbedded = (window.top !== window.self);
+  const inApp = /Line\/|FBAN|FBAV|Instagram|Twitter|CriOS GSA|YaBrowser/.test(navigator.userAgent);
+  if (isEmbedded || inApp) {
+    window.open(webIntent, '_blank', 'noopener');
+    return;
+  }
+  
+  // トップレベルのみ：アプリスキームを"クリック同期"で試す → 失敗時 Intent
+  const msg = new URL(webIntent).searchParams.get('text') || '';
+  const schemes = [
+    `twitter://post?message=${encodeURIComponent(msg)}`,
+    `x://post?message=${encodeURIComponent(msg)}`
+  ];
+  let done = false;
+  const fallback = setTimeout(() => { if (!done) window.open(webIntent, '_blank', 'noopener'); }, 800);
+  const onHide = () => { done = true; clearTimeout(fallback); document.removeEventListener('visibilitychange', onHide); };
+  document.addEventListener('visibilitychange', onHide);
+  try {
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.rel = 'noopener';
+    a.target = '_self';
+    a.href = schemes[0];
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { if (!done) location.href = schemes[1]; }, 200);
+  } catch (_) { /* fallback が拾う */ }
 }
 
-async function copyUrlToClipboard(text){
-  // 1) 標準API（トップレベル & HTTPS）
-  try {
-    const topLevel = (window.top === window.self);
-    if (navigator.clipboard && window.isSecureContext && topLevel) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-  } catch(_) {}
-
-  // 2) execCommand フォールバック
-  try {
+// コピー処理を一元化
+async function copyTextReliable(text) {
+  try { 
+    await navigator.clipboard.writeText(text); 
+    return true; 
+  } catch {
     const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.left = '-99999px';
-    ta.style.top = '-99999px';
+    ta.value = text; 
+    ta.style.position='fixed'; 
+    ta.style.opacity='0'; 
     document.body.appendChild(ta);
-    ta.focus();
+    ta.focus(); 
     ta.select();
     const ok = document.execCommand('copy');
     document.body.removeChild(ta);
     if (ok) return true;
-  } catch(_) {}
-
-  // 最終手段は呼び出し側で実施（ここでは静かに失敗を返す）
-  return false;
+    // 最終フォールバック: copy.html を使う
+    const u = new URL('/copy.html', location.origin);
+    u.searchParams.set('u', text);
+    window.open(u.toString(), '_blank', 'noopener');
+    return false;
+  }
 }
-
-// iOS対応: 堅牢なコピー機能（clipboard → execCommand の二段構え）
-async function copyTextReliable(text) {
-  // 1) Clipboard API（iframeでも試す）
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-  } catch(e){ /* 続行 */ }
-
-  // 2) execCommandフォールバック（ユーザー操作直後なら多くの端末で成功）
-  try {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.focus(); ta.select();
-    const ok = document.execCommand('copy');
-    ta.remove();
-    if (ok) return true;
-  } catch(e){ /* 続行 */ }
-
-  // 3) 最終手段：新規タブで自動コピー（埋め込み・iOS対策）
-  const u = new URL('copy.html', location.origin);
-  u.searchParams.set('u', text);
-  window.open(u.toString(), '_blank', 'noopener'); // ここでタブを開く
-  return false;
-}
-
-// Xアプリ起動（アプリ優先→ダメなら Web intent）
-window.openXAppOrIntent = function openXAppOrIntent(webIntent) {
-  try {
-    const embedded = (window.top !== window.self);
-    if (embedded) {
-      // iframe内は最初からWeb Intentへ（白画面回避）
-      window.open(webIntent, '_blank', 'noopener');
-      return true;
-    }
-    // アプリスキームを新しいタブで試行（ユーザー操作直後の同期クリック扱い）
-    const msg = new URL(webIntent).searchParams.get('text') || '';
-    const scheme = `twitter://post?message=${encodeURIComponent(msg)}`;
-    const a = document.createElement('a');
-    a.href = scheme;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    let done = false;
-    a.click();
-    setTimeout(() => {
-      if (!done) window.open(webIntent, '_blank', 'noopener');
-    }, 800);
-    setTimeout(() => { done = true; }, 1200);
-    a.remove();
-    return true;
-  } catch (e) { console.warn(e); return false; }
-};
-
-// 定数定義
-const CARD_WIDTH = 800;
-const CARD_HEIGHT = 500;
-// ================================================================================
-// ⚠️ 【超重要・変更厳禁】写真フレームの座標とサイズは完璧に調整済みです！
-// ⚠️ 今後絶対に変更しないでください！変更が必要な場合は必ず事前確認を取ってください！
-// ⚠️ この設定により画像のアスペクト比保持とクリッピングが完璧に動作しています！
-// ================================================================================
-const PHOTO_FRAME = {
-  x: 42,   // 完璧に調整済み【変更厳禁】
-  y: 125,   // 完璧に調整済み【変更厳禁】
-  width: 255,  // 完璧に調整済み【変更厳禁】
-  height: 324  // 完璧に調整済み【変更厳禁】
-};
 
 // DOM読み込み完了を待つ
 document.addEventListener('DOMContentLoaded', () => {
@@ -894,7 +824,10 @@ function initializeApp() {
        } else {
         // フォールバック：従来方式（非推奨）
         const studentInfo = { name: nameJa };
-        shareUrl = generateShareUrl(imageData.secure_url || imageData, studentInfo);
+        // ここではgenerateShareUrlを呼び出すと、window.DomainMaskingが未定義のためエラーになる可能性がある
+        // フォールバックとして、直接URLを生成するか、エラーを投げる
+        console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');
+        shareUrl = '新しい短いURL方式が利用できません';
       }
       const success = await copyTextReliable(String(shareUrl));
       
