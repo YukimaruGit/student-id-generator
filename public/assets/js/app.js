@@ -363,7 +363,7 @@ function initializeApp() {
   }
 
   // DOM要素の存在チェック（必須要素のみ）
-  const requiredElements = ['photoInput', 'nameJa', 'nameEn', 'dobMonth', 'dobDay', 'cardCanvas', 'downloadBtn', 'twitterBtn', 'urlBtn', 'loadingOverlay'];
+  const requiredElements = ['photoInput', 'nameJa', 'nameEn', 'dobMonth', 'dobDay', 'cardCanvas', 'downloadBtn', 'twitterBtn', 'urlBtn'];
   for (const key of requiredElements) {
     if (!elements[key]) {
       console.error(`要素が見つかりません: ${key}`);
@@ -388,11 +388,14 @@ function initializeApp() {
 
   // ローディング表示の制御
   function showLoading(message = '処理中...') {
-    elements.loadingOverlay.querySelector('p').textContent = message;
+    if (!elements.loadingOverlay) return;
+    const p = elements.loadingOverlay.querySelector('p');
+    if (p) p.textContent = message;
     elements.loadingOverlay.classList.add('active');
   }
 
   function hideLoading() {
+    if (!elements.loadingOverlay) return;
     elements.loadingOverlay.classList.remove('active');
   }
 
