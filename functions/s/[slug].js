@@ -40,6 +40,21 @@ export async function onRequest(context) {
   const html = `<!doctype html>
 <html lang="ja"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+
+<!-- 人間だけ診断の最初へ自動遷移（OGPは維持） -->
+<script>
+  (function(){
+    try{
+      var q = new URL(location.href).searchParams;
+      if (q.get('stay') === '1') return; // デバッグ用
+      var dest = '/index.html'; // or '/'
+      window.addEventListener('load', function(){
+        setTimeout(function(){ location.replace(dest); }, 600);
+      });
+    }catch(e){}
+  })();
+</script>
+<noscript><meta http-equiv="refresh" content="0;url=/index.html"></noscript>
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${canonical}">
 <meta property="og:type" content="website">

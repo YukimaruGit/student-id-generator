@@ -64,39 +64,51 @@ async function uploadImageToCloudinary(canvas, cloudName, uploadPreset) {
   });
 }
 
-function downloadCanvasAsImage(canvas, filename = '学生証.png') {
-  try {
-    const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
-    const pre = window.open('about:blank'); // 先に開く（ポップアップブロック回避）
+async function downloadCanvasAsImage(canvas, filename = '学生証.png') {
+  const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
+  const embedded = (window.top !== window.self);
+  const blob = await new Promise(res => canvas.toBlob(res, 'image/png', 0.95));
+  if (!blob) { alert('画像の生成に失敗しました'); return false; }
 
-    canvas.toBlob(blob => {
-      if (!blob) { if (pre) pre.close(); alert('画像の生成に失敗しました'); return; }
-
-      const url = URL.createObjectURL(blob);
-      if (isIOS) {
-        // iOSの場合は新規タブで開いて長押し保存を案内
-        if (pre) pre.close();
-        const newTab = window.open(url, '_blank', 'noopener');
-        if (newTab) {
-          setTimeout(() => {
-            newTab.close();
-            URL.revokeObjectURL(url);
-          }, 1000);
-        }
-      } else {
-        // 通常のブラウザはダウンロード
-        const link = document.createElement('a');
-        link.download = filename;
-        link.href = url;
-        link.click();
-        URL.revokeObjectURL(url);
-        if (pre) pre.close();
+  // ① スマホ優先：ファイル添付の Web Share (iOS/Android)
+  if ('canShare' in navigator && 'share' in navigator) {
+    try {
+      const file = new File([blob], filename, { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: '学生証', text: '' });
+        return true; // 新規タブを開かず保存/共有できる
       }
-    }, 'image/png', 0.9);
-  } catch (error) {
-    console.error('ダウンロードエラー:', error);
-    alert('画像のダウンロードに失敗しました。');
+    } catch(_) { /* 下へフォールバック */ }
   }
+
+  // ② PC(Chromium)：OSの保存ダイアログ
+  if (!isIOS && !embedded && 'showSaveFilePicker' in window) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{ description: 'PNG Image', accept: { 'image/png': ['.png'] } }]
+      });
+      const stream = await handle.createWritable();
+      await stream.write(blob);
+      await stream.close();
+      return true;
+    } catch(_) { /* キャンセル等 → ③へ */ }
+  }
+
+  // ③ それ以外：a[download] / どうしてもiOS等は新規タブ
+  const url = URL.createObjectURL(blob);
+  if (!isIOS && !embedded) {
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    return true;
+  }
+  // iOS/埋め込みは最終手段：新規タブ視聴（長押し保存）
+  const win = window.open('about:blank', '_blank', 'noopener');
+  if (win) win.location.href = url;
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  return true;
 }
 
 // Cloudinary配信用URLを作るユーティリティ（再利用用）
@@ -111,56 +123,64 @@ function buildCldOgUrl({ cloudName, public_id, version, eager_url }) {
 
 // X共有機能（白画面回避対応）
 function openXAppOrIntent(webIntent) {
-  // 埋め込み or インアプリ → 最初から Web Intent（白画面回避）
   const isEmbedded = (window.top !== window.self);
-  const inApp = /Line\/|FBAN|FBAV|Instagram|Twitter|CriOS GSA|YaBrowser/.test(navigator.userAgent);
-  if (isEmbedded || inApp) {
-    window.open(webIntent, '_blank', 'noopener');
-    return;
-  }
-  
-  // トップレベルのみ：アプリスキームを"クリック同期"で試す → 失敗時 Intent
+  if (isEmbedded) { window.open(webIntent, '_blank', 'noopener'); return; }
+  const ua = navigator.userAgent;
+  const isiOS = /iPad|iPhone|iPod/.test(ua);
+  const isAndroid = /Android/.test(ua);
   const msg = new URL(webIntent).searchParams.get('text') || '';
-  const schemes = [
-    `twitter://post?message=${encodeURIComponent(msg)}`,
-    `x://post?message=${encodeURIComponent(msg)}`
-  ];
-  let done = false;
-  const fallback = setTimeout(() => { if (!done) window.open(webIntent, '_blank', 'noopener'); }, 800);
-  const onHide = () => { done = true; clearTimeout(fallback); document.removeEventListener('visibilitychange', onHide); };
+  let tried = false;
+  const fallback = () => { if (!tried) { tried = true; window.open(webIntent, '_blank', 'noopener'); } };
+  // 失敗検知：アプリへ切り替わると visibilitychange が走る
+  const onHide = () => { tried = true; document.removeEventListener('visibilitychange', onHide); };
   document.addEventListener('visibilitychange', onHide);
   try {
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.rel = 'noopener';
-    a.target = '_self';
-    a.href = schemes[0];
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { if (!done) location.href = schemes[1]; }, 200);
-  } catch (_) { /* fallback が拾う */ }
+    if (isiOS) {
+      location.href = `x://post?message=${encodeURIComponent(msg)}`;       // iOS17以降
+      setTimeout(() => { if (!tried) location.href = `twitter://post?message=${encodeURIComponent(msg)}`; }, 200);
+      setTimeout(fallback, 900);
+    } else if (isAndroid) {
+      // Androidは intent:// が強い
+      location.href = `intent://post?message=${encodeURIComponent(msg)}#Intent;package=com.twitter.android;scheme=twitter;end`;
+      setTimeout(() => { if (!tried) location.href = `twitter://post?message=${encodeURIComponent(msg)}`; }, 180);
+      setTimeout(fallback, 900);
+    } else {
+      fallback(); // デスクトップ等はWeb Intentへ
+    }
+  } catch(_) { fallback(); }
 }
 
 // コピー処理を一元化
 async function copyTextReliable(text) {
-  try { 
-    await navigator.clipboard.writeText(text); 
-    return true; 
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
   } catch {
-    const ta = document.createElement('textarea');
-    ta.value = text; 
-    ta.style.position='fixed'; 
-    ta.style.opacity='0'; 
-    document.body.appendChild(ta);
-    ta.focus(); 
-    ta.select();
+    // DOMコピー（contentEditable方式はiOSに強い）
+    const div = document.createElement('div');
+    div.contentEditable = 'true';
+    div.style.position = 'fixed';
+    div.style.opacity = '0';
+    div.textContent = text;
+    document.body.appendChild(div);
+    const range = document.createRange();
+    range.selectNodeContents(div);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
     const ok = document.execCommand('copy');
-    document.body.removeChild(ta);
+    sel.removeAllRanges();
+    document.body.removeChild(div);
     if (ok) return true;
-    // 最終フォールバック: copy.html を使う
+    // 共有シートに逃がす（コピーが選べる）
+    if ('share' in navigator) {
+      try { await navigator.share({ text }); return true; } catch(_) {}
+    }
+    // どうしてもダメな時だけ、同一タブで copy.html を開き即クローズ
     const u = new URL('/copy.html', location.origin);
     u.searchParams.set('u', text);
-    window.open(u.toString(), '_blank', 'noopener');
+    // 埋め込みで new tab が白く残るのを避けるため _self で
+    location.href = u.toString();
     return false;
   }
 }
