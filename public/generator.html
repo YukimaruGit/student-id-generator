@@ -297,9 +297,13 @@
         .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
     }
 
-    // public_id -> /s/:slug だけ返す（画像URLやJSONは入れない）
+    // public_id -> 診断開始ページ + 短いクエリ
     function buildShareUrl(public_id){
-      return `${SHARE_BASE}/s/${b64url(public_id)}`;
+      const slug = b64url(public_id) + '-' + Date.now();
+      // 診断開始ページ（index.html 相当）に ?s= で短いパラメータ
+      const u = new URL('/', SHARE_BASE);
+      u.searchParams.set('s', slug);
+      return u.toString();
     }
     window.buildShareUrl = buildShareUrl; // 既存呼び出し互換
     
@@ -704,106 +708,6 @@
     document.getElementById('photoInput')?.removeAttribute('capture');
   </script>
   
-  <script>
-(function() {
-  'use strict';
-
-  // ===== ユーティリティ =====
-  const isIOS = /iP(hone|od|ad)/.test(navigator.platform) ||
-                (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
-  const canvas = document.getElementById('cardCanvas');
-
-  function getShareUrl() {
-    const f = document.getElementById('shareLinkField');
-    if (f && f.value) return f.value;
-    return location.href;
-  }
-
-  function canvasToFile(cb) {
-    if (!canvas) return cb(null);
-    canvas.toBlob(function(blob) {
-      if (!blob) return cb(null);
-      const file = new File([blob], 'student-card.png', { type: 'image/png' });
-      cb({ blob, file });
-    }, 'image/png', 0.92);
-  }
-
-  async function copyText(text) {
-    try {
-      await navigator.clipboard.writeText(text);
-      alert('URLをコピーしました');
-    } catch(e) {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      const ok = document.execCommand('copy');
-      document.body.removeChild(ta);
-      if (ok) alert('URLをコピーしました');
-      else alert('コピーに失敗しました。長押しでペーストしてください。');
-    }
-  }
-
-  function saveImage() {
-    canvasToFile(async ({ blob, file }) => {
-      if (!blob) return alert('画像の生成に失敗しました');
-
-      // 1) 共有シート（対応端末はここから「画像を保存」可能）
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], text: '学生証画像' });
-          return;
-        } catch (_) {}
-      }
-
-      // 2) フォールバック：iOSは新規タブ→長押し保存 / その他はダウンロード
-      const url = URL.createObjectURL(blob);
-      if (isIOS) {
-        window.open(url, '_blank'); // iOS Safari：新規タブで画像 → ユーザーが長押しで保存
-        setTimeout(() => URL.revokeObjectURL(url), 60000);
-      } else {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'student-card.png';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      }
-    });
-  }
-
-
-
-
-
-  // ===== 既存 updateShareLinks を互換拡張（元の動作は保持） =====
-  const _origUpdate = window.updateShareLinks;
-  window.updateShareLinks = function(public_id, text) {
-    try { _origUpdate && _origUpdate(public_id, text); } catch (_) {}
-
-    const shareUrl = (typeof window.buildShareUrl === 'function' && public_id)
-      ? window.buildShareUrl(public_id)
-      : getShareUrl();
-
-    const xEl = document.querySelector('#btnShareX, #twitterBtn, a.btn-twitter');
-    if (xEl) {
-      const intent = new URL('https://x.com/intent/post');
-      intent.searchParams.set('text', text || '学生証を発行しました');
-      intent.searchParams.set('url', shareUrl);
-      xEl.setAttribute('href', intent.toString());
-      xEl.setAttribute('rel', 'noopener noreferrer');
-      xEl.setAttribute('target', '_blank');
-    }
-
-    const copy = document.getElementById('shareLinkField');
-    if (copy) copy.value = shareUrl;
-    window.__shareUrl = shareUrl;
-  };
-})();
-</script>
+  <!-- 共有機能は app.js で統一管理 -->
 </body>
 </html> 

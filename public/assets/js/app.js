@@ -155,8 +155,7 @@ async function copyUrlToClipboard(text){
     if (ok) return true;
   } catch(_) {}
 
-  // 3) 埋め込み環境など → 最終手段：アラートで見せる（UIは既存のまま）
-  alert('URLをコピーできない環境です。下記のURLを長押しでコピーしてください：\n\n' + text);
+  // 最終手段は呼び出し側で実施（ここでは静かに失敗を返す）
   return false;
 }
 
@@ -181,26 +180,21 @@ async function copyTextReliable(text) {
   }
 }
 
-// Xアプリ起動機能（アプリスキーム → 失敗時 Intent）
+// Xアプリ起動（アプリ優先→ダメなら Web intent）
 function openXAppOrIntent(text, url) {
   const msg = `${text} ${url}`;
-  const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(msg)}`;
+  const intent = `https://x.com/intent/post?text=${encodeURIComponent(msg)}`;
 
-  // iFrame（STUDIOの埋め込み）なら最初から新規タブでWeb intentへ
-  if (window.top !== window.self) {
-    window.open(webIntent, '_blank', 'noopener');
-    return;
-  }
-
-  // インアプリブラウザも最初から Intent
+  // 埋め込み or インアプリは最初から Web intent
+  const isEmbedded = (window.top !== window.self);
   const ua = navigator.userAgent;
   const inApp = /Line\/|FBAN|FBAV|Instagram|Twitter|CriOS GSA|YaBrowser/.test(ua);
-  if (inApp) {
-    window.open(webIntent, '_blank', 'noopener');
+  if (isEmbedded || inApp) {
+    window.open(intent, '_blank', 'noopener');
     return;
   }
 
-  // トップレベルのみアプリスキームを試す（twitter:// → x://）
+  // トップレベルのみアプリスキームを試す
   const schemes = [
     `twitter://post?message=${encodeURIComponent(msg)}`,
     `x://post?message=${encodeURIComponent(msg)}`
@@ -208,14 +202,12 @@ function openXAppOrIntent(text, url) {
 
   let done = false;
   const fallback = setTimeout(() => {
-    if (!done) window.open(intent, '_blank', 'noopener');
+    if (!done) window.open(intent, '_blank', 'noopener'); // ← 確実に intent を使う
   }, 800);
 
-  // アプリに切り替わったら visibilitychange でキャンセル
   const onHide = () => { done = true; clearTimeout(fallback); document.removeEventListener('visibilitychange', onHide); };
   document.addEventListener('visibilitychange', onHide);
 
-  // ユーザー操作の直後に遷移（ポップアップブロック回避）
   try {
     const a = document.createElement('a');
     a.style.display = 'none';
@@ -224,9 +216,8 @@ function openXAppOrIntent(text, url) {
     a.href = schemes[0];
     document.body.appendChild(a);
     a.click();
-    // 2本目は少し遅延
     setTimeout(() => { if (!done) location.href = schemes[1]; }, 200);
-  } catch(_) { /* 失敗しても fallback が拾う */ }
+  } catch (_) { /* fallback が拾う */ }
 }
 
 // 定数定義
