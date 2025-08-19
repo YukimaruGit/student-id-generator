@@ -1,3 +1,39 @@
+// === Security constants ===
+const ALLOWED_EXTS = ['png','jpg','jpeg','webp','heic'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+function getExt(name=''){ const m = name.toLowerCase().match(/\.([a-z0-9]+)$/); return m? m[1] : ''; }
+
+// 署名検査（簡易マジックバイト）
+async function sniffImageType(file){
+  const buf = await file.slice(0, 12).arrayBuffer();
+  const b = new Uint8Array(buf);
+  const isPNG  = b[0]===0x89 && b[1]===0x50 && b[2]===0x4E && b[3]===0x47;
+  const isJPG  = b[0]===0xFF && b[1]===0xD8 && b[2]===0xFF;
+  const isWEBP = b[0]===0x52 && b[1]===0x49 && b[2]===0x46 && b[3]===0x46 && b[8]===0x57 && b[9]===0x45 && b[10]===0x42 && b[11]===0x50;
+  const isHEIC = (b[4]===0x66 && b[5]===0x74 && b[6]===0x79 && b[7]===0x70); // ftyp (HEIC/HEIF系)
+  if (isPNG)  return 'png';
+  if (isJPG)  return (file.type.includes('heic')?'heic':'jpg'); // 拡張で最終判定
+  if (isWEBP) return 'webp';
+  if (isHEIC) return 'heic';
+  return null;
+}
+
+// Cloudinary OGP URLを一元作成（v必須・セグメント毎エンコード）
+// namedTransform は後でコンソール側で作る前提（nullなら未使用）
+function buildCldOgUrl({cloudName, public_id, version, namedTransform=null, eager_url=null}){
+  if (eager_url) return eager_url; // 事前生成があれば最優先
+  const pid = String(public_id).split('/').map(encodeURIComponent).join('/');
+  const tfm = namedTransform ? `t_${namedTransform}/` : `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/`;
+  return `https://res.cloudinary.com/${cloudName}/image/upload/${tfm}v${version}/${pid}.png`;
+}
+
+// window.open / 動的 <a> の noopener 徹底
+function safeOpen(url, target='_blank'){
+  const w = window.open('', target, 'noopener');
+  if (w) w.opener = null, w.location.href = url;
+}
+
 // 定数定義
 const CARD_WIDTH = 800;
 const CARD_HEIGHT = 500;
@@ -105,7 +141,7 @@ async function downloadCanvasAsImage(canvas, filename = '学生証.png') {
     return true;
   }
   // iOS/埋め込みは最終手段：新規タブ視聴（長押し保存）
-  const win = window.open('about:blank', '_blank', 'noopener');
+  const win = safeOpen('about:blank', '_blank');
   if (win) win.location.href = url;
   setTimeout(() => URL.revokeObjectURL(url), 2000);
   return true;
@@ -152,11 +188,16 @@ function openXAppOrIntent(webIntent) {
 
 // コピー処理を一元化
 async function copyTextReliable(text) {
+  // 1) Clipboard API（ユーザー操作中なら多くの環境でOK）
   try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    // DOMコピー（contentEditable方式はiOSに強い）
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (_) {/* 次へ */}
+
+  // 2) contentEditable + execCommand（iOS/埋め込みに強い「同期」コピー）
+  try {
     const div = document.createElement('div');
     div.contentEditable = 'true';
     div.style.position = 'fixed';
@@ -172,17 +213,19 @@ async function copyTextReliable(text) {
     sel.removeAllRanges();
     document.body.removeChild(div);
     if (ok) return true;
-    // 共有シートに逃がす（コピーが選べる）
-    if ('share' in navigator) {
-      try { await navigator.share({ text }); return true; } catch(_) {}
-    }
-    // どうしてもダメな時だけ、同一タブで copy.html を開き即クローズ
-    const u = new URL('/copy.html', location.origin);
-    u.searchParams.set('u', text);
-    // 埋め込みで new tab が白く残るのを避けるため _self で
-    location.href = u.toString();
-    return false;
+  } catch (_) {/* 次へ */}
+
+  // 3) 共有シート（ここにも「コピー」がある）
+  if (navigator.share) {
+    try { await navigator.share({ text }); return true; } catch (_) {/* 次へ */}
   }
+
+  // 4) 最終手段：/copy を「同一タブ」で開いて自動コピー→自動復帰
+  const u = new URL('/copy', location.origin);
+  u.searchParams.set('u', text);
+  u.searchParams.set('back', location.href);
+  location.href = u.toString(); // _self で遷移（白タブ残しを防止）
+  return false;
 }
 
 // DOM読み込み完了を待つ
@@ -432,6 +475,25 @@ function initializeApp() {
       // セキュリティ検証を最初に実行
       if (window.PrivacySecurity && !window.PrivacySecurity.validateFileUpload(file)) {
         throw new Error('このファイルは安全性の理由でアップロードできません。\nJPEG、PNG、GIF、WebP形式の画像ファイルのみアップロード可能です。');
+      }
+
+      // ファイル選択時のクライアント検証
+      async function validateSelectedFile(file){
+        if (!file){ alert('ファイルが選択されていません'); return false; }
+        const ext = getExt(file.name);
+        if (!ALLOWED_EXTS.includes(ext)) { alert('対応拡張子: ' + ALLOWED_EXTS.join(', ')); return false; }
+        if (file.size > MAX_FILE_SIZE){ alert('10MB以内の画像をご利用ください'); return false; }
+        const sig = await sniffImageType(file);
+        if (!sig || !ALLOWED_EXTS.includes(sig)){ alert('画像ファイルではありません'); return false; }
+        // MIMEヒントの改ざん対策：拡張子とシグネチャが極端に乖離なら拒否
+        if (ext==='png' && sig!=='png')  { alert('PNG形式の画像を選択してください'); return false; }
+        if ((ext==='jpg'||ext==='jpeg') && sig!=='jpg') { alert('JPEG形式の画像を選択してください'); return false; }
+        return true;
+      }
+
+      if (!(await validateSelectedFile(file))) { 
+        elements.photoInput.value = ''; 
+        return; 
       }
 
       if (file.size > 5 * 1024 * 1024) {
@@ -695,9 +757,10 @@ function initializeApp() {
             cloudName: cloudinaryConfig.cloudName,
             public_id: window.__lastImageData.public_id,
             version: window.__lastImageData.version,
-            eager_url: window.__lastImageData.eager_url
+            eager_url: window.__lastImageData.eager_url,
+            namedTransform: null // 後日Cloudinaryで作るなら 'ogp_card'
           });
-          window.open(og, '_blank', 'noopener');
+          safeOpen(og, '_blank');
           return;
         } else {
           // 初回保存時は即アップロードしてOGP画像を表示
@@ -715,9 +778,10 @@ function initializeApp() {
               cloudName: cloudinaryConfig.cloudName,
               public_id: imageData.public_id,
               version: imageData.version,
-              eager_url: imageData.eager_url
+              eager_url: imageData.eager_url,
+              namedTransform: null // 後日Cloudinaryで作るなら 'ogp_card'
             });
-            window.open(og, '_blank', 'noopener');
+            safeOpen(og, '_blank');
             return;
           } catch (uploadError) {
             hideLoading();
