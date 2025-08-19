@@ -303,6 +303,15 @@
       const slug = b64url(public_id);
       return `${SHARE_BASE}/s/${slug}`;
     }
+    
+    // 新しい共有方式：JSONスラッグ（OGP画像URLを含む、最も確実）
+    function buildShareUrlWithImage(public_id, version, eager_url){
+      const ogUrl = eager_url || `https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version || 1}/${public_id}.png`;
+      const payload = { i: ogUrl, p: public_id }; // i: OGP画像URL, p: public_id
+      const slug = btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
+        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      return `${SHARE_BASE}/s/${slug}`;
+    }
     window.buildShareUrl = buildShareUrl; // 既存呼び出し互換
     
     // 共有ボタンの href を差し替える（既存ボタンやリンクID/クラスは変更しない）

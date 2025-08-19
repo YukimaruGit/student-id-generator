@@ -26,10 +26,13 @@ export async function onRequest(context) {
       if (typeof data.n === 'string' && data.n) title = `${data.n} の学生証`;
     } catch {
       // 新形式：decoded は public_id とみなす → ここでCloudinaryのOGP画像URLを組み立て
+      // 注意：versionが提供できない場合は、JSON方式への移行を推奨
       const pid = decoded;
       const safePid = pid.split('/').map(encodeURIComponent).join('/');
+      // 変換指定の「後」に v を入れるのが正解（versionが不明な場合はv1を仮定）
       image = `https://res.cloudinary.com/${CLOUD}/image/upload/` +
-              `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/${safePid}.png`;
+              `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
+              `v1/${safePid}.png`;
     }
   }
 

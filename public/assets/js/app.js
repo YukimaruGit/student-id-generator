@@ -45,10 +45,12 @@ async function uploadImageToCloudinary(canvas, cloudName, uploadPreset) {
           }
 
           const data = await response.json();
-          // public_idとsecure_urlの両方を返す
+          // public_id、secure_url、version、eager_urlを含む
           resolve({
             public_id: data.public_id,
-            secure_url: data.secure_url
+            secure_url: data.secure_url,
+            version: data.version,
+            eager_url: (data.eager && data.eager[0] && data.eager[0].secure_url) || null
           });
         } catch (error) {
           console.error('Cloudinary upload error:', error);
@@ -95,6 +97,16 @@ function downloadCanvasAsImage(canvas, filename = '学生証.png') {
     console.error('ダウンロードエラー:', error);
     alert('画像のダウンロードに失敗しました。');
   }
+}
+
+// Cloudinary配信用URLを作るユーティリティ（再利用用）
+function buildCldOgUrl({ cloudName, public_id, version, eager_url }) {
+  if (eager_url) return eager_url; // 事前生成を最優先（最も安定）
+  const pidSafe = String(public_id).split('/').map(encodeURIComponent).join('/');
+  // 変換指定の「後」に v を入れるのが正解
+  return `https://res.cloudinary.com/${cloudName}/image/upload/` +
+         `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
+         `v${version}/${pidSafe}.png`;
 }
 
 // X共有機能（白画面回避対応）
@@ -659,9 +671,12 @@ function initializeApp() {
       if (window.top !== window.self) {
         if (window.__lastImageData && window.__lastImageData.public_id) {
           // 既にアップロード済みの場合はOGP画像を表示
-          const pid = window.__lastImageData.public_id.split('/').map(encodeURIComponent).join('/');
-          const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
-                     `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/${pid}.png`;
+          const og = buildCldOgUrl({
+            cloudName: cloudinaryConfig.cloudName,
+            public_id: window.__lastImageData.public_id,
+            version: window.__lastImageData.version,
+            eager_url: window.__lastImageData.eager_url
+          });
           window.open(og, '_blank', 'noopener');
           return;
         } else {
@@ -676,9 +691,12 @@ function initializeApp() {
             window.__lastImageData = imageData;
             hideLoading();
             
-            const pid2 = imageData.public_id.split('/').map(encodeURIComponent).join('/');
-            const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
-                       `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/${pid2}.png`;
+            const og = buildCldOgUrl({
+              cloudName: cloudinaryConfig.cloudName,
+              public_id: imageData.public_id,
+              version: imageData.version,
+              eager_url: imageData.eager_url
+            });
             window.open(og, '_blank', 'noopener');
             return;
           } catch (uploadError) {
