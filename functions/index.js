@@ -13,9 +13,9 @@ export async function onRequestGet(context) {
   // decode（/s/ と同じ形式で作っているならそのまま使える）
   const decoded = atob(s.split('-')[0].replace(/-/g,'+').replace(/_/g,'/'));
   const pid = decoded; // 既存と同じく public_id を想定
+  const safePid = pid.split('/').map(encodeURIComponent).join('/');
   const image = `https://res.cloudinary.com/${CLOUD}/image/upload/` +
-                `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
-                `${encodeURIComponent(pid)}.png`;
+                `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/${safePid}.png`;
 
   const title = '放課後クロニクル 学生証';
   const desc  = 'あなたの学生証が完成！';
