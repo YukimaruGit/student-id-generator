@@ -299,7 +299,8 @@
 
     // public_id -> /s/:slug（短い）
     function buildShareUrl(public_id){
-      const slug = b64url(public_id) + '-' + Date.now(); // 互換で末尾にタイムスタンプ維持可
+      // public_id を Base64URL 化して /s/:slug だけにする（最短化）
+      const slug = b64url(public_id);
       return `${SHARE_BASE}/s/${slug}`;
     }
     window.buildShareUrl = buildShareUrl; // 既存呼び出し互換

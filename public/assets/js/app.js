@@ -723,12 +723,37 @@ function initializeApp() {
     }
     try {
       // 埋め込み環境ではCloudinary画像を新規タブ表示（iOS長押し保存対応）
-      if (window.top !== window.self && window.__lastImageData && window.__lastImageData.public_id) {
-        const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
-                   `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
-                   `${encodeURIComponent(window.__lastImageData.public_id)}.png`;
-        window.open(og, '_blank', 'noopener');
-        return;
+      if (window.top !== window.self) {
+        if (window.__lastImageData && window.__lastImageData.public_id) {
+          // 既にアップロード済みの場合はOGP画像を表示
+          const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
+                     `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
+                     `${encodeURIComponent(window.__lastImageData.public_id)}.png`;
+          window.open(og, '_blank', 'noopener');
+          return;
+        } else {
+          // 初回保存時は即アップロードしてOGP画像を表示
+          showLoading('画像を準備中...');
+          try {
+            const imageData = await uploadImageToCloudinary(
+              elements.cardCanvas, 
+              cloudinaryConfig.cloudName, 
+              cloudinaryConfig.uploadPreset
+            );
+            window.__lastImageData = imageData;
+            hideLoading();
+            
+            const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
+                       `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
+                       `${encodeURIComponent(imageData.public_id)}.png`;
+            window.open(og, '_blank', 'noopener');
+            return;
+          } catch (uploadError) {
+            hideLoading();
+            console.warn('埋め込み時のアップロードに失敗、ローカル保存にフォールバック:', uploadError);
+            // アップロード失敗時はローカル保存
+          }
+        }
       }
       downloadCanvasAsImage(elements.cardCanvas, '学生証.png');
     } catch (error) {
@@ -868,7 +893,7 @@ function initializeApp() {
         const studentInfo = { name: nameJa };
         shareUrl = generateShareUrl(imageData.secure_url || imageData, studentInfo);
       }
-      const success = await copyUrlToClipboard(shareUrl);
+      const success = await copyTextReliable(String(shareUrl));
       
       hideLoading();
       
