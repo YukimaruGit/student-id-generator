@@ -719,7 +719,7 @@ function initializeApp() {
   };
 
   // ダウンロードボタン
-  elements.downloadBtn.addEventListener('click', () => {
+  elements.downloadBtn.addEventListener('click', async () => {
     if (!validateInputs(true)) {
       alert('氏名と生年月日を入力してください。');
       return;
