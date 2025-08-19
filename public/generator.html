@@ -297,13 +297,10 @@
         .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
     }
 
-    // public_id -> 診断開始ページ + 短いクエリ
+    // public_id -> /s/:slug（短い）
     function buildShareUrl(public_id){
-      const slug = b64url(public_id) + '-' + Date.now();
-      // 診断開始ページ（index.html 相当）に ?s= で短いパラメータ
-      const u = new URL('/', SHARE_BASE);
-      u.searchParams.set('s', slug);
-      return u.toString();
+      const slug = b64url(public_id) + '-' + Date.now(); // 互換で末尾にタイムスタンプ維持可
+      return `${SHARE_BASE}/s/${slug}`;
     }
     window.buildShareUrl = buildShareUrl; // 既存呼び出し互換
     

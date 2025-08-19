@@ -90,40 +90,32 @@ function generateShareUrl(imageUrl, studentInfo = {}) {
 }
 
 function downloadCanvasAsImage(canvas, filename = '学生証.png') {
-  const isIOS = /iP(hone|ad|od)/.test(navigator.platform) ||
-                (/Macintosh/.test(navigator.userAgent) && 'ontouchend' in document);
+  try {
+    const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
+    const pre = window.open('about:blank'); // 先に開く（ポップアップブロック回避）
 
-  canvas.toBlob(async (blob) => {
-    if (!blob) {
-      // 最終フォールバック：表示→長押し保存
-      try {
-        const dataUrl = canvas.toDataURL('image/png', 0.92);
-        window.location.href = dataUrl;
-      } catch (_) {}
-      return;
-    }
+    canvas.toBlob(blob => {
+      if (!blob) { if (pre) pre.close(); alert('画像の生成に失敗しました'); return; }
 
-    // 1) まずはシェア（保存も選べる）
-    try {
-      const file = new File([blob], filename, { type: 'image/png' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], text: '学生証を保存' });
+      const url = URL.createObjectURL(blob);
+      if (isIOS) {
+        // iOSは新規タブで表示して「画像を保存」
+        if (pre) pre.location.href = url;
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
         return;
       }
-    } catch (_) { /* ユーザーキャンセル含む */ }
-
-    // 2) Blob URL + a.click（iOSはdownload無視→新規タブで画像表示）
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    if (!isIOS) a.download = filename;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
-  }, 'image/png', 0.92);
+      // 通常ブラウザ：ダウンロード属性
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      if (pre) pre.close();
+    }, 'image/png', 0.95);
+    return true;
+  } catch (e) { console.warn(e); return false; }
 }
 
 function generateTwitterShareUrl(shareUrl, text = '放課後クロニクル 学生証を作成しました！') {
@@ -161,64 +153,60 @@ async function copyUrlToClipboard(text){
 
 // iOS対応: 堅牢なコピー機能（clipboard → execCommand の二段構え）
 async function copyTextReliable(text) {
+  // 1) Clipboard API（iframeでも試す）
   try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch (e) {
-    // フォールバック: execCommand方式
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch(e){ /* 続行 */ }
+
+  // 2) execCommandフォールバック（ユーザー操作直後なら多くの端末で成功）
+  try {
     const ta = document.createElement('textarea');
     ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    ta.style.pointerEvents = 'none';
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
     document.body.appendChild(ta);
-    ta.focus();
-    ta.select();
+    ta.focus(); ta.select();
     const ok = document.execCommand('copy');
-    document.body.removeChild(ta);
-    return ok;
-  }
+    ta.remove();
+    if (ok) return true;
+  } catch(e){ /* 続行 */ }
+
+  // 3) 最終手段：新規タブで自動コピー（埋め込み・iOS対策）
+  const u = new URL('copy.html', location.origin);
+  u.searchParams.set('u', text);
+  window.open(u.toString(), '_blank', 'noopener'); // ここでタブを開く
+  return false;
 }
 
 // Xアプリ起動（アプリ優先→ダメなら Web intent）
-function openXAppOrIntent(text, url) {
-  const msg = `${text} ${url}`;
-  const intent = `https://x.com/intent/post?text=${encodeURIComponent(msg)}`;
-
-  // 埋め込み or インアプリは最初から Web intent
-  const isEmbedded = (window.top !== window.self);
-  const ua = navigator.userAgent;
-  const inApp = /Line\/|FBAN|FBAV|Instagram|Twitter|CriOS GSA|YaBrowser/.test(ua);
-  if (isEmbedded || inApp) {
-    window.open(intent, '_blank', 'noopener');
-    return;
-  }
-
-  // トップレベルのみアプリスキームを試す
-  const schemes = [
-    `twitter://post?message=${encodeURIComponent(msg)}`,
-    `x://post?message=${encodeURIComponent(msg)}`
-  ];
-
-  let done = false;
-  const fallback = setTimeout(() => {
-    if (!done) window.open(intent, '_blank', 'noopener'); // ← 確実に intent を使う
-  }, 800);
-
-  const onHide = () => { done = true; clearTimeout(fallback); document.removeEventListener('visibilitychange', onHide); };
-  document.addEventListener('visibilitychange', onHide);
-
+window.openXAppOrIntent = function openXAppOrIntent(webIntent) {
   try {
+    const embedded = (window.top !== window.self);
+    if (embedded) {
+      // iframe内は最初からWeb Intentへ（白画面回避）
+      window.open(webIntent, '_blank', 'noopener');
+      return true;
+    }
+    // アプリスキームを新しいタブで試行（ユーザー操作直後の同期クリック扱い）
+    const msg = new URL(webIntent).searchParams.get('text') || '';
+    const scheme = `twitter://post?message=${encodeURIComponent(msg)}`;
     const a = document.createElement('a');
-    a.style.display = 'none';
+    a.href = scheme;
+    a.target = '_blank';
     a.rel = 'noopener';
-    a.target = '_self';
-    a.href = schemes[0];
     document.body.appendChild(a);
+    let done = false;
     a.click();
-    setTimeout(() => { if (!done) location.href = schemes[1]; }, 200);
-  } catch (_) { /* fallback が拾う */ }
-}
+    setTimeout(() => {
+      if (!done) window.open(webIntent, '_blank', 'noopener');
+    }, 800);
+    setTimeout(() => { done = true; }, 1200);
+    a.remove();
+    return true;
+  } catch (e) { console.warn(e); return false; }
+};
 
 // 定数定義
 const CARD_WIDTH = 800;
@@ -812,8 +800,9 @@ function initializeApp() {
       
       hideLoading();
       
-      // Xアプリで開く（スマホの場合はアプリ起動、PCの場合はWeb intent）
-      openXAppOrIntent(tweetText, shareUrl.toString());
+             // Xアプリで開く（スマホの場合はアプリ起動、PCの場合はWeb intent）
+       const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl.toString())}`;
+       openXAppOrIntent(webIntent);
       
       // 成功時のフィードバック（ポップアップなし）
       console.log('✅ X投稿処理が完了しました');

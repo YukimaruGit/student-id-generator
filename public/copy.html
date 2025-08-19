@@ -1,90 +1,16 @@
-<!doctype html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>URLコピー</title>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans JP";
-      padding: 24px;
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-    .url-display {
-      background: #f5f5f5;
-      padding: 16px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      word-break: break-all;
-      font-family: monospace;
-      font-size: 14px;
-      margin: 20px 0;
-    }
-    .copy-btn {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-      margin: 10px 5px;
-    }
-    .copy-btn:hover {
-      background: #0056b3;
-    }
-    .success {
-      color: #28a745;
-      font-weight: bold;
-    }
-    .error {
-      color: #dc3545;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <h1>URLコピー</h1>
-  <p>以下のURLをコピーしてください：</p>
-  
-  <div class="url-display" id="urlDisplay"></div>
-  
-  <button class="copy-btn" onclick="copyUrl()">クリップボードにコピー</button>
-  <button class="copy-btn" onclick="window.close()">閉じる</button>
-  
-  <div id="message"></div>
-  
-  <script>
-    (async () => {
-      const url = new URL(location.href).searchParams.get('u') || '';
-      if (!url) {
-        document.getElementById('message').innerHTML = '<p class="error">URLが指定されていません</p>';
-        return;
-      }
-      
-      document.getElementById('urlDisplay').textContent = url;
-      
-      // 自動コピーを試行
-      try {
-        await navigator.clipboard.writeText(url);
-        document.getElementById('message').innerHTML = '<p class="success">URLをコピーしました！</p>';
-      } catch (e) {
-        // 自動コピー失敗時は手動コピーを促す
-        document.getElementById('message').innerHTML = '<p class="error">自動コピーに失敗しました。上記のURLを長押しでコピーしてください。</p>';
-      }
-    })();
-    
-    async function copyUrl() {
-      const url = document.getElementById('urlDisplay').textContent;
-      try {
-        await navigator.clipboard.writeText(url);
-        document.getElementById('message').innerHTML = '<p class="success">URLをコピーしました！</p>';
-      } catch (e) {
-        document.getElementById('message').innerHTML = '<p class="error">コピーできません。上記のURLを長押しでコピーしてください。</p>';
-      }
-    }
-  </script>
-</body>
-</html>
+<!doctype html><meta charset="utf-8">
+<script>
+  (async () => {
+    const u = new URL(location.href).searchParams.get('u') || '';
+    try {
+      if (navigator.clipboard && u) await navigator.clipboard.writeText(u);
+    } catch(e){}
+    // 失敗しても選択状態で見せて長押しコピーできるようにする
+    document.body.innerHTML =
+      '<textarea style="width:1px;height:1px;opacity:0">'+
+      (u || '')+'</textarea>';
+    const ta = document.querySelector('textarea');
+    ta.focus(); ta.select();
+    setTimeout(() => window.close(), 600);
+  })();
+</script>
