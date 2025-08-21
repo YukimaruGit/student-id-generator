@@ -22,14 +22,16 @@
   // ログエントリの作成
   function logSecurityEvent(type, details, severity = 'medium') {
     const timestamp = new Date().toISOString();
+    
+    // ログの最小化＆匿名化
     const entry = {
       timestamp,
       type,
       details,
       severity,
-      userAgent: navigator.userAgent,
-      url: window.location.href,
-      sessionId: generateSessionId()
+      userAgent: getMaskedUserAgent(), // UA情報を要約
+      url: getMaskedUrl(), // URLのクエリ/フラグメントを削除
+      sessionId: generateSecureSessionId() // CSPRNGで16バイト生成
     };
 
     SecurityLog.push(entry);
@@ -52,12 +54,34 @@
     updateSecurityMetrics(type);
   }
 
-  // セッションID生成
-  function generateSessionId() {
+  // CSPRNGセッションID生成（16バイト）
+  function generateSecureSessionId() {
     if (!window.securitySessionId) {
-      window.securitySessionId = 'sec_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+      const array = new Uint8Array(16);
+      crypto.getRandomValues(array);
+      window.securitySessionId = 'sec_' + Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
     }
     return window.securitySessionId;
+  }
+
+  // UA情報の要約（主要情報のみ）
+  function getMaskedUserAgent() {
+    const ua = navigator.userAgent;
+    const browserMatch = ua.match(/(Chrome|Firefox|Safari|Edge)\/(\d+)/);
+    if (browserMatch) {
+      return `${browserMatch[1]}/${browserMatch[2]}`;
+    }
+    return 'Unknown';
+  }
+
+  // URLのクエリ/フラグメントを削除（ドメイン＋パスのみ）
+  function getMaskedUrl() {
+    try {
+      const url = new URL(window.location.href);
+      return `${url.origin}${url.pathname}`;
+    } catch {
+      return window.location.origin + window.location.pathname;
+    }
   }
 
   // セキュリティメトリクス更新
@@ -115,7 +139,7 @@
   }
 
   // 外部からのセキュリティイベント報告用API
-  window.SecurityMonitor = {
+  const SecurityMonitorAPI = {
     // セキュリティイベントの報告
     reportThreat: function(type, details, severity = 'medium') {
       logSecurityEvent(type, details, severity);
@@ -144,14 +168,14 @@
       console.log('- インジェクション試行:', SecurityMetrics.injectionAttempts);
       console.log('- 疑わしいファイル:', SecurityMetrics.suspiciousFileUploads);
       console.log('- 悪意のあるURL:', SecurityMetrics.maliciousUrls);
-      console.log('- セッションID:', generateSessionId());
+      console.log('- セッションID:', generateSecureSessionId());
     },
 
     // セキュリティレポートの生成
     generateReport: function() {
       const report = {
         generated: new Date().toISOString(),
-        sessionId: generateSessionId(),
+        sessionId: generateSecureSessionId(),
         metrics: { ...SecurityMetrics },
         recentEvents: SecurityLog.slice(-10), // 直近10件
         riskLevel: calculateRiskLevel(),
@@ -162,6 +186,10 @@
       return report;
     }
   };
+
+  // APIを固定化
+  Object.freeze(SecurityMonitorAPI);
+  window.SecurityMonitor = SecurityMonitorAPI;
 
   // リスクレベルの計算
   function calculateRiskLevel() {
@@ -202,91 +230,97 @@
     return recommendations;
   }
 
-  // セキュリティイベントの自動検知
+  // セキュリティイベントの自動検知（開発時のみ）
   function setupAutomaticDetection() {
-    // コンソールエラーの監視
-    const originalError = console.error;
-    console.error = function(...args) {
-      const message = args.join(' ');
+    // 開発環境でのみ有効
+    if (window.__APP_ENV__ === 'development') {
+      // コンソールエラーの監視
+      const originalError = console.error;
+      console.error = function(...args) {
+        const message = args.join(' ');
+        
+        // セキュリティ関連エラーの検出
+        if (message.includes('script') || message.includes('inject') || 
+            message.includes('eval') || message.includes('XSS')) {
+          logSecurityEvent('xss_attempt', 'Console error suggests XSS attempt: ' + message, 'high');
+        }
+        
+        if (message.includes('prototype') || message.includes('__proto__')) {
+          logSecurityEvent('prototype_pollution', 'Prototype pollution attempt detected: ' + message, 'high');
+        }
+
+        return originalError.apply(this, args);
+      };
+
+      // ページの可視性変化を監視（タブ切り替え攻撃の検出）
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+          logSecurityEvent('visibility_change', 'Page hidden - potential tab hijacking', 'low');
+        }
+      });
+
+      // 異常なスクロール動作の検出
+      let rapidScrollCount = 0;
+      let lastScrollTime = 0;
       
-      // セキュリティ関連エラーの検出
-      if (message.includes('script') || message.includes('inject') || 
-          message.includes('eval') || message.includes('XSS')) {
-        logSecurityEvent('xss_attempt', 'Console error suggests XSS attempt: ' + message, 'high');
-      }
-      
-      if (message.includes('prototype') || message.includes('__proto__')) {
-        logSecurityEvent('prototype_pollution', 'Prototype pollution attempt detected: ' + message, 'high');
-      }
-
-      return originalError.apply(this, args);
-    };
-
-    // ページの可視性変化を監視（タブ切り替え攻撃の検出）
-    document.addEventListener('visibilitychange', function() {
-      if (document.hidden) {
-        logSecurityEvent('visibility_change', 'Page hidden - potential tab hijacking', 'low');
-      }
-    });
-
-    // 異常なスクロール動作の検出
-    let rapidScrollCount = 0;
-    let lastScrollTime = 0;
-    
-    window.addEventListener('scroll', function() {
-      const now = Date.now();
-      if (now - lastScrollTime < 10) { // 10ms以内の連続スクロール
-        rapidScrollCount++;
-        if (rapidScrollCount > 50) {
-          logSecurityEvent('rapid_scroll', 'Rapid scrolling detected - potential bot activity', 'medium');
+      window.addEventListener('scroll', function() {
+        const now = Date.now();
+        if (now - lastScrollTime < 10) { // 10ms以内の連続スクロール
+          rapidScrollCount++;
+          if (rapidScrollCount > 50) {
+            logSecurityEvent('rapid_scroll', 'Rapid scrolling detected - potential bot activity', 'medium');
+            rapidScrollCount = 0;
+          }
+        } else {
           rapidScrollCount = 0;
         }
-      } else {
-        rapidScrollCount = 0;
-      }
-      lastScrollTime = now;
-    });
+        lastScrollTime = now;
+      });
 
-    // 異常なキーボード入力の検出
-    let rapidKeyCount = 0;
-    let lastKeyTime = 0;
-    
-    document.addEventListener('keydown', function(event) {
-      const now = Date.now();
-      if (now - lastKeyTime < 5) { // 5ms以内の連続キー入力
-        rapidKeyCount++;
-        if (rapidKeyCount > 100) {
-          logSecurityEvent('rapid_input', 'Rapid keyboard input detected - potential bot activity', 'medium');
+      // 異常なキーボード入力の検出
+      let rapidKeyCount = 0;
+      let lastKeyTime = 0;
+      
+      document.addEventListener('keydown', function(event) {
+        const now = Date.now();
+        if (now - lastKeyTime < 5) { // 5ms以内の連続キー入力
+          rapidKeyCount++;
+          if (rapidKeyCount > 100) {
+            logSecurityEvent('rapid_input', 'Rapid keyboard input detected - potential bot activity', 'medium');
+            rapidKeyCount = 0;
+          }
+        } else {
           rapidKeyCount = 0;
         }
-      } else {
-        rapidKeyCount = 0;
-      }
-      lastKeyTime = now;
-    });
+        lastKeyTime = now;
+      });
+    }
   }
 
-  // 定期的なセキュリティチェック
+  // 定期的なセキュリティチェック（開発時のみ）
   function runPeriodicSecurityCheck() {
-    // 5分ごとにセキュリティ状態をチェック
-    setInterval(function() {
-      const riskLevel = calculateRiskLevel();
-      
-      if (riskLevel === 'high' || riskLevel === 'critical') {
-        console.warn('⚠️ 定期チェック: リスクレベルが上昇しています:', riskLevel);
-      }
-
-      // メモリ使用量のチェック
-      if (window.performance && window.performance.memory) {
-        const used = window.performance.memory.usedJSHeapSize;
-        const limit = window.performance.memory.jsHeapSizeLimit;
+    // 開発環境でのみ有効
+    if (window.__APP_ENV__ === 'development') {
+      // 5分ごとにセキュリティ状態をチェック
+      setInterval(function() {
+        const riskLevel = calculateRiskLevel();
         
-        if (used / limit > 0.9) {
-          logSecurityEvent('memory_pressure', 'High memory usage detected: ' + Math.round((used/limit)*100) + '%', 'medium');
+        if (riskLevel === 'high' || riskLevel === 'critical') {
+          console.warn('⚠️ 定期チェック: リスクレベルが上昇しています:', riskLevel);
         }
-      }
 
-    }, 5 * 60 * 1000); // 5分
+        // メモリ使用量のチェック
+        if (window.performance && window.performance.memory) {
+          const used = window.performance.memory.usedJSHeapSize;
+          const limit = window.performance.memory.jsHeapSizeLimit;
+          
+          if (used / limit > 0.9) {
+            logSecurityEvent('memory_pressure', 'High memory usage detected: ' + Math.round((used/limit)*100) + '%', 'medium');
+          }
+        }
+
+      }, 5 * 60 * 1000); // 5分
+    }
   }
 
   // セキュリティダッシュボード（開発用）
