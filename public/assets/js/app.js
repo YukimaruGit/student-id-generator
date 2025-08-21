@@ -20,12 +20,12 @@ async function sniffImageType(file){
 }
 
 // Cloudinary OGP URLを一元作成（v必須・セグメント毎エンコード）
-// namedTransform は後でコンソール側で作る前提（nullなら未使用）
-function buildCldOgUrl({cloudName, public_id, version, namedTransform=null, eager_url=null}){
+function buildCldOgUrl({cloudName, public_id, version, eager_url=null}){
   if (eager_url) return eager_url; // 事前生成があれば最優先
-  const pid = String(public_id).split('/').map(encodeURIComponent).join('/');
-  const tfm = namedTransform ? `t_${namedTransform}/` : `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/`;
-  return `https://res.cloudinary.com/${cloudName}/image/upload/${tfm}v${version}/${pid}.png`;
+  const pidSafe = String(public_id).split('/').map(encodeURIComponent).join('/');
+  return `https://res.cloudinary.com/${cloudName}/image/upload/` +
+         `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
+         `v${version}/${pidSafe}.png`;
 }
 
 // window.open / 動的 <a> の noopener 徹底
@@ -128,34 +128,35 @@ async function downloadCanvasAsImage(canvas, filename = '学生証.png') {
       await stream.write(blob);
       await stream.close();
       return true;
-    } catch(_) { /* キャンセル等 → ③へ */ }
+    } catch(_) { /* キャンセル等 → 次へ */ }
   }
 
-  // ③ それ以外：a[download] / どうしてもiOS等は新規タブ
+  // 3) ライトボックス（同一タブ・新規タブ禁止。iOS/埋め込みで長押し保存できる）
   const url = URL.createObjectURL(blob);
-  if (!isIOS && !embedded) {
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  const ov = document.getElementById('saveOverlay');
+  const img = document.getElementById('savePreview');
+  const closeBtn = document.getElementById('saveOverlayClose');
+  if (ov && img && closeBtn) {
+    img.src = url;
+    ov.style.display = 'flex';
+    const cleaner = () => { URL.revokeObjectURL(url); img.src = ''; ov.style.display = 'none'; };
+    const closeOnce = () => { cleaner(); closeBtn.removeEventListener('click', closeOnce); ov.removeEventListener('click', bgCloseOnce); };
+    const bgCloseOnce = (e) => { if (e.target === ov) closeOnce(); };
+    closeBtn.addEventListener('click', closeOnce, { once: true });
+    ov.addEventListener('click', bgCloseOnce, { once: true });
     return true;
   }
-  // iOS/埋め込みは最終手段：新規タブ視聴（長押し保存）
-  const win = safeOpen('about:blank', '_blank');
-  if (win) win.location.href = url;
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+  // 4) 最後の最後：アンカー download（デスクトップ向け）
+  const fallbackUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = fallbackUrl; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(fallbackUrl), 1500);
   return true;
 }
 
-// Cloudinary配信用URLを作るユーティリティ（再利用用）
-function buildCldOgUrl({ cloudName, public_id, version, eager_url }) {
-  if (eager_url) return eager_url; // 事前生成を最優先（最も安定）
-  const pidSafe = String(public_id).split('/').map(encodeURIComponent).join('/');
-  // 変換指定の「後」に v を入れるのが正解
-  return `https://res.cloudinary.com/${cloudName}/image/upload/` +
-         `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
-         `v${version}/${pidSafe}.png`;
-}
+
 
 // X共有機能（白画面回避対応）
 function openXAppOrIntent(webIntent) {
