@@ -24,13 +24,6 @@
             --nobara-dark: #1B5E20;
             --nobara-accent: #4CAF50;
             --nobara-soft: #A5D6A7;
-            --videos-color: #9E9E9E;
-            --videos-light: #F5F5F5;
-            --videos-dark: #424242;
-            --videos-accent: #757575;
-            --videos-orange: #FFCC80;
-            --videos-orange-dark: #FF8A65;
-            --videos-orange-light: #FFF3E0;
             --notebook-bg: #2A2A2A;
             --grid-color: #505050;
             --margin-line: #EF4444;
@@ -268,10 +261,7 @@
             gap: 20px;
         }
 
-        /* 動画モード時のみキャラクター間隔を狭める */
-        .videos-mode .character-image-outside {
-            gap: 5px;
-        }
+
 
         .amane-key-visual, .nobara-key-visual {
             height: 110vh;
@@ -281,16 +271,7 @@
             transition: all 0.4s ease;
         }
 
-        /* 動画モード時のキャラクター画像サイズ調整 */
-        .videos-mode .amane-key-visual {
-            height: 95vh;
-            transform: translateY(-4vh);
-        }
-        
-        .videos-mode .nobara-key-visual {
-            height: 85vh;
-            transform: translateY(-5vh);
-        }
+
 
         /* 九条あまねモード時のサイズ調整 */
         .amane-mode .amane-key-visual {
@@ -343,18 +324,7 @@
             transform: translateY(-5vh) translateX(3vw);
         }
 
-        /* 動画モード：2名キャラクター表示 */
-        .videos-mode .character-image-outside {
-            justify-content: center;
-        }
 
-        .videos-mode .nobara-key-visual {
-            display: block;
-        }
-
-        .videos-mode .amane-key-visual {
-            display: block;
-        }
 
         /* キャッチコピー（中央＆1920距離感を維持） */
         .character-keyword {
@@ -429,8 +399,25 @@
 
         /* 丸アイコン（顔）の表示とトリミング・ページ切替 */
         .mobile-nav{ position:fixed; left:12px; bottom: 18vh; display:flex; flex-direction:column; gap:10px; z-index: 8; }
-        .fab{ width:80px; height:80px; border-radius:50%; overflow:hidden; border:none; padding:0; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,.18); }
+        .fab{ width:80px; height:80px; border-radius:50%; overflow:hidden; border:none; padding:0; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,.18); transition: all 0.3s ease; }
         .fab img{ width:150%; height:150%; object-fit: cover; }
+        
+        /* 現在表示しているページの顔アイコンを強調 */
+        /* あまねモード時のアクティブアイコン */
+        .amane-mode .fab[data-target="amane"] {
+            transform: scale(1.15);
+            box-shadow: 0 6px 20px rgba(0,0,0,.25), 0 0 0 3px var(--amane-color);
+            background: var(--amane-light);
+            z-index: 10;
+        }
+        
+        /* のばらモード時のアクティブアイコン */
+        .nobara-mode .fab[data-target="nobara"] {
+            transform: scale(1.15);
+            box-shadow: 0 6px 20px rgba(0,0,0,.25), 0 0 0 3px var(--nobara-color);
+            background: var(--nobara-light);
+            z-index: 10;
+        }
 
         /* スマホサイズ（≤1024px）用のスタイル調整 */
         @media (max-width: 1024px) {
@@ -440,6 +427,41 @@
                 bottom: 20vh !important;
                 z-index: 15 !important;
             }
+            
+                         /* キービジュアルが切れないように設定 */
+             .character-image-outside {
+                 width: 100% !important;
+                 height: auto !important;
+                 max-height: none !important;
+                 overflow: visible !important;
+                 object-fit: contain !important;
+                 padding-top: 2vh !important;
+                 box-sizing: border-box !important;
+             }
+            
+                         .amane-key-visual,
+             .nobara-key-visual {
+                 width: 100% !important;
+                 height: auto !important;
+                 max-height: none !important;
+                 object-fit: contain !important;
+                 overflow: visible !important;
+             }
+             
+             /* 高森のばらのキービジュアルを画面内に収める */
+             .nobara-key-visual {
+                 max-height: 85vh !important;
+                 object-position: center center !important;
+             }
+            
+                         /* 高森のばらのページのキービジュアルが切れないように特別調整 */
+             .nobara-mode .nobara-key-visual {
+                 object-position: center center !important;
+                 width: 100% !important;
+                 height: auto !important;
+                 max-height: 90vh !important;
+                 margin-top: 5vh !important;
+             }
             
             /* コンテンツセクションを画面内で幅を広げる - 強制適用 */
             .content-section {
@@ -469,16 +491,7 @@
             object-position: 35% 25% !important;   /* 35% = 顔をより左に、25% = 顔を上に */
         }
 
-        /* 動画モード時のロゴ位置調整 - 2人の間に配置 */
-        .videos-mode .character-keyword {
-            left: calc(7vw + 25vw + 80px); /* キービジュアル中央（7vw + 25vw）に80px重ねて配置 */
-            transform: none;
-            top: 15%;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            backdrop-filter: none;
-        }
+        /* 動画モードは削除済み */
 
 
 
@@ -1002,18 +1015,7 @@
             color: white;
         }
 
-        /* 動画グリッド */
-        .video-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 25px 0 15px 0;
-            padding: 0;
-            background: transparent;
-            border-radius: 0;
-            border: none;
-            transform: scale(0.8);
-        }
+
 
         .content-card {
             display: block;
@@ -1046,10 +1048,6 @@
         .amane-mode #nobara-profile {
             display: none !important;
         }
-        .amane-mode #videos {
-            display: none !important;
-        }
-
         /* 高森のばらモード時：高森のばらのプロフィールのみ表示 */
         .nobara-mode #profile {
             display: none !important;
@@ -1057,79 +1055,13 @@
         .nobara-mode #nobara-profile {
             display: block !important;
         }
-        .nobara-mode #videos {
-            display: none !important;
-        }
 
         /* 動画モード時：動画コンテンツのみ表示 */
-        .videos-mode #profile {
-            display: none !important;
-        }
-        .videos-mode #nobara-profile {
-            display: none !important;
-        }
-        .videos-mode #videos {
-            display: block !important;
-        }
 
 
 
-        /* 動画コンテンツ専用スタイル - グレー配色 */
-        #videos.content-card {
-            /* 動画ページ専用のグレーノート風スタイル */
-            background: white !important;
-            padding: 10px 45px 35px 45px !important;
-            border-radius: 12px 0 0 12px !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-            border: 2px solid var(--videos-color) !important;
-            border-right: none !important;
-            margin-bottom: 35px !important;
-            position: relative !important;
-            transition: all 0.4s ease !important;
-            margin-left: 120px !important;
-            /* 動画ページ専用のグレーマージン線と薄い罫線（右側マージン） */
-            background-image: 
-                /* グレーマージン線（右側） */
-                linear-gradient(270deg, transparent 50px, var(--videos-color) 50px, var(--videos-color) 52px, transparent 52px),
-                /* 薄い横罫線 */
-                repeating-linear-gradient(
-                    0deg,
-                    transparent 0px,
-                    transparent 23px,
-                    rgba(158, 158, 158, 0.3) 23px,
-                    rgba(158, 158, 158, 0.3) 24px
-                ) !important;
-            background-size: 100% 100%, 100% 24px !important;
-            /* 十分な最小高さを確保 */
-            min-height: 100vh !important;
-            /* アニメーション設定 */
-            opacity: 0;
-            transform: translateY(30px);
-            pointer-events: none;
-            visibility: hidden;
-        }
 
-        #videos.content-card.active {
-            /* プロフィールと同じアクティブ状態 */
-            opacity: 1 !important;
-            transform: translateY(0) !important;
-            pointer-events: auto !important;
-            visibility: visible !important;
-            display: block !important;
-        }
 
-        /* 動画ページ専用のオレンジ配色 */
-        #videos .section-title {
-            color: var(--videos-orange-dark);
-        }
-
-        #videos .section-title::after {
-            background: linear-gradient(90deg, var(--videos-orange), var(--videos-orange-dark), var(--videos-orange));
-        }
-
-        #videos .playlist-section h3 {
-            color: var(--videos-orange-dark);
-        }
 
         /* 九条あまねプロフィール専用スタイル - 水色配色 */
         #profile.content-card {
@@ -1264,273 +1196,33 @@
             color: var(--nobara-dark) !important;
         }
 
-        .video-card {
-            background: white;
-            border-radius: 12px;
-            overflow: visible;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.4s ease;
-            cursor: pointer;
-            border: 2px solid rgba(173, 216, 230, 0.5);
-            transform: rotate(-1deg);
-            position: relative;
-        }
 
-        .video-card:nth-child(even) {
-            transform: rotate(1deg);
-        }
 
-        /* 小さな動画をテープで支えられているような角度 */
-        .video-card:nth-child(2) {
-            transform: rotate(3deg);
-        }
 
-        .video-card:nth-child(3) {
-            transform: rotate(2deg);
-        }
 
-        .video-card:hover {
-            transform: translateY(-8px) scale(1.02) rotate(0deg);
-            box-shadow: 0 15px 35px rgba(173, 216, 230, 0.4);
-        }
 
-        /* テープエフェクト - 八の字配置 */
-        .video-card::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            left: -8px;
-            width: 45px;
-            height: 20px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.8));
-            border: 1px solid rgba(200, 200, 200, 0.6);
-            border-radius: 2px;
-            transform: rotate(25deg);
-            z-index: 10;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
 
-        .video-card::after {
-            content: '';
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            width: 45px;
-            height: 20px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.8));
-            border: 1px solid rgba(200, 200, 200, 0.6);
-            border-radius: 2px;
-            transform: rotate(-25deg);
-            z-index: 10;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
 
-        /* 各動画カードで異なるテープ色とデザイン - オレンジ系 */
-        /* メインPV - 八の字テープ */
-        .video-card:nth-child(1)::before {
-            background: linear-gradient(135deg, rgba(255, 204, 128, 0.9), rgba(255, 183, 77, 0.8));
-            border-color: rgba(255, 183, 77, 0.6);
-        }
 
-        .video-card:nth-child(1)::after {
-            background: linear-gradient(135deg, rgba(255, 204, 128, 0.9), rgba(255, 183, 77, 0.8));
-            border-color: rgba(255, 183, 77, 0.6);
-        }
 
-        /* キャラクター紹介 - 左上のテープ1本のみ */
-        .video-card:nth-child(2)::before {
-            background: linear-gradient(135deg, rgba(255, 171, 145, 0.9), rgba(255, 138, 101, 0.8));
-            border-color: rgba(255, 138, 101, 0.6);
-            top: -10px;
-            left: -10px;
-            width: 50px;
-            transform: rotate(15deg);
-        }
 
-        .video-card:nth-child(2)::after {
-            display: none;
-        }
 
-        /* 楽曲MV - 左上のテープ1本のみ */
-        .video-card:nth-child(3)::before {
-            background: linear-gradient(135deg, rgba(255, 112, 67, 0.9), rgba(239, 83, 80, 0.8));
-            border-color: rgba(239, 83, 80, 0.6);
-            top: -10px;
-            left: -10px;
-            width: 50px;
-            transform: rotate(15deg);
-        }
 
-        .video-card:nth-child(3)::after {
-            display: none;
-        }
 
-        /* ホバー時のテープエフェクト - テープは完全に固定 */
-        .video-card:nth-child(1):hover::before {
-            transform: rotate(25deg);
-        }
 
-        .video-card:nth-child(1):hover::after {
-            transform: rotate(-25deg);
-        }
 
-        /* 小さな動画のテープは完全に固定 */
-        .video-card:nth-child(2):hover::before {
-            transform: rotate(15deg);
-        }
 
-        .video-card:nth-child(3):hover::before {
-            transform: rotate(15deg);
-        }
 
-        /* 小さな動画のホバー時 - テープで支えられている感を維持 */
-        .video-card:nth-child(2):hover {
-            transform: rotate(3deg) translateY(-8px) scale(1.02);
-        }
 
-        .video-card:nth-child(3):hover {
-            transform: rotate(2deg) translateY(-8px) scale(1.02);
-        }
 
-        .video-thumbnail {
-            position: relative;
-            width: 100%;
-            height: 0;
-            padding-bottom: 56.25%;
-            overflow: hidden;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        }
 
-        .thumbnail-img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-        }
 
-        .play-button {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 75px;
-            height: 75px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(240,240,240,0.9));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: #333;
-            transition: all 0.4s ease;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            border: 3px solid white;
-        }
 
-        .video-card:hover .play-button {
-            background: linear-gradient(135deg, var(--videos-orange), var(--videos-orange-dark));
-            color: white;
-            transform: translate(-50%, -50%) scale(1.2);
-        }
 
-        .video-duration {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            background: rgba(0,0,0,0.85);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 700;
-        }
 
-        .video-info {
-            padding: 18px;
-            background: white;
-        }
 
-        .video-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--videos-orange-dark);
-            margin-bottom: 8px;
-            font-family: 'Caveat', 'Klee One', cursive;
-            transform: rotate(-0.3deg);
-            text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.8);
-        }
 
-        .video-desc {
-            color: #2D3748;
-            font-size: 0.95rem;
-            margin-bottom: 10px;
-            font-style: italic;
-            text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.8);
-        }
 
-        /* 動画あらすじスタイル */
-        .video-synopsis {
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.95);
-            border-top: 2px solid var(--videos-orange);
-            margin-top: 0;
-        }
-
-        .video-synopsis h4 {
-            font-family: 'Caveat', 'Klee One', cursive;
-            font-size: 1.2rem;
-            color: var(--videos-orange-dark);
-            margin: 0 0 8px 0;
-            font-weight: 700;
-            transform: rotate(-0.5deg);
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
-        }
-
-        .video-synopsis p {
-            color: #2D3748;
-            font-size: 0.85rem;
-            line-height: 1.5;
-            margin: 0;
-            text-shadow: 0.5px 0.5px 1px rgba(255, 255, 255, 0.8);
-            font-family: 'Klee One', cursive;
-        }
-
-        .video-stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            color: #4A5568;
-            font-weight: 600;
-            text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.8);
-        }
-
-        .main-pv {
-            grid-column: 1 / -1;
-            transform: rotate(0deg) !important;
-            margin-bottom: 15px;
-        }
-
-        .main-pv .video-thumbnail {
-            padding-bottom: 45%;
-        }
-
-        .playlist-section {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 2px dashed var(--videos-orange);
-        }
-
-        .playlist-section h3 {
-            color: var(--videos-orange-dark);
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
-            font-family: 'Caveat', 'Klee One', cursive;
-        }
 
         .playlist-buttons {
             display: flex;
@@ -1538,78 +1230,10 @@
             gap: 15px;
         }
 
-        .playlist-btn {
-            background: linear-gradient(135deg, var(--videos-orange-light), var(--videos-orange));
-            color: var(--videos-orange-dark);
-            border: none;
-            padding: 15px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Klee One', cursive;
-            position: relative;
-            transform: rotate(-2deg);
-            box-shadow: 
-                0 4px 8px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
-            border-radius: 0;
-        }
 
-        .playlist-btn:nth-child(2) {
-            background: linear-gradient(135deg, var(--videos-orange), var(--videos-orange-dark));
-            color: white;
-            transform: rotate(1deg);
-            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
-        }
 
-        .playlist-btn:nth-child(3) {
-            background: linear-gradient(135deg, #FFAB91, #FF7043);
-            color: white;
-            transform: rotate(-1.5deg);
-            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
-        }
 
-        /* 角が折れた付箋効果 */
-        .playlist-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 0;
-            height: 0;
-            border-left: 15px solid transparent;
-            border-top: 15px solid rgba(0, 0, 0, 0.1);
-            transform: rotate(45deg);
-            transform-origin: top right;
-        }
 
-        .playlist-btn::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 12px;
-            height: 12px;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.2));
-            transform: rotate(45deg);
-            transform-origin: top right;
-            border-radius: 0 0 0 2px;
-        }
-
-        .playlist-btn:hover {
-            transform: rotate(0deg) translateY(-3px);
-            box-shadow: 
-                0 8px 16px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
-            filter: brightness(1.1);
-        }
-
-        .playlist-btn:hover::before,
-        .playlist-btn:hover::after {
-            opacity: 0.8;
-        }
 
         /* Coming Soon スタイル */
         .coming-soon-container {
@@ -1619,101 +1243,7 @@
             justify-content: center;
         }
 
-        .coming-soon-card {
-            background: white;
-            padding: 60px 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            border: 2px solid var(--videos-orange);
-            max-width: 400px;
-            margin: 0 auto;
-            transform: rotate(-1deg);
-            transition: all 0.3s ease;
-        }
 
-        .coming-soon-card:hover {
-            transform: rotate(0deg) translateY(-5px);
-            box-shadow: 0 15px 40px rgba(255, 138, 101, 0.2);
-        }
-
-        .coming-soon-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .coming-soon-title {
-            font-family: 'Caveat', 'Klee One', cursive;
-            font-size: 3rem;
-            color: var(--videos-orange-dark);
-            margin-bottom: 20px;
-            font-weight: 700;
-            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
-        }
-
-        .coming-soon-description {
-            font-family: 'Klee One', cursive;
-            font-size: 1.2rem;
-            color: #2D3748;
-            line-height: 1.8;
-            margin-bottom: 30px;
-            text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.8);
-        }
-
-        .coming-soon-note {
-            background: linear-gradient(135deg, var(--videos-orange-light), var(--videos-orange));
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-
-        .coming-soon-note p {
-            margin: 0;
-            font-size: 0.9rem;
-            color: var(--videos-orange-dark);
-            font-weight: 600;
-            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
-        }
-
-        /* スマホサイズでのComing Soonカード調整 */
-        @media (max-width: 1024px) {
-            .coming-soon-container {
-                min-height: 300px;
-                padding: 20px;
-            }
-            
-            .coming-soon-card {
-                padding: 30px 20px;
-                max-width: 100%;
-                transform: rotate(0deg);
-                border-radius: 12px;
-            }
-            
-            .coming-soon-icon {
-                font-size: 3rem;
-                margin-bottom: 15px;
-            }
-            
-            .coming-soon-title {
-                font-size: 2rem;
-                margin-bottom: 15px;
-            }
-            
-            .coming-soon-description {
-                font-size: 1rem;
-                margin-bottom: 20px;
-                line-height: 1.6;
-            }
-            
-            .coming-soon-note {
-                padding: 12px 16px;
-                margin-top: 15px;
-            }
-            
-            .coming-soon-note p {
-                font-size: 0.8rem;
-            }
-        }
 
         /* レスポンシブデザイン - 古い重複定義を削除済み */
         
@@ -1737,10 +1267,7 @@
                 gap: 8px;
             }
 
-            .video-grid {
-                transform: scale(0.85);
-                margin: 15px 0;
-            }
+
         }
 
         /* 古い768px対応を削除済み */
@@ -2096,32 +1623,9 @@
             line-height: 1.3 !important;
           }
 
-          /* 動画ページのキービジュアルサイズ調整 - スマホでは小さく */
-          .videos-mode .character-image-outside {
-            width: min(70vw, 400px) !important;
-            height: auto !important;
-          }
-          
-          .videos-mode .amane-key-visual,
-          .videos-mode .nobara-key-visual {
-            height: auto !important;
-            width: 100% !important;
-            max-height: 60vh !important;
-            transform: none !important;
-          }
 
-          /* Coming Soonカードをノート背景に収容 */
-          .coming-soon-container {
-            margin-left: 0 !important;
-            padding: 40px 20px !important;
-            min-height: 300px !important;
-          }
-          
-          .coming-soon-card {
-            max-width: 100% !important;
-            padding: 40px 20px !important;
-            margin: 0 !important;
-          }
+
+
         }
 
         /* さらにスマホでの微調整（幅600px以下） */
@@ -2368,7 +1872,7 @@
     <div class="sticky-tabs active">
         <button class="sticky-tab" data-target="amane" style="background: var(--amane-color); color: var(--amane-dark);">九条あまね</button>
         <button class="sticky-tab" data-target="nobara" style="background: var(--nobara-soft); color: var(--nobara-dark);">高森のばら</button>
-        <button class="sticky-tab" data-target="videos" style="background: var(--videos-orange); color: var(--videos-orange-dark);">動画</button>
+
         <button class="sticky-tab youtube" onclick="openYouTube()" title="YouTube">YouTube</button>
         <button class="sticky-tab twitter" onclick="openTwitter()" title="X (Twitter)">X</button>
                         </div>
@@ -2568,94 +2072,10 @@
                 </div>
             </div>
 
-            <!-- 
-            =============================
-            動画コンテンツ（保管用バックアップ）
-            将来の更新時に復元予定
-            =============================
-            <div id="videos" class="content-card">
-                <h2 class="section-title">動画</h2>
-                
-                <div class="video-grid" style="margin-left: -30px;">
-                    <div class="video-card main-pv" onclick="openVideo('main-pv')">
-                        <div class="video-thumbnail">
-                            <img src="assets/img/ibara.png" alt="メインPV" class="thumbnail-img">
-                            <div class="play-button">▶️</div>
-                            <div class="video-duration">3:24</div>
-                        </div>
-                        <div class="video-synopsis">
-                            <h4>メインPV</h4>
-                            <p>放課後クロニクルの世界観を描いたメインプロモーション映像。九条あまねと高森のばらの出会いから始まる、不思議で美しい物語の序章。夕焼けに染まる学校で繰り広げられる、二人の特別な時間を描く。</p>
-                        </div>
-                    </div>
-                    
-                    <div class="video-card" onclick="openVideo('character-intro')">
-                        <div class="video-thumbnail">
-                            <img src="assets/img/amane.png" alt="キャラクター紹介" class="thumbnail-img">
-                            <div class="play-button">▶️</div>
-                            <div class="video-duration">2:15</div>
-                        </div>
-                        <div class="video-synopsis">
-                            <h4>キャラクター紹介</h4>
-                            <p>九条あまねの日常と内面を深く掘り下げた紹介映像。水泳部での活動、図書委員としての責任感、そして海洋生物学者への夢。普通の女子高生に見えて、実は深い想いを秘めた彼女の魅力を余すことなく紹介。</p>
-                        </div>
-                    </div>
-                    
-                    <div class="video-card" onclick="openVideo('music-video')">
-                        <div class="video-thumbnail">
-                            <img src="assets/img/8648248cc9168e7d.png" alt="楽曲MV" class="thumbnail-img">
-                            <div class="play-button">▶️</div>
-                            <div class="video-duration">4:02</div>
-                        </div>
-                        <div class="video-synopsis">
-                            <h4>楽曲MV「夕暮れの約束」</h4>
-                            <p>放課後クロニクルのテーマソング「夕暮れの約束」のミュージックビデオ。あまねとのばらの友情を歌った感動的な楽曲に、美しいアニメーション映像を組み合わせた珠玉の作品。涙なしには見られない名作。</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="playlist-section">
-                    <h3>再生リスト</h3>
-                    <div class="playlist-buttons">
-                        <button class="playlist-btn" onclick="openPlaylist('story')">ストーリー編</button>
-                        <button class="playlist-btn" onclick="openPlaylist('music')">音楽編</button>
-                        <button class="playlist-btn" onclick="openPlaylist('behind')">舞台裏</button>
-                    </div>
-                </div>
 
-                <div class="video-additional-content" style="margin-left: -30px;">
-                    <div class="school-note">
-                        <p class="intro-text">放課後クロニクルの映像作品は、青春の美しさと儚さを表現することを目指して制作されています。各楽曲もキャラクターの心情を丁寧に表現した楽曲ばかりです。</p>
-                    </div>
-                </div>
-            </div>
-            -->
 
             <!-- 動画コンテンツ（Coming Soon版） -->
-            <div id="videos" class="content-card" data-section="videos" hidden>
-                <h2 class="section-title">動画</h2>
-                
-                <!-- Coming Soon メッセージ -->
-                <div class="coming-soon-container" style="text-align: center;">
-                    <div class="coming-soon-card">
-                        <div class="coming-soon-icon">
-                            🎬
-                        </div>
-                        <h3 class="coming-soon-title">Coming Soon</h3>
-                        <p class="coming-soon-description">
-                            放課後クロニクルの動画コンテンツを<br>
-                            現在制作中です。<br><br>
-                            公開まで今しばらく<br>
-                            お待ちください。
-                        </p>
-                        <div class="coming-soon-note">
-                            <p>更新情報は<a href="https://x.com/as_chronicle" target="_blank" rel="noopener noreferrer" style="color: var(--videos-orange-dark); text-decoration: underline;">公式X</a>でお知らせします</p>
-                        </div>
-                    </div>
-                </div>
 
-
-            </div>
             </div>
         </section>
             </div>
@@ -2694,13 +2114,7 @@
                 window.open('https://x.com/as_chronicle', '_blank');
         }
 
-        function openVideo(videoId) {
-            alert(`動画「${videoId}」を再生します。\n（実際のサイトでは動画プレーヤーが開きます）`);
-        }
 
-        function openPlaylist(playlistType) {
-            alert(`「${playlistType}」プレイリストを開きます。\n（実際のサイトでは専用ページに遷移します）`);
-        }
 
         // 学生証クリック機能
         let amaneCurrentView = 1;
@@ -2753,14 +2167,14 @@
         window.addEventListener('resize', updateScrollProgress);
 
         // 初期状態：あまねを表示
-        const MAP = { amane: 'profile', nobara: 'nobara-profile', videos: 'videos' };
+        const MAP = { amane: 'profile', nobara: 'nobara-profile' };
         function activate(target){
           // 本文カードの表示切替
           document.querySelectorAll('.content-card').forEach(c => c.classList.remove('active'));
           document.getElementById(MAP[target]).classList.add('active');
 
           // ボディのモード切替（KVやコピーの表示制御に利用）
-          document.body.classList.remove('amane-mode','nobara-mode','videos-mode');
+          document.body.classList.remove('amane-mode','nobara-mode');
           document.body.classList.add(`${target}-mode`);
 
           // タブのアクティブ表示
@@ -2790,13 +2204,13 @@
 
     <!-- <=1024px 用：追従丸アイコンナビ -->
     <nav class="mobile-nav" aria-label="キャラ切替">
-      <button class="fab" data-target="amane" aria-current="page">
+      <button class="fab" data-target="amane">
         <img class="fab-face amane" src="assets/img/Amane_icon.png" alt="九条あまね">
       </button>
       <button class="fab" data-target="nobara">
         <img class="fab-face nobara" src="assets/img/nobara_icon.png" alt="高森のばら">
       </button>
-      <button class="fab" data-target="videos" aria-label="動画"><span class="fab-icon">▶</span></button>
+      
     </nav>
 </body>
 </html> 
