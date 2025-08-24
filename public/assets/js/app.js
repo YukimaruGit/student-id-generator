@@ -885,8 +885,8 @@ function initializeApp() {
       // 新しい共有方式：短いURL（/s/{slug}形式）
       let shareUrl;
       
-      // ツイート文を作成
-      const tweetText = nameJa ? 
+      // ツイート文を作成（共有URLを先頭に配置）
+      const baseTweetText = nameJa ? 
         `${nameJa}の学生証が完成しました！🎓\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター` :
         `放課後クロニクル 学生証が完成しました！🎓\n\n診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター`;
       
@@ -901,7 +901,7 @@ function initializeApp() {
         
         // 共有リンクを更新（buildShareUrlWithImageが利用可能な場合のみ）
         if (window.updateShareLinksWithImage) {
-          window.updateShareLinksWithImage(imageData, tweetText);
+          window.updateShareLinksWithImage(imageData, baseTweetText);
         }
       } else if (window.buildShareUrl && imageData.public_id) {
         // フォールバック：短縮版
@@ -912,7 +912,7 @@ function initializeApp() {
         
         // 共有リンクを更新
         if (window.updateShareLinksWithImage) {
-          window.updateShareLinksWithImage(imageData, tweetText);
+          window.updateShareLinksWithImage(imageData, baseTweetText);
         }
       } else {
         // フォールバック：従来方式（非推奨）
@@ -922,9 +922,12 @@ function initializeApp() {
       
       hideLoading();
       
-             // Xアプリで開く（スマホの場合はアプリ起動、PCの場合はWeb intent）
-       const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl.toString())}`;
-       openXAppOrIntent(webIntent);
+      // ツイート文の先頭に共有URLを配置（Xは先頭URLのカードだけ解決）
+      const tweetText = `${shareUrl}\n\n${baseTweetText}`;
+      
+      // Xアプリで開く（スマホの場合はアプリ起動、PCの場合はWeb intent）
+      const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}`;
+      openXAppOrIntent(webIntent);
       
       // 成功時のフィードバック（ポップアップなし）
       console.log('✅ X投稿処理が完了しました');

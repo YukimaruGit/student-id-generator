@@ -314,6 +314,8 @@
 
     // マウスイベント防止
     document.addEventListener('mousedown', function(e) {
+      if (isForm(e.target)) return true;
+      
       // 右クリック、中クリック防止
       if (e.button === 1 || e.button === 2) {
         preventEvent(e);
@@ -324,6 +326,8 @@
     }, true);
 
     document.addEventListener('mouseup', function(e) {
+      if (isForm(e.target)) return true;
+      
       // 右クリック、中クリック防止
       if (e.button === 1 || e.button === 2) {
         preventEvent(e);
@@ -335,6 +339,7 @@
 
     // マウス移動中にも選択をクリア
     document.addEventListener('mousemove', function(e) {
+      if (isForm(e.target)) return true;
       if (e.buttons === 1) { // 左ボタンが押されている場合
         clearSelection();
       }
@@ -346,13 +351,23 @@
     document.addEventListener('dragend', preventEvent, true);
 
     // 選択関連イベント防止（強化版）
-    document.addEventListener('selectstart', preventEvent, true);
-    document.addEventListener('select', preventEvent, true);
-    document.addEventListener('selectionchange', preventEvent, true);
-    document.addEventListener('selectstart', preventEvent, true);
+    document.addEventListener('selectstart', function(e) {
+      if (isForm(e.target)) return true;
+      return preventEvent(e);
+    }, true);
+    document.addEventListener('select', function(e) {
+      if (isForm(e.target)) return true;
+      return preventEvent(e);
+    }, true);
+    document.addEventListener('selectionchange', function(e) {
+      if (isForm(e.target)) return true;
+      return preventEvent(e);
+    }, true);
     
     // テキスト選択の開始を完全に防止
     document.addEventListener('mousedown', function(e) {
+      if (isForm(e.target)) return true;
+      
       // テキスト選択を防ぐため、ダブルクリックを防止
       if (e.detail > 1) {
         preventEvent(e);
@@ -362,6 +377,7 @@
     
     // テキスト選択の範囲拡張を防止
     document.addEventListener('mouseup', function(e) {
+      if (isForm(e.target)) return true;
       if (window.getSelection && window.getSelection().rangeCount > 0) {
         window.getSelection().removeAllRanges();
       }
@@ -375,10 +391,12 @@
 
     // フォーカス時にも選択を解除（フォーム要素は除外）
     document.addEventListener('focus', function(e) {
-      if (!isForm(e.target)) clearSelection();
+      if (isForm(e.target)) return true;
+      clearSelection();
     }, true);
     document.addEventListener('blur', function(e) {
-      if (!isForm(e.target)) clearSelection();
+      if (isForm(e.target)) return true;
+      clearSelection();
     }, true);
 
     // 印刷防止
