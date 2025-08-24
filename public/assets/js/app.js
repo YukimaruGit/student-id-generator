@@ -93,8 +93,13 @@ function showSaveOverlay() {
       return;
     }
     
-    // 画像をプレビューに設定
-    preview.src = canvas.toDataURL('image/png');
+          // 画像をプレビューに設定（最優先はCloudinaryのOGP画像URL）
+      if (window.__ogpImageUrl) {
+        preview.src = window.__ogpImageUrl;
+      } else {
+        // 失敗時フォールバック
+        preview.src = canvas.toDataURL('image/png');
+      }
     
     // デバイス別の保存案内文言を設定
     const isPc = window.matchMedia('(pointer:fine)').matches && (navigator.maxTouchPoints || 0) === 0;
@@ -899,6 +904,14 @@ function initializeApp() {
       return;
     }
     
+    // すでに共有URLがあるなら、再アップロードせずそのまま開く
+    if (window.__shareUrl) {
+      const baseTweetText = '学生証が完成しました！📣\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター';
+      const intent = `https://x.com/intent/post?text=${encodeURIComponent(baseTweetText)}&url=${encodeURIComponent(window.__shareUrl)}`;
+      location.href = intent;
+      return;
+    }
+    
     try {
       showLoading('学生証をシェア用に準備中...');
       
@@ -958,12 +971,9 @@ function initializeApp() {
       
       hideLoading();
       
-      // ツイート文の先頭に共有URLを配置（Xは先頭URLのカードだけ解決）
-      const tweetText = `${shareUrl}\n\n${baseTweetText}`;
-      
-      // Web IntentでX投稿を開く（アプリ深リンクループ回避）
-      const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}`;
-      safeOpen(webIntent, '_blank');
+      // Web IntentでX投稿を開く（text と url を分離してカード確実化）
+      const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(baseTweetText)}&url=${encodeURIComponent(shareUrl)}`;
+      location.href = webIntent;
       
       // 成功時のフィードバック（ポップアップなし）
       console.log('✅ X投稿処理が完了しました');
@@ -996,6 +1006,15 @@ function initializeApp() {
   elements.urlBtn.addEventListener('click', async () => {
     if (!validateInputs(true)) {
       alert('氏名と生年月日を入力してください。');
+      return;
+    }
+    
+    // すでに共有URLがあるなら、再アップロードせずそのままコピー
+    if (window.__shareUrl) {
+      const success = await copyTextReliable(window.__shareUrl);
+      if (success) {
+        alert('共有URLをコピーしました！');
+      }
       return;
     }
     

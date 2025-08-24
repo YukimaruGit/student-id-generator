@@ -334,7 +334,9 @@
     function updateShareLinksWithImage(imageData, text) {
       const shareUrl = buildShareUrlWithImage(imageData.public_id, imageData.version, imageData.eager_url);
       console.log('共有URL更新:', shareUrl);
-      // 必要に応じてUI更新処理を追加
+      // ここでは「URLの保持と表示」だけ行う（ハンドラは app.js 側で参照）
+      const field = document.getElementById('shareLinkField');
+      if (field) field.value = shareUrl;
     }
     window.updateShareLinksWithImage = updateShareLinksWithImage;
     
