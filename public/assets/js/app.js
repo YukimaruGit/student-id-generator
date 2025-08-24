@@ -34,6 +34,53 @@ function safeOpen(url, target='_blank'){
   if (w) w.opener = null, w.location.href = url;
 }
 
+// 保存用ライトボックス表示
+function showSaveOverlay() {
+  try {
+    const canvas = document.getElementById('cardCanvas');
+    if (!canvas) {
+      console.error('Canvas not found');
+      return;
+    }
+    
+    const overlay = document.getElementById('saveOverlay');
+    const preview = document.getElementById('savePreview');
+    const closeBtn = document.getElementById('saveOverlayClose');
+    
+    if (!overlay || !preview || !closeBtn) {
+      console.error('Save overlay elements not found');
+      return;
+    }
+    
+    // 画像をプレビューに設定
+    preview.src = canvas.toDataURL('image/png');
+    
+    // ライトボックスを表示
+    overlay.style.display = 'flex';
+    
+    // 閉じるボタンのイベント
+    closeBtn.onclick = () => {
+      overlay.style.display = 'none';
+    };
+    
+    // 背景クリックでも閉じる
+    overlay.onclick = (e) => {
+      if (e.target === overlay) {
+        overlay.style.display = 'none';
+      }
+    };
+    
+  } catch (error) {
+    console.error('Save overlay error:', error);
+    // フォールバック：通常のダウンロード
+    try {
+      downloadCanvasAsImage(document.getElementById('cardCanvas'), '学生証.png');
+    } catch (fallbackError) {
+      console.error('Fallback download error:', fallbackError);
+    }
+  }
+}
+
 // 定数定義
 const CARD_WIDTH = 800;
 const CARD_HEIGHT = 500;
@@ -49,11 +96,16 @@ const PHOTO_FRAME = {
   height: 324  // 完璧に調整済み【変更厳禁】
 };
 
-// Cloudinary設定
+// Cloudinary設定（一元管理）
 const cloudinaryConfig = {
   cloudName: 'di5xqlddy',
   uploadPreset: 'student_card_AS_chronicle'
 };
+
+// 設定の検証
+if (!cloudinaryConfig.cloudName || !cloudinaryConfig.uploadPreset) {
+  console.error('❌ Cloudinary設定が不完全です。cloudNameとuploadPresetを確認してください。');
+}
 
 // シェア機能 - ローカル環境でも動作する安全な方法
 async function uploadImageToCloudinary(canvas, cloudName, uploadPreset) {
@@ -753,16 +805,16 @@ function initializeApp() {
       // 埋め込み環境ではCloudinary画像を新規タブ表示（iOS長押し保存対応）
       if (window.top !== window.self) {
         if (window.__lastImageData && window.__lastImageData.public_id) {
-                     // 既にアップロード済みの場合はOGP画像を表示
-           const pid = window.__lastImageData.public_id
-             .split('/')                       // スラッシュは保持
-             .map(encodeURIComponent)          // 各セグメントのみエンコード
-             .join('/');                       
-           const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
-                      `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
-                      `${pid}`;                // 拡張子は不要（付けても可）
-           safeOpen(og, '_blank');
-           return;
+          // 既にアップロード済みの場合はOGP画像を表示
+          const pid = window.__lastImageData.public_id
+            .split('/')                       // スラッシュは保持
+            .map(encodeURIComponent)          // 各セグメントのみエンコード
+            .join('/');                       
+          const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
+                     `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
+                     `${pid}`;                // 拡張子は不要（付けても可）
+          safeOpen(og, '_blank');
+          return;
         } else {
           // 初回保存時は即アップロードしてOGP画像を表示
           showLoading('画像を準備中...');
@@ -775,15 +827,15 @@ function initializeApp() {
             window.__lastImageData = imageData;
             hideLoading();
             
-                         const pid2 = imageData.public_id
-               .split('/')                       // スラッシュは保持
-               .map(encodeURIComponent)          // 各セグメントのみエンコード
-               .join('/');                       
-             const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
-                        `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
-                        `${pid2}`;               // 拡張子は不要（付けても可）
-             safeOpen(og, '_blank');
-             return;
+            const pid2 = imageData.public_id
+              .split('/')                       // スラッシュは保持
+              .map(encodeURIComponent)          // 各セグメントのみエンコード
+              .join('/');                       
+            const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
+                       `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
+                       `${pid2}`;               // 拡張子は不要（付けても可）
+            safeOpen(og, '_blank');
+            return;
           } catch (uploadError) {
             hideLoading();
             console.warn('埋め込み時のアップロードに失敗、ローカル保存にフォールバック:', uploadError);
@@ -791,10 +843,24 @@ function initializeApp() {
           }
         }
       }
-      downloadCanvasAsImage(elements.cardCanvas, '学生証.png');
+      
+      // 通常のダウンロード処理
+      try {
+        downloadCanvasAsImage(elements.cardCanvas, '学生証.png');
+      } catch (downloadError) {
+        console.error('ローカルダウンロードエラー:', downloadError);
+        // 最終手段：ライトボックス表示
+        showSaveOverlay();
+      }
     } catch (error) {
       console.error('ダウンロードエラー:', error);
-      alert('画像のダウンロードに失敗しました。もう一度お試しください。');
+      // エラー時はライトボックス表示でフォールバック
+      try {
+        showSaveOverlay();
+      } catch (fallbackError) {
+        console.error('フォールバックエラー:', fallbackError);
+        alert('画像の保存に失敗しました。もう一度お試しください。');
+      }
     }
   });
 
@@ -817,8 +883,8 @@ function initializeApp() {
       
       // 学生情報を取得
       const nameJa = elements.nameJa.value.trim();
-      const course = elements.department ? elements.department.value : '';
-      const club = elements.department ? elements.department.value : '';
+      const course = (document.getElementById('course')?.value || '').trim();
+      const club = (document.getElementById('club')?.value || '').trim();
       
       // URLパラメータから診断結果情報を取得
       const params = new URLSearchParams(location.search);
@@ -827,37 +893,22 @@ function initializeApp() {
       // 新しい共有方式：短いURL（/s/{slug}形式）
       let shareUrl;
       
-      // ツイート文を作成（先に定義）
+      // ツイート文を作成
       const tweetText = nameJa ? 
         `${nameJa}の学生証が完成しました！🎓\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター` :
         `放課後クロニクル 学生証が完成しました！🎓\n\n診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター`;
       
-             if (window.buildShareUrl && imageData.public_id) {
-         // 新しい共有方式
-         shareUrl = window.buildShareUrl(imageData.public_id);
-         
-         // 画像データを保存（埋め込み時の保存対応用）
-         window.__lastImageData = imageData;
-         
-         // 共有リンクを更新（X intent、URLコピー欄等）
-         if (window.updateShareLinks) {
-           window.updateShareLinks(imageData.public_id, tweetText);
-         }
-       } else {
-        // フォールバック：従来方式（非推奨）
-        // shareUrl = new URL('s.html', window.location.origin);
-        // shareUrl.searchParams.set('i', imageData.secure_url || imageData);
-        // if (nameJa) shareUrl.searchParams.set('n', nameJa);
+      if (window.buildShareUrl && imageData.public_id) {
+        // 新しい共有方式
+        shareUrl = window.buildShareUrl(imageData.public_id);
         
-        // 新しい短いURL方式を推奨
+        // 画像データを保存（埋め込み時の保存対応用）
+        window.__lastImageData = imageData;
+      } else {
+        // フォールバック：従来方式（非推奨）
         console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');
         shareUrl = '新しい短いURL方式が利用できません';
       }
-      
-      // ツイート文を作成（重複削除）
-      // const tweetText = nameJa ? 
-      //   `${nameJa}の学生証が完成しました！🎓\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター` :
-      //   `放課後クロニクル 学生証が完成しました！🎓\n\n診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター`;
       
       hideLoading();
       
@@ -913,22 +964,15 @@ function initializeApp() {
       
       // 新しい共有方式：短いURL（/s/{slug}形式）
       let shareUrl;
-             if (window.buildShareUrl && imageData.public_id) {
-         // 新しい共有方式
-         shareUrl = window.buildShareUrl(imageData.public_id);
-         
-         // 画像データを保存（埋め込み時の保存対応用）
-         window.__lastImageData = imageData;
-         
-         // 共有リンクを更新（X intent、URLコピー欄等）
-         if (window.updateShareLinks) {
-           window.updateShareLinks(imageData.public_id, '学生証を発行しました');
-         }
-       } else {
+      
+      if (window.buildShareUrl && imageData.public_id) {
+        // 新しい共有方式
+        shareUrl = window.buildShareUrl(imageData.public_id);
+        
+        // 画像データを保存（埋め込み時の保存対応用）
+        window.__lastImageData = imageData;
+      } else {
         // フォールバック：従来方式（非推奨）
-        const studentInfo = { name: nameJa };
-        // ここではgenerateShareUrlを呼び出すと、window.DomainMaskingが未定義のためエラーになる可能性がある
-        // フォールバックとして、直接URLを生成するか、エラーを投げる
         console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');
         shareUrl = '新しい短いURL方式が利用できません';
       }

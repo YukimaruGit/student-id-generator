@@ -290,6 +290,12 @@
   <script>
     // 共有用ドメイン
     const SHARE_BASE = 'https://student-id-generator.pages.dev';
+    
+    // Cloudinary設定（app.jsと同期）
+    const cloudinaryConfig = {
+      cloudName: 'di5xqlddy',
+      uploadPreset: 'student_card_AS_chronicle'
+    };
 
     // Base64URL（短く安全）
     function b64url(str){
@@ -307,7 +313,7 @@
     // 新しい共有方式：JSONスラッグ（OGP画像URLを含む、最も確実）
     function buildShareUrlWithImage(public_id, version, eager_url){
       // eager_url があれば最優先、なければ v{version} 付きURLを生成
-      const ogUrl = eager_url || `https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version || 1}/${public_id}.png`;
+      const ogUrl = eager_url || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version || 1}/${public_id}.png`;
       const payload = { i: ogUrl, p: public_id, v: version }; // i: OGP画像URL, p: public_id, v: version
       const slug = btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
         .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -315,25 +321,7 @@
     }
     window.buildShareUrl = buildShareUrl; // 既存呼び出し互換
     
-    // 共有ボタンの href を差し替える（既存ボタンやリンクID/クラスは変更しない）
-    function updateShareLinks(public_id, text){
-      const shareUrl = buildShareUrl(public_id);
-      
-      // X（Twitter）intent
-      const x = document.getElementById('btnShareX'); // 既存のIDに合わせる。無ければクラス等でクエリして安全に
-      if (x) {
-        const intent = new URL('https://x.com/intent/post');
-        intent.searchParams.set('text', text || '学生証を発行しました');
-        intent.searchParams.set('url', shareUrl);
-        x.setAttribute('href', intent.toString());
-        x.setAttribute('rel','noopener noreferrer');
-        x.setAttribute('target','_blank');
-      }
-      
-      // Discord や その他は shareUrl をそのままコピーできるUI（既存のコピーボタンに流し込むだけ）
-      const copy = document.getElementById('shareLinkField');
-      if (copy) { copy.value = shareUrl; }
-    }
+
     
     // 可能ならモバイルのWeb Share API Level 2で"画像添付"も試す（対応端末のみの強化。既存UIは維持）
     async function tryNativeShare(file, text, public_id){

@@ -1,82 +1,139 @@
 // /functions/s/[slug].js
 export async function onRequest(context) {
-  const { slug } = context.params;
-  const CLOUD = (context.env && context.env.CLOUD_NAME) || 'di5xqlddy';
-
-  // ---- helpers ----
-  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function b64urlDecodeSafe(s){
+  try {
+    const { slug } = context.params;
+    
+    // Base64URL → JSON で復号
+    let payload;
     try {
-      s = s.replace(/-/g,'+').replace(/_/g,'/'); while (s.length % 4) s += '=';
-      return atob(s);
-    } catch { return null; }
-  }
-
-  // 旧形式 slug-<ts> にも耐える（先頭だけ使う）
-  const head = String(slug).split('-')[0];
-  const decoded = b64urlDecodeSafe(head);
-
-  let image = '', title = '放課後クロニクル 学生証', desc = 'あなただけの学生証を作成しよう！';
-
-  if (decoded) {
-    // まずJSON試行（旧形式）
-    try {
-      const data = JSON.parse(decodeURIComponent(escape(decoded)));
-      if (typeof data.i === 'string') image = data.i;
-      if (typeof data.n === 'string' && data.n) title = `${data.n} の学生証`;
-    } catch {
-      // 新形式：decoded は public_id とみなす → ここでCloudinaryのOGP画像URLを組み立て
-      // 注意：versionが提供できない場合は、JSON方式への移行を推奨
-      const pid = decoded;
-      const safePid = pid.split('/').map(encodeURIComponent).join('/');
-      // 変換指定の「後」に v を入れるのが正解（versionが不明な場合はv1を仮定）
-      image = `https://res.cloudinary.com/${CLOUD}/image/upload/` +
-              `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
-              `v1/${safePid}.png`;
+      // Base64URL → Base64 → JSON
+      const base64 = slug.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+      const jsonStr = decodeURIComponent(atob(padded));
+      payload = JSON.parse(jsonStr);
+    } catch (e) {
+      console.error('Slug decode error:', e);
+      return getDefaultResponse();
     }
+    
+    // 画像URLを構築
+    let imageUrl;
+    if (payload.i && payload.i.startsWith('http')) {
+      // 完全なURLが提供されている場合
+      imageUrl = payload.i;
+    } else if (payload.p) {
+      // public_id から Cloudinary URL を構築
+      const cloudName = 'di5xqlddy'; // 設定ファイルから取得するのが理想的
+      const publicId = payload.p;
+      const version = payload.v || 1;
+      imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version}/${publicId}.png`;
+    } else {
+      return getDefaultResponse();
+    }
+    
+    // OGP メタタグを含む HTML を返す
+    const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>夢見が丘女子高等学校 学生証</title>
+  
+  <!-- OGP メタタグ -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="夢見が丘女子高等学校 学生証">
+  <meta property="og:description" content="診断から学生証を自動生成">
+  <meta property="og:image" content="${imageUrl}">
+  <meta property="og:url" content="${context.request.url}">
+  <meta name="twitter:card" content="summary_large_image">
+  
+  <!-- 人間は生成ページへ誘導 -->
+  <meta http-equiv="refresh" content="0;url=/generator.html">
+  
+  <style>
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: linear-gradient(135deg, #B997D6, #A895D0);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: white;
+      text-align: center;
+    }
+    .loading {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2rem;
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>学生証ジェネレーターに移動中...</p>
+  </div>
+</body>
+</html>`;
+    
+    return new Response(html, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'public, max-age=300' // 5分キャッシュ
+      }
+    });
+    
+  } catch (error) {
+    console.error('Function error:', error);
+    return getDefaultResponse();
   }
+}
 
-  const canonical = new URL(context.request.url).toString();
-  const html = `<!doctype html>
-<html lang="ja"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-
-<!-- 人間だけ診断の最初へ自動遷移（OGPは維持） -->
-<script>
-  (function(){
-    try{
-      var q = new URL(location.href).searchParams;
-      if (q.get('stay') === '1') return; // デバッグ用
-      var dest = '/index.html'; // or '/'
-      window.addEventListener('load', function(){
-        setTimeout(function(){ location.replace(dest); }, 600);
-      });
-    }catch(e){}
-  })();
-</script>
-<noscript><meta http-equiv="refresh" content="0;url=/index.html"></noscript>
-<title>${esc(title)}</title><meta name="description" content="${esc(desc)}">
-<link rel="canonical" href="${canonical}">
-<meta property="og:type" content="website">
-<meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(desc)}">
-<meta property="og:url" content="${canonical}">
-${image ? `<meta property="og:image" content="${image}">` : ''}
-<meta name="twitter:card" content="summary_large_image">
-${image ? `<meta name="twitter:image" content="${image}">` : ''}
-<meta name="twitter:title" content="${esc(title)}">
-<meta name="twitter:description" content="${esc(desc)}">
-<style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans JP";padding:24px}</style>
-</head><body>
-<h1>${esc(title)}</h1><p>${esc(desc)}</p>
-${image ? `<img src="${image}" alt="preview" style="max-width:640px;width:100%;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.12)">` : ''}
-<p><a href="/generator.html">学生証を作成する</a></p>
-</body></html>`;
-
+function getDefaultResponse() {
+  const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>夢見が丘女子高等学校 学生証</title>
+  
+  <!-- デフォルト OGP -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="夢見が丘女子高等学校 学生証">
+  <meta property="og:description" content="診断から学生証を自動生成">
+  <meta property="og:image" content="https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  
+  <!-- 生成ページへ誘導 -->
+  <meta http-equiv="refresh" content="0;url=/generator.html">
+</head>
+<body>
+  <p>学生証ジェネレーターに移動中...</p>
+</body>
+</html>`;
+  
   return new Response(html, {
+    status: 200,
     headers: {
-      'content-type': 'text/html; charset=utf-8',
-      'cache-control': 'public, max-age=31536000, immutable'
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'public, max-age=300'
     }
   });
 }
