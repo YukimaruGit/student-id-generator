@@ -34,6 +34,47 @@ function safeOpen(url, target='_blank'){
   if (w) w.opener = null, w.location.href = url;
 }
 
+// 手動コピーモーダル表示
+function showManualCopyModal(text) {
+  try {
+    // シンプルなモーダルを作成
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed; inset: 0; background: rgba(0,0,0,.85); 
+      display: flex; align-items: center; justify-content: center; 
+      z-index: 2147483647; flex-direction: column; padding: 2rem;
+    `;
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+      background: white; padding: 2rem; border-radius: 16px; 
+      max-width: 90vw; max-height: 80vh; overflow: auto;
+    `;
+    
+    content.innerHTML = `
+      <h3 style="margin: 0 0 1rem 0; color: #333;">URLをコピーしてください</h3>
+      <textarea readonly style="width: 100%; height: 100px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; resize: none;">${text}</textarea>
+      <div style="margin-top: 1rem; text-align: center;">
+        <button onclick="this.closest('.copy-modal').remove()" style="padding: 0.5rem 1rem; background: #B997D6; color: white; border: none; border-radius: 4px; cursor: pointer;">閉じる</button>
+      </div>
+    `;
+    
+    modal.className = 'copy-modal';
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    // 背景クリックで閉じる
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
+    
+  } catch (error) {
+    console.error('Manual copy modal error:', error);
+    // フォールバック：アラートで表示
+    alert(`URLをコピーしてください：\n\n${text}`);
+  }
+}
+
 // 保存用ライトボックス表示
 function showSaveOverlay() {
   try {
@@ -273,11 +314,8 @@ async function copyTextReliable(text) {
     try { await navigator.share({ text }); return true; } catch (_) {/* 次へ */}
   }
 
-  // 4) 最終手段：/copy を「同一タブ」で開いて自動コピー→自動復帰
-  const u = new URL('/copy', location.origin);
-  u.searchParams.set('u', text);
-  u.searchParams.set('back', location.href);
-  location.href = u.toString(); // _self で遷移（白タブ残しを防止）
+  // 4) 最終手段：モーダルでURLを表示して手動コピー（遷移しない）
+  showManualCopyModal(text);
   return false;
 }
 
@@ -802,49 +840,7 @@ function initializeApp() {
       return;
     }
     try {
-      // 埋め込み環境ではCloudinary画像を新規タブ表示（iOS長押し保存対応）
-      if (window.top !== window.self) {
-        if (window.__lastImageData && window.__lastImageData.public_id) {
-          // 既にアップロード済みの場合はOGP画像を表示
-          const pid = window.__lastImageData.public_id
-            .split('/')                       // スラッシュは保持
-            .map(encodeURIComponent)          // 各セグメントのみエンコード
-            .join('/');                       
-          const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
-                     `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
-                     `${pid}`;                // 拡張子は不要（付けても可）
-          safeOpen(og, '_blank');
-          return;
-        } else {
-          // 初回保存時は即アップロードしてOGP画像を表示
-          showLoading('画像を準備中...');
-          try {
-            const imageData = await uploadImageToCloudinary(
-              elements.cardCanvas, 
-              cloudinaryConfig.cloudName, 
-              cloudinaryConfig.uploadPreset
-            );
-            window.__lastImageData = imageData;
-            hideLoading();
-            
-            const pid2 = imageData.public_id
-              .split('/')                       // スラッシュは保持
-              .map(encodeURIComponent)          // 各セグメントのみエンコード
-              .join('/');                       
-            const og = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/` +
-                       `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
-                       `${pid2}`;               // 拡張子は不要（付けても可）
-            safeOpen(og, '_blank');
-            return;
-          } catch (uploadError) {
-            hideLoading();
-            console.warn('埋め込み時のアップロードに失敗、ローカル保存にフォールバック:', uploadError);
-            // アップロード失敗時はローカル保存
-          }
-        }
-      }
-      
-      // 通常のダウンロード処理
+      // 画像保存は常にオーバーレイ保存で統一（埋め込みでも新規タブ不要）
       try {
         downloadCanvasAsImage(elements.cardCanvas, '学生証.png');
       } catch (downloadError) {
@@ -898,16 +894,29 @@ function initializeApp() {
         `${nameJa}の学生証が完成しました！🎓\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター` :
         `放課後クロニクル 学生証が完成しました！🎓\n\n診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター`;
       
-      if (window.buildShareUrl && imageData.public_id) {
-        // 新しい共有方式
+      if (window.buildShareUrlWithImage && imageData.public_id) {
+        // 新しい共有方式：画像URL/バージョン付きJSONスラッグ
+        const { public_id, version, eager } = imageData;
+        const eagerUrl = eager && eager[0] && eager[0].secure_url;
+        shareUrl = window.buildShareUrlWithImage(public_id, version, eagerUrl);
+        
+        // 画像データを保存（埋め込み時の保存対応用）
+        window.__lastImageData = imageData;
+        
+        // 共有リンクを更新（buildShareUrlWithImageが利用可能な場合のみ）
+        if (window.updateShareLinks) {
+          window.updateShareLinks(shareUrl, tweetText);
+        }
+      } else if (window.buildShareUrl && imageData.public_id) {
+        // フォールバック：短縮版
         shareUrl = window.buildShareUrl(imageData.public_id);
         
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
         
-        // 共有リンクを更新（buildShareUrlが利用可能な場合のみ）
+        // 共有リンクを更新
         if (window.updateShareLinks) {
-          window.updateShareLinks(imageData.public_id, tweetText);
+          window.updateShareLinks(shareUrl, tweetText);
         }
       } else {
         // フォールバック：従来方式（非推奨）
@@ -970,16 +979,29 @@ function initializeApp() {
       // 新しい共有方式：短いURL（/s/{slug}形式）
       let shareUrl;
       
-      if (window.buildShareUrl && imageData.public_id) {
-        // 新しい共有方式
+      if (window.buildShareUrlWithImage && imageData.public_id) {
+        // 新しい共有方式：画像URL/バージョン付きJSONスラッグ
+        const { public_id, version, eager } = imageData;
+        const eagerUrl = eager && eager[0] && eager[0].secure_url;
+        shareUrl = window.buildShareUrlWithImage(public_id, version, eagerUrl);
+        
+        // 画像データを保存（埋め込み時の保存対応用）
+        window.__lastImageData = imageData;
+        
+        // 共有リンクを更新（buildShareUrlWithImageが利用可能な場合のみ）
+        if (window.updateShareLinks) {
+          window.updateShareLinks(shareUrl, '学生証を発行しました');
+        }
+      } else if (window.buildShareUrl && imageData.public_id) {
+        // フォールバック：短縮版
         shareUrl = window.buildShareUrl(imageData.public_id);
         
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
         
-        // 共有リンクを更新（buildShareUrlが利用可能な場合のみ）
+        // 共有リンクを更新
         if (window.updateShareLinks) {
-          window.updateShareLinks(imageData.public_id, '学生証を発行しました');
+          window.updateShareLinks(shareUrl, '学生証を発行しました');
         }
       } else {
         // フォールバック：従来方式（非推奨）
@@ -996,11 +1018,9 @@ function initializeApp() {
        if (ok) {
          console.log('✅ シェア用URLをクリップボードにコピーしました');
        } else {
-         // 最終手段：自動コピー専用ページ（新規タブ）。埋め込みやiOSでも通る
-         const u = new URL('copy.html', location.origin);
-         u.searchParams.set('u', urlToCopy);
-         window.open(u.toString(), '_blank', 'noopener');  // ここは新規タブ
-         console.log('✅ コピーできない環境のため、専用タブを開きました。数秒後に閉じます。');
+         // 最終手段：モーダルでURLを表示（遷移しない）
+         showManualCopyModal(urlToCopy);
+         console.log('✅ コピーできない環境のため、モーダルでURLを表示しました');
        }
     } catch (error) {
       console.error('URLコピーエラー:', error);

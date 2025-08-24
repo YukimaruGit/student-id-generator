@@ -132,22 +132,33 @@
         color: inherit !important;
       }
       
-      /* 画像のドラッグ&ドロップを完全に無効化 */
-      img {
-        -webkit-user-drag: none !important;
-        -khtml-user-drag: none !important;
-        -moz-user-drag: none !important;
-        -o-user-drag: none !important;
-        user-drag: none !important;
-        pointer-events: none !important;
-      }
-      
-      /* 画像の右クリックメニューを無効化 */
-      img {
-        -webkit-context-menu: none !important;
-        -moz-context-menu: none !important;
-        context-menu: none !important;
-      }
+             /* 画像のドラッグ&ドロップを完全に無効化 */
+       img {
+         -webkit-user-drag: none !important;
+         -khtml-user-drag: none !important;
+         -moz-user-drag: none !important;
+         -o-user-drag: none !important;
+         user-drag: none !important;
+         pointer-events: none !important;
+       }
+       
+       /* 画像の右クリックメニューを無効化 */
+       img {
+         -webkit-context-menu: none !important;
+         -moz-context-menu: none !important;
+         context-menu: none !important;
+       }
+       
+       /* プレビュー/保存用画像は操作可能に保持 */
+       #savePreview,
+       #idPreview img,
+       #cardCanvas {
+         pointer-events: auto !important;
+         -webkit-user-select: none !important;
+         -moz-user-select: none !important;
+         -ms-user-select: none !important;
+         user-select: none !important;
+       }
       
       /* 入力フィールドのみ選択可能に保持（必要最小限） */
       input[type="text"], input[type="password"], input[type="email"], 
@@ -221,17 +232,17 @@
       }
     };
 
-    // フォーム要素判定関数
-    const isForm = el => el && (el.closest('input, textarea, select, [contenteditable="true"]'));
+    // フォーム要素判定（安全化）
+    const isForm = (el) => {
+      if (!el) return false;
+      const node = el.nodeType === 1 ? el : el.parentElement; // TextNodeなど対応
+      return !!(node && node.closest('input, textarea, select, [contenteditable="true"]'));
+    };
     
-    // 強化されたイベント防止（フォーム要素は除外）
+    // 強化されたイベント防止（フォームは素通し）
     const preventEvent = function(e) {
-      // フォーム要素の場合は通す
-      if (isForm(e.target)) return true;
-      
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
+      if (isForm(e.target)) return true; // フォーム由来は即 return
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
       return false;
     };
 
@@ -544,14 +555,15 @@
       const meta = document.createElement('meta');
       meta.httpEquiv = 'Content-Security-Policy';
       meta.content = [
-        "default-src 'self' blob: data:",
-        "img-src 'self' https: data: blob:",
+        "default-src 'self' https:",
+        "img-src 'self' data: blob: https: https://res.cloudinary.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "script-src 'self' 'unsafe-inline'",
-        "connect-src 'self' https://api.cloudinary.com https://res.cloudinary.com https://x.com https://twitter.com",
-        "font-src 'self' https://fonts.gstatic.com",
+        "connect-src 'self' https://api.cloudinary.com https://res.cloudinary.com https://x.com https://twitter.com data: blob:",
+        "font-src 'self' https://fonts.gstatic.com data:",
+        "frame-ancestors 'self' *",
         "base-uri 'self'",
-        "frame-ancestors https://*.studio.site https://preview.studio.site 'self'"
+        "upgrade-insecure-requests"
       ].join('; ');
       
       if (document.head) {
