@@ -3,7 +3,7 @@ export async function onRequest(context) {
   try {
     const { slug } = context.params;
     
-    // Base64URL → JSON で復号
+    // Base64URL → JSON で復号（後方互換対応）
     let payload;
     try {
       // Base64URL → Base64 → JSON
@@ -13,7 +13,16 @@ export async function onRequest(context) {
       payload = JSON.parse(jsonStr);
     } catch (e) {
       console.error('Slug decode error:', e);
-      return getDefaultResponse();
+      // 後方互換：デコード文字列を public_id として扱う
+      try {
+        const base64 = slug.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+        const publicId = decodeURIComponent(atob(padded));
+        payload = { p: publicId, v: 1 };
+      } catch (fallbackError) {
+        console.error('Fallback decode error:', fallbackError);
+        return getDefaultResponse();
+      }
     }
     
     // 画像URLを構築

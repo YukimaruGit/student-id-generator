@@ -235,7 +235,7 @@
     // フォーム要素判定（安全化）
     const isForm = (el) => {
       if (!el) return false;
-      const node = el.nodeType === 1 ? el : el.parentElement; // TextNodeなど対応
+      const node = el.nodeType === 1 ? el : el.parentElement || el.ownerDocument?.activeElement;
       return !!(node && node.closest('input, textarea, select, [contenteditable="true"]'));
     };
     
@@ -251,8 +251,12 @@
     document.addEventListener('cut', preventEvent, true);
     document.addEventListener('paste', preventEvent, true);
 
-    // 右クリックメニュー制限（コンテキストメニュー防止）
-    document.addEventListener('contextmenu', preventEvent, true);
+    // 右クリックメニュー制限（保存UIでは許可）
+    document.addEventListener('contextmenu', function(e){
+      if (isForm(e.target)) return true;
+      if (e.target.id === 'savePreview' || e.target.closest?.('#saveOverlay')) return true;
+      return preventEvent(e);
+    }, true);
 
     // キーボードショートカット防止（強化版、フォーム要素は除外）
     document.addEventListener('keydown', function(e) {
@@ -363,7 +367,10 @@
     }, true);
 
     // 定期的に選択を解除
-    setInterval(clearSelection, 100);
+    setInterval(() => {
+      if (document.activeElement && isForm(document.activeElement)) return;
+      clearSelection();
+    }, 100);
 
     // フォーカス時にも選択を解除（フォーム要素は除外）
     document.addEventListener('focus', function(e) {
@@ -379,16 +386,18 @@
       alert('印刷は禁止されています。');
     });
 
-    // 画像の保存防止（強化版）
+    // 画像の保存防止（保存UIでは許可）
     document.addEventListener('dragstart', function(e) {
       if (e.target.tagName === 'IMG') {
+        if (e.target.id === 'savePreview' || e.target.closest?.('#saveOverlay')) return true;
         preventEvent(e);
       }
     }, true);
 
-    // 画像の右クリック保存を完全に防止
+    // 画像の右クリック保存を完全に防止（保存UIでは許可）
     document.addEventListener('contextmenu', function(e) {
       if (e.target.tagName === 'IMG') {
+        if (e.target.id === 'savePreview' || e.target.closest?.('#saveOverlay')) return true;
         preventEvent(e);
         return false;
       }
@@ -402,17 +411,19 @@
       }
     }, true);
 
-    // 画像のコピーを完全に防止
+    // 画像のコピーを完全に防止（保存UIでは許可）
     document.addEventListener('copy', function(e) {
       if (e.target.tagName === 'IMG' || window.getSelection().toString().includes('IMG')) {
+        if (e.target.id === 'savePreview' || e.target.closest?.('#saveOverlay')) return true;
         preventEvent(e);
         return false;
       }
     }, true);
 
-    // 画像の切り取りを防止
+    // 画像の切り取りを防止（保存UIでは許可）
     document.addEventListener('cut', function(e) {
       if (e.target.tagName === 'IMG') {
+        if (e.target.id === 'savePreview' || e.target.closest?.('#saveOverlay')) return true;
         preventEvent(e);
         return false;
       }
@@ -434,15 +445,17 @@
     const protectImages = function() {
       const images = document.querySelectorAll('img');
       images.forEach(img => {
-        // 画像の右クリックを完全に無効化
+        // 画像の右クリックを完全に無効化（保存UIでは許可）
         img.addEventListener('contextmenu', function(e) {
+          if (img.id === 'savePreview' || img.closest?.('#saveOverlay')) return true;
           e.preventDefault();
           e.stopPropagation();
           return false;
         }, true);
         
-        // 画像のドラッグ開始を防止
+        // 画像のドラッグ開始を防止（保存UIでは許可）
         img.addEventListener('dragstart', function(e) {
+          if (img.id === 'savePreview' || img.closest?.('#saveOverlay')) return true;
           e.preventDefault();
           e.stopPropagation();
           return false;
@@ -455,15 +468,17 @@
           return false;
         }, true);
         
-        // 画像のコピーを防止
+        // 画像のコピーを防止（保存UIでは許可）
         img.addEventListener('copy', function(e) {
+          if (img.id === 'savePreview' || img.closest?.('#saveOverlay')) return true;
           e.preventDefault();
           e.stopPropagation();
           return false;
         }, true);
         
-        // 画像の切り取りを防止
+        // 画像の切り取りを防止（保存UIでは許可）
         img.addEventListener('cut', function(e) {
+          if (img.id === 'savePreview' || img.closest?.('#saveOverlay')) return true;
           e.preventDefault();
           e.stopPropagation();
           return false;
