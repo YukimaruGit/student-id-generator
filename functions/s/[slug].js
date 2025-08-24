@@ -19,7 +19,7 @@ export async function onRequest(context) {
         const publicId = decodeURIComponent(atob(padded));
         payload = { p: publicId, v: 1 };
       } catch (_) {
-        return getDefaultResponse();
+        return getDefaultResponse(context);
       }
     }
     
@@ -33,66 +33,116 @@ export async function onRequest(context) {
       const version = payload.v || 1;
       imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version}/${encodeURIComponent(publicId)}.png`;
     } else {
-      return getDefaultResponse();
+      return getDefaultResponse(context);
     }
     
-    // OGP メタタグを含む HTML を返す
+    // User-Agent判定でクローラか人間かを判定
+    const userAgent = context.request.headers.get('user-agent') || '';
+    const isBot = /(twitterbot|facebookexternalhit|slackbot|discordbot|line|linkedinbot|embedly|vkshare|pinterest|crawler|spider|bot|whatsapp|telegram)/i.test(userAgent);
+    
+    const shareUrl = context.request.url;
+    const title = '夢見が丘女子高等学校 学生証';
+    const description = '診断から学生証を自動生成';
+    
+    // クローラにはOGPメタタグ付きHTMLを返す（リダイレクトしない）
+    if (isBot) {
+      const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  
+  <!-- OGP メタタグ（クローラ用） -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:url" content="${shareUrl}">
+  <meta property="og:image" content="${imageUrl}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="学生証ジェネレーター">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="${imageUrl}">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description}">
+  
+  <!-- その他のメタタグ -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="${shareUrl}">
+</head>
+<body>
+  <div style="display:none;">
+    <img src="${imageUrl}" alt="学生証プレビュー" />
+  </div>
+</body>
+</html>`;
+      
+      return new Response(html, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'public, max-age=31536000, immutable'
+        }
+      });
+    }
+    
+    // 人間のブラウザは302でジェネレータページへリダイレクト
+    const redirectUrl = new URL('/generator.html', context.request.url);
+    redirectUrl.searchParams.set('share', slug);
+    
+    return Response.redirect(redirectUrl.toString(), 302);
+    
+  } catch (error) {
+    console.error('Function error:', error);
+    return getDefaultResponse(context);
+  }
+}
+
+function getDefaultResponse(context) {
+  const shareUrl = context.request.url;
+  const title = '夢見が丘女子高等学校 学生証';
+  const description = '診断から学生証を自動生成';
+  const defaultImage = 'https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png';
+  
+  // User-Agent判定
+  const userAgent = context.request.headers.get('user-agent') || '';
+  const isBot = /(twitterbot|facebookexternalhit|slackbot|discordbot|line|linkedinbot|embedly|vkshare|pinterest|crawler|spider|bot|whatsapp|telegram)/i.test(userAgent);
+  
+  if (isBot) {
+    // クローラにはデフォルトOGPを返す
     const html = `<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>夢見が丘女子高等学校 学生証</title>
+  <title>${title}</title>
   
-  <!-- OGP メタタグ -->
+  <!-- デフォルト OGP メタタグ（クローラ用） -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="夢見が丘女子高等学校 学生証">
-  <meta property="og:description" content="診断から学生証を自動生成">
-  <meta property="og:image" content="${imageUrl}">
-  <meta property="og:url" content="${context.request.url}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:url" content="${shareUrl}">
+  <meta property="og:image" content="${defaultImage}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="学生証ジェネレーター">
+  
+  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="${defaultImage}">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description}">
   
-  <!-- 人間は生成ページへ誘導 -->
-  <meta http-equiv="refresh" content="0;url=/generator.html">
-  
-  <style>
-    body {
-      font-family: 'Noto Sans JP', sans-serif;
-      background: linear-gradient(135deg, #B997D6, #A895D0);
-      margin: 0;
-      padding: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      color: white;
-      text-align: center;
-    }
-    .loading {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 2rem;
-      border-radius: 16px;
-      backdrop-filter: blur(10px);
-    }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-top: 4px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 1rem;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
+  <!-- その他のメタタグ -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="${shareUrl}">
 </head>
 <body>
-  <div class="loading">
-    <div class="spinner"></div>
-    <p>学生証ジェネレーターに移動中...</p>
+  <div style="display:none;">
+    <img src="${defaultImage}" alt="学生証プレビュー" />
   </div>
 </body>
 </html>`;
@@ -101,44 +151,12 @@ export async function onRequest(context) {
       status: 200,
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=300' // 5分キャッシュ
+        'Cache-Control': 'public, max-age=31536000, immutable'
       }
     });
-    
-  } catch (error) {
-    console.error('Function error:', error);
-    return getDefaultResponse();
   }
-}
-
-function getDefaultResponse() {
-  const html = `<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>夢見が丘女子高等学校 学生証</title>
   
-  <!-- デフォルト OGP -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="夢見が丘女子高等学校 学生証">
-  <meta property="og:description" content="診断から学生証を自動生成">
-  <meta property="og:image" content="https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png">
-  <meta name="twitter:card" content="summary_large_image">
-  
-  <!-- 生成ページへ誘導 -->
-  <meta http-equiv="refresh" content="0;url=/generator.html">
-</head>
-<body>
-  <p>学生証ジェネレーターに移動中...</p>
-</body>
-</html>`;
-  
-  return new Response(html, {
-    status: 200,
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'public, max-age=300'
-    }
-  });
+  // 人間のブラウザはジェネレータページへリダイレクト
+  const redirectUrl = new URL('/generator.html', context.request.url);
+  return Response.redirect(redirectUrl.toString(), 302);
 }

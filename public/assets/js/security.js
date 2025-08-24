@@ -593,10 +593,10 @@
       meta.content = [
         "default-src 'self' https:",
         "img-src 'self' data: blob: https: https://res.cloudinary.com",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://use.fontawesome.com",
         "script-src 'self' 'unsafe-inline'",
         "connect-src 'self' https://api.cloudinary.com https://res.cloudinary.com https://x.com https://twitter.com data: blob:",
-        "font-src 'self' https://fonts.gstatic.com data:",
+        "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://use.fontawesome.com data:",
         "frame-ancestors 'self' *",
         "base-uri 'self'",
         "upgrade-insecure-requests"

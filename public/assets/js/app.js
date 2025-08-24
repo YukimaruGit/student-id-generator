@@ -96,6 +96,15 @@ function showSaveOverlay() {
     // 画像をプレビューに設定
     preview.src = canvas.toDataURL('image/png');
     
+    // デバイス別の保存案内文言を設定
+    const isPc = window.matchMedia('(pointer:fine)').matches && (navigator.maxTouchPoints || 0) === 0;
+    const saveHint = overlay.querySelector('.save-hint');
+    if (saveHint) {
+      saveHint.textContent = isPc 
+        ? 'PCは画像を「右クリック」→「名前を付けて画像を保存」'
+        : 'スマホは画像を長押し→「写真に追加」';
+    }
+    
     // ライトボックスを表示
     overlay.style.display = 'flex';
     
