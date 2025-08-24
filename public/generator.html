@@ -280,6 +280,10 @@
       gap: 0 !important;
     }
   </style>
+  <script>
+    // このページでは高度対策をOFF（画像保存・Canvas操作のため）
+    window.AdvancedSecurityConfig = { preventSideChannelAttacks: false };
+  </script>
   <script src="assets/js/comprehensive-security.js"></script>
   <script src="assets/js/security.js"></script>
   <script src="assets/js/privacy-protection.js"></script>
@@ -291,10 +295,10 @@
     // 共有用ドメイン
     const SHARE_BASE = 'https://student-id-generator.pages.dev';
     
-    // Cloudinary設定（app.jsと同期）
-    const cloudinaryConfig = {
-      cloudName: 'di5xqlddy',
-      uploadPreset: 'student_card_AS_chronicle'
+    // Cloudinary設定（app.jsと同期、二重定義防止）
+    window.cloudinaryConfig ??= { 
+      cloudName: 'di5xqlddy', 
+      uploadPreset: 'student_card_AS_chronicle' 
     };
 
     // Base64URL（短く安全）
@@ -321,7 +325,13 @@
     }
     window.buildShareUrl = buildShareUrl; // 既存呼び出し互換
     
-
+    // 共有リンク更新関数（app.jsから呼び出される）
+    function updateShareLinks(public_id, text) {
+      const shareUrl = buildShareUrl(public_id);
+      console.log('共有URL更新:', shareUrl);
+      // 必要に応じてUI更新処理を追加
+    }
+    window.updateShareLinks = updateShareLinks;
     
     // 可能ならモバイルのWeb Share API Level 2で"画像添付"も試す（対応端末のみの強化。既存UIは維持）
     async function tryNativeShare(file, text, public_id){

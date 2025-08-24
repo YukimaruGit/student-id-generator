@@ -904,6 +904,11 @@ function initializeApp() {
         
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
+        
+        // 共有リンクを更新（buildShareUrlが利用可能な場合のみ）
+        if (window.updateShareLinks) {
+          window.updateShareLinks(imageData.public_id, tweetText);
+        }
       } else {
         // フォールバック：従来方式（非推奨）
         console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');
@@ -971,6 +976,11 @@ function initializeApp() {
         
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
+        
+        // 共有リンクを更新（buildShareUrlが利用可能な場合のみ）
+        if (window.updateShareLinks) {
+          window.updateShareLinks(imageData.public_id, '学生証を発行しました');
+        }
       } else {
         // フォールバック：従来方式（非推奨）
         console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');

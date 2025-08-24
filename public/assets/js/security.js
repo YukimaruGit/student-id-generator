@@ -221,8 +221,14 @@
       }
     };
 
-    // 強化されたイベント防止
+    // フォーム要素判定関数
+    const isForm = el => el && (el.closest('input, textarea, select, [contenteditable="true"]'));
+    
+    // 強化されたイベント防止（フォーム要素は除外）
     const preventEvent = function(e) {
+      // フォーム要素の場合は通す
+      if (isForm(e.target)) return true;
+      
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
@@ -237,8 +243,11 @@
     // 右クリックメニュー制限（コンテキストメニュー防止）
     document.addEventListener('contextmenu', preventEvent, true);
 
-    // キーボードショートカット防止（強化版）
+    // キーボードショートカット防止（強化版、フォーム要素は除外）
     document.addEventListener('keydown', function(e) {
+      // フォーム要素の場合は通す
+      if (isForm(e.target)) return;
+      
       // Ctrl+C, Ctrl+X, Ctrl+A, Ctrl+V, Ctrl+Z, Ctrl+Y, Ctrl+S を防止
       if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 'a' || 
                         e.key === 'v' || e.key === 'z' || e.key === 'y' || e.key === 's')) {
@@ -345,9 +354,13 @@
     // 定期的に選択を解除
     setInterval(clearSelection, 100);
 
-    // フォーカス時にも選択を解除
-    document.addEventListener('focus', clearSelection, true);
-    document.addEventListener('blur', clearSelection, true);
+    // フォーカス時にも選択を解除（フォーム要素は除外）
+    document.addEventListener('focus', function(e) {
+      if (!isForm(e.target)) clearSelection();
+    }, true);
+    document.addEventListener('blur', function(e) {
+      if (!isForm(e.target)) clearSelection();
+    }, true);
 
     // 印刷防止
     window.addEventListener('beforeprint', function(e) {
@@ -533,10 +546,10 @@
       meta.content = [
         "default-src 'self' blob: data:",
         "img-src 'self' https: data: blob:",
-        "style-src 'self' 'unsafe-inline'",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "script-src 'self' 'unsafe-inline'",
-        "connect-src 'self'",
-        "font-src 'self' https:",
+        "connect-src 'self' https://api.cloudinary.com https://res.cloudinary.com https://x.com https://twitter.com",
+        "font-src 'self' https://fonts.gstatic.com",
         "base-uri 'self'",
         "frame-ancestors https://*.studio.site https://preview.studio.site 'self'"
       ].join('; ');
