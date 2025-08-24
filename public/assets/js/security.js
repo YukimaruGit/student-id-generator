@@ -211,6 +211,7 @@
         -moz-user-select: text !important;
         -ms-user-select: text !important;
         user-select: text !important;
+        pointer-events: auto !important;
       }
       `;
       
@@ -254,7 +255,7 @@
     // 右クリックメニュー制限（保存UIでは許可）
     document.addEventListener('contextmenu', function(e){
       if (isForm(e.target)) return true;
-      if (e.target.id === 'savePreview' || e.target.closest?.('#saveOverlay')) return true;
+      if (e.target.id === 'savePreview' || e.target.closest?.('#saveOverlay') || e.target.id === 'cardCanvas') return true;
       return preventEvent(e);
     }, true);
 

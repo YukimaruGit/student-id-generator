@@ -138,10 +138,11 @@ const PHOTO_FRAME = {
 };
 
 // Cloudinary設定（一元管理）
-const cloudinaryConfig = {
+window.cloudinaryConfig = window.cloudinaryConfig || {
   cloudName: 'di5xqlddy',
   uploadPreset: 'student_card_AS_chronicle'
 };
+const cloudinaryConfig = window.cloudinaryConfig;
 
 // 設定の検証
 if (!cloudinaryConfig.cloudName || !cloudinaryConfig.uploadPreset) {
@@ -841,13 +842,8 @@ function initializeApp() {
     }
     try {
       // 画像保存は常にオーバーレイ保存で統一（埋め込みでも新規タブ不要）
-      try {
-        downloadCanvasAsImage(elements.cardCanvas, '学生証.png');
-      } catch (downloadError) {
-        console.error('ローカルダウンロードエラー:', downloadError);
-        // 最終手段：ライトボックス表示
-        showSaveOverlay();
-      }
+      await downloadCanvasAsImage(elements.cardCanvas, '学生証.png');
+      showSaveOverlay();
     } catch (error) {
       console.error('ダウンロードエラー:', error);
       // エラー時はライトボックス表示でフォールバック
