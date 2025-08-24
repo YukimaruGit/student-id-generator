@@ -12,30 +12,26 @@ export async function onRequest(context) {
       const jsonStr = decodeURIComponent(atob(padded));
       payload = JSON.parse(jsonStr);
     } catch (e) {
-      console.error('Slug decode error:', e);
-      // 後方互換：デコード文字列を public_id として扱う
+      // 旧形式: public_id のみを Base64URL しているケース
       try {
         const base64 = slug.replace(/-/g, '+').replace(/_/g, '/');
         const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
         const publicId = decodeURIComponent(atob(padded));
         payload = { p: publicId, v: 1 };
-      } catch (fallbackError) {
-        console.error('Fallback decode error:', fallbackError);
+      } catch (_) {
         return getDefaultResponse();
       }
     }
     
     // 画像URLを構築
     let imageUrl;
-    if (payload.i && payload.i.startsWith('http')) {
-      // 完全なURLが提供されている場合
+    if (payload.i?.startsWith('http')) {
       imageUrl = payload.i;
     } else if (payload.p) {
-      // public_id から Cloudinary URL を構築
-      const cloudName = 'di5xqlddy'; // 設定ファイルから取得するのが理想的
+      const cloudName = 'di5xqlddy';
       const publicId = payload.p;
       const version = payload.v || 1;
-      imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version}/${publicId}.png`;
+      imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version}/${encodeURIComponent(publicId)}.png`;
     } else {
       return getDefaultResponse();
     }

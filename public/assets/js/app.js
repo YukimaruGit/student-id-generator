@@ -904,8 +904,8 @@ function initializeApp() {
         window.__lastImageData = imageData;
         
         // 共有リンクを更新（buildShareUrlWithImageが利用可能な場合のみ）
-        if (window.updateShareLinks) {
-          window.updateShareLinks(shareUrl, tweetText);
+        if (window.updateShareLinksWithImage) {
+          window.updateShareLinksWithImage(imageData, tweetText);
         }
       } else if (window.buildShareUrl && imageData.public_id) {
         // フォールバック：短縮版
@@ -915,8 +915,8 @@ function initializeApp() {
         window.__lastImageData = imageData;
         
         // 共有リンクを更新
-        if (window.updateShareLinks) {
-          window.updateShareLinks(shareUrl, tweetText);
+        if (window.updateShareLinksWithImage) {
+          window.updateShareLinksWithImage(imageData, tweetText);
         }
       } else {
         // フォールバック：従来方式（非推奨）
@@ -989,8 +989,8 @@ function initializeApp() {
         window.__lastImageData = imageData;
         
         // 共有リンクを更新（buildShareUrlWithImageが利用可能な場合のみ）
-        if (window.updateShareLinks) {
-          window.updateShareLinks(shareUrl, '学生証を発行しました');
+        if (window.updateShareLinksWithImage) {
+          window.updateShareLinksWithImage(imageData, '学生証を発行しました');
         }
       } else if (window.buildShareUrl && imageData.public_id) {
         // フォールバック：短縮版
@@ -1000,8 +1000,8 @@ function initializeApp() {
         window.__lastImageData = imageData;
         
         // 共有リンクを更新
-        if (window.updateShareLinks) {
-          window.updateShareLinks(shareUrl, '学生証を発行しました');
+        if (window.updateShareLinksWithImage) {
+          window.updateShareLinksWithImage(imageData, '学生証を発行しました');
         }
       } else {
         // フォールバック：従来方式（非推奨）

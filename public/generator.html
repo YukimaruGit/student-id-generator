@@ -314,24 +314,28 @@
       return `${SHARE_BASE}/s/${slug}`;
     }
     
+    // 共有URLペイロード生成（JSONスラッグ用）
+    function buildShareSlugPayload({public_id, version, eager_url}) {
+      // i: 完全URL, p: public_id, v: version
+      const payload = eager_url ? { i: eager_url } : { p: public_id, v: version };
+      const json = encodeURIComponent(JSON.stringify(payload));
+      return btoa(unescape(json)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    }
+    
     // 新しい共有方式：JSONスラッグ（OGP画像URLを含む、最も確実）
     function buildShareUrlWithImage(public_id, version, eager_url){
-      // eager_url があれば最優先、なければ v{version} 付きURLを生成
-      const ogUrl = eager_url || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version || 1}/${public_id}.png`;
-      const payload = { i: ogUrl, p: public_id, v: version }; // i: OGP画像URL, p: public_id, v: version
-      const slug = btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
-        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      const slug = buildShareSlugPayload({ public_id, version, eager_url });
       return `${SHARE_BASE}/s/${slug}`;
     }
-    window.buildShareUrl = buildShareUrl; // 既存呼び出し互換
+    window.buildShareUrlWithImage = buildShareUrlWithImage;
     
     // 共有リンク更新関数（app.jsから呼び出される）
-    function updateShareLinks(public_id, text) {
-      const shareUrl = buildShareUrl(public_id);
+    function updateShareLinksWithImage(imageData, text) {
+      const shareUrl = buildShareUrlWithImage(imageData.public_id, imageData.version, imageData.eager_url);
       console.log('共有URL更新:', shareUrl);
       // 必要に応じてUI更新処理を追加
     }
-    window.updateShareLinks = updateShareLinks;
+    window.updateShareLinksWithImage = updateShareLinksWithImage;
     
     // 可能ならモバイルのWeb Share API Level 2で"画像添付"も試す（対応端末のみの強化。既存UIは維持）
     async function tryNativeShare(file, text, public_id){

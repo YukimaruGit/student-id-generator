@@ -232,16 +232,16 @@
       }
     };
 
-    // フォーム要素判定（安全化）
+    // 安全なフォーム除外判定
     const isForm = (el) => {
       if (!el) return false;
-      const node = el.nodeType === 1 ? el : el.parentElement || el.ownerDocument?.activeElement;
-      return !!(node && node.closest('input, textarea, select, [contenteditable="true"]'));
+      const node = el.nodeType === 1 ? el : el.parentElement || document.activeElement;
+      return !!(node && node.closest && node.closest('input, textarea, select, [contenteditable="true"]'));
     };
     
-    // 強化されたイベント防止（フォームは素通し）
-    const preventEvent = function(e) {
-      if (isForm(e.target)) return true; // フォーム由来は即 return
+    // 既存の preventEvent を置換：フォームはすべて通す
+    const preventEvent = function(e){
+      if (isForm(e.target)) return true;
       e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
       return false;
     };
@@ -259,9 +259,9 @@
     }, true);
 
     // キーボードショートカット防止（強化版、フォーム要素は除外）
-    document.addEventListener('keydown', function(e) {
-      // フォーム要素の場合は通す
-      if (isForm(e.target)) return;
+    document.addEventListener('keydown', function(e){
+      if (isForm(e.target)) return true;
+      // 以降は今まで通りのショートカット抑止
       
       // Ctrl+C, Ctrl+X, Ctrl+A, Ctrl+V, Ctrl+Z, Ctrl+Y, Ctrl+S を防止
       if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 'a' || 
@@ -394,13 +394,13 @@
       }
     }, true);
 
-    // 画像の右クリック保存を完全に防止（保存UIでは許可）
+    // グローバルの画像右クリック禁止を、保存UIでは許可
     document.addEventListener('contextmenu', function(e) {
-      if (e.target.tagName === 'IMG') {
-        if (e.target.id === 'savePreview' || e.target.closest?.('#saveOverlay')) return true;
-        preventEvent(e);
-        return false;
-      }
+      const t = e.target;
+      const allow = (id) => !!(t.id === id || (t.closest && t.closest('#' + id)));
+      // 保存用の特別領域とキャンバスは許可
+      if (allow('saveOverlay') || allow('savePreview') || allow('cardCanvas')) return true;
+      if (t.tagName === 'IMG') return preventEvent(e);
     }, true);
 
     // 画像のキーボードショートカット保存を防止
@@ -445,9 +445,11 @@
     const protectImages = function() {
       const images = document.querySelectorAll('img');
       images.forEach(img => {
+        const inSaveArea = (el) => el && (el.id === 'savePreview' || el.closest?.('#saveOverlay'));
+        
         // 画像の右クリックを完全に無効化（保存UIでは許可）
         img.addEventListener('contextmenu', function(e) {
-          if (img.id === 'savePreview' || img.closest?.('#saveOverlay')) return true;
+          if (inSaveArea(img)) return true;
           e.preventDefault();
           e.stopPropagation();
           return false;
@@ -455,7 +457,7 @@
         
         // 画像のドラッグ開始を防止（保存UIでは許可）
         img.addEventListener('dragstart', function(e) {
-          if (img.id === 'savePreview' || img.closest?.('#saveOverlay')) return true;
+          if (inSaveArea(img)) return true;
           e.preventDefault();
           e.stopPropagation();
           return false;
@@ -470,7 +472,7 @@
         
         // 画像のコピーを防止（保存UIでは許可）
         img.addEventListener('copy', function(e) {
-          if (img.id === 'savePreview' || img.closest?.('#saveOverlay')) return true;
+          if (inSaveArea(img)) return true;
           e.preventDefault();
           e.stopPropagation();
           return false;
@@ -478,7 +480,7 @@
         
         // 画像の切り取りを防止（保存UIでは許可）
         img.addEventListener('cut', function(e) {
-          if (img.id === 'savePreview' || img.closest?.('#saveOverlay')) return true;
+          if (inSaveArea(img)) return true;
           e.preventDefault();
           e.stopPropagation();
           return false;
