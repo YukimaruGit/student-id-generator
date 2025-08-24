@@ -330,11 +330,13 @@
     }
     window.buildShareUrlWithImage = buildShareUrlWithImage;
     
-    // 共有リンク更新関数（app.jsから呼び出される）
+    // 共有リンク更新関数（app.jsから呼び出される）…UIは保持のみ、ハンドラはapp.jsが参照
     function updateShareLinksWithImage(imageData, text) {
       const shareUrl = buildShareUrlWithImage(imageData.public_id, imageData.version, imageData.eager_url);
       console.log('共有URL更新:', shareUrl);
-      // ここでは「URLの保持と表示」だけ行う（ハンドラは app.js 側で参照）
+      // グローバルに保持（ボタンはこれを最優先で利用）
+      window.__shareUrl = shareUrl;
+      // 表示用フィールドがあれば更新
       const field = document.getElementById('shareLinkField');
       if (field) field.value = shareUrl;
     }

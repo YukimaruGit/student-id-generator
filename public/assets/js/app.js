@@ -105,9 +105,25 @@ function showSaveOverlay() {
     const isPc = window.matchMedia('(pointer:fine)').matches && (navigator.maxTouchPoints || 0) === 0;
     const saveHint = overlay.querySelector('.save-hint');
     if (saveHint) {
-      saveHint.textContent = isPc 
-        ? '新しいタブに開きました。右クリック→「名前を付けて画像を保存」してください。'
+      saveHint.textContent = isPc
+        ? '下の「新しいタブで開く」→ 右クリックで保存'
         : '画像を長押しして保存してください';
+    }
+    
+    // 上位タブで開くボタン（埋め込みでも確実に開く）
+    let openImageLink = overlay.querySelector('#openImageNewTab');
+    if (!openImageLink) {
+      openImageLink = document.createElement('button');
+      openImageLink.id = 'openImageNewTab';
+      openImageLink.textContent = isPc ? '新しいタブで開く（右クリックで保存）' : '新しいタブで開く';
+      openImageLink.style.cssText = 'margin-top:8px;padding:8px 16px;background:#B997D6;color:#fff;border:none;border-radius:6px;font-size:14px;';
+      openImageLink.addEventListener('click', () => {
+        const url = window.__ogpImageUrl || preview.src;
+        try { window.top.location.href = url; } catch (_) { location.href = url; }
+      });
+      if (saveHint && saveHint.parentNode) {
+        saveHint.parentNode.insertBefore(openImageLink, saveHint.nextSibling);
+      }
     }
     
     // ライトボックスを表示
@@ -875,11 +891,16 @@ function initializeApp() {
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
         
-        // OGP画像URLを新規タブで開く（PCは右クリック保存、スマホは長押し保存）
+        // OGP画像URLを保持してオーバーレイで案内（自動ポップアップ禁止）
         const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version}/${encodeURIComponent(public_id)}.png`;
-        safeOpen(ogpImageUrl, '_blank');
+        window.__ogpImageUrl = ogpImageUrl;
         
-        // 保存オーバーレイも表示（フォールバック用）
+        // 共有リンクを更新
+        if (window.updateShareLinksWithImage) {
+          window.updateShareLinksWithImage(imageData, '学生証が完成しました！');
+        }
+        
+        // 保存オーバーレイを表示
         showSaveOverlay();
       } else {
         throw new Error('画像のアップロードに失敗しました');
@@ -973,7 +994,8 @@ function initializeApp() {
       
       // Web IntentでX投稿を開く（text と url を分離してカード確実化）
       const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(baseTweetText)}&url=${encodeURIComponent(shareUrl)}`;
-      location.href = webIntent;
+      // iframe内で開かないよう常にトップへ遷移
+      try { window.top.location.href = webIntent; } catch (_) { location.href = webIntent; }
       
       // 成功時のフィードバック（ポップアップなし）
       console.log('✅ X投稿処理が完了しました');
