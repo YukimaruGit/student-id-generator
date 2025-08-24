@@ -714,6 +714,21 @@
       // 進捗バーの初期化
       setupProgressTracking();
       updateProgress();
+      
+      // 端末別の保存UI
+      const isPc = matchMedia('(pointer:fine)').matches && (navigator.maxTouchPoints || 0) === 0;
+      const saveBtn = document.getElementById('downloadBtn');
+      if (saveBtn) {
+        if (isPc) {
+          // PCはボタン不要（右クリック保存）
+          saveBtn.remove();
+        } else {
+          // モバイルはOGP画像を新規タブで開く（長押し保存）
+          saveBtn.onclick = () => {
+            if (window.__ogpImageUrl) window.open(window.__ogpImageUrl, '_blank', 'noopener');
+          };
+        }
+      }
     });
   </script>
   

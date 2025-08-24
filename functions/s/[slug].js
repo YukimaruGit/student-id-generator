@@ -31,7 +31,7 @@ export async function onRequest(context) {
       const cloudName = 'di5xqlddy';
       const publicId = payload.p;
       const version = payload.v || 1;
-      imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version}/${encodeURIComponent(publicId)}.png`;
+      imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_pad,b_white,fl_force_strip/v${version}/${encodeURIComponent(publicId)}.png`;
     } else {
       return getDefaultResponse(context);
     }
@@ -105,7 +105,7 @@ function getDefaultResponse(context) {
   const shareUrl = context.request.url;
   const title = '夢見が丘女子高等学校 学生証';
   const description = '診断から学生証を自動生成';
-  const defaultImage = 'https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png';
+  const defaultImage = 'https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_pad,b_white,fl_force_strip/v1/student-id-generator/preview.png';
   
   // User-Agent判定
   const userAgent = context.request.headers.get('user-agent') || '';

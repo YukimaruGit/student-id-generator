@@ -1588,7 +1588,9 @@
             'なし': '文芸'
           };
           
-          const mappedClub = clubMapping[result.club] || '文芸';
+          const mappedClub = clubMapping[result.club] ?? (
+            result.club ? (result.club.endsWith('部') ? result.club : result.club + '部') : '軽音部'
+          );
           
           const url = new URL('generator.html', window.location.href);
           url.searchParams.set('department', result.department);

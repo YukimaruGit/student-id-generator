@@ -24,7 +24,7 @@ function buildCldOgUrl({cloudName, public_id, version, eager_url=null}){
   if (eager_url) return eager_url; // 事前生成があれば最優先
   const pidSafe = String(public_id).split('/').map(encodeURIComponent).join('/');
   return `https://res.cloudinary.com/${cloudName}/image/upload/` +
-         `f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/` +
+         `f_auto,q_auto,w_1200,h_630,c_pad,b_white,fl_force_strip/` +
          `v${version}/${pidSafe}.png`;
 }
 
@@ -892,7 +892,7 @@ function initializeApp() {
         window.__lastImageData = imageData;
         
         // OGP画像URLを保持してオーバーレイで案内（自動ポップアップ禁止）
-        const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version}/${encodeURIComponent(public_id)}.png`;
+        const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_pad,b_white,fl_force_strip/v${version}/${encodeURIComponent(public_id)}.png`;
         window.__ogpImageUrl = ogpImageUrl;
         
         // 共有リンクを更新
@@ -994,8 +994,8 @@ function initializeApp() {
       
       // Web IntentでX投稿を開く（text と url を分離してカード確実化）
       const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(baseTweetText)}&url=${encodeURIComponent(shareUrl)}`;
-      // iframe内で開かないよう常にトップへ遷移
-      try { window.top.location.href = webIntent; } catch (_) { location.href = webIntent; }
+      // 常に新しいタブで開く（埋め込みでも安全）
+      try { window.top.open(webIntent, '_blank', 'noopener'); } catch (_) { window.open(webIntent, '_blank', 'noopener'); }
       
       // 成功時のフィードバック（ポップアップなし）
       console.log('✅ X投稿処理が完了しました');
