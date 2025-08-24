@@ -101,8 +101,8 @@ function showSaveOverlay() {
     const saveHint = overlay.querySelector('.save-hint');
     if (saveHint) {
       saveHint.textContent = isPc 
-        ? 'PCは画像を「右クリック」→「名前を付けて画像を保存」'
-        : 'スマホは画像を長押し→「写真に追加」';
+        ? '新しいタブに開きました。右クリック→「名前を付けて画像を保存」してください。'
+        : '画像を長押しして保存してください';
     }
     
     // ライトボックスを表示
@@ -850,11 +850,38 @@ function initializeApp() {
       return;
     }
     try {
-      // 画像保存は常にオーバーレイ保存で統一（埋め込みでも新規タブ不要）
-      await downloadCanvasAsImage(elements.cardCanvas, '学生証.png');
-      showSaveOverlay();
+      showLoading('学生証をシェア用に準備中...');
+      
+      // 学生証画像をCloudinaryにアップロード
+      const imageData = await uploadImageToCloudinary(
+        elements.cardCanvas, 
+        cloudinaryConfig.cloudName, 
+        cloudinaryConfig.uploadPreset
+      );
+      
+      hideLoading();
+      
+      if (imageData.public_id) {
+        // 新しい共有方式：画像URL/バージョン付きJSONスラッグ
+        const { public_id, version, eager } = imageData;
+        const eagerUrl = eager && eager[0] && eager[0].secure_url;
+        const shareUrl = window.buildShareUrlWithImage(public_id, version, eagerUrl);
+        
+        // 画像データを保存（埋め込み時の保存対応用）
+        window.__lastImageData = imageData;
+        
+        // OGP画像URLを新規タブで開く（PCは右クリック保存、スマホは長押し保存）
+        const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version}/${encodeURIComponent(public_id)}.png`;
+        safeOpen(ogpImageUrl, '_blank');
+        
+        // 保存オーバーレイも表示（フォールバック用）
+        showSaveOverlay();
+      } else {
+        throw new Error('画像のアップロードに失敗しました');
+      }
     } catch (error) {
       console.error('ダウンロードエラー:', error);
+      hideLoading();
       // エラー時はライトボックス表示でフォールバック
       try {
         showSaveOverlay();
@@ -934,9 +961,9 @@ function initializeApp() {
       // ツイート文の先頭に共有URLを配置（Xは先頭URLのカードだけ解決）
       const tweetText = `${shareUrl}\n\n${baseTweetText}`;
       
-      // Xアプリで開く（スマホの場合はアプリ起動、PCの場合はWeb intent）
+      // Web IntentでX投稿を開く（アプリ深リンクループ回避）
       const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}`;
-      openXAppOrIntent(webIntent);
+      safeOpen(webIntent, '_blank');
       
       // 成功時のフィードバック（ポップアップなし）
       console.log('✅ X投稿処理が完了しました');

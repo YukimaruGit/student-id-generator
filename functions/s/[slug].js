@@ -44,9 +44,9 @@ export async function onRequest(context) {
     const title = '夢見が丘女子高等学校 学生証';
     const description = '診断から学生証を自動生成';
     
-    // クローラにはOGPメタタグ付きHTMLを返す（リダイレクトしない）
-    if (isBot) {
-      const html = `<!DOCTYPE html>
+          // クローラにはOGPメタタグ付きHTMLを返す（リダイレクトしない）
+      if (isBot) {
+        const html = `<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -79,15 +79,15 @@ export async function onRequest(context) {
   </div>
 </body>
 </html>`;
-      
-      return new Response(html, {
-        status: 200,
-        headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'public, max-age=31536000, immutable'
-        }
-      });
-    }
+        
+        return new Response(html, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'public, max-age=0, s-maxage=600'
+          }
+        });
+      }
     
     // 人間のブラウザは302でジェネレータページへリダイレクト
     const redirectUrl = new URL('/generator.html', context.request.url);
@@ -151,7 +151,7 @@ function getDefaultResponse(context) {
       status: 200,
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=31536000, immutable'
+        'Cache-Control': 'public, max-age=0, s-maxage=600'
       }
     });
   }
