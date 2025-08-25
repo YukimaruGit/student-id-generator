@@ -6,11 +6,11 @@ export default async function onRequest({ request }) {
   
   const decodeB64Url = (s) => {
     s = s.replace(/-/g,'+').replace(/_/g,'/');
-    const pad = s.length % 4;
-    const bin = atob(s + (pad ? '='.repeat(4 - pad) : ''));
-    // Unicode安全復元（btoa(unescape(encodeURIComponent))) の逆）
-    // eslint-disable-next-line no-undef
-    return decodeURIComponent(escape(bin));
+    const pad = s.length % 4; 
+    if (pad) s += '='.repeat(4 - pad);
+    const bin = atob(s);
+    const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
   };
 
   let payload = null;

@@ -331,7 +331,12 @@
     
     // 共有リンク更新関数（app.jsから呼び出される）…UIは保持のみ、ハンドラはapp.jsが参照
     function updateShareLinksWithImage(imageData, text) {
-      const shareUrl = buildShareUrlWithImage({ public_id: imageData.public_id, version: imageData.version, eager: imageData.eager });
+      const shareUrl = buildShareUrlWithImage({
+        public_id: imageData.public_id,
+        version: imageData.version,
+        eager: imageData.eager,
+        eager_url: imageData.eager_url
+      });
       console.log('共有URL更新:', shareUrl);
       // 共有URLを保存
       window.__shareUrl = shareUrl;

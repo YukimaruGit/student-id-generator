@@ -847,7 +847,7 @@ function initializeApp() {
         window.__lastImageData = imageData;
         
         // OGP画像URLを保持してオーバーレイで案内（自動ポップアップ禁止）
-        const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/v${version}/${encodeURIComponent(public_id)}.jpg`;
+        const ogpImageUrl = eager_url || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/v${version}/${public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
         window.__ogpImageUrl = ogpImageUrl;
         
         // 画像 URL をそのまま新しいタブで開く（PC=右クリック保存 / スマホ=共有/保存）
