@@ -105,9 +105,19 @@ function showSaveOverlay() {
     const isPc = window.matchMedia('(pointer:fine)').matches && (navigator.maxTouchPoints || 0) === 0;
     const saveHint = overlay.querySelector('.save-hint');
     if (saveHint) {
-      saveHint.textContent = isPc
-        ? '下の「新しいタブで開く」→ 右クリックで保存'
-        : '画像を長押しして保存してください';
+      const pcHint = saveHint.querySelector('.pc-hint');
+      const mobileHint = saveHint.querySelector('.mobile-hint');
+      
+      if (pcHint && mobileHint) {
+        // 既存の構造を利用
+        pcHint.style.display = isPc ? 'inline' : 'none';
+        mobileHint.style.display = isPc ? 'none' : 'inline';
+      } else {
+        // フォールバック：従来の方式
+        saveHint.textContent = isPc
+          ? '下の「新しいタブで開く」→ 右クリックで保存'
+          : '画像を長押しして保存してください';
+      }
     }
     
     // 上位タブで開くボタン（埋め込みでも確実に開く）
@@ -737,10 +747,9 @@ function initializeApp() {
     const params = new URLSearchParams(location.search);
     const departmentLabel = params.get('course') || '';
     let clubLabel = params.get('club') || '';
-    
-    if (!clubLabel || clubLabel === 'なし' || clubLabel === '') {
-      clubLabel = '文芸';
-    }
+    // 「部」は画像側にあるため表示文字列からは除去、未指定は「帰宅」
+    clubLabel = (clubLabel || '').replace(/部$/,'');
+    if (!clubLabel || clubLabel === 'なし') clubLabel = '帰宅';
 
     document.fonts.ready.then(() => {
       // ================================================================================
@@ -843,8 +852,13 @@ function initializeApp() {
       ctx.font = '22px "Noto Sans JP", sans-serif';
       const [clubX, clubY] = pos(1620, 920);
       if (clubLabel) {
-        const cleanClubName = clubLabel.replace(/部$/, '');
-        ctx.fillText(cleanClubName, clubX, clubY);
+        let displayClubName;
+        if (clubLabel === '帰宅') {
+          displayClubName = 'ー'; // 帰宅部の場合は横棒を表示
+        } else {
+          displayClubName = clubLabel.replace(/部$/, '');
+        }
+        ctx.fillText(displayClubName, clubX, clubY);
       }
 
       // 生年月日 - 完璧な位置に調整済み【絶対変更禁止】
@@ -929,7 +943,8 @@ function initializeApp() {
     if (window.__shareUrl) {
       const baseTweetText = '学生証が完成しました！📣\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター';
       const intent = `https://x.com/intent/post?text=${encodeURIComponent(baseTweetText)}&url=${encodeURIComponent(window.__shareUrl)}`;
-      location.href = intent;
+      // 常に新しいタブで開く（埋め込みでも安全）
+      try { window.top.open(intent, '_blank', 'noopener'); } catch (_) { window.open(intent, '_blank', 'noopener'); }
       return;
     }
     

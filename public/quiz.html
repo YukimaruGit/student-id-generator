@@ -659,9 +659,9 @@
           const em     = p.get('episodeMessage') || '';
 
           const rCourseEl = document.getElementById('resultCourse');
-          const rClubEl   = document.getElementById('resultClub');
-          if (rCourseEl) rCourseEl.textContent = course || dept || rCourseEl.textContent;
-          if (rClubEl)   rClubEl.textContent   = (/部$/.test(club) ? club : (club ? club + '部' : rClubEl.textContent));
+                     const rClubEl   = document.getElementById('resultClub');
+           if (rCourseEl) rCourseEl.textContent = course || dept || rCourseEl.textContent;
+           if (rClubEl)   rClubEl.textContent   = club || rClubEl.textContent;
 
           if (pm) { const el = document.getElementById('previewMsg'); if (el) el.textContent = pm; }
           if (em) { const el = document.getElementById('episodeMsg'); if (el) el.textContent = em; }
@@ -760,10 +760,10 @@
       {
         q: '朝の支度、どんな感じ？',
         choices: [
-          { text:'ぎりぎりまで寝てる', scores:{ course:'', club:'軽音部', vibe:4 } },
+          { text:'ぎりぎりまで寝てる', scores:{ course:'', club:'帰宅', vibe:4 } },
           { text:'支度は前日に完璧', scores:{ course:'特進コース', club:'', vibe:1 } },
           { text:'なんとなくでOK', scores:{ course:'', club:'美術', vibe:3 } },
-          { text:'毎朝ドタバタしてる', scores:{ course:'', club:'ダンス部', vibe:5 } }
+          { text:'毎朝ドタバタしてる', scores:{ course:'', club:'ダンス', vibe:5 } }
         ]
       },
       {
@@ -778,26 +778,26 @@
       {
         q: 'お昼休みの過ごし方は？',
         choices: [
-          { text:'友達とワイワイご飯', scores:{ course:'', club:'演劇部', vibe:4 } },
+          { text:'友達とワイワイご飯', scores:{ course:'', club:'演劇', vibe:4 } },
           { text:'図書室でのんびり読書', scores:{ course:'', club:'図書', vibe:2 } },
-          { text:'校庭で遊ぶ', scores:{ course:'', club:'陸上部', vibe:3 } },
-          { text:'購買ダッシュ', scores:{ course:'', club:'バスケットボール部', vibe:5 } }
+          { text:'校庭で遊ぶ', scores:{ course:'', club:'陸上', vibe:3 } },
+          { text:'購買ダッシュ', scores:{ course:'', club:'バスケットボール', vibe:5 } }
         ]
       },
       {
         q: '体育の時間といえば？',
         choices: [
-          { text:'全力で勝ちにいく！', scores:{ course:'', club:'テニス部', vibe:2 } },
-          { text:'まあまあ楽しむ派', scores:{ course:'', club:'バレーボール部', vibe:3 } },
-          { text:'見学したい……', scores:{ course:'', club:'文芸', vibe:1 } },
-          { text:'体育祭だけ本気出す', scores:{ course:'', club:'ダンス部', vibe:4 } }
+          { text:'全力で勝ちにいく！', scores:{ course:'', club:'テニス', vibe:2 } },
+          { text:'まあまあ楽しむ派', scores:{ course:'', club:'バレーボール', vibe:3 } },
+          { text:'見学したい……', scores:{ course:'', club:'帰宅', vibe:1 } },
+          { text:'体育祭だけ本気出す', scores:{ course:'', club:'ダンス', vibe:4 } }
         ]
       },
       {
         q: '放課後の予定は？',
         choices: [
-          { text:'部活に全力！', scores:{ course:'', club:'吹奏楽部', vibe:2 } },
-          { text:'友達と寄り道', scores:{ course:'', club:'軽音部', vibe:4 } },
+          { text:'部活に全力！', scores:{ course:'', club:'吹奏楽', vibe:2 } },
+          { text:'友達と寄り道', scores:{ course:'', club:'帰宅', vibe:4 } },
           { text:'即帰宅', scores:{ course:'', club:'帰宅', vibe:3 } },
           { text:'学校に残って自主練や自習', scores:{ course:'特進コース', club:'', vibe:1 } }
         ]
@@ -806,27 +806,27 @@
         q: 'テスト期間中、あなたは…？',
         choices: [
           { text:'計画的にコツコツ', scores:{ course:'特進コース', club:'', vibe:1 } },
-          { text:'一夜漬け', scores:{ course:'', club:'軽音部', vibe:5 } },
-          { text:'勉強会を開催', scores:{ course:'', club:'演劇部', vibe:3 } },
-          { text:'ノリと勢い', scores:{ course:'', club:'ダンス部', vibe:4 } }
+          { text:'一夜漬け', scores:{ course:'', club:'帰宅', vibe:5 } },
+          { text:'勉強会を開催', scores:{ course:'', club:'演劇', vibe:3 } },
+          { text:'ノリと勢い', scores:{ course:'', club:'ダンス', vibe:4 } }
         ]
       },
       {
         q: '文化祭でやってみたいことは？',
         choices: [
-          { text:'演劇やダンスのステージ', scores:{ course:'', club:'演劇部', vibe:3 } },
-          { text:'模擬店や屋台運営', scores:{ course:'', club:'バスケットボール部', vibe:4 } },
+          { text:'演劇やダンスのステージ', scores:{ course:'', club:'演劇', vibe:3 } },
+          { text:'模擬店や屋台運営', scores:{ course:'', club:'バスケットボール', vibe:4 } },
           { text:'展示や制作系の出し物', scores:{ course:'美術コース', club:'', vibe:2 } },
-          { text:'お化け屋敷や脱出ゲーム', scores:{ course:'', club:'ホラー布教部', vibe:5 } }
+          { text:'お化け屋敷や脱出ゲーム', scores:{ course:'', club:'ホラー布教', vibe:5 } }
         ]
       },
       {
         q: '忘れ物した時どうする？',
         choices: [
           { text:'正直に言って謝る', scores:{ course:'特進コース', club:'', vibe:1 } },
-          { text:'誰かに借りる', scores:{ course:'', club:'演劇部', vibe:3 } },
+          { text:'誰かに借りる', scores:{ course:'', club:'演劇', vibe:3 } },
           { text:'そもそも気づかない', scores:{ course:'', club:'美術', vibe:4 } },
-          { text:'なんとか誤魔化す', scores:{ course:'', club:'軽音部', vibe:5 } }
+          { text:'なんとか誤魔化す', scores:{ course:'', club:'帰宅', vibe:5 } }
         ]
       },
       {
@@ -834,28 +834,47 @@
         choices: [
           { text:'自信あり', scores:{ course:'特進コース', club:'', vibe:2 } },
           { text:'とにかく祈る', scores:{ course:'', club:'文芸', vibe:3 } },
-          { text:'周りの点数が気になる', scores:{ course:'', club:'演劇部', vibe:4 } },
-          { text:'これ何の教科だっけ？', scores:{ course:'', club:'軽音部', vibe:5 } }
+          { text:'周りの点数が気になる', scores:{ course:'', club:'演劇', vibe:4 } },
+          { text:'これ何の教科だっけ？', scores:{ course:'', club:'帰宅', vibe:5 } }
         ]
       },
       {
         q: '学校行事で一番燃えるのは？',
         choices: [
-          { text:'体育祭', scores:{ course:'', club:'陸上部', vibe:3 } },
-          { text:'文化祭', scores:{ course:'', club:'演劇部', vibe:4 } },
+          { text:'体育祭', scores:{ course:'', club:'陸上', vibe:3 } },
+          { text:'文化祭', scores:{ course:'', club:'演劇', vibe:4 } },
           { text:'合唱コンクール', scores:{ course:'音楽コース', club:'', vibe:2 } },
           { text:'修学旅行', scores:{ course:'英語コース', club:'', vibe:5 } }
         ]
       }
     ];
 
-    // ゲーム状態
-    let currentQuestion = 0;
-    let scores = {
-      course: { '特進コース': 0, '英語コース': 0, '音楽コース': 0, '美術コース': 0 },
-      club: {},
-      vibe: 0
-    };
+         // ゲーム状態
+     let currentQuestion = 0;
+     let scores = {
+       course: { '特進コース': 0, '英語コース': 0, '音楽コース': 0, '美術コース': 0 },
+       club: {},
+       vibe: 0
+     };
+
+     // 正規化テーブル & ウェイト
+     const CLUB_SET = [
+       '陸上','テニス','バドミントン','バスケットボール','バレーボール','水泳','ダンス',
+       '声楽','吹奏楽','絵画','彫刻','放送','英語研究','演劇','茶道','華道','帰宅','ホラー布教'
+     ];
+     const CLUB_WEIGHT = Object.fromEntries(CLUB_SET.map(k => [k, 1]));
+     CLUB_WEIGHT['ホラー布教'] = 0.15; // レア
+
+     function normalizeClub(raw) {
+       if (!raw) return '';
+       let c = String(raw).replace(/部$/,'');       // 語尾「部」を除去
+       // 表記ゆれ吸収
+       if (c === '軽音') c = '吹奏楽';
+       if (c === '美術') c = '絵画';
+       if (c === '文芸' || c === '図書') c = '英語研究';
+       // 既定セット外は弾く
+       return CLUB_SET.includes(c) ? c : '';
+     }
 
     // 質問表示
     function showQuestion(index) {
@@ -937,15 +956,16 @@
         const choice = question.choices[answerIndex];
         console.log('📝 選択した回答:', choice.text);
         
-        // スコア計算（エラーハンドリング付き）
-        try {
-          if (choice.scores.course) {
-            scores.course[choice.scores.course] = (scores.course[choice.scores.course] || 0) + 1;
-          }
-          if (choice.scores.club) {
-            scores.club[choice.scores.club] = (scores.club[choice.scores.club] || 0) + 1;
-          }
-          scores.vibe += choice.scores.vibe || 0;
+                 // スコア計算（エラーハンドリング付き）
+         try {
+           if (choice.scores.course) {
+             scores.course[choice.scores.course] = (scores.course[choice.scores.course] || 0) + 1;
+           }
+           if (choice.scores.club) {
+             const club = normalizeClub(choice.scores.club);
+             if (club) scores.club[club] = (scores.club[club] || 0) + 1;
+           }
+           scores.vibe += choice.scores.vibe || 0;
           
           console.log('📊 現在のスコア:', { course: scores.course, club: Object.keys(scores.club).length, vibe: scores.vibe });
         } catch (scoreError) {
@@ -1042,10 +1062,17 @@
           displayCourse = '普通科（一般コース）';
       }
       
-      // 部活決定
-      const clubEntries = Object.entries(scores.club);
-      const club = clubEntries.length > 0 ? 
-        clubEntries.reduce((a, b) => a[1] > b[1] ? a : b)[0] : '帰宅';
+             // 部活決定（平滑化 + レア抑制 + 僅差はランダム）
+       // 1) ラプラス平滑化（通常: +1, ホラー: +0.15）
+       const prior = {};
+       for (const k of CLUB_SET) prior[k] = (scores.club[k] || 0) + (CLUB_WEIGHT[k] === 0.15 ? 0.15 : 1);
+       // 2) レア抑制（重み乗算）
+       const adjusted = Object.fromEntries(Object.entries(prior).map(([k,v]) => [k, v * CLUB_WEIGHT[k]]));
+       const entries = Object.entries(adjusted).filter(([k,v]) => v > 0);
+       // 3) 最大値 ±10% を同率扱いにしランダム
+       const max = Math.max(...entries.map(([,v]) => v));
+       const band = entries.filter(([,v]) => v >= max * 0.90);
+       const club = (band.length ? band[Math.floor(Math.random()*band.length)][0] : '帰宅');
       
       return { department, course, displayCourse, club };
     }
@@ -1079,14 +1106,14 @@
       
       const result = calculateResult();
       
-      document.getElementById('resultCourse').textContent = result.displayCourse;
-      
-      const clubDisplayName = result.club.endsWith('部') ? result.club : result.club + '部';
-      document.getElementById('resultClub').textContent = clubDisplayName;
-      
-      // プレビューメッセージ
-      const msgTemplate = previewMessages[Math.floor(Math.random() * previewMessages.length)];
-      const previewMessage = msgTemplate.replace('${club}', clubDisplayName);
+             document.getElementById('resultCourse').textContent = result.displayCourse;
+       
+       // 表示は語尾「部」を付けない（カード画像に表記あり）
+       document.getElementById('resultClub').textContent = result.club;
+       
+       // プレビューメッセージ
+       const msgTemplate = previewMessages[Math.floor(Math.random() * previewMessages.length)];
+       const previewMessage = msgTemplate.replace('${club}', result.club);
       document.getElementById('previewMsg').textContent = previewMessage;
       
       // エピソード
@@ -1095,18 +1122,22 @@
       
       // ボタン設定
       document.getElementById('toGeneratorBtn').onclick = () => {
-        const clubMapping = {
-          '陸上部': '陸上部', 'テニス部': 'テニス部', 'バスケットボール部': 'バスケットボール部',
-          'バレーボール部': 'バレーボール部', 'バドミントン部': 'バドミントン部', '水泳部': '水泳部',
-          'ダンス部': 'ダンス部', '声楽部': '声楽部', '吹奏楽部': '吹奏楽部', '絵画部': '絵画部',
-          '彫刻部': '彫刻部', '放送部': '放送部', '英語研究部': '英語研究部', '演劇部': '演劇部',
-          '茶道部': '茶道部', '華道部': '華道部', 'ホラー布教部': 'ホラー布教部', '軽音部': '軽音部',
-          '帰宅': '文芸', 'なし': '文芸'
+        // 画像側に「部」が印字済みのため、テキストには付けない
+        const baseClubMap = {
+          '陸上': '陸上', 'テニス': 'テニス', 'バドミントン': 'バドミントン',
+          'バスケットボール': 'バスケットボール', 'バレーボール': 'バレーボール',
+          '水泳': '水泳', 'ダンス': 'ダンス',
+          '声楽': '声楽', '吹奏楽': '吹奏楽', '絵画': '絵画', '彫刻': '彫刻',
+          '放送': '放送', '英語研究': '英語研究', '演劇': '演劇', '茶道': '茶道', '華道': '華道',
+          '帰宅': '帰宅', 'なし': '帰宅'
         };
         
-        const mappedClub = clubMapping[result.club] ?? (
-          result.club ? (result.club.endsWith('部') ? result.club : result.club + '部') : '軽音部'
-        );
+        const normalizeClub = (raw) => {
+          const s = (raw || '').replace(/部$/,'');
+          if (!s) return '帰宅';
+          return baseClubMap[s] ?? s;
+        };
+        const mappedClub = normalizeClub(result.club);
         
         const url = new URL('generator.html', window.location.href);
         url.searchParams.set('department', result.department);

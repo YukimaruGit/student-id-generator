@@ -334,8 +334,24 @@
     function updateShareLinksWithImage(imageData, text) {
       const shareUrl = buildShareUrlWithImage(imageData.public_id, imageData.version, imageData.eager_url);
       console.log('共有URL更新:', shareUrl);
-      // グローバルに保持（ボタンはこれを最優先で利用）
+      // 共有URLを保存
       window.__shareUrl = shareUrl;
+      
+      // URLコピー
+      const urlBtn = document.getElementById('urlBtn');
+      if (urlBtn) urlBtn.onclick = () => copyTextReliable(window.__shareUrl);
+      
+      // X投稿（web intent & 新規タブ）
+      const twitterBtn = document.getElementById('twitterBtn');
+      if (twitterBtn) {
+        const baseTweetText =
+          '学生証が完成しました！📣\n\n#放課後クロニクル #学生証ジェネレーター';
+        const webIntent =
+          `https://x.com/intent/post?text=${encodeURIComponent(baseTweetText)}` +
+          `&url=${encodeURIComponent(window.__shareUrl)}`;
+        twitterBtn.onclick = () => window.open(webIntent, '_blank', 'noopener');
+      }
+      
       // 表示用フィールドがあれば更新
       const field = document.getElementById('shareLinkField');
       if (field) field.value = shareUrl;
@@ -352,6 +368,24 @@
     }
     
 
+  </script>
+  
+  <!-- 直アクセス防止：診断未実施なら診断ゲームへ誘導 -->
+  <script>
+    (() => {
+      const sp = new URLSearchParams(location.search);
+      const hasParams = ['department','course','club'].some(k => sp.has(k));
+      // 診断結果をセッションに保持しているキー（あなたの実装に合わせて両対応）
+      const hasCtx =
+        sessionStorage.getItem('diagCtx') ||
+        sessionStorage.getItem('as_chronicle_diagnosis');
+      const inEmbed = sp.get('embed') === '1' || (window !== window.top);
+
+      if (!hasParams && !hasCtx && !inEmbed) {
+        // 直リンク/履歴復帰で generator に来たと判断 → 診断へ誘導
+        location.replace('./index.html'); // または './quiz.html'
+      }
+    })();
   </script>
 </head>
 <body>
@@ -746,7 +780,10 @@
   <div id="saveOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;z-index:2147483647;align-items:center;justify-content:center;flex-direction:column;">
     <img id="savePreview" alt="長押しで保存" style="max-width:92vw;max-height:80vh;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);" />
     <button id="saveOverlayClose" style="margin-top:12px;padding:.6rem 1rem;border-radius:10px;border:0;background:#444;color:#fff;">閉じる</button>
-    <div class="save-hint" style="margin-top:6px;color:#ddd;font-size:.9rem;">長押しで「写真に追加」</div>
+    <div class="save-hint" style="margin-top:6px;color:#ddd;font-size:.9rem;">
+      <span class="pc-hint" style="display: none;">PCは画像の上で右クリック →「名前を付けて画像を保存」できます</span>
+      <span class="mobile-hint">長押しで「写真に追加」</span>
+    </div>
   </div>
 </body>
 </html> 
