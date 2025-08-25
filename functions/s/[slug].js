@@ -40,12 +40,15 @@ export async function onRequest(context) {
       const cloudName = 'di5xqlddy';
       const publicId = payload.p;
       const version = payload.v || 1;
-      // フォルダの「/」はエンコードしない。各セグメントだけエンコードする
-      const encodedPublicId = publicId
-        .split('/')
-        .map(encodeURIComponent)
-        .join('/');
-      imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto,fl_force_strip/v${version}/${encodedPublicId}.png`;
+      
+      // 互換性最優先で JPEG に固定（Discord / X で確実に出る）
+      function buildOgImageJpeg({ cloud, publicId, version }) {
+        const baseId = encodeURIComponent(publicId).replace(/%2F/g, '/');
+        return `https://res.cloudinary.com/${cloud}/image/upload/` +
+               `c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/` +
+               `v${version}/${baseId}.jpg`;
+      }
+      imageUrl = buildOgImageJpeg({ cloud: cloudName, publicId, version });
     } else {
       return getDefaultResponse(context);
     }

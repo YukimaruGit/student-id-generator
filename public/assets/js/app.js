@@ -99,6 +99,53 @@ window.cloudinaryConfig = window.cloudinaryConfig || {
 };
 const cloudinaryConfig = window.cloudinaryConfig;
 
+// X投稿の深リンク制御（アプリ起動成功時はフォールバックをキャンセル）
+function openXAppOrIntent(webIntentUrl, tweetText) {
+  const ua = navigator.userAgent || '';
+  const isIOS = /iP(hone|od|ad)/.test(ua);
+  const isAndroid = /Android/i.test(ua);
+  const deepLink = `twitter://post?message=${encodeURIComponent(tweetText)}`;
+
+  // PC は常に Web Intent を新規タブで
+  if (!isIOS && !isAndroid) {
+    window.open(webIntentUrl, '_blank', 'noopener');
+    return;
+  }
+
+  // モバイル：まずアプリ深リンク、失敗時だけ Web Intent へ
+  let fired = false;
+  const cancel = () => {
+    if (fired) return;
+    fired = true;
+    clearTimeout(timer);
+    window.removeEventListener('visibilitychange', onHidden, true);
+    window.removeEventListener('pagehide', onHidden, true);
+  };
+  const onHidden = () => {
+    // アプリに遷移してタブが非表示になった → フォールバック中止
+    if (document.hidden) cancel();
+  };
+  window.addEventListener('visibilitychange', onHidden, true);
+  window.addEventListener('pagehide', onHidden, true);
+
+  // 失敗フォールバック（1.2s 後に Web Intent を同タブ遷移）
+  const timer = setTimeout(() => {
+    if (!fired) {
+      fired = true;
+      window.location.href = webIntentUrl;
+    }
+  }, 1200);
+
+  // アプリを開く
+  try {
+    window.location.href = deepLink;
+  } catch {
+    // 例外時は即フォールバック
+    clearTimeout(timer);
+    window.location.href = webIntentUrl;
+  }
+}
+
 // 設定の検証
 if (!cloudinaryConfig.cloudName || !cloudinaryConfig.uploadPreset) {
   console.error('❌ Cloudinary設定が不完全です。cloudNameとuploadPresetを確認してください。');
@@ -860,13 +907,7 @@ function initializeApp() {
 
         // 2) フォールバック: Web Intent（新しいタブで安定）
         const intent = `https://x.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
-        const a = document.createElement('a');
-        a.href = intent;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        openXAppOrIntent(intent, tweet);
         return;
       }
     
@@ -950,13 +991,7 @@ function initializeApp() {
 
       // 2) フォールバック: Web Intent（新しいタブで安定）
       const webIntent = `https://x.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
-      const a = document.createElement('a');
-      a.href = webIntent;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      openXAppOrIntent(webIntent, tweet);
       
       // 成功時のフィードバック（ポップアップなし）
       console.log('✅ X投稿処理が完了しました');
