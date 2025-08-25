@@ -40,7 +40,9 @@ export async function onRequest(context) {
       const cloudName = 'di5xqlddy';
       const publicId = payload.p;
       const version = payload.v || 1;
-      imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto,fl_force_strip/v${version}/${encodeURIComponent(publicId)}.png`;
+      // セグメントごとにエンコード（フォルダ区切り/を保持）
+      const pidSafe = publicId.split('/').map(encodeURIComponent).join('/');
+      imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto,fl_force_strip/v${version}/${pidSafe}.png`;
     } else {
       return getDefaultResponse(context);
     }
@@ -53,9 +55,9 @@ export async function onRequest(context) {
     const title = '夢見が丘女子高等学校 学生証';
     const description = '診断から学生証を自動生成';
     
-          // クローラにはOGPメタタグ付きHTMLを返す（リダイレクトしない）
-      if (isBot) {
-        const html = `<!DOCTYPE html>
+    // クローラにはOGPメタタグ付きHTMLを返す（リダイレクトしない）
+    if (isBot) {
+      const html = `<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -88,18 +90,18 @@ export async function onRequest(context) {
   </div>
 </body>
 </html>`;
-        
-        return new Response(html, {
-          status: 200,
-          headers: {
-            'Content-Type': 'text/html; charset=utf-8',
-            'Cache-Control': 'public, max-age=0, s-maxage=600'
-          }
-        });
-      }
+      
+      return new Response(html, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'public, max-age=0, s-maxage=600'
+        }
+      });
+    }
     
-    // 人間のブラウザは302でジェネレータページへリダイレクト（絶対URL）
-    const to = `https://student-id-generator.pages.dev/generator.html?share=${encodeURIComponent(slug)}`;
+    // 人間のブラウザは302でStudioの診断ページへリダイレクト（絶対URL）
+    const to = 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
     return Response.redirect(to, 302);
     
   } catch (error) {
@@ -163,7 +165,7 @@ function getDefaultResponse(context) {
     });
   }
   
-  // 人間のブラウザはジェネレータページへリダイレクト（絶対URL）
-  const to = `https://student-id-generator.pages.dev/generator.html`;
+  // 人間のブラウザはStudioの診断ページへリダイレクト（絶対URL）
+  const to = 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
   return Response.redirect(to, 302);
 }

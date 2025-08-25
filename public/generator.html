@@ -273,9 +273,7 @@
       overflow: visible !important;
     }
     
-    /* 保存案内の表示切替 */
-    @media (pointer:fine) and (hover:hover){ .pc-only{display:inline} .sp-only{display:none} }
-    @media (pointer:coarse){ .pc-only{display:none} .sp-only{display:inline} }
+
     
     /* プレビューのキャンバスは 8:5 を厳守して伸縮 */
     .preview-card .card-body canvas#cardCanvas{
@@ -524,10 +522,9 @@
         <div class="card-body">
           <canvas id="cardCanvas" width="800" height="500"></canvas>
         </div>
-        <p class="save-mini-hint" style="margin:.5rem 0 0; font-size:12px; color:#888; text-align:center;">
-          <span class="pc-only">※画像の上で <b>右クリック →「名前を付けて画像を保存」</b></span>
-          <span class="sp-only" style="display:none;">※画像を <b>長押しで保存</b>（保存できない端末は「画像を開く」をご利用ください）</span>
-        </p>
+        <small style="display:block; margin:.5rem 0 0; font-size:12px; color:#888; text-align:center;">
+          ※PCはプレビュー画像の上で右クリック →「名前を付けて画像を保存」
+        </small>
         <div class="card-footer">
           <button type="button" id="downloadBtn">
             画像を保存
@@ -802,14 +799,6 @@
   
   <!-- 共有機能は app.js で統一管理 -->
   
-  <!-- 保存用ライトボックス（同一タブ、長押し保存用） -->
-  <div id="saveOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;z-index:2147483647;align-items:center;justify-content:center;flex-direction:column;">
-    <img id="savePreview" alt="長押しで保存" style="max-width:92vw;max-height:80vh;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);" />
-    <button id="saveOverlayClose" style="margin-top:12px;padding:.6rem 1rem;border-radius:10px;border:0;background:#444;color:#fff;">閉じる</button>
-    <div class="save-hint" style="margin-top:6px;color:#ddd;font-size:.9rem;">
-      <span class="pc-hint" style="display: none;">PCは画像の上で右クリック →「名前を付けて画像を保存」できます</span>
-      <span class="mobile-hint">長押しで「写真に追加」</span>
-    </div>
-  </div>
+
 </body>
 </html> 

@@ -898,21 +898,15 @@ function initializeApp() {
           window.updateShareLinksWithImage(imageData, '学生証が完成しました！');
         }
         
-        // 保存オーバーレイを表示
-        showSaveOverlay();
+        // 保存オーバーレイは表示しない（モバイルは新規タブで画像を開く）
       } else {
         throw new Error('画像のアップロードに失敗しました');
       }
     } catch (error) {
       console.error('ダウンロードエラー:', error);
       hideLoading();
-      // エラー時はライトボックス表示でフォールバック
-      try {
-        showSaveOverlay();
-      } catch (fallbackError) {
-        console.error('フォールバックエラー:', fallbackError);
-        alert('画像の保存に失敗しました。もう一度お試しください。');
-      }
+      // エラー時はアラートのみ表示
+      alert('画像の保存に失敗しました。もう一度お試しください。');
     }
   });
 
@@ -932,19 +926,25 @@ function initializeApp() {
         const clubParam = /部$/.test(rawClubParam) ? rawClubParam : `${rawClubParam}部`;
 
         const tweet = [
+          `${window.__shareUrl}`,
+          '',
           '🏫夢見が丘女子高等学校 入学診断',
           `【${courseParam}】の【${clubParam}】になりました！`,
           '診断の最後には、自分だけの学生証ももらえます🎓📸',
           '',
           '君も放課後クロニクルの世界へ――',
           '',
-          '#放課後クロニクル #学生証メーカー',
-          `▶︎ ${window.__shareUrl}`
+          '#放課後クロニクル #学生証メーカー'
         ].join('\n');
 
         const intent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
-        // 常に新しいタブで開く（埋め込みでも安全）
-        try { window.top.open(intent, '_blank', 'noopener'); } catch (_) { window.open(intent, '_blank', 'noopener'); }
+        // モバイル：同一タブ、PC：新規タブ
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+          location.href = intent; // たらい回し軽減、戻るで復帰可
+        } else {
+          window.open(intent, '_blank', 'noopener'); // PCは新規タブ
+        }
         return;
       }
     
@@ -1004,19 +1004,25 @@ function initializeApp() {
       const clubName = /部$/.test(rawClubName) ? rawClubName : `${rawClubName}部`;
 
       const tweet = [
+        `${shareUrl}`,
+        '',
         '🏫夢見が丘女子高等学校 入学診断',
         `【${courseName}】の【${clubName}】になりました！`,
         '診断の最後には、自分だけの学生証ももらえます🎓📸',
         '',
         '君も放課後クロニクルの世界へ――',
         '',
-        '#放課後クロニクル #学生証メーカー',
-        `▶︎ ${shareUrl}`
+        '#放課後クロニクル #学生証メーカー'
       ].join('\n');
 
       const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
-      // 常に新しいタブで開く（埋め込みでも安全）
-      try { window.top.open(webIntent, '_blank', 'noopener'); } catch (_) { window.open(webIntent, '_blank', 'noopener'); }
+      // モバイル：同一タブ、PC：新規タブ
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile) {
+        location.href = webIntent; // たらい回し軽減、戻るで復帰可
+      } else {
+        window.open(webIntent, '_blank', 'noopener'); // PCは新規タブ
+      }
       
       // 成功時のフィードバック（ポップアップなし）
       console.log('✅ X投稿処理が完了しました');
