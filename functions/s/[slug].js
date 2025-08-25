@@ -41,10 +41,19 @@ export default async function onRequest({ request }) {
   if (payload?.p && payload?.v) {
     ogImg = buildOgpUrl({ i: payload.i, p: payload.p, v: payload.v });
   }
+  
+  // デバッグ情報（開発時のみ）
+  console.log('OGP Debug:', {
+    userAgent: ua,
+    isBot: isBot,
+    payload: payload,
+    ogImg: ogImg,
+    url: url.href
+  });
 
   // ---- Bot には 200 でOGP HTMLを返す ----
-  // ボット判定を少し強化
-  const isBot = /(Twitterbot|X-Twitter|Discordbot|Slackbot|facebookexternalhit|LinkedInBot|WhatsApp|TelegramBot|Pinterestbot)/i.test(ua);
+  // ボット判定を強化（より多くのSNSクローラーに対応）
+  const isBot = /(Twitterbot|X-Twitter|Discordbot|Slackbot|facebookexternalhit|LinkedInBot|WhatsApp|TelegramBot|Pinterestbot|Discord|Slack|Line|Discord-Webhook|Discord-Embed|Slack-Webhook|Slack-Embed)/i.test(ua);
   if (isBot) {
     const html = `<!doctype html><html lang="ja"><head>
 <meta charset="utf-8">
