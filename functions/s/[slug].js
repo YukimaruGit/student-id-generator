@@ -48,9 +48,15 @@ export default async function onRequest({ request }) {
   }
 
   // ---- Bot には 200 でOGP HTMLを返す ----
-  // ボット判定を少し強化
-  const isBot = /(Twitterbot|X-Twitter|Discordbot|Slackbot|facebookexternalhit|LinkedInBot|WhatsApp|TelegramBot|Pinterestbot)/i.test(ua);
-  if (isBot) {
+  // ボット判定をより限定的に（人間アクセスは確実に302へ）
+  const isBot = /(Twitterbot|Discordbot|Slackbot|facebookexternalhit|LinkedInBot|WhatsApp|TelegramBot|Pinterestbot)/i.test(ua);
+  // ※ "X-Twitter" は人間の UA と誤衝突しやすいので除外
+  
+  // プリフェッチ（Sec-Purpose: prefetch）もBot扱い
+  const secPurpose = request.headers.get('sec-purpose') || '';
+  const isPrefetch = /prefetch/i.test(secPurpose);
+  
+  if (isBot || isPrefetch) {
     const html = `<!doctype html><html lang="ja"><head>
 <meta charset="utf-8">
 <title>夢見が丘女子高等学校 学生証</title>

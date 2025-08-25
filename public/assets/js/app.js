@@ -104,6 +104,9 @@ async function shareToX(tweetText) {
   const ua = navigator.userAgent || '';
   const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
   const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}`;
+  
+  // iframe内でも最上位で遷移（真っ白・タブ増殖・Safari経由ループを防止）
+  const nav = (window.top && window.top !== window && 'location' in window.top) ? window.top : window;
 
   // 1) ネイティブ共有
   if (isMobile && navigator.share) {
@@ -130,13 +133,13 @@ async function shareToX(tweetText) {
     window.addEventListener('pagehide', onHide, true);
 
     const t = setTimeout(() => { 
-      if (!cancelled) location.href = webIntent; 
+      if (!cancelled) nav.location.href = webIntent; 
     }, 1200);
     try { 
-      location.href = deep; 
+      nav.location.href = deep; 
     } catch { 
       clearTimeout(t); 
-      location.href = webIntent; 
+      nav.location.href = webIntent; 
     }
     return;
   }
@@ -144,7 +147,7 @@ async function shareToX(tweetText) {
   // 3) PC
   const a = document.createElement('a');
   a.href = webIntent; 
-  a.target = '_blank'; 
+  a.target = (nav === window.top) ? '_blank' : '_top'; 
   a.rel = 'noopener';
   document.body.appendChild(a); 
   a.click(); 
@@ -259,12 +262,7 @@ async function downloadCanvasAsImage(canvas, filename = '学生証.png') {
 
 
 
-// X共有機能（廃止：常にWeb Intentを新規タブで開く）
-function openXAppOrIntent(webIntent) {
-  // 深リンク挙動を排除し、常にWeb Intentを新規タブで開く
-  window.open(webIntent, '_blank', 'noopener');
-  return;
-}
+// 古い実装の残骸を削除済み
 
 // コピー処理を一元化
 async function copyTextReliable(text) {
