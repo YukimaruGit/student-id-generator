@@ -46,7 +46,6 @@ export default async function onRequest({ request }) {
   // ボット判定を少し強化
   const isBot = /(Twitterbot|X-Twitter|Discordbot|Slackbot|facebookexternalhit|LinkedInBot|WhatsApp|TelegramBot|Pinterestbot)/i.test(ua);
   if (isBot) {
-    const canonical = `https://preview.studio.site/live/1Va6D4lMO7/student-id`;
     const html = `<!doctype html><html lang="ja"><head>
 <meta charset="utf-8">
 <title>夢見が丘女子高等学校 学生証</title>
@@ -61,17 +60,7 @@ export default async function onRequest({ request }) {
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="${ogImg}">
 <link rel="canonical" href="${url.href}">
-</head><body>
-<script>
-  // 人間のブラウザはStudioへ即時リダイレクト
-  if (!/bot|crawler|spider/i.test(navigator.userAgent)) {
-    window.top.location.replace('https://preview.studio.site/live/1Va6D4lMO7/student-id');
-  }
-</script>
-<noscript>
-  <meta http-equiv="refresh" content="0;url=https://preview.studio.site/live/1Va6D4lMO7/student-id">
-</noscript>
-</body></html>`;
+</head><body></body></html>`;
     return new Response(html, {
       headers: {
         'content-type':'text/html; charset=utf-8',
@@ -81,10 +70,8 @@ export default async function onRequest({ request }) {
     });
   }
 
-  // ---- 人間は現在のサイトのトップページへ 302 ----
-  // リクエストURLを元に、同じドメインのトップページにリダイレクト
-  const baseUrl = new URL(request.url);
-  const dest = new URL('/', baseUrl);
-  dest.searchParams.set('share', slug);
-  return Response.redirect(dest.toString(), 302);
+  // ---- 人間は指定のStudioページへ 302 ----
+  // 期待されるリダイレクト先URLにslugをshareパラメータとして付与
+  const dest = `https://preview.studio.site/live/1Va6D4lMO7/student-id?share=${encodeURIComponent(slug)}`;
+  return Response.redirect(dest, 302);
 }
