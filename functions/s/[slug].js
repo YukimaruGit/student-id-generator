@@ -3,24 +3,33 @@ export async function onRequest(context) {
   try {
     const { slug } = context.params;
     
-    // Base64URL → JSON で復号（後方互換対応）
+    // Base64URL → 短縮スラッグ or JSON で復号（新旧両対応）
     let payload;
     try {
-      // Base64URL → Base64 → JSON
+      // Base64URL → Base64 → 文字列
       const base64 = slug.replace(/-/g, '+').replace(/_/g, '/');
       const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
-      const jsonStr = decodeURIComponent(atob(padded));
-      payload = JSON.parse(jsonStr);
-    } catch (e) {
-      // 旧形式: public_id のみを Base64URL しているケース
-      try {
-        const base64 = slug.replace(/-/g, '+').replace(/_/g, '/');
-        const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
-        const publicId = decodeURIComponent(atob(padded));
-        payload = { p: publicId, v: 1 };
-      } catch (_) {
-        return getDefaultResponse(context);
+      const decoded = decodeURIComponent(atob(padded));
+      
+      // 新形式: "v:VERSION:PUBLIC_ID" の短縮スラッグ
+      if (decoded.startsWith('v:')) {
+        const parts = decoded.split(':');
+        if (parts.length >= 3) {
+          const version = parts[1];
+          const publicId = parts.slice(2).join(':'); // コロンを含むpublic_idに対応
+          payload = { p: publicId, v: parseInt(version) || 1 };
+        } else {
+          return getDefaultResponse(context);
+        }
+      } else if (decoded.startsWith('{')) {
+        // 旧形式: JSON スラッグ
+        payload = JSON.parse(decoded);
+      } else {
+        // 旧形式: public_id のみを Base64URL しているケース
+        payload = { p: decoded, v: 1 };
       }
+    } catch (e) {
+      return getDefaultResponse(context);
     }
     
     // 画像URLを構築
@@ -31,7 +40,7 @@ export async function onRequest(context) {
       const cloudName = 'di5xqlddy';
       const publicId = payload.p;
       const version = payload.v || 1;
-      imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_pad,b_white,fl_force_strip/v${version}/${encodeURIComponent(publicId)}.png`;
+      imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto,fl_force_strip/v${version}/${encodeURIComponent(publicId)}.png`;
     } else {
       return getDefaultResponse(context);
     }
@@ -105,7 +114,7 @@ function getDefaultResponse(context) {
   const shareUrl = context.request.url;
   const title = '夢見が丘女子高等学校 学生証';
   const description = '診断から学生証を自動生成';
-  const defaultImage = 'https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_pad,b_white,fl_force_strip/v1/student-id-generator/preview.png';
+  const defaultImage = 'https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto,fl_force_strip/v1/student-id-generator/preview.png';
   
   // User-Agent判定
   const userAgent = context.request.headers.get('user-agent') || '';

@@ -24,7 +24,7 @@ function buildCldOgUrl({cloudName, public_id, version, eager_url=null}){
   if (eager_url) return eager_url; // 事前生成があれば最優先
   const pidSafe = String(public_id).split('/').map(encodeURIComponent).join('/');
   return `https://res.cloudinary.com/${cloudName}/image/upload/` +
-         `f_auto,q_auto,w_1200,h_630,c_pad,b_white,fl_force_strip/` +
+         `f_auto,q_auto,w_1200,h_630,c_fill,g_auto,fl_force_strip/` +
          `v${version}/${pidSafe}.png`;
 }
 
@@ -939,14 +939,14 @@ function initializeApp() {
       return;
     }
     
-    // すでに共有URLがあるなら、再アップロードせずそのまま開く
-    if (window.__shareUrl) {
-      const baseTweetText = '学生証が完成しました！📣\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター';
-      const intent = `https://x.com/intent/post?text=${encodeURIComponent(baseTweetText)}&url=${encodeURIComponent(window.__shareUrl)}`;
-      // 常に新しいタブで開く（埋め込みでも安全）
-      try { window.top.open(intent, '_blank', 'noopener'); } catch (_) { window.open(intent, '_blank', 'noopener'); }
-      return;
-    }
+          // すでに共有URLがあるなら、再アップロードせずそのまま開く
+      if (window.__shareUrl) {
+        const baseTweetText = 'あなたの学校生活を診断して学生証を作ろう！\n\n#放課後クロニクル #学生証ジェネレーター';
+        const intent = `https://x.com/intent/post?text=${encodeURIComponent(`${window.__shareUrl}\n\n${baseTweetText}`)}`;
+        // 常に新しいタブで開く（埋め込みでも安全）
+        try { window.top.open(intent, '_blank', 'noopener'); } catch (_) { window.open(intent, '_blank', 'noopener'); }
+        return;
+      }
     
     try {
       showLoading('学生証をシェア用に準備中...');
@@ -972,8 +972,8 @@ function initializeApp() {
       
       // ツイート文を作成（共有URLを先頭に配置）
       const baseTweetText = nameJa ? 
-        `${nameJa}の学生証が完成しました！🎓\n\n放課後クロニクル 診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター` :
-        `放課後クロニクル 学生証が完成しました！🎓\n\n診断ゲームで自分だけの学校生活を見つけよう✨\n\n#放課後クロニクル #学生証ジェネレーター`;
+        `${nameJa}の学生証が完成しました！🎓\n\nあなたの学校生活を診断して学生証を作ろう！\n\n#放課後クロニクル #学生証ジェネレーター` :
+        `放課後クロニクル 学生証が完成しました！🎓\n\nあなたの学校生活を診断して学生証を作ろう！\n\n#放課後クロニクル #学生証ジェネレーター`;
       
       if (window.buildShareUrlWithImage && imageData.public_id) {
         // 新しい共有方式：画像URL/バージョン付きJSONスラッグ
@@ -1007,8 +1007,9 @@ function initializeApp() {
       
       hideLoading();
       
-      // Web IntentでX投稿を開く（text と url を分離してカード確実化）
-      const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(baseTweetText)}&url=${encodeURIComponent(shareUrl)}`;
+      // Web IntentでX投稿を開く（URL先頭でカード確実化）
+      const tweet = `${shareUrl}\n\n${baseTweetText}`;
+      const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
       // 常に新しいタブで開く（埋め込みでも安全）
       try { window.top.open(webIntent, '_blank', 'noopener'); } catch (_) { window.open(webIntent, '_blank', 'noopener'); }
       

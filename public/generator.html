@@ -273,6 +273,14 @@
       overflow: visible !important;
     }
     
+    /* プレビューのキャンバスは 8:5 を厳守して伸縮 */
+    .preview-card .card-body canvas#cardCanvas{
+      width: 100%;
+      height: auto;
+      aspect-ratio: 8 / 5;
+      display: block;
+    }
+    
     /* style.cssのmainグリッド設定を完全に無効化 */
     main.generator-container {
       display: block !important;
@@ -315,17 +323,17 @@
       return `${SHARE_BASE}/s/${slug}`;
     }
     
-    // 共有URLペイロード生成（JSONスラッグ用）
-    function buildShareSlugPayload({public_id, version, eager_url}) {
-      // i: 完全URL, p: public_id, v: version
-      const payload = eager_url ? { i: eager_url } : { p: public_id, v: version };
-      const json = encodeURIComponent(JSON.stringify(payload));
-      return btoa(unescape(json)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    // 共有URLペイロード生成（短縮スラッグ用）
+    function buildShareSlugPayload({public_id, version}) {
+      // "v:VERSION:PUBLIC_ID" を Base64URL（最短）
+      const raw = `v:${version}:${public_id}`;
+      return btoa(unescape(encodeURIComponent(raw)))
+        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
     }
     
-    // 新しい共有方式：JSONスラッグ（OGP画像URLを含む、最も確実）
+    // 新しい共有方式：短縮スラッグ（OGP画像URLを含む、最も確実）
     function buildShareUrlWithImage(public_id, version, eager_url){
-      const slug = buildShareSlugPayload({ public_id, version, eager_url });
+      const slug = buildShareSlugPayload({ public_id, version });
       return `${SHARE_BASE}/s/${slug}`;
     }
     window.buildShareUrlWithImage = buildShareUrlWithImage;
@@ -344,11 +352,9 @@
       // X投稿（web intent & 新規タブ）
       const twitterBtn = document.getElementById('twitterBtn');
       if (twitterBtn) {
-        const baseTweetText =
-          '学生証が完成しました！📣\n\n#放課後クロニクル #学生証ジェネレーター';
-        const webIntent =
-          `https://x.com/intent/post?text=${encodeURIComponent(baseTweetText)}` +
-          `&url=${encodeURIComponent(window.__shareUrl)}`;
+        const baseTweetText = 'あなたの学校生活を診断して学生証を作ろう！\n\n#放課後クロニクル #学生証ジェネレーター';
+        const tweet = `${window.__shareUrl}\n\n${baseTweetText}`;
+        const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
         twitterBtn.onclick = () => window.open(webIntent, '_blank', 'noopener');
       }
       
