@@ -1,6 +1,8 @@
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'inline-speculation-rules' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://use.fontawesome.com; img-src 'self' data: https: blob: https://res.cloudinary.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://use.fontawesome.com; connect-src 'self' https://api.cloudinary.com https://res.cloudinary.com; frame-ancestors 'self' https://*.studio.site https://preview.studio.site https://student-id-generator.pages.dev; base-uri 'self'; form-action 'self' https://api.cloudinary.com; upgrade-insecure-requests; block-all-mixed-content
-  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
-  Permissions-Policy: clipboard-read=(self), clipboard-write=(self), camera=(), microphone=(), geolocation=()
-  Cross-Origin-Resource-Policy: same-origin
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+/s/*
+  Cache-Control: public, max-age=0, s-maxage=600
