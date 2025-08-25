@@ -65,17 +65,20 @@ export async function onRequest(context) {
 <head>
   <meta charset="utf-8">
   <title>${title}</title>
-  <meta property="og:type" content="article">
+  <meta property="og:type" content="website">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
   <meta property="og:url" content="${shareUrl}">
   <meta property="og:image" content="${imageUrl}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="夢見が丘女子高等学校 学生証">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="${imageUrl}">
   <meta name="twitter:title" content="${title}">
   <meta name="twitter:description" content="${description}">
-  <meta name="twitter:image" content="${imageUrl}">
+  <meta name="twitter:url" content="${shareUrl}">
+  <link rel="canonical" href="${shareUrl}">
 </head>
 <body></body>
 </html>`;
@@ -83,16 +86,16 @@ export async function onRequest(context) {
       return new Response(html, {
         headers: {
           'content-type': 'text/html; charset=utf-8',
-          // ボットに確実に出させる & 再取得も効かせる
-          'cache-control': 'public, max-age=0, s-maxage=86400',
+          // カードの再取得を安定させる
+          'cache-control': 'public, max-age=300',
           'vary': 'user-agent'
         }
       });
     }
     
-    // 人間のブラウザは302でStudioの診断ページへリダイレクト（絶対URL）
-    const to = 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
-    return Response.redirect(to, 302);
+    // 人間のブラウザは302でStudioの診断ページへリダイレクト（?share=<slug>を付与）
+    const dest = `https://preview.studio.site/live/1Va6D4lMO7/student-id?share=${slug}`;
+    return Response.redirect(dest, 302);
     
   } catch (error) {
     console.error('Function error:', error);
@@ -155,7 +158,7 @@ function getDefaultResponse(context) {
     });
   }
   
-  // 人間のブラウザはStudioの診断ページへリダイレクト（絶対URL）
-  const to = 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
-  return Response.redirect(to, 302);
+  // 人間のブラウザはStudioの診断ページへリダイレクト（?share=<slug>を付与）
+  const dest = `https://preview.studio.site/live/1Va6D4lMO7/student-id?share=${slug}`;
+  return Response.redirect(dest, 302);
 }

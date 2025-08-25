@@ -75,92 +75,7 @@ function showManualCopyModal(text) {
   }
 }
 
-// 保存用ライトボックス表示
-function showSaveOverlay() {
-  try {
-    const canvas = document.getElementById('cardCanvas');
-    if (!canvas) {
-      console.error('Canvas not found');
-      return;
-    }
-    
-    const overlay = document.getElementById('saveOverlay');
-    const preview = document.getElementById('savePreview');
-    const closeBtn = document.getElementById('saveOverlayClose');
-    
-    if (!overlay || !preview || !closeBtn) {
-      console.error('Save overlay elements not found');
-      return;
-    }
-    
-          // 画像をプレビューに設定（最優先はCloudinaryのOGP画像URL）
-      if (window.__ogpImageUrl) {
-        preview.src = window.__ogpImageUrl;
-      } else {
-        // 失敗時フォールバック
-        preview.src = canvas.toDataURL('image/png');
-      }
-    
-    // デバイス別の保存案内文言を設定
-    const isPc = window.matchMedia('(pointer:fine)').matches && (navigator.maxTouchPoints || 0) === 0;
-    const saveHint = overlay.querySelector('.save-hint');
-    if (saveHint) {
-      const pcHint = saveHint.querySelector('.pc-hint');
-      const mobileHint = saveHint.querySelector('.mobile-hint');
-      
-      if (pcHint && mobileHint) {
-        // 既存の構造を利用
-        pcHint.style.display = isPc ? 'inline' : 'none';
-        mobileHint.style.display = isPc ? 'none' : 'inline';
-      } else {
-        // フォールバック：従来の方式
-        saveHint.textContent = isPc
-          ? '下の「新しいタブで開く」→ 右クリックで保存'
-          : '画像を長押しして保存してください';
-      }
-    }
-    
-    // 上位タブで開くボタン（埋め込みでも確実に開く）
-    let openImageLink = overlay.querySelector('#openImageNewTab');
-    if (!openImageLink) {
-      openImageLink = document.createElement('button');
-      openImageLink.id = 'openImageNewTab';
-      openImageLink.textContent = isPc ? '新しいタブで開く（右クリックで保存）' : '新しいタブで開く';
-      openImageLink.style.cssText = 'margin-top:8px;padding:8px 16px;background:#B997D6;color:#fff;border:none;border-radius:6px;font-size:14px;';
-      openImageLink.addEventListener('click', () => {
-        const url = window.__ogpImageUrl || preview.src;
-        try { window.top.location.href = url; } catch (_) { location.href = url; }
-      });
-      if (saveHint && saveHint.parentNode) {
-        saveHint.parentNode.insertBefore(openImageLink, saveHint.nextSibling);
-      }
-    }
-    
-    // ライトボックスを表示
-    overlay.style.display = 'flex';
-    
-    // 閉じるボタンのイベント
-    closeBtn.onclick = () => {
-      overlay.style.display = 'none';
-    };
-    
-    // 背景クリックでも閉じる
-    overlay.onclick = (e) => {
-      if (e.target === overlay) {
-        overlay.style.display = 'none';
-      }
-    };
-    
-  } catch (error) {
-    console.error('Save overlay error:', error);
-    // フォールバック：通常のダウンロード
-    try {
-      downloadCanvasAsImage(document.getElementById('cardCanvas'), '学生証.png');
-    } catch (fallbackError) {
-      console.error('Fallback download error:', fallbackError);
-    }
-  }
-}
+
 
 // 定数定義
 const CARD_WIDTH = 800;
@@ -887,18 +802,13 @@ function initializeApp() {
         const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_pad,b_white,fl_force_strip/v${version}/${encodeURIComponent(public_id)}.png`;
         window.__ogpImageUrl = ogpImageUrl;
         
-        // モバイルは最初から新規タブで画像を開く（長押し保存より確実）
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        if (isMobile) {
-          window.open(ogpImageUrl, '_blank', 'noopener');
-        }
+        // 画像 URL をそのまま新しいタブで開く（PC=右クリック保存 / スマホ=共有/保存）
+        window.open(ogpImageUrl, '_blank', 'noopener');
         
         // 共有リンクを更新
         if (window.updateShareLinksWithImage) {
           window.updateShareLinksWithImage(imageData, '学生証が完成しました！');
         }
-        
-        // 保存オーバーレイは表示しない（モバイルは新規タブで画像を開く）
       } else {
         throw new Error('画像のアップロードに失敗しました');
       }
@@ -948,20 +858,15 @@ function initializeApp() {
           }
         }
 
-        // 2) フォールバック: Web Intent（モバイルは同一タブ、PCは新規タブ）
-        //   * mobile.twitter.com を使うと iOS の「Safariで開く？」誘導が起きにくい
-        const intent = `https://mobile.twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
-        if (isMobile) {
-          location.href = intent;              // 同一タブ遷移でたらい回しを抑止
-        } else {
-          const a = document.createElement('a');
-          a.href = intent;
-          a.target = '_blank';
-          a.rel = 'noopener';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-        }
+        // 2) フォールバック: Web Intent（新しいタブで安定）
+        const intent = `https://x.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
+        const a = document.createElement('a');
+        a.href = intent;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
         return;
       }
     
@@ -1043,20 +948,15 @@ function initializeApp() {
         }
       }
 
-      // 2) フォールバック: Web Intent（モバイルは同一タブ、PCは新規タブ）
-      //   * mobile.twitter.com を使うと iOS の「Safariで開く？」誘導が起きにくい
-      const webIntent = `https://mobile.twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
-      if (isMobile) {
-        location.href = webIntent;              // 同一タブ遷移でたらい回しを抑止
-      } else {
-        const a = document.createElement('a');
-        a.href = webIntent;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }
+      // 2) フォールバック: Web Intent（新しいタブで安定）
+      const webIntent = `https://x.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
+      const a = document.createElement('a');
+      a.href = webIntent;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
       
       // 成功時のフィードバック（ポップアップなし）
       console.log('✅ X投稿処理が完了しました');

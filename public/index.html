@@ -1309,8 +1309,13 @@
       // 低確率での遊び（1〜2%）にしたいときは下行を有効化
       // if (Math.random() < 0.015) return 'ホラー布教';
 
-      // 3) 上位グループを決める（±10%は同率扱い）
-      const entries = Object.entries({sports:sum.sports,culture:sum.culture,other:sum.other});
+      // 3) 上位グループ（帰宅=other はハードルを上げる）
+      const majors = { sports:sum.sports, culture:sum.culture };
+      const topMajor = Math.max(majors.sports, majors.culture);
+      // 《帰宅》は topMajor より 20% 以上強いときだけ採用
+      if (sum.other >= topMajor * 1.2) return '帰宅';
+      // それ以外は sports/culture のみで上位判定（±10% 同率）
+      const entries = Object.entries(majors);
       const topVal = Math.max(...entries.map(([,v])=>v));
       const tops = entries.filter(([,v]) => v >= topVal * 0.9).map(([k])=>k);
 
