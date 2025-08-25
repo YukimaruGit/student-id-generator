@@ -17,6 +17,7 @@ export default async function onRequest({ request }) {
   try { 
     // decodeB64Url内で既にデコード済みのため、JSON.parseに直接渡す
     payload = JSON.parse(decodeB64Url(slug)); 
+    console.log('Decoded payload:', payload); // デバッグ用
   } catch(e) {
     console.error('Slug decode error:', e);
   }
@@ -38,22 +39,17 @@ export default async function onRequest({ request }) {
 
   // 常にOGP画像を出す（payload不良でも既定画像にフォールバック）
   let ogImg = DEFAULT_OGP;
-  if (payload?.p && payload?.v) {
+  if (payload?.i) {
+    // eager_urlが存在する場合は直接使用
+    ogImg = payload.i;
+  } else if (payload?.p && payload?.v) {
+    // eager_urlがない場合は生成
     ogImg = buildOgpUrl({ i: payload.i, p: payload.p, v: payload.v });
   }
-  
-  // デバッグ情報（開発時のみ）
-  console.log('OGP Debug:', {
-    userAgent: ua,
-    isBot: isBot,
-    payload: payload,
-    ogImg: ogImg,
-    url: url.href
-  });
 
   // ---- Bot には 200 でOGP HTMLを返す ----
-  // ボット判定を強化（より多くのSNSクローラーに対応）
-  const isBot = /(Twitterbot|X-Twitter|Discordbot|Slackbot|facebookexternalhit|LinkedInBot|WhatsApp|TelegramBot|Pinterestbot|Discord|Slack|Line|Discord-Webhook|Discord-Embed|Slack-Webhook|Slack-Embed)/i.test(ua);
+  // ボット判定を少し強化
+  const isBot = /(Twitterbot|X-Twitter|Discordbot|Slackbot|facebookexternalhit|LinkedInBot|WhatsApp|TelegramBot|Pinterestbot)/i.test(ua);
   if (isBot) {
     const html = `<!doctype html><html lang="ja"><head>
 <meta charset="utf-8">
