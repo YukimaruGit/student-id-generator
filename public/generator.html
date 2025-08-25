@@ -365,8 +365,9 @@
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         twitterBtn.onclick = () => {
           if (isMobile) {
-            // モバイルは同一タブ遷移（アプリ起動を優先、余計なタブを出さない）
-            location.href = webIntent;
+            // モバイルはiframeを脱出してトップで遷移（白画面防止）
+            const targetWin = (window.top && window.top !== window.self) ? window.top : window;
+            targetWin.location.href = webIntent;
           } else {
             // PCは新規タブ
             window.open(webIntent, '_blank', 'noopener');

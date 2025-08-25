@@ -845,13 +845,17 @@ function initializeApp() {
         // 新しい共有方式：画像URL/バージョン付きJSONスラッグ
         const { public_id, version, eager } = imageData;
         const eagerUrl = eager && eager[0] && eager[0].secure_url;
-        const shareUrl = window.buildShareUrlWithImage(public_id, version, eagerUrl);
+        const shareUrl = window.buildShareUrlWithImage({
+          public_id,
+          version,
+          eager
+        });
         
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
         
         // OGP画像URLを保持してオーバーレイで案内（自動ポップアップ禁止）
-        const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_pad,b_white,fl_force_strip/v${version}/${encodeURIComponent(public_id)}.png`;
+        const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version}/${encodeURIComponent(public_id)}.png`;
         window.__ogpImageUrl = ogpImageUrl;
         
         // 画像 URL をそのまま新しいタブで開く（PC=右クリック保存 / スマホ=共有/保存）
@@ -946,7 +950,11 @@ function initializeApp() {
         // 新しい共有方式：画像URL/バージョン付きJSONスラッグ
         const { public_id, version, eager } = imageData;
         const eagerUrl = eager && eager[0] && eager[0].secure_url;
-        shareUrl = window.buildShareUrlWithImage(public_id, version, eagerUrl);
+        shareUrl = window.buildShareUrlWithImage({
+          public_id,
+          version,
+          eager
+        });
         
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
@@ -1058,7 +1066,11 @@ function initializeApp() {
         // 新しい共有方式：画像URL/バージョン付きJSONスラッグ
         const { public_id, version, eager } = imageData;
         const eagerUrl = eager && eager[0] && eager[0].secure_url;
-        shareUrl = window.buildShareUrlWithImage(public_id, version, eagerUrl);
+        shareUrl = window.buildShareUrlWithImage({
+          public_id,
+          version,
+          eager
+        });
         
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
