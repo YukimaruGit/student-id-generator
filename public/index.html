@@ -101,25 +101,27 @@
       const showingResult = qs.get('showResult') === '1';
       const inEmbed = qs.get('embed') === '1' || window !== window.top;
       
-      if (!inEmbed || showingResult) {
-        // 以降の5秒フォールバック(setTimeout)は実行しない
-      } else {
-        // ここから下に既存の setTimeout(...) が続く（元コードは残す）
-        if (location.protocol !== 'file:') {
-          setTimeout(() => {
-            const questionContainer = document.getElementById('questionContainer');
-            const answerOptions = document.querySelectorAll('.answer-option');
-            
-            if (questionContainer && answerOptions.length === 0) {
-              console.warn('🚨 質問が正常に表示されていません。シンプル版にリダイレクトします。');
-              window.location.href = 'quiz.html';
-            } else if (typeof selectAnswer !== 'function') {
-              console.warn('🚨 selectAnswer関数が定義されていません。シンプル版にリダイレクトします。');
-              window.location.href = 'quiz.html';
-            }
-          }, 5000);
-        }
-      }
+      // 埋め込みモード時の5秒フォールバックタイマーを削除（スクリプト読み込み遅延対策）
+      // 元のコード（削除済み）:
+      // if (!inEmbed || showingResult) {
+      //   // 以降の5秒フォールバック(setTimeout)は実行しない
+      // } else {
+      //   // ここから下に既存の setTimeout(...) が続く（元コードは残す）
+      //   if (location.protocol !== 'file:') {
+      //     setTimeout(() => {
+      //       const questionContainer = document.getElementById('questionContainer');
+      //       const answerOptions = document.querySelectorAll('.answer-option');
+      //       
+      //       if (questionContainer && answerOptions.length === 0) {
+      //         console.warn('🚨 質問が正常に表示されていません。シンプル版にリダイレクトします。');
+      //         window.location.href = 'quiz.html';
+      //       } else if (typeof selectAnswer !== 'function') {
+      //         console.warn('🚨 selectAnswer関数が定義されていません。シンプル版にリダイレクトします。');
+      //         window.location.href = 'quiz.html';
+      //       }
+      //     }, 5000);
+      //   }
+      // }
       
       console.log('✅ TypeSquare遮断システム完了');
     })();
@@ -1034,10 +1036,8 @@
       
       // 通常の診断フロー
       // 質問をシャッフルして10問選択
-      for (let i = questionPool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [questionPool[i], questionPool[j]] = [questionPool[j], questionPool[i]];
-      }
+      shuffle(questionPool);
+      questions = questionPool.slice(0, 10);
       
       // 最初の質問を表示
       showQuestion(0);
@@ -1274,9 +1274,8 @@
       }
     }
 
-    // 質問をシャッフルして10問を選択
-    shuffle(questionPool);
-    const questions = questionPool.slice(0, 10);
+    // 質問変数の宣言（初期化はDOMContentLoaded内で実行）
+    let questions;
 
     // スコア累積用オブジェクト
     let tally = {
@@ -1367,7 +1366,7 @@
       const prior = {};
       for (const k of CLUB_SET) prior[k] = (tally.club[k] || 0) + (CLUB_WEIGHT[k] === 0.15 ? 0.15 : 1);
       // 2) レア抑制（重み乗算）
-      const adjusted = Object.fromEntries(Object.entries(prior).map(([k,v]) => [k, v * CLUB_WEIGHT[k]));
+      const adjusted = Object.fromEntries(Object.entries(prior).map(([k,v]) => [k, v * CLUB_WEIGHT[k]]));
       const entries = Object.entries(adjusted).filter(([k,v]) => v > 0);
       // 3) 最大値 ±10% を同率扱いにしランダム
       const max = Math.max(...entries.map(([,v]) => v));
@@ -1393,13 +1392,14 @@
       "🧩 ${club}での個性派として知られています。ひらめきが魅力的です。"
     ];
 
-    // プレビューメッセージ生成関数
+    // プレビューメッセージ生成関数（構文正常化・「部」付与なし）
     function makeMsg(result) {
-      const template = previewTemplates[Math.floor(Math.random() * previewTemplates.length)];
-      // 表示は語尾「部」を付けない（カード画像に表記あり）
+      const template = previewTemplates[
+        Math.floor(Math.random() * previewTemplates.length)
+      ];
       return template
-        .replace(/\$\{course\}/g, result.course)
-        .replace(/\$\{club\}/g, result.club);
+        .replace(/\$\{course\}/g, result.course || '')
+        .replace(/\$\{club\}/g, (result.club || ''));
     }
 
     // 個性エピソードテンプレート（50種）

@@ -273,6 +273,10 @@
       overflow: visible !important;
     }
     
+    /* 保存案内の表示切替 */
+    @media (pointer:fine) and (hover:hover){ .pc-only{display:inline} .sp-only{display:none} }
+    @media (pointer:coarse){ .pc-only{display:none} .sp-only{display:inline} }
+    
     /* プレビューのキャンバスは 8:5 を厳守して伸縮 */
     .preview-card .card-body canvas#cardCanvas{
       width: 100%;
@@ -316,12 +320,8 @@
         .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
     }
 
-    // public_id -> /s/:slug（短い）
-    function buildShareUrl(public_id){
-      // public_id を Base64URL 化して /s/:slug だけにする（最短化）
-      const slug = b64url(public_id);
-      return `${SHARE_BASE}/s/${slug}`;
-    }
+    // （廃止）public_idのみの短縮スラッグは作らない
+    // 共有は必ず version を含む短縮スラッグで行う
     
     // 共有URLペイロード生成（短縮スラッグ用）
     function buildShareSlugPayload({public_id, version}) {
@@ -359,14 +359,15 @@
         const club = /部$/.test(rawClub) ? rawClub : `${rawClub}部`;
 
         const tweet = [
+          `${window.__shareUrl}`,
+          '',
           '🏫夢見が丘女子高等学校 入学診断',
           `【${course}】の【${club}】になりました！`,
           '診断の最後には、自分だけの学生証ももらえます🎓📸',
           '',
           '君も放課後クロニクルの世界へ――',
           '',
-          '#放課後クロニクル #学生証メーカー',
-          `▶︎ ${window.__shareUrl}`
+          '#放課後クロニクル #学生証メーカー'
         ].join('\n');
 
         const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
@@ -523,6 +524,10 @@
         <div class="card-body">
           <canvas id="cardCanvas" width="800" height="500"></canvas>
         </div>
+        <p class="save-mini-hint" style="margin:.5rem 0 0; font-size:12px; color:#888; text-align:center;">
+          <span class="pc-only">※画像の上で <b>右クリック →「名前を付けて画像を保存」</b></span>
+          <span class="sp-only" style="display:none;">※画像を <b>長押しで保存</b>（保存できない端末は「画像を開く」をご利用ください）</span>
+        </p>
         <div class="card-footer">
           <button type="button" id="downloadBtn">
             画像を保存

@@ -98,11 +98,9 @@ export async function onRequest(context) {
         });
       }
     
-    // 人間のブラウザは302でジェネレータページへリダイレクト
-    const redirectUrl = new URL('/generator.html', context.request.url);
-    redirectUrl.searchParams.set('share', slug);
-    
-    return Response.redirect(redirectUrl.toString(), 302);
+    // 人間のブラウザは302でジェネレータページへリダイレクト（絶対URL）
+    const to = `https://student-id-generator.pages.dev/generator.html?share=${encodeURIComponent(slug)}`;
+    return Response.redirect(to, 302);
     
   } catch (error) {
     console.error('Function error:', error);
@@ -165,7 +163,7 @@ function getDefaultResponse(context) {
     });
   }
   
-  // 人間のブラウザはジェネレータページへリダイレクト
-  const redirectUrl = new URL('/generator.html', context.request.url);
-  return Response.redirect(redirectUrl.toString(), 302);
+  // 人間のブラウザはジェネレータページへリダイレクト（絶対URL）
+  const to = `https://student-id-generator.pages.dev/generator.html`;
+  return Response.redirect(to, 302);
 }

@@ -292,33 +292,11 @@ async function downloadCanvasAsImage(canvas, filename = '学生証.png') {
 
 
 
-// X共有機能（白画面回避対応）
+// X共有機能（廃止：常にWeb Intentを新規タブで開く）
 function openXAppOrIntent(webIntent) {
-  const isEmbedded = (window.top !== window.self);
-  if (isEmbedded) { window.open(webIntent, '_blank', 'noopener'); return; }
-  const ua = navigator.userAgent;
-  const isiOS = /iPad|iPhone|iPod/.test(ua);
-  const isAndroid = /Android/.test(ua);
-  const msg = new URL(webIntent).searchParams.get('text') || '';
-  let tried = false;
-  const fallback = () => { if (!tried) { tried = true; window.open(webIntent, '_blank', 'noopener'); } };
-  // 失敗検知：アプリへ切り替わると visibilitychange が走る
-  const onHide = () => { tried = true; document.removeEventListener('visibilitychange', onHide); };
-  document.addEventListener('visibilitychange', onHide);
-  try {
-    if (isiOS) {
-      location.href = `x://post?message=${encodeURIComponent(msg)}`;       // iOS17以降
-      setTimeout(() => { if (!tried) location.href = `twitter://post?message=${encodeURIComponent(msg)}`; }, 200);
-      setTimeout(fallback, 900);
-    } else if (isAndroid) {
-      // Androidは intent:// が強い
-      location.href = `intent://post?message=${encodeURIComponent(msg)}#Intent;package=com.twitter.android;scheme=twitter;end`;
-      setTimeout(() => { if (!tried) location.href = `twitter://post?message=${encodeURIComponent(msg)}`; }, 180);
-      setTimeout(fallback, 900);
-    } else {
-      fallback(); // デスクトップ等はWeb Intentへ
-    }
-  } catch(_) { fallback(); }
+  // 深リンク挙動を排除し、常にWeb Intentを新規タブで開く
+  window.open(webIntent, '_blank', 'noopener');
+  return;
 }
 
 // コピー処理を一元化
@@ -909,6 +887,12 @@ function initializeApp() {
         const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_pad,b_white,fl_force_strip/v${version}/${encodeURIComponent(public_id)}.png`;
         window.__ogpImageUrl = ogpImageUrl;
         
+        // モバイルは最初から新規タブで画像を開く（長押し保存より確実）
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+          window.open(ogpImageUrl, '_blank', 'noopener');
+        }
+        
         // 共有リンクを更新
         if (window.updateShareLinksWithImage) {
           window.updateShareLinksWithImage(imageData, '学生証が完成しました！');
@@ -1004,21 +988,10 @@ function initializeApp() {
         if (window.updateShareLinksWithImage) {
           window.updateShareLinksWithImage(imageData, baseTweetText);
         }
-      } else if (window.buildShareUrl && imageData.public_id) {
-        // フォールバック：短縮版
-        shareUrl = window.buildShareUrl(imageData.public_id);
-        
-        // 画像データを保存（埋め込み時の保存対応用）
-        window.__lastImageData = imageData;
-        
-        // 共有リンクを更新
-        if (window.updateShareLinksWithImage) {
-          window.updateShareLinksWithImage(imageData, baseTweetText);
-        }
       } else {
-        // フォールバック：従来方式（非推奨）
-        console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');
-        shareUrl = '新しい短いURL方式が利用できません';
+        // buildShareUrlWithImageが利用できない場合はエラー
+        console.error('共有URL生成に必要な関数が利用できません');
+        shareUrl = '共有URLの生成に失敗しました';
       }
       
       hideLoading();
@@ -1116,21 +1089,10 @@ function initializeApp() {
         if (window.updateShareLinksWithImage) {
           window.updateShareLinksWithImage(imageData, '学生証を発行しました');
         }
-      } else if (window.buildShareUrl && imageData.public_id) {
-        // フォールバック：短縮版
-        shareUrl = window.buildShareUrl(imageData.public_id);
-        
-        // 画像データを保存（埋め込み時の保存対応用）
-        window.__lastImageData = imageData;
-        
-        // 共有リンクを更新
-        if (window.updateShareLinksWithImage) {
-          window.updateShareLinksWithImage(imageData, '学生証を発行しました');
-        }
       } else {
-        // フォールバック：従来方式（非推奨）
-        console.warn('古い共有方式は非推奨です。新しい短いURL方式を使用してください。');
-        shareUrl = '新しい短いURL方式が利用できません';
+        // buildShareUrlWithImageが利用できない場合はエラー
+        console.error('共有URL生成に必要な関数が利用できません');
+        shareUrl = '共有URLの生成に失敗しました';
       }
              // 共有URLを文字列化
        const urlToCopy = shareUrl.toString();
