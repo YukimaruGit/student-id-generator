@@ -40,9 +40,12 @@ export async function onRequest(context) {
       const cloudName = 'di5xqlddy';
       const publicId = payload.p;
       const version = payload.v || 1;
-      // セグメントごとにエンコード（フォルダ区切り/を保持）
-      const pidSafe = publicId.split('/').map(encodeURIComponent).join('/');
-      imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto,fl_force_strip/v${version}/${pidSafe}.png`;
+      // フォルダの「/」はエンコードしない。各セグメントだけエンコードする
+      const encodedPublicId = publicId
+        .split('/')
+        .map(encodeURIComponent)
+        .join('/');
+      imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto,fl_force_strip/v${version}/${encodedPublicId}.png`;
     } else {
       return getDefaultResponse(context);
     }
@@ -57,45 +60,32 @@ export async function onRequest(context) {
     
     // クローラにはOGPメタタグ付きHTMLを返す（リダイレクトしない）
     if (isBot) {
-      const html = `<!DOCTYPE html>
+      const html = `<!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
   <title>${title}</title>
-  
-  <!-- OGP メタタグ（クローラ用） -->
-  <meta property="og:type" content="website">
+  <meta property="og:type" content="article">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
   <meta property="og:url" content="${shareUrl}">
   <meta property="og:image" content="${imageUrl}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:site_name" content="学生証ジェネレーター">
-  
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="${imageUrl}">
   <meta name="twitter:title" content="${title}">
   <meta name="twitter:description" content="${description}">
-  
-  <!-- その他のメタタグ -->
-  <meta name="robots" content="noindex, nofollow">
-  <link rel="canonical" href="${shareUrl}">
+  <meta name="twitter:image" content="${imageUrl}">
 </head>
-<body>
-  <div style="display:none;">
-    <img src="${imageUrl}" alt="学生証プレビュー" />
-  </div>
-</body>
+<body></body>
 </html>`;
       
       return new Response(html, {
-        status: 200,
         headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'public, max-age=0, s-maxage=600'
+          'content-type': 'text/html; charset=utf-8',
+          // ボットに確実に出させる & 再取得も効かせる
+          'cache-control': 'public, max-age=0, s-maxage=86400',
+          'vary': 'user-agent'
         }
       });
     }

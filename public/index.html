@@ -1284,7 +1284,50 @@
       vibe: 0
     };
 
-    // 正規化テーブル & ウェイト
+    // ── 部活グループ定義（要件どおり・増減禁止） ─────────────────
+    const CLUB_GROUP = {
+      sports: ['陸上','テニス','バドミントン','バスケットボール','バレーボール','水泳','ダンス'],
+      culture: ['声楽','吹奏楽','絵画','彫刻','放送','英語研究','演劇','茶道','華道'],
+      other:  ['帰宅'],
+      rare:   ['ホラー布教']
+    };
+
+    // グループ判定 → グループ内で均等（レアは別枠）
+    function chooseClubByGroup(tally) {
+      // 1) グループ合算
+      const sum = { sports:0, culture:0, other:0, rare:0 };
+      for (const [club, v] of Object.entries(tally)) {
+        if (CLUB_GROUP.sports.includes(club))  sum.sports += v;
+        else if (CLUB_GROUP.culture.includes(club)) sum.culture += v;
+        else if (CLUB_GROUP.other.includes(club))   sum.other += v;
+        else if (CLUB_GROUP.rare.includes(club))    sum.rare += v;
+      }
+
+      // 2) レア判定（強いときだけ・それ以外は低確率に抑制）
+      const maxMajor = Math.max(sum.sports, sum.culture, sum.other);
+      if (sum.rare > 0 && sum.rare >= maxMajor * 1.2) return 'ホラー布教'; // 回答が強く示唆
+      // 低確率での遊び（1〜2%）にしたいときは下行を有効化
+      // if (Math.random() < 0.015) return 'ホラー布教';
+
+      // 3) 上位グループを決める（±10%は同率扱い）
+      const entries = Object.entries({sports:sum.sports,culture:sum.culture,other:sum.other});
+      const topVal = Math.max(...entries.map(([,v])=>v));
+      const tops = entries.filter(([,v]) => v >= topVal * 0.9).map(([k])=>k);
+
+      // 4) 候補プール（上位グループの合併）から均等抽選
+      const pool = tops.flatMap(g => CLUB_GROUP[g]);
+      // 事前スコア（Laplace平滑：+1）で微調整しつつ極端な偏りを防ぐ
+      const weights = pool.map(c => (tally[c] ?? 0) + 1);
+      const total = weights.reduce((a,b)=>a+b,0);
+      let r = Math.random() * total;
+      for (let i=0;i<pool.length;i++){
+        r -= weights[i];
+        if (r <= 0) return pool[i];
+      }
+      return pool[0];
+    }
+
+    // 正規化テーブル（既存互換性のため残す）
     const CLUB_SET = [
       '陸上','テニス','バドミントン','バスケットボール','バレーボール','水泳','ダンス',
       '声楽','吹奏楽','絵画','彫刻','放送','英語研究','演劇','茶道','華道','帰宅','ホラー布教'
@@ -1361,17 +1404,8 @@
           displayCourse = courseName;
       }
       
-      // 部活決定（平滑化 + レア抑制 + 僅差はランダム）
-      // 1) ラプラス平滑化（通常: +1, ホラー: +0.15）
-      const prior = {};
-      for (const k of CLUB_SET) prior[k] = (tally.club[k] || 0) + (CLUB_WEIGHT[k] === 0.15 ? 0.15 : 1);
-      // 2) レア抑制（重み乗算）
-      const adjusted = Object.fromEntries(Object.entries(prior).map(([k,v]) => [k, v * CLUB_WEIGHT[k]]));
-      const entries = Object.entries(adjusted).filter(([k,v]) => v > 0);
-      // 3) 最大値 ±10% を同率扱いにしランダム
-      const max = Math.max(...entries.map(([,v]) => v));
-      const band = entries.filter(([,v]) => v >= max * 0.90);
-      const club = (band.length ? band[Math.floor(Math.random()*band.length)][0] : '帰宅');
+      // 部活決定（グループ優先の均等化）
+      const club = chooseClubByGroup(tally.club);
       
       return { department, course, displayCourse, club };
     }
