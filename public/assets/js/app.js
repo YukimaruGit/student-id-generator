@@ -24,8 +24,8 @@ function buildCldOgUrl({cloudName, public_id, version, eager_url=null}){
   if (eager_url) return eager_url; // 事前生成があれば最優先
   const pidSafe = String(public_id).split('/').map(encodeURIComponent).join('/');
   return `https://res.cloudinary.com/${cloudName}/image/upload/` +
-         `f_auto,q_auto,w_1200,h_630,c_fill,g_auto,fl_force_strip/` +
-         `v${version}/${pidSafe}.png`;
+         `c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/` +
+         `v${version}/${pidSafe}.jpg`;
 }
 
 // window.open / 動的 <a> の noopener 徹底
@@ -855,7 +855,7 @@ function initializeApp() {
         window.__lastImageData = imageData;
         
         // OGP画像URLを保持してオーバーレイで案内（自動ポップアップ禁止）
-        const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v${version}/${encodeURIComponent(public_id)}.png`;
+        const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/v${version}/${encodeURIComponent(public_id)}.jpg`;
         window.__ogpImageUrl = ogpImageUrl;
         
         // 画像 URL をそのまま新しいタブで開く（PC=右クリック保存 / スマホ=共有/保存）
