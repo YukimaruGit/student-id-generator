@@ -1294,41 +1294,55 @@
 
     // グループ判定 → グループ内で均等（レアは別枠）
     function chooseClubByGroup(tally) {
-      // 1) グループ合算
-      const sum = { sports:0, culture:0, other:0, rare:0 };
-      for (const [club, v] of Object.entries(tally)) {
-        if (CLUB_GROUP.sports.includes(club))  sum.sports += v;
-        else if (CLUB_GROUP.culture.includes(club)) sum.culture += v;
-        else if (CLUB_GROUP.other.includes(club))   sum.other += v;
-        else if (CLUB_GROUP.rare.includes(club))    sum.rare += v;
+      // 1) レア判定（強いときだけ・それ以外は低確率に抑制）
+      const allScores = Object.values(tally.club || {});
+      const maxScore = allScores.length > 0 ? Math.max(...allScores) : 0;
+      if (tally.club && tally.club['ホラー布教'] && tally.club['ホラー布教'] >= maxScore * 1.2) {
+        return 'ホラー布教'; // 回答が強く示唆
       }
-
-      // 2) レア判定（強いときだけ・それ以外は低確率に抑制）
-      const maxMajor = Math.max(sum.sports, sum.culture, sum.other);
-      if (sum.rare > 0 && sum.rare >= maxMajor * 1.2) return 'ホラー布教'; // 回答が強く示唆
       // 低確率での遊び（1〜2%）にしたいときは下行を有効化
       // if (Math.random() < 0.015) return 'ホラー布教';
 
-      // 3) 上位グループ（帰宅=other はハードルを上げる）
-      const majors = { sports:sum.sports, culture:sum.culture };
-      const topMajor = Math.max(majors.sports, majors.culture);
-      // 《帰宅》は topMajor より 20% 以上強いときだけ採用
-      if (sum.other >= topMajor * 1.2) return '帰宅';
-      // それ以外は sports/culture のみで上位判定（±10% 同率）
-      const entries = Object.entries(majors);
-      const topVal = Math.max(...entries.map(([,v])=>v));
-      const tops = entries.filter(([,v]) => v >= topVal * 0.9).map(([k])=>k);
-
-      // 4) 候補プール（上位グループの合併）から均等抽選
-      const pool = tops.flatMap(g => CLUB_GROUP[g]);
-      // 事前スコア（Laplace平滑：+1）で微調整しつつ極端な偏りを防ぐ
-      const weights = pool.map(c => (tally[c] ?? 0) + 1);
-      const total = weights.reduce((a,b)=>a+b,0);
+      // 2) すべての部活動を個別に扱う（グループ分けを無視）
+      const allClubs = [...CLUB_GROUP.sports, ...CLUB_GROUP.culture, ...CLUB_GROUP.other];
+      const pool = allClubs.filter(club => club !== 'ホラー布教'); // ホラー布教は除外
+      
+      // 3) 各部活動に基本重み1を設定し、スコアに応じて適切に調整
+      const weights = pool.map(club => {
+        const baseWeight = 1;
+        const scoreWeight = (tally.club[club] || 0) * 1.2; // スコアの影響を適切に反映
+        
+        // 部活動の性格に応じた重み調整
+        let personalityWeight = 1;
+        
+        // アクティブ系の部活動（スポーツ系、ダンス、演劇など）
+        if (['陸上', 'テニス', 'バドミントン', 'バスケットボール', 'バレーボール', '水泳', 'ダンス', '演劇'].includes(club)) {
+          personalityWeight = 1.1; // 少し高めの重み
+        }
+        // 落ち着いた系の部活動（図書、文芸、茶道、華道など）
+        else if (['英語研究', '茶道', '華道', '絵画', '彫刻'].includes(club)) {
+          personalityWeight = 0.9; // 少し低めの重み
+        }
+        // 帰宅部は中程度
+        else if (club === '帰宅') {
+          personalityWeight = 1.0;
+        }
+        // その他（放送、声楽、吹奏楽など）は標準
+        else {
+          personalityWeight = 1.0;
+        }
+        
+        return (baseWeight + scoreWeight) * personalityWeight;
+      });
+      
+      const total = weights.reduce((a, b) => a + b, 0);
       let r = Math.random() * total;
-      for (let i=0;i<pool.length;i++){
+      
+      for (let i = 0; i < pool.length; i++) {
         r -= weights[i];
         if (r <= 0) return pool[i];
       }
+      
       return pool[0];
     }
 
@@ -1410,7 +1424,7 @@
       }
       
       // 部活決定（グループ優先の均等化）
-      const club = chooseClubByGroup(tally.club);
+      const club = chooseClubByGroup(tally);
       
       return { department, course, displayCourse, club };
     }
@@ -1518,13 +1532,16 @@
         
         console.log('📝 回答:', choice.text);
         
-        // スコア計算（元の方式に戻す）
+        // スコア計算（正規化して累積）
         const bonus = 0.8 + Math.random() * 0.4;
         if (choice.scores.course) {
           tally.course[choice.scores.course] += bonus;
         }
         if (choice.scores.club) {
-          tally.club[choice.scores.club] = (tally.club[choice.scores.club] || 0) + bonus;
+          const normalizedClub = normalizeClub(choice.scores.club);
+          if (normalizedClub) {
+            tally.club[normalizedClub] = (tally.club[normalizedClub] || 0) + bonus;
+          }
         }
         tally.vibe += choice.scores.vibe * bonus;
         
