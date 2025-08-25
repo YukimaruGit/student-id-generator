@@ -15,7 +15,7 @@ export default async function onRequest({ request }) {
     payload = JSON.parse(decodeURIComponent(decodeB64Url(slug))); 
   } catch {}
 
-  // 画像URLの決定（最優先: payload.i）
+  // 画像URLの決定（JPG固定。f_auto はボットで失敗するため使わない）
   const CLOUD = 'di5xqlddy'; // あなたの cloud name
   const segEnc = s => (s||'').split('/').map(encodeURIComponent).join('/');
   const buildJpeg = ({p,v}) =>
@@ -23,10 +23,14 @@ export default async function onRequest({ request }) {
     `c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/` +
     `v${v}/${segEnc(p)}.jpg`;
 
-  const ogImg = payload?.i || (payload?.p && payload?.v ? buildJpeg({p:payload.p, v:payload.v}) : null);
+  // p,v があれば必ず JPG を生成して使う
+  const ogImg = (payload?.p && payload?.v)
+    ? buildJpeg({ p: payload.p, v: payload.v })
+    : null;
 
   // ---- Bot には 200 でOGP HTMLを返す ----
-  const isBot = /(Twitterbot|Discordbot|Slackbot|facebookexternalhit|LinkedInBot|WhatsApp)/i.test(ua);
+  // ボット判定を少し強化
+  const isBot = /(Twitterbot|X-Twitter|Discordbot|Slackbot|facebookexternalhit|LinkedInBot|WhatsApp|TelegramBot|Pinterestbot)/i.test(ua);
   if (isBot) {
     const canonical = `https://student-id-generator.pages.dev/s/${slug}`;
     const html = `<!doctype html><html lang="ja"><head>
@@ -37,6 +41,7 @@ export default async function onRequest({ request }) {
 <meta property="og:description" content="診断から学生証を自動生成">
 <meta property="og:url" content="${canonical}">
 ${ogImg ? `<meta property="og:image" content="${ogImg}">` : ''}
+${ogImg ? `<meta property="og:image:secure_url" content="${ogImg}">` : ''}
 ${ogImg ? `<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">` : ''}
 <meta name="twitter:card" content="summary_large_image">
 ${ogImg ? `<meta name="twitter:image" content="${ogImg}">` : ''}

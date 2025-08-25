@@ -362,7 +362,16 @@
         ].join('\n');
 
         const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
-        twitterBtn.onclick = () => window.open(webIntent, '_blank', 'noopener');
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        twitterBtn.onclick = () => {
+          if (isMobile) {
+            // モバイルは同一タブ遷移（アプリ起動を優先、余計なタブを出さない）
+            location.href = webIntent;
+          } else {
+            // PCは新規タブ
+            window.open(webIntent, '_blank', 'noopener');
+          }
+        };
       }
       
       // 表示用フィールドがあれば更新
