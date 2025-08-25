@@ -860,17 +860,26 @@ function initializeApp() {
       
       if (imageData.public_id) {
         // 新しい共有方式：画像URL/バージョン付きJSONスラッグ
-        const { public_id, version, eager_url } = imageData;
+        const { public_id, version } = imageData;
+        
+        // Cloudinaryのどの形で返ってきても拾えるように統一
+        const eagerUrl = 
+          imageData.eager?.[0]?.secure_url ||
+          imageData.eager_url ||
+          imageData.secure_url ||
+          null;
+        
         const shareUrl = window.buildShareUrlWithImage({
           public_id,
-          version
+          version,
+          eager_url: eagerUrl   // 受け側が無視しても問題ない
         });
         
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
         
         // OGP画像URLを保持してオーバーレイで案内（自動ポップアップ禁止）
-        const ogpImageUrl = eager_url || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/v${version}/${public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
+        const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/v${version}/${public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
         window.__ogpImageUrl = ogpImageUrl;
         
         // 状態を保存（戻っても診断結果が剥がれない）
@@ -885,7 +894,7 @@ function initializeApp() {
           window.saveResult({
             public_id,
             version,
-            eager_url,
+            eager_url: eagerUrl,
             imageData,
             formData,
             timestamp: Date.now()
@@ -1000,10 +1009,17 @@ function initializeApp() {
             dobDay: elements.dobDay?.value || ''
           };
           
+          // Cloudinaryのどの形で返ってきても拾えるように統一
+          const eagerUrl = 
+            imageData.eager?.[0]?.secure_url ||
+            imageData.eager_url ||
+            imageData.secure_url ||
+            null;
+          
           window.saveResult({
             public_id,
             version,
-            eager_url,
+            eager_url: eagerUrl,
             imageData,
             formData,
             timestamp: Date.now()
@@ -1133,10 +1149,17 @@ function initializeApp() {
             dobDay: elements.dobDay?.value || ''
           };
           
+          // Cloudinaryのどの形で返ってきても拾えるように統一
+          const eagerUrl = 
+            imageData.eager?.[0]?.secure_url ||
+            imageData.eager_url ||
+            imageData.secure_url ||
+            null;
+          
           window.saveResult({
             public_id,
             version,
-            eager_url,
+            eager_url: eagerUrl,
             imageData,
             formData,
             timestamp: Date.now()
@@ -1211,3 +1234,20 @@ function initializeApp() {
   setupRealtimePreview();
   setupDateInputs();
 }
+
+// Xシェア用の安全な関数（新規タブで開く）
+function shareToX(tweet) {
+  try {
+    const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
+    // 必ず新規タブで開く（元ページは保持）
+    window.open(webIntent, '_blank', 'noopener,noreferrer');
+    console.log('✅ X投稿用Web Intentを新規タブで開きました');
+  } catch (error) {
+    console.error('Xシェアエラー:', error);
+    // フォールバック：アラートでURLを表示
+    alert(`X投稿用URL:\n${webIntent}\n\nこのURLをコピーしてXで投稿してください。`);
+  }
+}
+
+// グローバル関数として公開
+window.shareToX = shareToX;

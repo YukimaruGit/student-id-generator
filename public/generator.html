@@ -404,20 +404,14 @@
                 window.showToast('Xを新しいタブで開きました。ページはこのまま利用できます。');
               }
             } else {
-              // 画像URLがない場合はWeb Intentを新しいタブで開く
-              const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
-              if (window.openInNewTab) {
-                window.openInNewTab(webIntent);
-              } else {
-                // フォールバック
-                const a = document.createElement('a');
-                a.href = webIntent;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-              }
+                      // 画像URLがない場合はWeb Intentを新しいタブで開く
+        const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
+        if (window.openInNewTab) {
+          window.openInNewTab(webIntent);
+        } else {
+          // フォールバック：必ず新規タブで開く
+          window.open(webIntent, '_blank', 'noopener,noreferrer');
+        }
             }
           } finally {
             // 1.5秒後にロック解除
@@ -441,7 +435,17 @@
       return false;
     }
     
-
+    // 新規タブで開く関数
+    function openInNewTab(url) {
+      try {
+        window.open(url, '_blank', 'noopener,noreferrer');
+        return true;
+      } catch (error) {
+        console.error('新規タブオープンエラー:', error);
+        return false;
+      }
+    }
+    window.openInNewTab = openInNewTab;
   </script>
   
   <!-- 直アクセス防止：診断未実施なら診断ゲームへ誘導 -->
