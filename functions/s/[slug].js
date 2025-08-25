@@ -15,8 +15,11 @@ export default async function onRequest({ request }) {
 
   let payload = null;
   try { 
-    payload = JSON.parse(decodeURIComponent(decodeB64Url(slug))); 
-  } catch {}
+    // decodeB64Url内で既にデコード済みのため、JSON.parseに直接渡す
+    payload = JSON.parse(decodeB64Url(slug)); 
+  } catch(e) {
+    console.error('Slug decode error:', e);
+  }
 
   // 画像URLの決定（OGP用、eager_urlがあれば最優先）
   const CLOUD = 'di5xqlddy'; // あなたの cloud name
@@ -57,7 +60,7 @@ export default async function onRequest({ request }) {
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="${ogImg}">
-<link rel="canonical" href="${canonical}">
+<link rel="canonical" href="${url.href}">
 </head><body>
 <script>
   // 人間のブラウザはStudioへ即時リダイレクト
@@ -78,7 +81,10 @@ export default async function onRequest({ request }) {
     });
   }
 
-  // ---- 人間は Studio の診断ページへ 302 ----
-  const dest = `https://preview.studio.site/live/1Va6D4lMO7/student-id?share=${encodeURIComponent(slug)}`;
-  return Response.redirect(dest, 302);
+  // ---- 人間は現在のサイトのトップページへ 302 ----
+  // リクエストURLを元に、同じドメインのトップページにリダイレクト
+  const baseUrl = new URL(request.url);
+  const dest = new URL('/', baseUrl);
+  dest.searchParams.set('share', slug);
+  return Response.redirect(dest.toString(), 302);
 }

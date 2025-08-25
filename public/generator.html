@@ -364,14 +364,8 @@
         const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         twitterBtn.onclick = () => {
-          if (isMobile) {
-            // モバイルはiframeを脱出してトップで遷移（白画面防止）
-            const targetWin = (window.top && window.top !== window.self) ? window.top : window;
-            targetWin.location.href = webIntent;
-          } else {
-            // PCは新規タブ
-            window.open(webIntent, '_blank', 'noopener');
-          }
+          // プラットフォームを問わず、常に新しいタブで開く（白画面防止）
+          window.open(webIntent, '_blank', 'noopener');
         };
       }
       
