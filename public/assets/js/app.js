@@ -937,13 +937,30 @@ function initializeApp() {
           '#放課後クロニクル #学生証メーカー'
         ].join('\n');
 
-        const intent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
-        // モバイル：同一タブ、PC：新規タブ
+        // 1) まず OS の共有シート（Web Share API）を試す
         const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile && navigator.share) {
+          try {
+            await navigator.share({ text: tweet });   // URLは本文先頭に含める運用なので text のみでOK
+            return;
+          } catch (e) {
+            // ユーザーキャンセルや未許可はフォールバック
+          }
+        }
+
+        // 2) フォールバック: Web Intent（モバイルは同一タブ、PCは新規タブ）
+        //   * mobile.twitter.com を使うと iOS の「Safariで開く？」誘導が起きにくい
+        const intent = `https://mobile.twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
         if (isMobile) {
-          location.href = intent; // たらい回し軽減、戻るで復帰可
+          location.href = intent;              // 同一タブ遷移でたらい回しを抑止
         } else {
-          window.open(intent, '_blank', 'noopener'); // PCは新規タブ
+          const a = document.createElement('a');
+          a.href = intent;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
         }
         return;
       }
@@ -1015,13 +1032,30 @@ function initializeApp() {
         '#放課後クロニクル #学生証メーカー'
       ].join('\n');
 
-      const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
-      // モバイル：同一タブ、PC：新規タブ
+      // 1) まず OS の共有シート（Web Share API）を試す
       const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile && navigator.share) {
+        try {
+          await navigator.share({ text: tweet });   // URLは本文先頭に含める運用なので text のみでOK
+          return;
+        } catch (e) {
+          // ユーザーキャンセルや未許可はフォールバック
+        }
+      }
+
+      // 2) フォールバック: Web Intent（モバイルは同一タブ、PCは新規タブ）
+      //   * mobile.twitter.com を使うと iOS の「Safariで開く？」誘導が起きにくい
+      const webIntent = `https://mobile.twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
       if (isMobile) {
-        location.href = webIntent; // たらい回し軽減、戻るで復帰可
+        location.href = webIntent;              // 同一タブ遷移でたらい回しを抑止
       } else {
-        window.open(webIntent, '_blank', 'noopener'); // PCは新規タブ
+        const a = document.createElement('a');
+        a.href = webIntent;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
       }
       
       // 成功時のフィードバック（ポップアップなし）
