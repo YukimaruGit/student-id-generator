@@ -839,8 +839,7 @@ function initializeApp() {
         const { public_id, version, eager_url } = imageData;
         const shareUrl = window.buildShareUrlWithImage({
           public_id,
-          version,
-          eager_url
+          version
         });
         
         // 画像データを保存（埋め込み時の保存対応用）
@@ -940,11 +939,10 @@ function initializeApp() {
       
       if (window.buildShareUrlWithImage && imageData.public_id) {
         // 新しい共有方式：画像URL/バージョン付きJSONスラッグ
-        const { public_id, version, eager_url } = imageData;
+        const { public_id, version } = imageData;
         shareUrl = window.buildShareUrlWithImage({
           public_id,
-          version,
-          eager_url
+          version
         });
         
         // 画像データを保存（埋め込み時の保存対応用）
@@ -1055,11 +1053,10 @@ function initializeApp() {
       
       if (window.buildShareUrlWithImage && imageData.public_id) {
         // 新しい共有方式：画像URL/バージョン付きJSONスラッグ
-        const { public_id, version, eager_url } = imageData;
+        const { public_id, version } = imageData;
         shareUrl = window.buildShareUrlWithImage({
           public_id,
-          version,
-          eager_url
+          version
         });
         
         // 画像データを保存（埋め込み時の保存対応用）
