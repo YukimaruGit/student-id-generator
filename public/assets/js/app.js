@@ -209,55 +209,79 @@ async function downloadCanvasAsImage(canvas, filename = '学生証.png') {
 
 
 
-// 画像 + URL を"確実に"シェアする統合関数
-async function shareStudentId(imageUrl, shareUrl, tweetTextBase = '') {
-  const nav = (window.top && window.top !== window && 'location' in window.top) ? window.top : window;
-  const tweetText = `${tweetTextBase ? tweetTextBase + '\n' : ''}${shareUrl}`;
+// 新しいタブ/外部アプリで開く関数（現在のタブを保持）
+function openInNewTab(url) {
+  const wTop = (window.top && window.top !== window) ? window.top : window;
+  // a要素＋_blankを使うことでSafari/iOSのブロックを回避しやすい
+  const a = wTop.document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  wTop.document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
 
-  // 1) 画像ファイル付きネイティブ共有（最優先：スマホでXアプリに直接渡せる）
+// 画像 + URL を"確実に"シェアする統合関数（現在のタブを保持）
+async function shareStudentId(imageUrl, shareUrl, baseText = '') {
+  const text = `${baseText ? baseText + '\n' : ''}${shareUrl}`;
+  
+  // A) Web Share API Level-2（画像付き）
   try {
-    const res = await fetch(imageUrl, { mode: 'cors', cache: 'no-store' });
-    const blob = await res.blob();
-    const file = new File([blob], 'student-id.png', { type: blob.type || 'image/png' });
-
-    if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
-      await navigator.share({ files: [file], text: tweetText });
-      return; // ここで完了（ユーザーがXを選べば画像添付で開く）
-    }
-  } catch (_) {
-    // 画像取得に失敗しても下のフォールバックへ進む
-  }
-
-  // 2) 画像をクリップボードに入れてからXを開く（一部環境で有効）
-  if (navigator.clipboard && 'ClipboardItem' in window) {
-    try {
+    if (imageUrl && navigator.share && navigator.canShare) {
       const res = await fetch(imageUrl, { mode: 'cors', cache: 'no-store' });
       const blob = await res.blob();
       const file = new File([blob], 'student-id.png', { type: blob.type || 'image/png' });
-      await navigator.clipboard.write([new ClipboardItem({ [file.type]: file })]);
-      // → X側で「貼り付け」で画像添付できる
-    } catch (_) { /* 無視して次へ */ }
-  }
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], text });
+        return; // 戻りはPromise解決のみ。画面遷移禁止
+      }
+    }
+  } catch (_) {} // フォールバックへ
 
-  // 3) アプリ深リンク → 失敗時 Web Intent（iframeでも最上位で遷移）
-  const deep = `twitter://post?message=${encodeURIComponent(tweetText)}`;
-  const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}`;
+  // 以降はタブを保持したまま"新しいタブ/外部アプリ"で開く
+  const deep = `twitter://post?message=${encodeURIComponent(text)}`;
+  const web = `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
 
-  let cancelled = false;
+  let hidden = false;
+  const onHidden = () => { hidden = true; cleanup(); };
   const cleanup = () => {
-    window.removeEventListener('visibilitychange', onHide, true);
-    window.removeEventListener('pagehide', onHide, true);
+    document.removeEventListener('visibilitychange', onVis);
+    window.removeEventListener('pagehide', onHidden, true);
+    window.removeEventListener('blur', onHidden, true);
+    document.removeEventListener('freeze', onHidden, true);
   };
-  const onHide = () => { if (document.hidden) { cancelled = true; clearTimeout(t); cleanup(); } };
-  window.addEventListener('visibilitychange', onHide, true);
-  window.addEventListener('pagehide', onHide, true);
+  const onVis = () => { if (document.visibilityState === 'hidden') onHidden(); };
 
-  const t = setTimeout(() => { if (!cancelled) nav.location.href = webIntent; }, 1200);
-  try { nav.location.href = deep; } catch { clearTimeout(t); nav.location.href = webIntent; }
+  document.addEventListener('visibilitychange', onVis, { once: false, passive: true });
+  window.addEventListener('pagehide', onHidden, true);
+  window.addEventListener('blur', onHidden, true);
+  document.addEventListener('freeze', onHidden, true);
+
+  // B) 深リンクは"新しいタブ"で試す
+  openInNewTab(deep);
+
+  // C) 1.2秒後、ページが隠れていなければ Web Intent を"新しいタブ"で開く
+  setTimeout(() => { if (!hidden) openInNewTab(web); cleanup(); }, 1200);
+}
+
+// 状態保持機能
+function saveResult(data) { 
+  sessionStorage.setItem('studentId.lastResult', JSON.stringify(data)); 
+}
+
+function loadResult() {
+  try { 
+    return JSON.parse(sessionStorage.getItem('studentId.lastResult') || 'null'); 
+  } catch { 
+    return null; 
+  }
 }
 
 // グローバル関数として公開
 window.shareStudentId = shareStudentId;
+window.saveResult = saveResult;
+window.loadResult = loadResult;
 
 // コピー処理を一元化
 async function copyTextReliable(text) {
@@ -849,6 +873,25 @@ function initializeApp() {
         const ogpImageUrl = eager_url || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/v${version}/${public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
         window.__ogpImageUrl = ogpImageUrl;
         
+        // 状態を保存（戻っても診断結果が剥がれない）
+        if (window.saveResult) {
+          const formData = {
+            nameJa: elements.nameJa?.value || '',
+            nameEn: elements.nameEn?.value || '',
+            dobMonth: elements.dobMonth?.value || '',
+            dobDay: elements.dobDay?.value || ''
+          };
+          
+          window.saveResult({
+            public_id,
+            version,
+            eager_url,
+            imageData,
+            formData,
+            timestamp: Date.now()
+          });
+        }
+        
         // 画像 URL をそのまま新しいタブで開く（PC=右クリック保存 / スマホ=共有/保存）
         window.open(ogpImageUrl, '_blank', 'noopener');
         
@@ -947,6 +990,25 @@ function initializeApp() {
         
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
+        
+        // 状態を保存（戻っても診断結果が剥がれない）
+        if (window.saveResult) {
+          const formData = {
+            nameJa: elements.nameJa?.value || '',
+            nameEn: elements.nameEn?.value || '',
+            dobMonth: elements.dobMonth?.value || '',
+            dobDay: elements.dobDay?.value || ''
+          };
+          
+          window.saveResult({
+            public_id,
+            version,
+            eager_url,
+            imageData,
+            formData,
+            timestamp: Date.now()
+          });
+        }
         
         // 共有リンクを更新（buildShareUrlWithImageが利用可能な場合のみ）
         if (window.updateShareLinksWithImage) {
@@ -1061,6 +1123,25 @@ function initializeApp() {
         
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
+        
+        // 状態を保存（戻っても診断結果が剥がれない）
+        if (window.saveResult) {
+          const formData = {
+            nameJa: elements.nameJa?.value || '',
+            nameEn: elements.nameEn?.value || '',
+            dobMonth: elements.dobMonth?.value || '',
+            dobDay: elements.dobDay?.value || ''
+          };
+          
+          window.saveResult({
+            public_id,
+            version,
+            eager_url,
+            imageData,
+            formData,
+            timestamp: Date.now()
+          });
+        }
         
         // 共有リンクを更新（buildShareUrlWithImageが利用可能な場合のみ）
         if (window.updateShareLinksWithImage) {

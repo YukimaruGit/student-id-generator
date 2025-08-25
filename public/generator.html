@@ -272,6 +272,29 @@
       top: auto !important;
       overflow: visible !important;
     }
+
+    /* トースト表示のスタイル */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      z-index: 10000;
+      font-size: 14px;
+      transition: opacity 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .toast.hide {
+      opacity: 0;
+    }
     
 
     
@@ -365,16 +388,40 @@
 
         const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        // ダブルクリック防止
+        let isSharing = false;
         twitterBtn.onclick = async () => {
-          // 新しい統合共有関数を使用（画像 + URL を確実にシェア）
-          const finalImageUrl = window.__ogpImageUrl || window.__lastImageData?.eager_url || window.__lastImageData?.secure_url;
-          if (finalImageUrl) {
-            await window.shareStudentId(finalImageUrl, window.__shareUrl, '🏫夢見が丘女子高等学校 学生証 つくったよ');
-          } else {
-            // 画像URLがない場合はWeb Intentを直接開く
-            const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
-            const nav = (window.top && window.top !== window && 'location' in window.top) ? window.top : window;
-            nav.location.href = webIntent;
+          if (isSharing) return; // 連打防止
+          isSharing = true;
+          
+          try {
+            // 新しい統合共有関数を使用（画像 + URL を確実にシェア）
+            const finalImageUrl = window.__ogpImageUrl || window.__lastImageData?.eager_url || window.__lastImageData?.secure_url;
+            if (finalImageUrl) {
+              await window.shareStudentId(finalImageUrl, window.__shareUrl, '🏫夢見が丘女子高等学校 学生証 つくったよ');
+              // 共有完了後のトースト表示
+              if (window.showToast) {
+                window.showToast('Xを新しいタブで開きました。ページはこのまま利用できます。');
+              }
+            } else {
+              // 画像URLがない場合はWeb Intentを新しいタブで開く
+              const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
+              if (window.openInNewTab) {
+                window.openInNewTab(webIntent);
+              } else {
+                // フォールバック
+                const a = document.createElement('a');
+                a.href = webIntent;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+              }
+            }
+          } finally {
+            // 1.5秒後にロック解除
+            setTimeout(() => { isSharing = false; }, 1500);
           }
         };
       }
@@ -564,6 +611,13 @@
     <p>処理中...</p>
   </div>
 
+  <!-- トースト表示 -->
+  <div id="toast" class="toast" style="display: none;">
+    <div class="toast-content">
+      <span id="toastMessage"></span>
+    </div>
+  </div>
+
   <!-- 進捗バー制御 -->
   <script>
     // 進捗バーの更新
@@ -641,6 +695,89 @@
   <script>
     // 放課後クロニクル診断ゲームからの連携処理（セキュリティ強化版）
     document.addEventListener('DOMContentLoaded', function() {
+      // 状態復元処理
+      function restoreStudentIdState() {
+        try {
+          const savedResult = window.loadResult ? window.loadResult() : null;
+          if (savedResult && savedResult.public_id && savedResult.version) {
+            console.log('学生証の状態を復元します:', savedResult);
+            
+            // 共有URLを復元
+            if (window.buildShareUrlWithImage) {
+              const shareUrl = window.buildShareUrlWithImage({
+                public_id: savedResult.public_id,
+                version: savedResult.version
+              });
+              window.__shareUrl = shareUrl;
+              
+              // 共有リンクを更新
+              if (window.updateShareLinksWithImage) {
+                window.updateShareLinksWithImage(savedResult, '学生証が復元されました');
+              }
+            }
+            
+            // OGP画像URLを復元
+            if (savedResult.eager_url) {
+              window.__ogpImageUrl = savedResult.eager_url;
+            }
+            
+            // 画像データを復元
+            if (savedResult.imageData) {
+              window.__lastImageData = savedResult.imageData;
+            }
+            
+            // フォーム値を復元
+            if (savedResult.formData) {
+              const { nameJa, nameEn, dobMonth, dobDay } = savedResult.formData;
+              if (nameJa && document.getElementById('nameJa')) {
+                document.getElementById('nameJa').value = nameJa;
+              }
+              if (nameEn && document.getElementById('nameEn')) {
+                document.getElementById('nameEn').value = nameEn;
+              }
+              if (dobMonth && document.getElementById('dobMonth')) {
+                document.getElementById('dobMonth').value = dobMonth;
+              }
+              if (dobDay && document.getElementById('dobDay')) {
+                document.getElementById('dobDay').value = dobDay;
+              }
+            }
+            
+            // プレビューを再描画
+            if (typeof window.drawStudentCard === 'function') {
+              setTimeout(() => window.drawStudentCard(), 100);
+            }
+            
+            console.log('✅ 学生証の状態が復元されました');
+          }
+        } catch (error) {
+          console.error('状態復元エラー:', error);
+        }
+      }
+      
+          // 状態復元を実行
+    restoreStudentIdState();
+    
+    // トースト表示機能
+    function showToast(message, duration = 3000) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      if (toast && toastMessage) {
+        toastMessage.textContent = message;
+        toast.style.display = 'block';
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+          toast.classList.add('hide');
+          setTimeout(() => {
+            toast.style.display = 'none';
+            toast.classList.remove('show', 'hide');
+          }, 300);
+        }, duration);
+      }
+    }
+    
+    window.showToast = showToast;
       // 診断情報をsessionStorageにバックアップ（クエリがある場合のみ）
       if (location.search) {
         sessionStorage.setItem('diagCtx', location.search);
