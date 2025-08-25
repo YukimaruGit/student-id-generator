@@ -47,42 +47,34 @@ export default async function onRequest({ request }) {
     ogImg = buildOgpUrl({ i: payload.i, p: payload.p, v: payload.v });
   }
 
-  // ---- Bot には 200 でOGP HTMLを返す ----
-  // ボット判定をより限定的に（人間アクセスは確実に302へ）
-  const isBot = /(Twitterbot|Discordbot|Slackbot|facebookexternalhit|LinkedInBot|WhatsApp|TelegramBot|Pinterestbot)/i.test(ua);
-  // ※ "X-Twitter" は人間の UA と誤衝突しやすいので除外
+  // ---- 全アクセスにOGP付きHTMLを返し、1秒後に自動遷移 ----
+  // UA誤判定のリスクを排除し、Discord/Xは確実に画像プレビュー、人間はHPへ自動遷移
   
-  // プリフェッチ（Sec-Purpose: prefetch）もBot扱い
-  const secPurpose = request.headers.get('sec-purpose') || '';
-  const isPrefetch = /prefetch/i.test(secPurpose);
+  const previewUrl = `https://preview.studio.site/live/1Va6D4lMO7/student-id?share=${encodeURIComponent(slug)}`;
   
-  if (isBot || isPrefetch) {
-    const html = `<!doctype html><html lang="ja"><head>
-<meta charset="utf-8">
+  const html = `<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
 <title>夢見が丘女子高等学校 学生証</title>
-<meta property="og:type" content="website">
-<meta property="og:title" content="夢見が丘女子高等学校 学生証">
-<meta property="og:description" content="診断から学生証を自動生成">
-<meta property="og:url" content="${url.href}">
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta property="og:type" content="article">
+<meta property="og:title" content="学生証ジェネレーター - 夢見が丘女子高等学校">
+<meta property="og:description" content="診断から学生証を自動生成／完成カードをシェアできます。">
 <meta property="og:image" content="${ogImg}">
-<meta property="og:image:secure_url" content="${ogImg}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:url" content="${url.href}">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="${ogImg}">
-<link rel="canonical" href="${url.href}">
-</head><body></body></html>`;
-    return new Response(html, {
-      headers: {
-        'content-type':'text/html; charset=utf-8',
-        'cache-control':'public, max-age=0, s-maxage=86400',
-        'vary':'user-agent'
-      }
-    });
-  }
+<meta http-equiv="refresh" content="1; url=${previewUrl}">
+</head>
+<body>
+<p>まもなく移動します。開かない場合は<a href="${previewUrl}">こちら</a>。</p>
+<script>setTimeout(function(){location.replace("${previewUrl}");}, 600);</script>
+</body></html>`;
 
-  // ---- 人間は指定のStudioページへ 302 ----
-  // 期待されるリダイレクト先URLにslugをshareパラメータとして付与
-  const dest = `https://preview.studio.site/live/1Va6D4lMO7/student-id?share=${encodeURIComponent(slug)}`;
-  return Response.redirect(dest, 302);
+  return new Response(html, { 
+    headers: { 
+      'content-type':'text/html; charset=utf-8', 
+      'cache-control':'public, max-age=600' 
+    }
+  });
 }

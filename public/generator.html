@@ -364,8 +364,16 @@
         const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         twitterBtn.onclick = async () => {
-          // ネイティブ共有 → アプリ深リンク → フォールバック の最適な手法を使用
-          await shareToX(tweet);
+          // 新しい統合共有関数を使用（画像 + URL を確実にシェア）
+          const finalImageUrl = window.__ogpImageUrl || window.__lastImageData?.eager_url || window.__lastImageData?.secure_url;
+          if (finalImageUrl) {
+            await window.shareStudentId(finalImageUrl, window.__shareUrl, '🏫夢見が丘女子高等学校 学生証 つくったよ');
+          } else {
+            // 画像URLがない場合はWeb Intentを直接開く
+            const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
+            const nav = (window.top && window.top !== window && 'location' in window.top) ? window.top : window;
+            nav.location.href = webIntent;
+          }
         };
       }
       

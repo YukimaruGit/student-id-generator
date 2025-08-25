@@ -99,60 +99,7 @@ window.cloudinaryConfig = window.cloudinaryConfig || {
 };
 const cloudinaryConfig = window.cloudinaryConfig;
 
-// X投稿の二重起動を完全停止（アプリが開けたらフォールバック中止）
-async function shareToX(tweetText) {
-  const ua = navigator.userAgent || '';
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
-  const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}`;
-  
-  // iframe内でも最上位で遷移（真っ白・タブ増殖・Safari経由ループを防止）
-  const nav = (window.top && window.top !== window && 'location' in window.top) ? window.top : window;
-
-  // 1) ネイティブ共有
-  if (isMobile && navigator.share) {
-    try { 
-      await navigator.share({ text: tweetText }); 
-      return; 
-    } catch(e) {}
-  }
-
-  // 2) アプリ深リンク → 失敗時のみフォールバック
-  if (isMobile) {
-    const deep = `twitter://post?message=${encodeURIComponent(tweetText)}`;
-    let cancelled = false;
-    const stop = () => { 
-      cancelled = true; 
-      clearTimeout(t); 
-      window.removeEventListener('visibilitychange', onHide, true); 
-      window.removeEventListener('pagehide', onHide, true); 
-    };
-    const onHide = () => { 
-      if (document.hidden) stop(); 
-    };
-    window.addEventListener('visibilitychange', onHide, true);
-    window.addEventListener('pagehide', onHide, true);
-
-    const t = setTimeout(() => { 
-      if (!cancelled) nav.location.href = webIntent; 
-    }, 1200);
-    try { 
-      nav.location.href = deep; 
-    } catch { 
-      clearTimeout(t); 
-      nav.location.href = webIntent; 
-    }
-    return;
-  }
-
-  // 3) PC
-  const a = document.createElement('a');
-  a.href = webIntent; 
-  a.target = (nav === window.top) ? '_blank' : '_top'; 
-  a.rel = 'noopener';
-  document.body.appendChild(a); 
-  a.click(); 
-  a.remove();
-}
+// 古いshareToX関数は削除済み（新しいshareStudentId関数に統合）
 
 // 設定の検証
 if (!cloudinaryConfig.cloudName || !cloudinaryConfig.uploadPreset) {
@@ -262,7 +209,55 @@ async function downloadCanvasAsImage(canvas, filename = '学生証.png') {
 
 
 
-// 古い実装の残骸を削除済み
+// 画像 + URL を"確実に"シェアする統合関数
+async function shareStudentId(imageUrl, shareUrl, tweetTextBase = '') {
+  const nav = (window.top && window.top !== window && 'location' in window.top) ? window.top : window;
+  const tweetText = `${tweetTextBase ? tweetTextBase + '\n' : ''}${shareUrl}`;
+
+  // 1) 画像ファイル付きネイティブ共有（最優先：スマホでXアプリに直接渡せる）
+  try {
+    const res = await fetch(imageUrl, { mode: 'cors', cache: 'no-store' });
+    const blob = await res.blob();
+    const file = new File([blob], 'student-id.png', { type: blob.type || 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+      await navigator.share({ files: [file], text: tweetText });
+      return; // ここで完了（ユーザーがXを選べば画像添付で開く）
+    }
+  } catch (_) {
+    // 画像取得に失敗しても下のフォールバックへ進む
+  }
+
+  // 2) 画像をクリップボードに入れてからXを開く（一部環境で有効）
+  if (navigator.clipboard && 'ClipboardItem' in window) {
+    try {
+      const res = await fetch(imageUrl, { mode: 'cors', cache: 'no-store' });
+      const blob = await res.blob();
+      const file = new File([blob], 'student-id.png', { type: blob.type || 'image/png' });
+      await navigator.clipboard.write([new ClipboardItem({ [file.type]: file })]);
+      // → X側で「貼り付け」で画像添付できる
+    } catch (_) { /* 無視して次へ */ }
+  }
+
+  // 3) アプリ深リンク → 失敗時 Web Intent（iframeでも最上位で遷移）
+  const deep = `twitter://post?message=${encodeURIComponent(tweetText)}`;
+  const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}`;
+
+  let cancelled = false;
+  const cleanup = () => {
+    window.removeEventListener('visibilitychange', onHide, true);
+    window.removeEventListener('pagehide', onHide, true);
+  };
+  const onHide = () => { if (document.hidden) { cancelled = true; clearTimeout(t); cleanup(); } };
+  window.addEventListener('visibilitychange', onHide, true);
+  window.addEventListener('pagehide', onHide, true);
+
+  const t = setTimeout(() => { if (!cancelled) nav.location.href = webIntent; }, 1200);
+  try { nav.location.href = deep; } catch { clearTimeout(t); nav.location.href = webIntent; }
+}
+
+// グローバル関数として公開
+window.shareStudentId = shareStudentId;
 
 // コピー処理を一元化
 async function copyTextReliable(text) {
