@@ -99,51 +99,56 @@ window.cloudinaryConfig = window.cloudinaryConfig || {
 };
 const cloudinaryConfig = window.cloudinaryConfig;
 
-// X投稿の深リンク制御（アプリ起動成功時はフォールバックをキャンセル）
-function openXAppOrIntent(webIntentUrl, tweetText) {
+// X投稿の二重起動を完全停止（アプリが開けたらフォールバック中止）
+async function shareToX(tweetText) {
   const ua = navigator.userAgent || '';
-  const isIOS = /iP(hone|od|ad)/.test(ua);
-  const isAndroid = /Android/i.test(ua);
-  const deepLink = `twitter://post?message=${encodeURIComponent(tweetText)}`;
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+  const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}`;
 
-  // PC は常に Web Intent を新規タブで
-  if (!isIOS && !isAndroid) {
-    window.open(webIntentUrl, '_blank', 'noopener');
+  // 1) ネイティブ共有
+  if (isMobile && navigator.share) {
+    try { 
+      await navigator.share({ text: tweetText }); 
+      return; 
+    } catch(e) {}
+  }
+
+  // 2) アプリ深リンク → 失敗時のみフォールバック
+  if (isMobile) {
+    const deep = `twitter://post?message=${encodeURIComponent(tweetText)}`;
+    let cancelled = false;
+    const stop = () => { 
+      cancelled = true; 
+      clearTimeout(t); 
+      window.removeEventListener('visibilitychange', onHide, true); 
+      window.removeEventListener('pagehide', onHide, true); 
+    };
+    const onHide = () => { 
+      if (document.hidden) stop(); 
+    };
+    window.addEventListener('visibilitychange', onHide, true);
+    window.addEventListener('pagehide', onHide, true);
+
+    const t = setTimeout(() => { 
+      if (!cancelled) location.href = webIntent; 
+    }, 1200);
+    try { 
+      location.href = deep; 
+    } catch { 
+      clearTimeout(t); 
+      location.href = webIntent; 
+    }
     return;
   }
 
-  // モバイル：まずアプリ深リンク、失敗時だけ Web Intent へ
-  let fired = false;
-  const cancel = () => {
-    if (fired) return;
-    fired = true;
-    clearTimeout(timer);
-    window.removeEventListener('visibilitychange', onHidden, true);
-    window.removeEventListener('pagehide', onHidden, true);
-  };
-  const onHidden = () => {
-    // アプリに遷移してタブが非表示になった → フォールバック中止
-    if (document.hidden) cancel();
-  };
-  window.addEventListener('visibilitychange', onHidden, true);
-  window.addEventListener('pagehide', onHidden, true);
-
-  // 失敗フォールバック（1.2s 後に Web Intent を同タブ遷移）
-  const timer = setTimeout(() => {
-    if (!fired) {
-      fired = true;
-      window.location.href = webIntentUrl;
-    }
-  }, 1200);
-
-  // アプリを開く
-  try {
-    window.location.href = deepLink;
-  } catch {
-    // 例外時は即フォールバック
-    clearTimeout(timer);
-    window.location.href = webIntentUrl;
-  }
+  // 3) PC
+  const a = document.createElement('a');
+  a.href = webIntent; 
+  a.target = '_blank'; 
+  a.rel = 'noopener';
+  document.body.appendChild(a); 
+  a.click(); 
+  a.remove();
 }
 
 // 設定の検証
@@ -906,8 +911,7 @@ function initializeApp() {
         }
 
         // 2) フォールバック: Web Intent（新しいタブで安定）
-        const intent = `https://x.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
-        openXAppOrIntent(intent, tweet);
+        shareToX(tweet);
         return;
       }
     
@@ -990,8 +994,7 @@ function initializeApp() {
       }
 
       // 2) フォールバック: Web Intent（新しいタブで安定）
-      const webIntent = `https://x.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
-      openXAppOrIntent(webIntent, tweet);
+      shareToX(tweet);
       
       // 成功時のフィードバック（ポップアップなし）
       console.log('✅ X投稿処理が完了しました');

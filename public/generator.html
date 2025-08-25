@@ -318,27 +318,20 @@
         .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
     }
 
-    // （廃止）public_idのみの短縮スラッグは作らない
-    // 共有は必ず version を含む短縮スラッグで行う
-    
-    // 共有URLペイロード生成（短縮スラッグ用）
-    function buildShareSlugPayload({public_id, version}) {
-      // "v:VERSION:PUBLIC_ID" を Base64URL（最短）
-      const raw = `v:${version}:${public_id}`;
-      return btoa(unescape(encodeURIComponent(raw)))
-        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-    }
-    
-    // 新しい共有方式：短縮スラッグ（OGP画像URLを含む、最も確実）
-    function buildShareUrlWithImage(public_id, version, eager_url){
-      const slug = buildShareSlugPayload({ public_id, version });
+    // 共有URLは JSON 方式に一本化（eager_url を最優先）
+    function buildShareUrlWithImage({public_id, version, eager}) {
+      const eagerUrl = eager?.[0]?.secure_url || null;
+      const payload = { i: eagerUrl, p: public_id, v: version };
+      const json = JSON.stringify(payload);
+      const slug = btoa(unescape(encodeURIComponent(json)))  // base64
+                    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); // base64url
       return `${SHARE_BASE}/s/${slug}`;
     }
     window.buildShareUrlWithImage = buildShareUrlWithImage;
     
     // 共有リンク更新関数（app.jsから呼び出される）…UIは保持のみ、ハンドラはapp.jsが参照
     function updateShareLinksWithImage(imageData, text) {
-      const shareUrl = buildShareUrlWithImage(imageData.public_id, imageData.version, imageData.eager_url);
+      const shareUrl = buildShareUrlWithImage({ public_id: imageData.public_id, version: imageData.version, eager: imageData.eager });
       console.log('共有URL更新:', shareUrl);
       // 共有URLを保存
       window.__shareUrl = shareUrl;
