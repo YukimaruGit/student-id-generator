@@ -349,11 +349,26 @@
       const urlBtn = document.getElementById('urlBtn');
       if (urlBtn) urlBtn.onclick = () => copyTextReliable(window.__shareUrl);
       
-      // X投稿（web intent & 新規タブ）
+      // X投稿（指定のテンプレに差し替え・新規タブで開く）
       const twitterBtn = document.getElementById('twitterBtn');
       if (twitterBtn) {
-        const baseTweetText = 'あなたの学校生活を診断して学生証を作ろう！\n\n#放課後クロニクル #学生証ジェネレーター';
-        const tweet = `${window.__shareUrl}\n\n${baseTweetText}`;
+        // URLパラメータから学科/部活を取得（部活は"部"を付ける）
+        const p = new URLSearchParams(location.search);
+        const course = p.get('course') || '普通科';
+        const rawClub = p.get('club') || '帰宅';
+        const club = /部$/.test(rawClub) ? rawClub : `${rawClub}部`;
+
+        const tweet = [
+          '🏫夢見が丘女子高等学校 入学診断',
+          `【${course}】の【${club}】になりました！`,
+          '診断の最後には、自分だけの学生証ももらえます🎓📸',
+          '',
+          '君も放課後クロニクルの世界へ――',
+          '',
+          '#放課後クロニクル #学生証メーカー',
+          `▶︎ ${window.__shareUrl}`
+        ].join('\n');
+
         const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
         twitterBtn.onclick = () => window.open(webIntent, '_blank', 'noopener');
       }

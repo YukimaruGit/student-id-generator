@@ -941,8 +941,24 @@ function initializeApp() {
     
           // すでに共有URLがあるなら、再アップロードせずそのまま開く
       if (window.__shareUrl) {
-        const baseTweetText = 'あなたの学校生活を診断して学生証を作ろう！\n\n#放課後クロニクル #学生証ジェネレーター';
-        const intent = `https://x.com/intent/post?text=${encodeURIComponent(`${window.__shareUrl}\n\n${baseTweetText}`)}`;
+        // URLパラメータから学科/部活を取得（部活は"部"を付ける）
+        const p = new URLSearchParams(location.search);
+        const courseParam = p.get('course') || '普通科';
+        const rawClubParam = p.get('club') || '帰宅';
+        const clubParam = /部$/.test(rawClubParam) ? rawClubParam : `${rawClubParam}部`;
+
+        const tweet = [
+          '🏫夢見が丘女子高等学校 入学診断',
+          `【${courseParam}】の【${clubParam}】になりました！`,
+          '診断の最後には、自分だけの学生証ももらえます🎓📸',
+          '',
+          '君も放課後クロニクルの世界へ――',
+          '',
+          '#放課後クロニクル #学生証メーカー',
+          `▶︎ ${window.__shareUrl}`
+        ].join('\n');
+
+        const intent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
         // 常に新しいタブで開く（埋め込みでも安全）
         try { window.top.open(intent, '_blank', 'noopener'); } catch (_) { window.open(intent, '_blank', 'noopener'); }
         return;
@@ -970,7 +986,7 @@ function initializeApp() {
       // 新しい共有方式：短いURL（/s/{slug}形式）
       let shareUrl;
       
-      // ツイート文を作成（共有URLを先頭に配置）
+      // ツイート文を作成（指定のテンプレート使用）
       const baseTweetText = nameJa ? 
         `${nameJa}の学生証が完成しました！🎓\n\nあなたの学校生活を診断して学生証を作ろう！\n\n#放課後クロニクル #学生証ジェネレーター` :
         `放課後クロニクル 学生証が完成しました！🎓\n\nあなたの学校生活を診断して学生証を作ろう！\n\n#放課後クロニクル #学生証ジェネレーター`;
@@ -1007,8 +1023,24 @@ function initializeApp() {
       
       hideLoading();
       
-      // Web IntentでX投稿を開く（URL先頭でカード確実化）
-      const tweet = `${shareUrl}\n\n${baseTweetText}`;
+      // Web IntentでX投稿を開く（指定のテンプレート使用）
+      // URLパラメータから学科/部活を取得（部活は"部"を付ける）
+      const searchParams = new URLSearchParams(location.search);
+      const courseName = searchParams.get('course') || '普通科';
+      const rawClubName = searchParams.get('club') || '帰宅';
+      const clubName = /部$/.test(rawClubName) ? rawClubName : `${rawClubName}部`;
+
+      const tweet = [
+        '🏫夢見が丘女子高等学校 入学診断',
+        `【${courseName}】の【${clubName}】になりました！`,
+        '診断の最後には、自分だけの学生証ももらえます🎓📸',
+        '',
+        '君も放課後クロニクルの世界へ――',
+        '',
+        '#放課後クロニクル #学生証メーカー',
+        `▶︎ ${shareUrl}`
+      ].join('\n');
+
       const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
       // 常に新しいタブで開く（埋め込みでも安全）
       try { window.top.open(webIntent, '_blank', 'noopener'); } catch (_) { window.open(webIntent, '_blank', 'noopener'); }
