@@ -319,8 +319,8 @@
     }
 
     // 共有URLは JSON 方式に一本化（eager_url を最優先）
-    function buildShareUrlWithImage({public_id, version, eager}) {
-      const eagerUrl = eager?.[0]?.secure_url || null;
+    function buildShareUrlWithImage({public_id, version, eager, eager_url}) {
+      const eagerUrl = eager?.[0]?.secure_url || eager_url || null;
       const payload = { i: eagerUrl, p: public_id, v: version };
       const json = JSON.stringify(payload);
       const slug = btoa(unescape(encodeURIComponent(json)))  // base64
