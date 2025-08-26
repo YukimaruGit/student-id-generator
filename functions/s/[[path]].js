@@ -29,15 +29,16 @@ export async function onRequest({ request }) {
     `c_pad,g_auto,w_1200,h_630,b_white,q_auto:good,f_png,fl_force_strip/` +
     `v1/student-id-generator/preview.png`; // ← 拡張子を .png に合わせる
 
-  // OGP画像URL（SNSプレビュー用）: 自ドメイン配信で安定させる
+  // OGP画像URL（SNSプレビュー用）: Cloudinary直リンクで安定させる（Discord対応）
   // ページの ?cb=... を画像URLにも付与して、Discord/X の画像キャッシュを確実に更新させる
   let ogImg = DEFAULT_OGP;
   if (payload?.i) ogImg = payload.i;
   else if (payload?.p && payload?.v) {
-    // 自ドメイン経由の /ogp を使用（named transformation経由で安定）
-    const ogImgBase = `${url.origin}/ogp/v${payload.v}/${segEnc(payload.p)}.jpg`;
-    const cb = url.searchParams.get('cb');
-    ogImg = cb ? `${ogImgBase}?cb=${encodeURIComponent(cb)}` : ogImgBase;
+    // Cloudinary直リンクを使用（Discordの埋め込み安定化）
+    const cloud = 'di5xqlddy';
+    const cloudinaryOgp = `https://res.cloudinary.com/${cloud}/image/upload/t_ogp_card/v${payload.v}/${segEnc(payload.p)}.jpg`;
+    // 最終フォールバック（理論上不要だが安全のため）
+    ogImg = cloudinaryOgp;
   }
 
   // クリック後の遷移先（Studio）
@@ -54,6 +55,8 @@ export async function onRequest({ request }) {
 <meta property="og:description" content="診断から学生証を自動生成。カードをクリックで詳細へ。">
 <meta property="og:url" content="${url.origin}${url.pathname}">
 <meta property="og:image" content="${ogImg}">
+<meta property="og:image:secure_url" content="${ogImg}">
+<meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">

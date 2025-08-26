@@ -358,38 +358,9 @@
       const urlBtn = document.getElementById('urlBtn');
       if (urlBtn) urlBtn.onclick = () => copyTextReliable(window.__shareUrl);
       
-      // X投稿（共有ブリッジ経由でトップレベルWeb Shareを実行）
-      const twitterBtn = document.getElementById('twitterBtn');
-      if (twitterBtn) {
-        twitterBtn.onclick = async () => {
-          // URLパラメータから学科/部活を取得（部活は"部"を付ける）
-          const p = new URLSearchParams(location.search);
-          const course = p.get('course') || '普通科';
-          const rawClub = p.get('club') || '帰宅';
-          const club = /部$/.test(rawClub) ? rawClub : `${rawClub}部`;
-
-          const tweet = [
-            `${window.__shareUrl}`,
-            '',
-            '🏫夢見が丘女子高等学校 入学診断',
-            `【${course}】の【${club}】になりました！`,
-            '診断の最後には、自分だけの学生証ももらえます🎓📸',
-            '',
-            '君も放課後クロニクルの世界へ――',
-            '',
-            '#放課後クロニクル #学生証メーカー'
-          ].join('\n');
-
-          // 自ドメイン経由のOGP画像URLを構築（プロキシ経由で安定）
-          const imgUrl = `${location.origin}/ogp/v${window.__lastImageData?.version}/${window.__lastImageData?.public_id?.split('/').map(encodeURIComponent).join('/')}.jpg`;
-          
-          // 直接ネイティブ共有を実行（iOSではアプリのみ、Android/PCではフォールバック）
-          if (window.shareToXAppFirstOnly) {
-            const text = buildPostText();
-            await window.shareToXAppFirstOnly(imgUrl, text);
-          }
-        };
-      }
+      // 画像生成後は共有素材を最新に更新（常時バインド済みハンドラがこれを参照する）
+      window.__lastImageData = imageData;
+      window.__ogpImageUrl = `${location.origin}/ogp/v${imageData.version}/${imageData.public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
       
       // 表示用フィールドがあれば更新
       const field = document.getElementById('shareLinkField');
@@ -409,6 +380,28 @@
         '#放課後クロニクル #学生証メーカー'
       ].join('\n');
     }
+    
+    // ✅ ページ読込時に"常時"バインド（画像生成の有無に関わらず動く）
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('twitterBtn');
+      if (!btn) return;
+      btn.addEventListener('click', async () => {
+        // 投稿テキスト
+        const text = buildPostText();
+        // 共有URL（なければHPを案内）
+        const url  = window.__shareUrl || 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
+        // 画像URL（未生成なら null）
+        const img  = window.__ogpImageUrl || null;
+
+        // iOS/Android/PC 共通の統合関数（既存）で実行
+        if (window.shareToXAppFirstOnly) {
+          // iOS は"アプリのみ"モード：画像があれば添付、なければテキスト共有
+          await window.shareToXAppFirstOnly(img || '', `${text}\n${url}`);
+        } else if (window.shareStudentId) {
+          await window.shareStudentId(img || '', url, text);
+        }
+      }, { passive: true });
+    });
     
 
   </script>
