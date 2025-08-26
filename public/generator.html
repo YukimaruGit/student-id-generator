@@ -389,23 +389,26 @@
           isSharing = true;
           
           try {
-            // 新しい統合共有関数を使用（画像 + URL を確実にシェア）
+            // 共有ブリッジページを新規タブで開く（iframe回避）
             const finalImageUrl = window.__ogpImageUrl || window.__lastImageData?.eager_url || window.__lastImageData?.secure_url;
-            if (finalImageUrl) {
-              await window.shareStudentId(finalImageUrl, window.__shareUrl, '🏫夢見が丘女子高等学校 学生証 つくったよ');
-              // 共有完了後のトースト表示
-              if (window.showToast) {
-                window.showToast('Xを新しいタブで開きました。ページはこのまま利用できます。');
-              }
+            const shareUrl = window.__shareUrl;
+            
+            // 共有本文と画像URLを共有ブリッジに渡す
+            const shareText = `${shareUrl}\n\n#放課後クロニクル #学生証メーカー`;
+            const imgUrl = finalImageUrl || `${window.location.origin}/ogp/v${window.__lastImageData?.version}/${window.__lastImageData?.public_id}.jpg`;
+            
+            // 必ず新規タブで共有ブリッジを開く
+            const bridgeUrl = `/share.html?text=${encodeURIComponent(shareText)}&img=${encodeURIComponent(imgUrl || '')}`;
+            if (window.openInNewTab) {
+              window.openInNewTab(bridgeUrl);
             } else {
-                      // 画像URLがない場合はWeb Intentを新しいタブで開く
-        const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
-        if (window.openInNewTab) {
-          window.openInNewTab(webIntent);
-        } else {
-          // フォールバック：必ず新規タブで開く
-          window.open(webIntent, '_blank', 'noopener,noreferrer');
-        }
+              // フォールバック：必ず新規タブで開く
+              window.open(bridgeUrl, '_blank', 'noopener,noreferrer');
+            }
+            
+            // 共有完了後のトースト表示
+            if (window.showToast) {
+              window.showToast('共有ページを新しいタブで開きました。ページはこのまま利用できます。');
             }
           } finally {
             // 1.5秒後にロック解除

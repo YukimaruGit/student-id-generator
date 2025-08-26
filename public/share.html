@@ -1,0 +1,29 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Share</title>
+<script>
+(async () => {
+  const p = new URLSearchParams(location.search);
+  const text = p.get('text') || '';
+  const img  = p.get('img'); // 画像URL（OGP用でも可）
+  
+  try {
+    const data = { text };
+    if (img && navigator.canShare) {
+      const res  = await fetch(img, { cache: 'no-store' });
+      const blob = await res.blob();
+      const file = new File([blob], 'student-id.jpg', { type: blob.type || 'image/jpeg' });
+      if (navigator.canShare({ files: [file] })) data.files = [file];
+    }
+    if (navigator.share) {
+      await navigator.share(data);
+      window.close();
+      return;
+    }
+  } catch(e) {}
+  
+  // フォールバック（画像なしIntent）
+  location.href = 'https://x.com/intent/post?text=' + encodeURIComponent(text);
+})();
+</script>
