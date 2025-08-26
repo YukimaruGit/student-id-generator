@@ -26,7 +26,7 @@ export async function onRequest({ request }) {
   const segEnc = s => (s||'').split('/').map(encodeURIComponent).join('/');
   const DEFAULT_OGP =
     `https://res.cloudinary.com/${CLOUD}/image/upload/` +
-    `c_fill,g_auto,w_1200,h_630,q_auto:good,f_png,fl_force_strip/` +
+    `c_pad,g_auto,w_1200,h_630,b_white,q_auto:good,f_png,fl_force_strip/` +
     `v1/student-id-generator/preview.png`; // ← 拡張子を .png に合わせる
 
   // OGP画像URL（SNSプレビュー用）: 自ドメイン配信で安定させる

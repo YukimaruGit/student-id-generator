@@ -216,6 +216,19 @@ function openInNewTab(url) {
 }
 
 // deep link（twitter://）や location.href は使わない。常に新規タブ or ネイティブ共有。
+// シェアテキストの定型化（改行を含む）
+function buildPostText() {
+  return [
+    'ようこそ、夢見が丘女子高等学校へ！',
+    '',
+    '▼自分だけの学生証を作ろう！',
+    '（https://preview.studio.site/live/1Va6D4lMO7/student-id）',
+    '（画像）', // 共有シートでは画像ファイル自体を添付する想定
+    '',
+    '#放課後クロニクル #学生証メーカー'
+  ].join('\n');
+}
+
 // 画像 + URL を"確実に"シェアする統合関数（現在のタブを保持）
 async function shareStudentId(finalImageUrl, shareUrl, baseText='') {
   const text = `${baseText ? baseText + '\n' : ''}${shareUrl}`;
@@ -853,7 +866,10 @@ function initializeApp() {
         window.__lastImageData = imageData;
         
         // OGP画像URLを設定（共有時のプレビュー用）
-        const ogpImageUrl = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/v${version}/${public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
+        // 自ドメインの /ogp を使用して、t_ogp_card の named transformation を適用
+        const pid = public_id.split('/').map(encodeURIComponent).join('/');
+        const cb = Date.now(); // キャッシュ破り
+        const ogpImageUrl = `${location.origin}/ogp/v${version}/${pid}.jpg?cb=${cb}`;
         window.__ogpImageUrl = ogpImageUrl;
         
         // 状態を保存（戻っても診断結果が剥がれない）
@@ -883,7 +899,8 @@ function initializeApp() {
         }
         
         // 画像 URL をそのまま新しいタブで開く（PC=右クリック保存 / スマホ=共有/保存）
-        const downloadImageUrl = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/v${version}/${public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
+        // 同じ /ogp の画像URLを使用（t_ogp_card の named transformation 適用）
+        const downloadImageUrl = ogpImageUrl;
         window.open(downloadImageUrl, '_blank', 'noopener');
         
         // 共有リンクを更新
@@ -1020,7 +1037,14 @@ function initializeApp() {
       
       hideLoading();
       
-      // Web IntentでX投稿を開く（指定のテンプレート使用）
+      // 新しい共有方式：画像付きシェア（最優先）
+      if (window.__ogpImageUrl && shareUrl) {
+        const text = buildPostText();
+        await shareStudentId(window.__ogpImageUrl, shareUrl, text);
+        return;
+      }
+
+      // フォールバック：従来のテキストシェア
       // URLパラメータから学科/部活を取得（部活は"部"を付ける）
       const searchParams = new URLSearchParams(location.search);
       const courseName = searchParams.get('course') || '普通科';
