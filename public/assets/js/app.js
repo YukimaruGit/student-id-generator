@@ -862,24 +862,17 @@ function initializeApp() {
         // 新しい共有方式：画像URL/バージョン付きJSONスラッグ
         const { public_id, version } = imageData;
         
-        // Cloudinaryのどの形で返ってきても拾えるように統一
-        const eagerUrl = 
-          imageData.eager?.[0]?.secure_url ||
-          imageData.eager_url ||
-          imageData.secure_url ||
-          null;
-        
+        // 短いURL方式で共有URLを生成
         const shareUrl = window.buildShareUrlWithImage({
           public_id,
-          version,
-          eager_url: eagerUrl   // 受け側が無視しても問題ない
+          version
         });
         
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
         
-        // OGP画像URLを保持してオーバーレイで案内（自動ポップアップ禁止）
-        const ogpImageUrl = eagerUrl || `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/v${version}/${public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
+        // OGP画像URLを設定（共有時のプレビュー用）
+        const ogpImageUrl = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/v${version}/${public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
         window.__ogpImageUrl = ogpImageUrl;
         
         // 状態を保存（戻っても診断結果が剥がれない）
@@ -890,6 +883,13 @@ function initializeApp() {
             dobMonth: elements.dobMonth?.value || '',
             dobDay: elements.dobDay?.value || ''
           };
+          
+          // Cloudinaryのどの形で返ってきても拾えるように統一
+          const eagerUrl = 
+            imageData.eager?.[0]?.secure_url ||
+            imageData.eager_url ||
+            imageData.secure_url ||
+            null;
           
           window.saveResult({
             public_id,
@@ -902,7 +902,8 @@ function initializeApp() {
         }
         
         // 画像 URL をそのまま新しいタブで開く（PC=右クリック保存 / スマホ=共有/保存）
-        window.open(ogpImageUrl, '_blank', 'noopener');
+        const downloadImageUrl = `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/v${version}/${public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
+        window.open(downloadImageUrl, '_blank', 'noopener');
         
         // 共有リンクを更新
         if (window.updateShareLinksWithImage) {
