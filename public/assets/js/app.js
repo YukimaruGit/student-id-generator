@@ -239,30 +239,17 @@ async function shareStudentId(imageUrl, shareUrl, baseText = '') {
     }
   } catch (_) {} // フォールバックへ
 
-  // 以降はタブを保持したまま"新しいタブ/外部アプリ"で開く
-  const deep = `twitter://post?message=${encodeURIComponent(text)}`;
+  // B) 画像共有不可なら text だけでも Share Sheet を試す
+  try {
+    if (navigator.share) {
+      await navigator.share({ text });
+      return; // アプリ選択で成功
+    }
+  } catch (_) {} // フォールバックへ
+
+  // C) 最後のフォールバック：Web Intent を新規タブで開く
   const web = `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
-
-  let hidden = false;
-  const onHidden = () => { hidden = true; cleanup(); };
-  const cleanup = () => {
-    document.removeEventListener('visibilitychange', onVis);
-    window.removeEventListener('pagehide', onHidden, true);
-    window.removeEventListener('blur', onHidden, true);
-    document.removeEventListener('freeze', onHidden, true);
-  };
-  const onVis = () => { if (document.visibilityState === 'hidden') onHidden(); };
-
-  document.addEventListener('visibilitychange', onVis, { once: false, passive: true });
-  window.addEventListener('pagehide', onHidden, true);
-  window.addEventListener('blur', onHidden, true);
-  document.addEventListener('freeze', onHidden, true);
-
-  // B) 深リンクは"新しいタブ"で試す
-  openInNewTab(deep);
-
-  // C) 1.2秒後、ページが隠れていなければ Web Intent を"新しいタブ"で開く
-  setTimeout(() => { if (!hidden) openInNewTab(web); cleanup(); }, 1200);
+  openInNewTab(web);
 }
 
 // 状態保持機能

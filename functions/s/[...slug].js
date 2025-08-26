@@ -1,4 +1,4 @@
-// /functions/s/[slug].js
+// /functions/s/[...slug].js
 export default async function onRequest({ request }) {
   const url = new URL(request.url);
   
