@@ -1013,7 +1013,7 @@ function initializeApp() {
         }
 
         // 2) フォールバック: Web Intent（新しいタブで安定）
-        shareToX(tweet);
+        shareToX();
         return;
       }
     
@@ -1131,7 +1131,7 @@ function initializeApp() {
       }
 
       // 2) フォールバック: Web Intent（新しいタブで安定）
-      shareToX(tweet);
+      shareToX();
       
       // 成功時のフィードバック（ポップアップなし）
       console.log('✅ X投稿処理が完了しました');
@@ -1297,71 +1297,96 @@ function initializeApp() {
   setupDateInputs();
 }
 
-// Xシェア用の安全な関数（iOSでは何もしない）
-function shareToX(tweet) {
-  // iOSではWeb Intentを開かない（ネイティブ共有のみ）
-  if (isIOS) {
-    console.log('iOS環境のため、Web Intentは開きません');
-    return;
-  }
-  
-  try {
-    const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
-    // 必ず新規タブで開く（元ページは保持）
-    window.open(webIntent, '_blank', 'noopener,noreferrer');
-    console.log('✅ X投稿用Web Intentを新規タブで開きました');
-  } catch (error) {
-    console.error('Xシェアエラー:', error);
-    // フォールバック：アラートでURLを表示
-    alert(`X投稿用URL:\n${webIntent}\n\nこのURLをコピーしてXで投稿してください。`);
-  }
+
+
+// === 共有テキスト ===
+function buildShareText(shareUrl) {
+  // 指定の文面
+  const lines = [
+    '　ようこそ、夢見が丘女子高等学校へ！',
+    '　忘れられない放課後を、あなたに。',
+    '✎︎＿＿＿＿＿＿＿＿＿＿＿＿＿＿',
+    '',
+    '▼ #放課後クロニクル　のHPで自分だけの学生証を作ろう！',
+    shareUrl // 文末にURL
+  ];
+  return lines.join('\n');
 }
 
-// 新しい共有関数（iOSはアプリのみ、Android/PCはフォールバック）
-async function shareToX() {
-  if (sharingNow) return;
-  sharingNow = true;
-  try {
-    const text = buildPostText(); // 下に定義
-    const url  = window.__shareUrl || 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
-    const files = window.__ogpFile ? [window.__ogpFile] : undefined;
+// === 画像Blobを準備（Canvas優先、なければCloudinaryのJPEGをfetch） ===
+async function makeShareFile() {
+  const canvas = document.getElementById('cardCanvas');
+  if (canvas && canvas.toBlob) {
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.92));
+    if (blob) return new File([blob], 'student_id.jpg', { type: 'image/jpeg' });
+  }
+  // Fallback: OGP用の最終画像（JPEG拡張子のURL）をfetch
+  const url = window.__ogpImageUrl; // 例: /ogp/v<ver>/<public_id>.jpg
+  if (!url) return null;
+  const resp = await fetch(url, { mode: 'cors', credentials: 'omit' });
+  const blob = await resp.blob();
+  return new File([blob], 'student_id.jpg', { type: blob.type || 'image/jpeg' });
+}
 
-    // iOS：ネイティブ共有のみ。成功/キャンセル後もフォールバックしない
-    if (isIOS && navigator.share) {
-      try {
-        if (files && navigator.canShare && navigator.canShare({ files })) {
-          await navigator.share({ text: `${text}\n${url}`, files });
-        } else {
-          await navigator.share({ text: `${text}\n${url}` });
-        }
-      } catch(_) { /* cancel も沈黙 */ }
+// === X 共有本体 ===
+async function shareToX(ev) {
+  try {
+    ev?.preventDefault();
+
+    // 共有URLは /s/v<ver>/<public_id>
+    const shareUrl = window.__shareUrl || location.href;
+    const text = buildShareText(shareUrl);
+
+    // 1) Web Share（画像 + テキスト + URL）
+    let file = null;
+    try { file = await makeShareFile(); } catch {}
+    const canFiles = !!(file && navigator.canShare && navigator.canShare({ files: [file] }));
+
+    if (navigator.share && (canFiles || /*画像なしでも*/ true)) {
+      const data = canFiles
+        ? { files: [file], text, url: undefined } // iOSはtext内URLOK
+        : { text }; // urlはtextに含める
+      await navigator.share(data);
       return;
     }
 
-    // それ以外：ファイル共有できるなら share、ダメなら Web Intent
-    if (navigator.share && files && navigator.canShare && navigator.canShare({ files })) {
-      await navigator.share({ text: `${text}\n${url}`, files });
+    // 2) Deep link → 失敗時だけ Web Intent（単発フォールバック）
+    const msg = encodeURIComponent(text);
+    const deep = `twitter://post?message=${msg}`;
+    const intent = `https://x.com/intent/post?text=${msg}`;
+
+    // iOS/Androidで deep link を優先
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    const openTop = (url) => { window.top.location.href = url; };
+
+    if (isIOS || isAndroid) {
+      let fallbackTimer = setTimeout(() => {
+        // 失敗っぽい時だけ Web Intent へ（多重オープン防止）
+        if (document.visibilityState === 'visible') openTop(intent);
+      }, 700); // 短すぎると誤判定、長すぎるとUX悪化
+
+      // deep link 試行
+      openTop(deep);
+
+      // deep link で画面遷移できた場合は visibility が hidden になる
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') clearTimeout(fallbackTimer);
+      }, { once: true });
       return;
     }
-    // Web Intent（新規タブ、元ページ保持）
-    const intent = 'https://x.com/intent/post?text=' + encodeURIComponent(`${text}\n${url}`);
-    window.open(intent, '_blank', 'noopener,noreferrer');
-  } finally {
-    setTimeout(()=>{ sharingNow=false; }, 600);
+
+    // 3) PC等: 直接 Web Intent
+    openTop(intent);
+  } catch (e) {
+    console.error('shareToX error', e);
+    // 最低限のフォールバック
+    const shareUrl = window.__shareUrl || location.href;
+    const text = buildShareText(shareUrl);
+    window.top.location.href = `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
   }
 }
 
-function buildPostText(){
-  return [
-    'ようこそ、夢見が丘女子高等学校へ！',
-    '',
-    '▼自分だけの学生証を作ろう！',
-    '（https://preview.studio.site/live/1Va6D4lMO7/student-id）',
-    '（画像）',
-    '',
-    '#放課後クロニクル #学生証メーカー'
-  ].join('\n');
-}
-
-// グローバル関数として公開
+// グローバル関数として公開（generator.htmlがDOMContentLoadedでバインド）
 window.shareToX = shareToX;
+
