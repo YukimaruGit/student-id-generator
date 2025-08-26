@@ -229,6 +229,18 @@ function buildPostText() {
   ].join('\n');
 }
 
+// iOS判定と二重実行ガード
+const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent);
+let sharingNow = false;
+
+// 画像DL→File化
+async function fetchAsFile(url, filename = "student_card.jpg") {
+  const res = await fetch(url, { cache: "no-store" });
+  const blob = await res.blob();
+  const type = blob.type || "image/jpeg";
+  return new File([blob], filename, { type });
+}
+
 // 画像 + URL を"確実に"シェアする統合関数（現在のタブを保持）
 async function shareStudentId(finalImageUrl, shareUrl, baseText='') {
   const text = `${baseText ? baseText + '\n' : ''}${shareUrl}`;
@@ -272,10 +284,43 @@ function loadResult() {
   }
 }
 
+// ★ iOSは"アプリのみ"モード：ネイティブ共有に成功/キャンセルしたら何もしない
+async function shareToXAppFirstOnly(imageUrl, text) {
+  if (sharingNow) return;
+  sharingNow = true;
+  try {
+    if (isIOS && navigator.share) {
+      // 画像ファイル同梱できるなら付ける
+      if (navigator.canShare && navigator.canShare({ files: [new File([""], "a.jpg", { type: "image/jpeg" })] })) {
+        const file = await fetchAsFile(imageUrl, "student_card.jpg");
+        try {
+          await navigator.share({ text, files: [file] });
+        } catch (err) {
+          // ユーザーがキャンセルしても"何もしない"＝ブラウザは開かない
+        }
+        return; // ← iOSはここで必ず終了（Intent等は一切呼ばない）
+      } else {
+        try {
+          await navigator.share({ text }); // 画像不可端末
+        } catch (_) {}
+        return; // ← ここでも終了
+      }
+    }
+
+    // ---- iOS以外：通常フォールバック（必要なら保持）
+    const intent = "https://x.com/intent/post?text=" + encodeURIComponent(text);
+    window.open(intent, "_blank", "noopener,noreferrer");
+  } finally {
+    // 少し待ってから解除（ダブルタップ対策）
+    setTimeout(() => (sharingNow = false), 800);
+  }
+}
+
 // グローバル関数として公開
 window.shareStudentId = shareStudentId;
 window.saveResult = saveResult;
 window.loadResult = loadResult;
+window.shareToXAppFirstOnly = shareToXAppFirstOnly;
 
 // コピー処理を一元化
 async function copyTextReliable(text) {
@@ -1040,7 +1085,7 @@ function initializeApp() {
       // 新しい共有方式：画像付きシェア（最優先）
       if (window.__ogpImageUrl && shareUrl) {
         const text = buildPostText();
-        await shareStudentId(window.__ogpImageUrl, shareUrl, text);
+        await shareToXAppFirstOnly(window.__ogpImageUrl, text);
         return;
       }
 
@@ -1241,8 +1286,14 @@ function initializeApp() {
   setupDateInputs();
 }
 
-// Xシェア用の安全な関数（新規タブで開く）
+// Xシェア用の安全な関数（iOSでは何もしない）
 function shareToX(tweet) {
+  // iOSではWeb Intentを開かない（ネイティブ共有のみ）
+  if (isIOS) {
+    console.log('iOS環境のため、Web Intentは開きません');
+    return;
+  }
+  
   try {
     const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
     // 必ず新規タブで開く（元ページは保持）
