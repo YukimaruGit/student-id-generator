@@ -248,6 +248,17 @@ async function prefetchOgpFile(url){
   window.__ogpFile = new File([blob], 'student_card.jpg', { type: blob.type || 'image/jpeg' });
 }
 
+// OGP共有用URL作成関数
+function buildOgpShareUrl(publicId) {
+  return `https://student-id-generator.pages.dev/ogp/v${Date.now()}/as_chronicle/student_card/${publicId}.jpg`;
+}
+
+// Cloudinary OGP画像URL作成関数
+function cloudinaryOgpImage(publicId) {
+  const CLOUD_NAME = 'di5xqlddy';
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/t_ogp_card/as_chronicle/student_card/${publicId}.jpg`;
+}
+
 // 画像 + URL を"確実に"シェアする統合関数（現在のタブを保持）
 async function shareStudentId(finalImageUrl, shareUrl, baseText='') {
   const text = `${baseText ? baseText + '\n' : ''}${shareUrl}`;
@@ -371,6 +382,30 @@ async function copyTextReliable(text) {
 // DOM読み込み完了を待つ
 document.addEventListener('DOMContentLoaded', () => {
   initializeApp();
+  
+  // 入力初期化（個別フィールドのクリア）
+  const inputFields = ['nameJa', 'nameEn', 'dobMonth', 'dobDay'];
+  inputFields.forEach(id => {
+    const field = document.getElementById(id);
+    if (field) field.value = '';
+  });
+
+  // 旧データの掃除（あれば）
+  ['student_form','student_profile','last_result','profileCache'].forEach(k => {
+    try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch(e){}
+  });
+});
+
+// 履歴戻り(bfcache)でも常に初期化
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    // 個別フィールドのクリア
+    const inputFields = ['nameJa', 'nameEn', 'dobMonth', 'dobDay'];
+    inputFields.forEach(id => {
+      const field = document.getElementById(id);
+      if (field) field.value = '';
+    });
+  }
 });
 
 function initializeApp() {
@@ -919,11 +954,10 @@ function initializeApp() {
         
         // 共有URL（OGP付きHTML）
         const pidEnc = imageData.public_id.split('/').map(encodeURIComponent).join('/');
-        window.__shareUrl = `${location.origin}/s/v${imageData.version}/${pidEnc}`;
+        window.__shareUrl = buildOgpShareUrl(imageData.public_id);
         
         // カード画像（1200x628 パディング済み）
-        const cloud = 'di5xqlddy';
-        window.__ogpImageUrl = `https://res.cloudinary.com/${cloud}/image/upload/t_ogp_card/v${imageData.version}/${pidEnc}.jpg`;
+        window.__ogpImageUrl = cloudinaryOgpImage(imageData.public_id);
         
         // 共有ボタンがすぐ使えるよう、画像ファイルを先読みして保持（iOSのshare成功率Up）
         prefetchOgpFile(window.__ogpImageUrl).catch(()=>{});
@@ -1303,11 +1337,11 @@ function initializeApp() {
 function buildShareText(shareUrl) {
   // 指定の文面
   const lines = [
-    '　ようこそ、夢見が丘女子高等学校へ！',
-    '　忘れられない放課後を、あなたに。',
+    'ようこそ、夢見が丘女子高等学校へ！',
+    '忘れられない放課後を、あなたに。',
     '✎︎＿＿＿＿＿＿＿＿＿＿＿＿＿＿',
     '',
-    '▼ #放課後クロニクル　のHPで自分だけの学生証を作ろう！',
+    '▼ #放課後クロニクル のHPで自分だけの学生証を作ろう！',
     shareUrl // 文末にURL
   ];
   return lines.join('\n');
@@ -1329,62 +1363,45 @@ async function makeShareFile() {
 }
 
 // === X 共有本体 ===
-async function shareToX(ev) {
-  try {
-    ev?.preventDefault();
+function shareToX({text, url, hashtags=[]}) {
+  const intent = new URL('https://x.com/intent/tweet');
+  intent.searchParams.set('text', text);
+  intent.searchParams.set('url', url);
+  if (hashtags.length) intent.searchParams.set('hashtags', hashtags.join(','));
 
-    // 共有URLは /s/v<ver>/<public_id>
-    const shareUrl = window.__shareUrl || location.href;
-    const text = buildShareText(shareUrl);
+  const ua = navigator.userAgent || '';
+  const isMobile = /iPhone|iPad|Android/i.test(ua);
+  const appUrl = `twitter://post?message=${encodeURIComponent(`${text}\n${url}`)}`;
 
-    // 1) Web Share（画像 + テキスト + URL）
-    let file = null;
-    try { file = await makeShareFile(); } catch {}
-    const canFiles = !!(file && navigator.canShare && navigator.canShare({ files: [file] }));
+  const openNow = (href, target) => {
+    const a = document.createElement('a');
+    a.href = href;
+    a.target = target;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
 
-    if (navigator.share && (canFiles || /*画像なしでも*/ true)) {
-      const data = canFiles
-        ? { files: [file], text, url: undefined } // iOSはtext内URLOK
-        : { text }; // urlはtextに含める
-      await navigator.share(data);
+  // モバイル：アプリ→失敗時Web→最終フォールバックで intent
+  if (isMobile) {
+    // 可能なら Web Share API
+    if (navigator.share) {
+      navigator.share({ text: `${text}\n${url}` })
+        .catch(() => {
+          // アプリスキーム → 失敗なら intent
+          location.href = appUrl;
+          setTimeout(() => openNow(intent.toString(), '_self'), 800);
+        });
       return;
     }
-
-    // 2) Deep link → 失敗時だけ Web Intent（単発フォールバック）
-    const msg = encodeURIComponent(text);
-    const deep = `twitter://post?message=${msg}`;
-    const intent = `https://x.com/intent/post?text=${msg}`;
-
-    // iOS/Androidで deep link を優先
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isAndroid = /Android/.test(navigator.userAgent);
-    const openTop = (url) => { window.top.location.href = url; };
-
-    if (isIOS || isAndroid) {
-      let fallbackTimer = setTimeout(() => {
-        // 失敗っぽい時だけ Web Intent へ（多重オープン防止）
-        if (document.visibilityState === 'visible') openTop(intent);
-      }, 700); // 短すぎると誤判定、長すぎるとUX悪化
-
-      // deep link 試行
-      openTop(deep);
-
-      // deep link で画面遷移できた場合は visibility が hidden になる
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') clearTimeout(fallbackTimer);
-      }, { once: true });
-      return;
-    }
-
-    // 3) PC等: 直接 Web Intent
-    openTop(intent);
-  } catch (e) {
-    console.error('shareToX error', e);
-    // 最低限のフォールバック
-    const shareUrl = window.__shareUrl || location.href;
-    const text = buildShareText(shareUrl);
-    window.top.location.href = `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
+    location.href = appUrl;
+    setTimeout(() => openNow(intent.toString(), '_self'), 800);
+    return;
   }
+
+  // PC：新規タブで intent
+  openNow(intent.toString(), '_blank');
 }
 
 // グローバル関数として公開（generator.htmlがDOMContentLoadedでバインド）
