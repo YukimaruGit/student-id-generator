@@ -53,4 +53,4 @@ export async function onRequestGet(ctx) {
 }
 
 // HEADでも200/ヘッダを返す（SNSがHEADを打つため）
-export const onRequestHead = onRequest;
+export const onRequestHead = onRequestGet;
