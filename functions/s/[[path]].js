@@ -30,11 +30,14 @@ export async function onRequest({ request }) {
     `v1/student-id-generator/preview.png`; // ← 拡張子を .png に合わせる
 
   // OGP画像URL（SNSプレビュー用）: 自ドメイン配信で安定させる
+  // ページの ?cb=... を画像URLにも付与して、Discord/X の画像キャッシュを確実に更新させる
   let ogImg = DEFAULT_OGP;
   if (payload?.i) ogImg = payload.i;
   else if (payload?.p && payload?.v) {
     // 自ドメイン経由の /ogp を使用（named transformation経由で安定）
-    ogImg = `${url.origin}/ogp/v${payload.v}/${segEnc(payload.p)}.jpg`;
+    const ogImgBase = `${url.origin}/ogp/v${payload.v}/${segEnc(payload.p)}.jpg`;
+    const cb = url.searchParams.get('cb');
+    ogImg = cb ? `${ogImgBase}?cb=${encodeURIComponent(cb)}` : ogImgBase;
   }
 
   // クリック後の遷移先（Studio）
