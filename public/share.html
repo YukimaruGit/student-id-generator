@@ -1,29 +1,97 @@
 <!doctype html>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width">
-<title>Share</title>
-<script>
-(async () => {
-  const p = new URLSearchParams(location.search);
-  const text = p.get('text') || '';
-  const img  = p.get('img'); // 画像URL（OGP用でも可）
-  
-  try {
-    const data = { text };
-    if (img && navigator.canShare) {
-      const res  = await fetch(img, { cache: 'no-store' });
-      const blob = await res.blob();
-      const file = new File([blob], 'student-id.jpg', { type: blob.type || 'image/jpeg' });
-      if (navigator.canShare({ files: [file] })) data.files = [file];
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Share</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
-    if (navigator.share) {
-      await navigator.share(data);
-      window.close();
-      return;
+    .loading {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
     }
-  } catch(e) {}
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 1rem auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading">共有中...</div>
+  <div class="spinner"></div>
   
-  // フォールバック（画像なしIntent）
-  location.href = 'https://x.com/intent/post?text=' + encodeURIComponent(text);
-})();
-</script>
+  <script>
+    (async () => {
+      try {
+        const p = new URLSearchParams(location.search);
+        const text = p.get('text') || '';
+        const img = p.get('img');
+
+        // Web Share API で画像付き共有を試行
+        if (img && navigator.canShare && navigator.share) {
+          try {
+            const r = await fetch(img, { cache: 'no-store' });
+            if (r.ok) {
+              const b = await r.blob();
+              const f = new File([b], 'student-id.jpg', { type: b.type || 'image/jpeg' });
+              if (navigator.canShare({ files: [f] })) {
+                await navigator.share({ files: [f], text });
+                window.close();
+                return;
+              }
+            }
+          } catch (e) {
+            console.log('画像付き共有に失敗:', e);
+          }
+        }
+
+        // 画像なし Web Share を試行
+        if (navigator.share) {
+          try {
+            await navigator.share({ text });
+            window.close();
+            return;
+          } catch (e) {
+            console.log('Web Shareに失敗:', e);
+          }
+        }
+
+        // フォールバック：Web Intent（新規タブで開く）
+        const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
+        window.open(webIntent, '_blank', 'noopener,noreferrer');
+        window.close();
+
+      } catch (error) {
+        console.error('共有処理エラー:', error);
+        // エラー時もWeb Intentにフォールバック
+        const p = new URLSearchParams(location.search);
+        const text = p.get('text') || '';
+        const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
+        window.open(webIntent, '_blank', 'noopener,noreferrer');
+        window.close();
+      }
+    })();
+  </script>
+</body>
+</html>

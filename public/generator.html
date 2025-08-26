@@ -358,36 +358,34 @@
       const urlBtn = document.getElementById('urlBtn');
       if (urlBtn) urlBtn.onclick = () => copyTextReliable(window.__shareUrl);
       
-      // X投稿（shareStudentId関数を使用して統一）
+      // X投稿（共有ブリッジ経由でトップレベルWeb Shareを実行）
       const twitterBtn = document.getElementById('twitterBtn');
       if (twitterBtn) {
         twitterBtn.onclick = async () => {
-          if (window.shareStudentId) {
-            const finalImageUrl = window.__ogpImageUrl || window.__lastImageData?.eager_url || window.__lastImageData?.secure_url;
-            const shareUrl = window.__shareUrl;
-            await window.shareStudentId(finalImageUrl, shareUrl, '学生証を共有しました！');
-          } else {
-            // フォールバック：Web Intent
-            const p = new URLSearchParams(location.search);
-            const course = p.get('course') || '普通科';
-            const rawClub = p.get('club') || '帰宅';
-            const club = /部$/.test(rawClub) ? rawClub : `${rawClub}部`;
+          // URLパラメータから学科/部活を取得（部活は"部"を付ける）
+          const p = new URLSearchParams(location.search);
+          const course = p.get('course') || '普通科';
+          const rawClub = p.get('club') || '帰宅';
+          const club = /部$/.test(rawClub) ? rawClub : `${rawClub}部`;
 
-            const tweet = [
-              `${window.__shareUrl}`,
-              '',
-              '🏫夢見が丘女子高等学校 入学診断',
-              `【${course}】の【${club}】になりました！`,
-              '診断の最後には、自分だけの学生証ももらえます🎓📸',
-              '',
-              '君も放課後クロニクルの世界へ――',
-              '',
-              '#放課後クロニクル #学生証メーカー'
-            ].join('\n');
+          const tweet = [
+            `${window.__shareUrl}`,
+            '',
+            '🏫夢見が丘女子高等学校 入学診断',
+            `【${course}】の【${club}】になりました！`,
+            '診断の最後には、自分だけの学生証ももらえます🎓📸',
+            '',
+            '君も放課後クロニクルの世界へ――',
+            '',
+            '#放課後クロニクル #学生証メーカー'
+          ].join('\n');
 
-            const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
-            window.open(webIntent, '_blank', 'noopener,noreferrer');
-          }
+          // OGP画像URLを構築（自ドメイン経由）
+          const ogpImg = `${location.origin}/ogp/v${window.__lastImageData?.version}/${window.__lastImageData?.public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
+
+          // 共有ブリッジを新規タブで開く（トップレベルでWeb Share実行）
+          const bridgeUrl = `/share.html?text=${encodeURIComponent(tweet)}&img=${encodeURIComponent(ogpImg)}`;
+          window.open(bridgeUrl, '_blank', 'noopener,noreferrer');
         };
       }
       
@@ -898,11 +896,9 @@
     // capture属性は既に削除済み
   </script>
   
-  <!-- 共有機能は app.js の shareStudentId 関数で統一管理 -->
-  <!-- 共有ボタンは必ず app.js の shareStudentId を呼ぶ（Intent直開きはしない） -->
-  <!-- 例： -->
-  <!-- document.getElementById('btnShareX').onclick = () => -->
-  <!--   shareStudentId(window.__finalImageUrl, window.__shareUrl, '#学生証つくった'); -->
+  <!-- 共有機能は共有ブリッジ経由で統一管理 -->
+  <!-- 共有ボタンは共有ブリッジを新規タブで開き、トップレベルでWeb Share実行 -->
+  <!-- これによりiframe内でのWeb Share拒否問題を回避 -->
   
 
 </body>
