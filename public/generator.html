@@ -368,39 +368,13 @@
     }
     window.updateShareLinksWithImage = updateShareLinksWithImage;
     
-    // シェアテキストの定型化（改行を含む）
-    function buildPostText() {
-      return [
-        'ようこそ、夢見が丘女子高等学校へ！',
-        '',
-        '▼自分だけの学生証を作ろう！',
-        '（https://preview.studio.site/live/1Va6D4lMO7/student-id）',
-        '（画像）', // 共有シートでは画像ファイル自体を添付する想定
-        '',
-        '#放課後クロニクル #学生証メーカー'
-      ].join('\n');
-    }
+
     
     // ✅ ページ読込時に"常時"バインド（画像生成の有無に関わらず動く）
     document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('twitterBtn');
       if (!btn) return;
-      btn.addEventListener('click', async () => {
-        // 投稿テキスト
-        const text = buildPostText();
-        // 共有URL（なければHPを案内）
-        const url  = window.__shareUrl || 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
-        // 画像URL（未生成なら null）
-        const img  = window.__ogpImageUrl || null;
-
-        // iOS/Android/PC 共通の統合関数（既存）で実行
-        if (window.shareToXAppFirstOnly) {
-          // iOS は"アプリのみ"モード：画像があれば添付、なければテキスト共有
-          await window.shareToXAppFirstOnly(img || '', `${text}\n${url}`);
-        } else if (window.shareStudentId) {
-          await window.shareStudentId(img || '', url, text);
-        }
-      }, { passive: true });
+      btn.addEventListener('click', shareToX, { passive: true });
     });
     
 

@@ -241,6 +241,13 @@ async function fetchAsFile(url, filename = "student_card.jpg") {
   return new File([blob], filename, { type });
 }
 
+// 先読みして File を保持（クリック直下でfetchさせない）
+async function prefetchOgpFile(url){
+  const res = await fetch(url, { cache: 'no-store' });
+  const blob = await res.blob();
+  window.__ogpFile = new File([blob], 'student_card.jpg', { type: blob.type || 'image/jpeg' });
+}
+
 // 画像 + URL を"確実に"シェアする統合関数（現在のタブを保持）
 async function shareStudentId(finalImageUrl, shareUrl, baseText='') {
   const text = `${baseText ? baseText + '\n' : ''}${shareUrl}`;
@@ -910,12 +917,16 @@ function initializeApp() {
         // 画像データを保存（埋め込み時の保存対応用）
         window.__lastImageData = imageData;
         
-        // OGP画像URLを設定（共有時のプレビュー用）
-        // 自ドメインの /ogp を使用して、t_ogp_card の named transformation を適用
-        const pid = public_id.split('/').map(encodeURIComponent).join('/');
-        const cb = Date.now(); // キャッシュ破り
-        const ogpImageUrl = `${location.origin}/ogp/v${version}/${pid}.jpg?cb=${cb}`;
-        window.__ogpImageUrl = ogpImageUrl;
+        // 共有URL（OGP付きHTML）
+        const pidEnc = imageData.public_id.split('/').map(encodeURIComponent).join('/');
+        window.__shareUrl = `${location.origin}/s/v${imageData.version}/${pidEnc}`;
+        
+        // カード画像（1200x628 パディング済み）
+        const cloud = 'di5xqlddy';
+        window.__ogpImageUrl = `https://res.cloudinary.com/${cloud}/image/upload/t_ogp_card/v${imageData.version}/${pidEnc}.jpg`;
+        
+        // 共有ボタンがすぐ使えるよう、画像ファイルを先読みして保持（iOSのshare成功率Up）
+        prefetchOgpFile(window.__ogpImageUrl).catch(()=>{});
         
         // 状態を保存（戻っても診断結果が剥がれない）
         if (window.saveResult) {
@@ -1304,6 +1315,52 @@ function shareToX(tweet) {
     // フォールバック：アラートでURLを表示
     alert(`X投稿用URL:\n${webIntent}\n\nこのURLをコピーしてXで投稿してください。`);
   }
+}
+
+// 新しい共有関数（iOSはアプリのみ、Android/PCはフォールバック）
+async function shareToX() {
+  if (sharingNow) return;
+  sharingNow = true;
+  try {
+    const text = buildPostText(); // 下に定義
+    const url  = window.__shareUrl || 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
+    const files = window.__ogpFile ? [window.__ogpFile] : undefined;
+
+    // iOS：ネイティブ共有のみ。成功/キャンセル後もフォールバックしない
+    if (isIOS && navigator.share) {
+      try {
+        if (files && navigator.canShare && navigator.canShare({ files })) {
+          await navigator.share({ text: `${text}\n${url}`, files });
+        } else {
+          await navigator.share({ text: `${text}\n${url}` });
+        }
+      } catch(_) { /* cancel も沈黙 */ }
+      return;
+    }
+
+    // それ以外：ファイル共有できるなら share、ダメなら Web Intent
+    if (navigator.share && files && navigator.canShare && navigator.canShare({ files })) {
+      await navigator.share({ text: `${text}\n${url}`, files });
+      return;
+    }
+    // Web Intent（新規タブ、元ページ保持）
+    const intent = 'https://x.com/intent/post?text=' + encodeURIComponent(`${text}\n${url}`);
+    window.open(intent, '_blank', 'noopener,noreferrer');
+  } finally {
+    setTimeout(()=>{ sharingNow=false; }, 600);
+  }
+}
+
+function buildPostText(){
+  return [
+    'ようこそ、夢見が丘女子高等学校へ！',
+    '',
+    '▼自分だけの学生証を作ろう！',
+    '（https://preview.studio.site/live/1Va6D4lMO7/student-id）',
+    '（画像）',
+    '',
+    '#放課後クロニクル #学生証メーカー'
+  ].join('\n');
 }
 
 // グローバル関数として公開
