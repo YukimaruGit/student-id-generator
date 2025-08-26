@@ -217,6 +217,7 @@ function openInNewTab(url) {
   root.document.body.appendChild(a); a.click(); a.remove();
 }
 
+// deep link（twitter://）や location.href は使わない。常に新規タブ or ネイティブ共有。
 // 画像 + URL を"確実に"シェアする統合関数（現在のタブを保持）
 async function shareStudentId(finalImageUrl, shareUrl, baseText='') {
   const text = `${baseText ? baseText + '\n' : ''}${shareUrl}`;
