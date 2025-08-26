@@ -19,13 +19,11 @@ async function sniffImageType(file){
   return null;
 }
 
-// Cloudinary OGP URLを一元作成（v必須・セグメント毎エンコード）
+// 自ドメインのOGPプロキシURLを一元作成（安定性重視）
 function buildCldOgUrl({cloudName, public_id, version, eager_url=null}){
-  if (eager_url) return eager_url; // 事前生成があれば最優先
+  // 自ドメインのOGPプロキシを最優先（Botが確実にアクセス可能）
   const pidSafe = String(public_id).split('/').map(encodeURIComponent).join('/');
-  return `https://res.cloudinary.com/${cloudName}/image/upload/` +
-         `c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/` +
-         `v${version}/${pidSafe}.jpg`;
+  return `${window.location.origin}/ogp/v${version}/${pidSafe}.jpg`;
 }
 
 // window.open / 動的 <a> の noopener 徹底

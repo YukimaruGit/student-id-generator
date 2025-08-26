@@ -23,5 +23,4 @@ async function doShare(){
   location.replace('https://x.com/intent/post?text='+encodeURIComponent(text));
 }
 document.getElementById('go').onclick=doShare;
-setTimeout(()=>doShare().catch(()=>{}),100);
 </script>
