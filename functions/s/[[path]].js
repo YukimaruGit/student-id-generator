@@ -29,16 +29,13 @@ export async function onRequest({ request }) {
     `c_fill,g_auto,w_1200,h_630,q_auto:good,f_png,fl_force_strip/` +
     `v1/student-id-generator/preview.png`; // ← 拡張子を .png に合わせる
 
-  const buildOgpUrl = ({i, p, v}) => {
-    if (i) return i;
-    return `https://res.cloudinary.com/${CLOUD}/image/upload/` +
-           `c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/` +
-           `v${v}/${segEnc(p)}.jpg`;
-  };
-
+  // OGP画像URL（SNSプレビュー用）: 自ドメイン配信で安定させる
   let ogImg = DEFAULT_OGP;
   if (payload?.i) ogImg = payload.i;
-  else if (payload?.p && payload?.v) ogImg = buildOgpUrl({ i: payload.i, p: payload.p, v: payload.v });
+  else if (payload?.p && payload?.v) {
+    // 自ドメイン経由の /ogp を使用（named transformation経由で安定）
+    ogImg = `${url.origin}/ogp/v${payload.v}/${segEnc(payload.p)}.jpg`;
+  }
 
   // クリック後の遷移先（Studio）
   const previewUrl =

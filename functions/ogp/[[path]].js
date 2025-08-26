@@ -10,9 +10,10 @@ export async function onRequest({ request }) {
 
   const CLOUDINARY_CLOUD_NAME = "di5xqlddy"; // ←あなたの値に置換
   const enc = s => s.split("/").map(encodeURIComponent).join("/");
+  // named transformation（Strictでも署名不要）
   const cloudUrl =
     `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/` +
-    `c_fill,g_auto,w_1200,h_630,f_auto,q_auto,fl_force_strip/` +
+    `t_ogp_card/` +
     `v${version}/${enc(publicId)}.jpg`;
 
   const res = await fetch(cloudUrl, { cf: { cacheTtl: 86400, cacheEverything: true } });
