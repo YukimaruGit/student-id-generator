@@ -1,29 +1,27 @@
-<!doctype html><meta charset="utf-8">
-<title>共有</title>
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Share</title>
 <script>
 (async () => {
-  const p   = new URLSearchParams(location.search);
-  const txt = p.get('text') || '';
-  const img = p.get('img'); // 画像URL（任意）
+  const p = new URLSearchParams(location.search);
+  const text = p.get('text') || '';
+  const img  = p.get('img'); // 例: /ogp/v{version}/{public_id}.jpg
 
-  // 画像をFileにしたい場合（任意。失敗したらテキストのみ共有）
   let files = [];
   if (img) {
     try {
-      const res  = await fetch(img, { mode: 'no-cors' });
-      const blob = await res.blob();
-      files = [new File([blob], 'card.jpg', { type: blob.type || 'image/jpeg' })];
-    } catch (_) {}
+      const r = await fetch(img, { cache: 'no-store' });
+      const b = await r.blob();
+      files = [new File([b], 'student-id.jpg', { type: b.type || 'image/jpeg' })];
+    } catch {}
   }
 
-  if (navigator.share) {
-    try {
-      await navigator.share(files.length ? { text: txt, files } : { text: txt });
-      window.close();
-      return;
-    } catch (_) {}
-  }
-  // 非対応なら Web Intent へフォールバック（新規タブのまま）
-  location.replace('https://x.com/intent/post?text=' + encodeURIComponent(txt));
+  try {
+    if (navigator.share) {
+      await navigator.share(files.length ? { text, files } : { text });
+      window.close(); return;
+    }
+  } catch {}
+
+  location.replace('https://x.com/intent/post?text=' + encodeURIComponent(text));
 })();
 </script>

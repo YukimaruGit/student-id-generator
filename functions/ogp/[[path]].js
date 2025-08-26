@@ -12,7 +12,7 @@ export async function onRequest({ request }) {
   const enc = s => s.split("/").map(encodeURIComponent).join("/");
   const cloudUrl =
     `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/` +
-    `c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/` +
+    `c_fill,g_auto,w_1200,h_630,f_auto,q_auto,fl_force_strip/` +
     `v${version}/${enc(publicId)}.jpg`;
 
   const res = await fetch(cloudUrl, { cf: { cacheTtl: 86400, cacheEverything: true } });
