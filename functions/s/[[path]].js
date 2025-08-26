@@ -10,10 +10,7 @@ export async function onRequest({ request }) {
 
   const CLOUDINARY_CLOUD_NAME = 'di5xqlddy'; // ←必要に応じて変更
   const enc = s => s.split('/').map(encodeURIComponent).join('/');
-  const ogImg =
-    `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/` +
-    `c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/` +
-    `v${version}/${enc(publicId)}.jpg`;
+  const ogImg = `${url.origin}/ogp/v${version}/${enc(publicId)}.jpg`;
 
   const previewUrl =
     `https://preview.studio.site/live/1Va6D4lMO7/student-id` +

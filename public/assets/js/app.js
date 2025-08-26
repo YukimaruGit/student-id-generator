@@ -211,45 +211,40 @@ async function downloadCanvasAsImage(canvas, filename = '学生証.png') {
 
 // 新しいタブ/外部アプリで開く関数（現在のタブを保持）
 function openInNewTab(url) {
-  const wTop = (window.top && window.top !== window) ? window.top : window;
-  // a要素＋_blankを使うことでSafari/iOSのブロックを回避しやすい
-  const a = wTop.document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  wTop.document.body.appendChild(a);
-  a.click();
-  a.remove();
+  const root = (window.top && window.top !== window) ? window.top : window;
+  const a = root.document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  root.document.body.appendChild(a); a.click(); a.remove();
 }
 
 // 画像 + URL を"確実に"シェアする統合関数（現在のタブを保持）
-async function shareStudentId(imageUrl, shareUrl, baseText = '') {
+async function shareStudentId(finalImageUrl, shareUrl, baseText='') {
   const text = `${baseText ? baseText + '\n' : ''}${shareUrl}`;
-  
-  // A) Web Share API Level-2（画像付き）
+
+  // A) 画像付き Share Sheet（最優先：Xアプリを直接選べる）
   try {
-    if (imageUrl && navigator.share && navigator.canShare) {
-      const res = await fetch(imageUrl, { mode: 'cors', cache: 'no-store' });
+    if (finalImageUrl && navigator.share && navigator.canShare) {
+      const res = await fetch(finalImageUrl, { mode: 'cors', cache: 'no-store' });
       const blob = await res.blob();
-      const file = new File([blob], 'student-id.png', { type: blob.type || 'image/png' });
+      const file = new File([blob], 'student-id.jpg', { type: 'image/jpeg' });
       if (navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], text });
-        return; // 戻りはPromise解決のみ。画面遷移禁止
+        return;
       }
     }
-  } catch (_) {} // フォールバックへ
+  } catch (_) { /* 次へ */ }
 
-  // B) 画像共有不可なら text だけでも Share Sheet を試す
+  // B) 画像なし Share Sheet（URLだけでもアプリ選択可）
   try {
     if (navigator.share) {
       await navigator.share({ text });
-      return; // アプリ選択で成功
+      return;
     }
-  } catch (_) {} // フォールバックへ
+  } catch (_) { /* 次へ */ }
 
-  // C) 最後のフォールバック：Web Intent を新規タブで開く
-  const web = `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
-  openInNewTab(web);
+  // C) 最後のフォールバック：Web Intent（必ず新規タブ、元ページは残す）
+  const webIntent = `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
+  openInNewTab(webIntent);
 }
 
 // 状態保持機能
