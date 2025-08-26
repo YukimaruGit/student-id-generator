@@ -380,12 +380,12 @@
             '#放課後クロニクル #学生証メーカー'
           ].join('\n');
 
-          // OGP画像URLを構築（自ドメイン経由）
-          const ogpImg = `${location.origin}/ogp/v${window.__lastImageData?.version}/${window.__lastImageData?.public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
-
-          // 共有ブリッジを新規タブで開く（トップレベルでWeb Share実行）
-          const bridgeUrl = `/share.html?text=${encodeURIComponent(tweet)}&img=${encodeURIComponent(ogpImg)}`;
-          window.open(bridgeUrl, '_blank', 'noopener,noreferrer');
+          // 自ドメイン経由のOGP画像URLを構築（プロキシ経由で安定）
+          const imgUrl = `${location.origin}/ogp/v${window.__lastImageData?.version}/${window.__lastImageData?.public_id?.split('/').map(encodeURIComponent).join('/')}.jpg`;
+          
+          // 自オリジンのブリッジを「新規タブ」で開く → そこで navigator.share 実行
+          const bridge = `/share.html?text=${encodeURIComponent(tweet)}&img=${encodeURIComponent(imgUrl)}`;
+          window.open(bridge, '_blank', 'noopener,noreferrer');
         };
       }
       

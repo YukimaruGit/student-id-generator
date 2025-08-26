@@ -1,23 +1,49 @@
 export async function onRequest({ request }) {
+  const ua = request.headers.get('user-agent') || '';
   const url = new URL(request.url);
-  // 期待パス: /s/v1234/path/to/public_id
-  const m = url.pathname.match(/^\/s\/v(\d+)\/(.+)$/);
-  if (!m) return new Response('Not found', { status: 404 });
+  const path = url.pathname;
 
-  const version  = m[1];
-  const publicId = decodeURIComponent(m[2]);
+  const decodeB64Url = (s) => {
+    s = s.replace(/-/g,'+').replace(/_/g,'/');
+    const pad = s.length % 4;
+    const bin = atob(s + (pad ? '='.repeat(4 - pad) : ''));
+    return decodeURIComponent(escape(bin));
+  };
 
-  // ←あなたの Cloudinary のクラウド名に置換
-  const CLOUDINARY_CLOUD_NAME = 'di5xqlddy';
-  const enc = (s) => s.split('/').map(encodeURIComponent).join('/');
+  // ① /s/v{version}/{public_id} 形式を先に判定
+  let payload = null;
+  let m = path.match(/^\/s\/v(\d+)\/(.+)$/);
+  if (m) {
+    payload = { v: m[1], p: decodeURIComponent(m[2]) }; // JSONではないが後段の共通処理で使える形に
+  } else {
+    // ② 従来の Base64(JSON) 方式
+    const slug = path.split('/').pop() || '';
+    try { payload = JSON.parse(decodeB64Url(slug)); } catch (_) {}
+  }
 
-  // OGP画像は"自ドメイン配信"にすると安定（下の /ogp を利用）
-  const ogImg = `${url.origin}/ogp/v${version}/${enc(publicId)}.jpg`;
+  // 画像URL（OGP）構築
+  const CLOUD = 'di5xqlddy';
+  const segEnc = s => (s||'').split('/').map(encodeURIComponent).join('/');
+  const DEFAULT_OGP =
+    `https://res.cloudinary.com/${CLOUD}/image/upload/` +
+    `c_fill,g_auto,w_1200,h_630,q_auto:good,f_png,fl_force_strip/` +
+    `v1/student-id-generator/preview.png`; // ← 拡張子を .png に合わせる
+
+  const buildOgpUrl = ({i, p, v}) => {
+    if (i) return i;
+    return `https://res.cloudinary.com/${CLOUD}/image/upload/` +
+           `c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/` +
+           `v${v}/${segEnc(p)}.jpg`;
+  };
+
+  let ogImg = DEFAULT_OGP;
+  if (payload?.i) ogImg = payload.i;
+  else if (payload?.p && payload?.v) ogImg = buildOgpUrl({ i: payload.i, p: payload.p, v: payload.v });
 
   // クリック後の遷移先（Studio）
   const previewUrl =
     `https://preview.studio.site/live/1Va6D4lMO7/student-id` +
-    `?share=${encodeURIComponent(`v=${version}&p=${publicId}`)}`;
+    `?share=${encodeURIComponent(`v=${payload?.v || '1'}&p=${payload?.p || 'student-id-generator'}`)}`;
 
   const html = `<!doctype html><html lang="ja"><head>
 <meta charset="utf-8">
