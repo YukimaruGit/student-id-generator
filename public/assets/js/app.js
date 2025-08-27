@@ -98,8 +98,11 @@ const T_OGP      = 't_ogp_card';                 // 1200x628 pad
 const T_FULL     = 't_full_card';                // 比率維持の保存/プレビュー用
 
 // URLビルダー関数
-export const ogpUrl  = (id, ext='jpg') => `${CDN_BASE}/${T_OGP}/${FOLDER}/${id}.${ext}`;
-export const fullUrl = (id, ext='png') => `${CDN_BASE}/${T_FULL}/${FOLDER}/${id}.${ext}`;
+const ogpUrl  = (id, ext='jpg') => `${CDN_BASE}/${T_OGP}/${FOLDER}/${id}.${ext}`;
+const fullUrl = (id, ext='png') => `${CDN_BASE}/${T_FULL}/${FOLDER}/${id}.${ext}`;
+// 必要ならグローバルでも使えるように
+window.ogpUrl = ogpUrl;
+window.fullUrl = fullUrl;
 
 // Cloudinary設定（一元管理）
 window.cloudinaryConfig = window.cloudinaryConfig || {
@@ -602,7 +605,7 @@ function initializeApp() {
   
   // ローカル環境ではcrossOriginを設定せずに読み込み
   function loadTemplateImage() {
-    templateImage.src = 'assets/img/student_template.png';
+    templateImage.src = '/assets/img/student_template.png';
   }
 
   // ローディング表示の制御
@@ -627,7 +630,7 @@ function initializeApp() {
   };
 
   templateImage.onerror = () => {
-    console.error('テンプレート画像の読み込みに失敗しました');
+    console.error('テンプレート画像の読み込みに失敗しました:', templateImage.src);
     drawEmptyCard();
   };
 
@@ -974,8 +977,10 @@ function initializeApp() {
         
         // 画像 URL をそのまま新しいタブで開く（PC=右クリック保存 / スマホ=共有/保存）
         // 同じ /ogp の画像URLを使用（t_ogp_card の named transformation 適用）
-        const downloadImageUrl = ogpImageUrl;
-        window.open(downloadImageUrl, '_blank', 'noopener');
+        const downloadImageUrl = window.__ogpImageUrl || imageData.secure_url;
+        if (downloadImageUrl) {
+          window.open(downloadImageUrl, '_blank', 'noopener');
+        }
         
         // プレビュー画像を表示（t_full_card で全表示）
         const previewImg = document.getElementById('cardPreview');
