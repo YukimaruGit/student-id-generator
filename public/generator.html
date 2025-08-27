@@ -327,7 +327,7 @@
     // このページでは高度対策をOFF（画像保存・Canvas操作のため）
     window.AdvancedSecurityConfig = { preventSideChannelAttacks: false };
   </script>
-  <!-- ブートローダー（自前ドメイン固定） -->
+  <!-- ブートローダー（フォールバック付き・自前ドメイン固定） -->
   <script>
     (function () {
       // あなたのサイトの実ドメイン（Cloudflare Pages のままならこれでOK）
@@ -336,6 +336,21 @@
       // 埋め込み先(preview.studio.site等)では常に自分のドメインから読み込む
       window.APP_ORIGIN = MY_ORIGIN;
 
+      function loadWithFallback(primary, fallback) {
+        const s = document.createElement('script');
+        s.defer = true;
+        s.src = APP_ORIGIN + '/' + primary;
+        s.onerror = () => {
+          if (!fallback) return;
+          console.log('フォールバック: ' + primary + ' → ' + fallback);
+          const s2 = document.createElement('script');
+          s2.defer = true;
+          s2.src = APP_ORIGIN + '/' + fallback;
+          document.head.appendChild(s2);
+        };
+        document.head.appendChild(s);
+      }
+
       function load(p) {
         const s = document.createElement('script');
         s.src = APP_ORIGIN + '/' + p;
@@ -343,12 +358,14 @@
         document.head.appendChild(s);
       }
 
+      // セキュリティ系（現状のままでOK）
       load('assets/js/comprehensive-security.js');
       load('assets/js/security.js');
       load('assets/js/privacy-protection.js');
       load('assets/js/security-monitor.js');
-      // バージョンはそのままでOK。キャッシュ更新時だけ日付などを変える
-      load('assets/js/app.js?v=20250828');
+
+      // app.jsはフォールバック付きで読み込み
+      loadWithFallback('assets/js/app.js?v=20250828', 'app.js?v=20250828');
     })();
   </script>
   
