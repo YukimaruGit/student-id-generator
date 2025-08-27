@@ -327,21 +327,29 @@
     // このページでは高度対策をOFF（画像保存・Canvas操作のため）
     window.AdvancedSecurityConfig = { preventSideChannelAttacks: false };
   </script>
-  <script src="/comprehensive-security.js" defer></script>
-  <script src="/security.js" defer></script>
-  <script src="/privacy-protection.js" defer></script>
-  <script src="/security-monitor.js" defer></script>
-  <script src="/app.js?v=20250827" defer></script>
-  
-  <!-- フォールバックローダー -->
+  <!-- ブートローダー（自前ドメイン固定） -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof window.drawStudentCard !== 'function') {
+    (function () {
+      // あなたのサイトの実ドメイン（Cloudflare Pages のままならこれでOK）
+      const MY_ORIGIN = 'https://student-id-generator.pages.dev';
+
+      // 埋め込み先(preview.studio.site等)では常に自分のドメインから読み込む
+      window.APP_ORIGIN = MY_ORIGIN;
+
+      function load(p) {
         const s = document.createElement('script');
-        s.src = '/app.js?v=20250827';
+        s.src = APP_ORIGIN + '/' + p;
+        s.defer = true;
         document.head.appendChild(s);
       }
-    });
+
+      load('comprehensive-security.js');
+      load('security.js');
+      load('privacy-protection.js');
+      load('security-monitor.js');
+      // バージョンはそのままでOK。キャッシュ更新時だけ日付などを変える
+      load('app.js?v=20250827');
+    })();
   </script>
   
   <!-- 共有URL生成機能 -->
@@ -929,7 +937,15 @@
   </script>
   
   <!-- 埋め込みモード対応 -->
-  <script src="/embed-mode.js" defer></script>
+  <script>
+    // 埋め込みモード対応も自前ドメインから読み込み
+    (function() {
+      const s = document.createElement('script');
+      s.src = (window.APP_ORIGIN || 'https://student-id-generator.pages.dev') + '/embed-mode.js';
+      s.defer = true;
+      document.head.appendChild(s);
+    })();
+  </script>
   
   <!-- iPhoneでカメラが起動する件を修正 -->
   <script>

@@ -97,6 +97,9 @@ const FOLDER     = 'as_chronicle/student_card';  // public_id の先頭
 const T_OGP      = 't_ogp_card';                 // 1200x628 pad
 const T_FULL     = 't_full_card';                // 比率維持の保存/プレビュー用
 
+// 自前ドメイン固定（埋め込み時のMIMEエラー対策）
+const ORIGIN = (window.APP_ORIGIN) || 'https://student-id-generator.pages.dev';
+
 // URLビルダー関数
 const ogpUrl  = (id, ext='jpg') => `${CDN_BASE}/${T_OGP}/${FOLDER}/${id}.${ext}`;
 const fullUrl = (id, ext='png') => `${CDN_BASE}/${T_FULL}/${FOLDER}/${id}.${ext}`;
@@ -605,7 +608,7 @@ function initializeApp() {
   
   // ローカル環境ではcrossOriginを設定せずに読み込み
   function loadTemplateImage() {
-    templateImage.src = '/assets/img/student_template.png';
+    templateImage.src = ORIGIN + '/assets/img/student_template.png';
   }
 
   // ローディング表示の制御
@@ -631,12 +634,8 @@ function initializeApp() {
 
   templateImage.onerror = () => {
     console.error('テンプレート画像の読み込みに失敗しました:', templateImage.src);
-    // 念のため絶対パスでリトライ（相対で来た版からの復旧）
-    if (!templateImage.src.includes('/assets/img/')) {
-      templateImage.src = '/assets/img/student_template.png';
-      return;
-    }
-    drawEmptyCard();
+    // 失敗時も絶対URLでリトライ（保険）
+    templateImage.src = ORIGIN + '/assets/img/student_template.png';
   };
 
   // テンプレート画像を読み込み
