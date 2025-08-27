@@ -90,9 +90,20 @@ const PHOTO_FRAME = {
   height: 324  // 完璧に調整済み【変更厳禁】
 };
 
+// ==== Cloudinary constants ====
+const CLOUD_NAME = 'di5xqlddy';
+const CDN_BASE   = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload`;
+const FOLDER     = 'as_chronicle/student_card';  // public_id の先頭
+const T_OGP      = 't_ogp_card';                 // 1200x628 pad
+const T_FULL     = 't_full_card';                // 比率維持の保存/プレビュー用
+
+// URLビルダー関数
+export const ogpUrl  = (id, ext='jpg') => `${CDN_BASE}/${T_OGP}/${FOLDER}/${id}.${ext}`;
+export const fullUrl = (id, ext='png') => `${CDN_BASE}/${T_FULL}/${FOLDER}/${id}.${ext}`;
+
 // Cloudinary設定（一元管理）
 window.cloudinaryConfig = window.cloudinaryConfig || {
-  cloudName: 'di5xqlddy',
+  cloudName: CLOUD_NAME,
   uploadPreset: 'student_card_AS_chronicle'
 };
 const cloudinaryConfig = window.cloudinaryConfig;
@@ -109,6 +120,14 @@ function buildShareUrlWithImage({ public_id, version, eager_url }) {
   const payload = { p: public_id, v: version, i: eager_url || '' };
   const slug = b64UrlFromUtf8(JSON.stringify(payload));
   return new URL(`/s/${slug}`, location.origin).toString();
+}
+
+// 共有URLの作り方を一本化
+// 生成時に id を決定（例：kjvfdcgtliwx8kphlua5）
+// SNSプレビューは ogpUrl(id) が参照されるよう、共有ページURLに id を含める
+// 画面表示は fullUrl(id) を使用
+function buildSimpleShareUrl(id) {
+  return new URL(`/s/${id}`, location.origin).toString();
 }
 
 // 設定の検証
@@ -181,6 +200,24 @@ async function downloadCanvasAsImage(canvas, filename = '学生証.png') {
   }
 }
 
+// t_full_card を使用した保存処理
+async function downloadCard(id, filename = 'student-card.png') {
+  const url = fullUrl(id, 'png'); // 全表示のPNG
+  try {
+    const blob = await fetch(url, { cache: 'reload' }).then(r => r.blob());
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  } catch(e) {
+    // iOS Safari などダウンロード制限時のフォールバック
+    window.open(url, '_blank', 'noopener');
+  }
+}
+
 
 
 // 新しいタブ/外部アプリで開く関数（現在のタブを保持）
@@ -189,6 +226,23 @@ function openInNewTab(url) {
   const a = root.document.createElement('a');
   a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
   root.document.body.appendChild(a); a.click(); a.remove();
+}
+
+// Xへ投稿（スマホはアプリ起動、PCはWebで新規タブ）
+function shareOnX({text, url}) {
+  const ua = navigator.userAgent || '';
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(ua);
+
+  const webIntent = `https://twitter.com/intent/tweet?${new URLSearchParams({text, url})}`;
+
+  if (isMobile) {
+    // まずアプリを試す → 失敗したらWebへ
+    const appUrl = `twitter://post?message=${encodeURIComponent(`${text} ${url}`)}`;
+    const fallback = setTimeout(() => window.open(webIntent, '_blank', 'noopener'), 1200);
+    window.location.href = appUrl;
+    return;
+  }
+  window.open(webIntent, '_blank', 'noopener'); // PCは新規タブ
 }
 
 // deep link（twitter://）や location.href は使わない。常に新規タブ or ネイティブ共有。
@@ -204,6 +258,15 @@ function buildPostText() {
     '#放課後クロニクル #学生証メーカー'
   ].join('\n');
 }
+
+// 投稿文の例（要件に合わせて差し替え）
+const tweetText = [
+  'ようこそ、夢見が丘女子高等学校へ！',
+  '　忘れられない放課後を、あなたに。',
+  '✎︎＿＿＿＿＿＿＿＿＿＿＿＿＿＿',
+  '',
+  '▼ #放課後クロニクル のHPで自分だけの学生証を作ろう！'
+].join('\n');
 
 // iOS判定と二重実行ガード
 const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent);
@@ -985,6 +1048,17 @@ function initializeApp() {
         const downloadImageUrl = ogpImageUrl;
         window.open(downloadImageUrl, '_blank', 'noopener');
         
+        // プレビュー画像を表示（t_full_card で全表示）
+        const previewImg = document.getElementById('cardPreview');
+        if (previewImg && imageData.public_id) {
+          const fullImageUrl = fullUrl(imageData.public_id, 'png');
+          previewImg.src = fullImageUrl;
+          previewImg.style.display = 'block';
+          // Canvasは非表示
+          const canvas = document.getElementById('cardCanvas');
+          if (canvas) canvas.style.display = 'none';
+        }
+        
         // 共有リンクを更新
         if (window.updateShareLinksWithImage) {
           window.updateShareLinksWithImage(imageData, '学生証が完成しました！');
@@ -1105,6 +1179,17 @@ function initializeApp() {
             formData,
             timestamp: Date.now()
           });
+        }
+        
+        // プレビュー画像を表示（t_full_card で全表示）
+        const previewImg = document.getElementById('cardPreview');
+        if (previewImg && imageData.public_id) {
+          const fullImageUrl = fullUrl(imageData.public_id, 'png');
+          previewImg.src = fullImageUrl;
+          previewImg.style.display = 'block';
+          // Canvasは非表示
+          const canvas = document.getElementById('cardCanvas');
+          if (canvas) canvas.style.display = 'none';
         }
         
         // 共有リンクを更新（buildShareUrlWithImageが利用可能な場合のみ）
@@ -1252,6 +1337,17 @@ function initializeApp() {
             formData,
             timestamp: Date.now()
           });
+        }
+        
+        // プレビュー画像を表示（t_full_card で全表示）
+        const previewImg = document.getElementById('cardPreview');
+        if (previewImg && imageData.public_id) {
+          const fullImageUrl = fullUrl(imageData.public_id, 'png');
+          previewImg.src = fullImageUrl;
+          previewImg.style.display = 'block';
+          // Canvasは非表示
+          const canvas = document.getElementById('cardCanvas');
+          if (canvas) canvas.style.display = 'none';
         }
         
         // 共有リンクを更新（buildShareUrlWithImageが利用可能な場合のみ）

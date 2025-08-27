@@ -39,15 +39,24 @@ export async function onRequest({ request }) {
 
   const html = `<!doctype html><html lang="ja"><head>
 <meta charset="utf-8">
-<title>夢見が丘女子高等学校 学生証</title>
+<title>学生証ジェネレーター - 夢見が丘女子高等学校</title>
+<meta property="og:title" content="学生証ジェネレーター - 夢見が丘女子高等学校">
+<meta property="og:description" content="診断から自分だけの学生証を自動生成。カードをクリックで詳細へ。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="夢見が丘女子高等学校 学生証">
-<meta property="og:description" content="診断から学生証を自動生成。自分だけの学生証を作ろう！">
 <meta property="og:url" content="${dest}">
+<meta property="og:site_name" content="放課後クロニクル">
 <meta property="og:image" content="${ogImg}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="628">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${ogImg}">
 <meta http-equiv="refresh" content="0.8;url=${dest}">
 </head><body>
+<div style="text-align: center; padding: 2rem; font-family: sans-serif;">
+  <h2>学生証ジェネレーター</h2>
+  <p>リダイレクト中...</p>
+  <a href="${dest}" rel="noopener" class="share-cta" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: #B997D6; color: white; text-decoration: none; border-radius: 8px;">学生証を作る（HPへ）</a>
+</div>
 <script>setTimeout(function(){location.replace(${JSON.stringify(dest)})},800);</script>
 </body></html>`;
 
