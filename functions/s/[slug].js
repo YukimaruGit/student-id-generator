@@ -2,7 +2,8 @@ export async function onRequest({ request }) {
   // -------- Settings --------
   // 人間を誘導したい最終遷移先（HP）
   const PAGE_URL = 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
-  const CLOUD_NAME = 'di5xqlddy';
+  const CLOUD_NAME = 'di5xqlddy';          // 既存のまま
+  const NAMED = 't_ogp_card';              // ★レターボックスのNamed変換
 
   const url = new URL(request.url);
   const slug = url.pathname.split('/').pop() || '';
@@ -25,14 +26,10 @@ export async function onRequest({ request }) {
 
   const segEnc = s => (s||'').split('/').map(encodeURIComponent).join('/');
   const DEFAULT_OGP =
-    `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/` +
-    `c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/` +
-    `v1/student-id-generator/preview.jpg`;
+    `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${NAMED}/v1/student-id-generator/preview.jpg`;
 
   const buildOgpUrl = ({ i, p, v }) =>
-    i || `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/` +
-          `c_fill,g_auto,w_1200,h_630,q_auto:good,f_jpg,fl_force_strip/` +
-          `v${v}/${segEnc(p)}.jpg`;
+    i || `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${NAMED}/v${v}/${segEnc(p)}.jpg`;
 
   let ogImg = DEFAULT_OGP;
   if (payload?.i) ogImg = payload.i;

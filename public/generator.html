@@ -337,12 +337,7 @@
 
     // Base64URL関数は削除済み（短い固定形式に統一）
 
-    // 新：/s/v<version>/<public_id> の短URLに一本化
-    function buildShareUrlWithImage({ public_id, version }) {
-      const pidSafe = String(public_id).split('/').map(encodeURIComponent).join('/');
-      return `${SHARE_BASE}/s/v${version}/${pidSafe}`;
-    }
-    window.buildShareUrlWithImage = buildShareUrlWithImage;
+    <!-- 共有URL生成は app.js の実装を利用（再定義しない） -->
     
     // 共有リンク更新関数（app.jsから呼び出される）…UIは保持のみ、ハンドラはapp.jsが参照
     function updateShareLinksWithImage(imageData, text) {
@@ -375,16 +370,48 @@
       const btn = document.getElementById('twitterBtn');
       if (!btn) return;
       btn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        // 直前に生成した Cloudinary の upload 結果を取って呼び出す
-        const last = window.__lastUploadResult;
-        if (!last) { 
-          alert("先に学生証を作成してください。"); 
-          return; 
-        }
-        await onShareXClicked(last);
+        e.preventDefault(); e.stopPropagation();
+        try {
+          const last = window.loadResult?.();
+          if (!last || !last.public_id || !last.version) {
+            alert('先に学生証を作成してください'); return;
+          }
+          // 共有URLは app.js の実装を使う
+          const shareUrl = window.buildShareUrlWithImage?.({
+            public_id: last.public_id,
+            version  : last.version,
+            eager_url: last.eager_url || last.secure_url
+          });
+          const text = [
+            'ようこそ、夢見が丘女子高等学校へ！',
+            '　忘れられない放課後を、あなたに。',
+            '✎︎＿＿＿＿＿＿＿＿＿＿＿＿＿＿',
+            '',
+            '▼ #放課後クロニクル　のHPで自分だけの学生証を作ろう！'
+          ].join('\n');
+          // iOSはアプリのみ・他はIntent新規タブ
+          await window.shareToXAppFirstOnly?.(last.eager_url || last.secure_url, `${text}\n${shareUrl}`);
+        } catch (e){}
       }, { passive: false });
     });
+
+    // フォーム初期化処理
+    function resetStudentForm(){
+      ['nameJa','nameEn','dobMonth','dobDay'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.value='';
+      });
+    }
+    document.addEventListener('DOMContentLoaded', ()=>{
+      try{
+        sessionStorage.removeItem('student_form');
+        sessionStorage.removeItem('student_profile');
+        sessionStorage.removeItem('last_result');
+        sessionStorage.removeItem('profileCache');
+      }catch{}
+      resetStudentForm();
+    });
+    // bfcache復帰でも毎回クリア
+    window.addEventListener('pageshow', ()=> resetStudentForm());
     
 
   </script>
@@ -434,7 +461,7 @@
         <div class="form-group">
           <label>
             氏名（漢字）
-            <input type="text" id="nameJa" placeholder="例：高森のばら" autocomplete="off">
+            <input type="text" id="nameJa" placeholder="例：高森のばら" autocomplete="off" autocapitalize="off" spellcheck="false">
           </label>
         </div>
 
@@ -451,7 +478,7 @@
           </label>
           <div class="date-inputs">
             <div class="number-input">
-              <select id="dobMonth" autocomplete="off">
+              <select id="dobMonth" autocomplete="one-time-code">
                 <option value="">月</option>
                 <option value="1">1月</option>
                 <option value="2">2月</option>
@@ -468,7 +495,7 @@
               </select>
             </div>
             <div class="number-input">
-              <select id="dobDay" autocomplete="off">
+              <select id="dobDay" autocomplete="one-time-code">
                 <option value="">日</option>
                 <option value="1">1日</option>
                 <option value="2">2日</option>
@@ -532,6 +559,17 @@
           <button type="button" id="downloadBtn">
             画像を保存
           </button>
+          <script>
+            document.getElementById('downloadBtn')?.addEventListener('click', (e) => {
+              e.preventDefault(); e.stopPropagation();
+              try {
+                // 直前生成フラグ（ガードを通す）
+                sessionStorage.setItem('as_chronicle_last_result','1');
+                const cvs = document.getElementById('cardCanvas');
+                if (cvs) window.downloadCanvasAsImage?.(cvs, '放課後クロニクル_学生証.png');
+              } catch(e){}
+            }, { passive:false });
+          </script>
           <button type="button" id="twitterBtn" class="btn-twitter">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;">
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
