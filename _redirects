@@ -14,5 +14,8 @@
 # プライバシー
 /privacy /privacy.html 200
 
+# 静的アセット（JS/CSS/画像）はSPAフォールバック対象外
+/assets/* /assets/:splat 200
+
 # 404 リダイレクト
 /* /index.html 404 
