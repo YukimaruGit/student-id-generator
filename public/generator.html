@@ -400,7 +400,10 @@
         sessionStorage.getItem('as_chronicle_diagnosis');
       const inEmbed = sp.get('embed') === '1' || (window !== window.top);
 
-      if (!hasParams && !hasCtx && !inEmbed) {
+      // 直前に生成したユーザーはガードを通過
+      const hasResult = sessionStorage.getItem('as_chronicle_last_result');
+      
+      if (!hasParams && !hasCtx && !hasResult && !inEmbed) {
         // 直リンク/履歴復帰で generator に来たと判断 → 診断へ誘導
         location.replace('./index.html'); // または './quiz.html'
       }
