@@ -631,6 +631,11 @@ function initializeApp() {
 
   templateImage.onerror = () => {
     console.error('テンプレート画像の読み込みに失敗しました:', templateImage.src);
+    // 念のため絶対パスでリトライ（相対で来た版からの復旧）
+    if (!templateImage.src.includes('/assets/img/')) {
+      templateImage.src = '/assets/img/student_template.png';
+      return;
+    }
     drawEmptyCard();
   };
 
@@ -678,6 +683,8 @@ function initializeApp() {
   // 空の学生証を描画
   function drawEmptyCard() {
     ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
     if (templateImage.complete && templateImage.naturalWidth > 0) {
       ctx.drawImage(templateImage, 0, 0, CARD_WIDTH, CARD_HEIGHT);
     }

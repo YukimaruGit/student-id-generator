@@ -327,18 +327,18 @@
     // このページでは高度対策をOFF（画像保存・Canvas操作のため）
     window.AdvancedSecurityConfig = { preventSideChannelAttacks: false };
   </script>
-  <script src="/assets/js/comprehensive-security.js"></script>
-  <script src="/assets/js/security.js"></script>
-  <script src="/assets/js/privacy-protection.js"></script>
-  <script src="/assets/js/security-monitor.js"></script>
-  <script src="/app.js?v=20250822"></script>
+  <script src="/comprehensive-security.js" defer></script>
+  <script src="/security.js" defer></script>
+  <script src="/privacy-protection.js" defer></script>
+  <script src="/security-monitor.js" defer></script>
+  <script src="/app.js?v=20250827" defer></script>
   
   <!-- フォールバックローダー -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof window.drawStudentCard !== 'function') {
         const s = document.createElement('script');
-        s.src = '/app.js?v=20250822';
+        s.src = '/app.js?v=20250827';
         document.head.appendChild(s);
       }
     });
@@ -929,7 +929,7 @@
   </script>
   
   <!-- 埋め込みモード対応 -->
-  <script src="/assets/js/embed-mode.js" defer></script>
+  <script src="/embed-mode.js" defer></script>
   
   <!-- iPhoneでカメラが起動する件を修正 -->
   <script>
