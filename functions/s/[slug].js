@@ -1,4 +1,4 @@
-export default async function onRequest({ request }) {
+export async function onRequest({ request }) {
   // -------- Settings --------
   // 人間を誘導したい最終遷移先（HP）
   const PAGE_URL = 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
