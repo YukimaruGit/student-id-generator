@@ -343,10 +343,10 @@
         document.head.appendChild(s);
       }
 
-      load('comprehensive-security.js');
-      load('security.js');
-      load('privacy-protection.js');
-      load('security-monitor.js');
+      load('assets/js/comprehensive-security.js');
+      load('assets/js/security.js');
+      load('assets/js/privacy-protection.js');
+      load('assets/js/security-monitor.js');
       // バージョンはそのままでOK。キャッシュ更新時だけ日付などを変える
       load('app.js?v=20250827');
     })();
@@ -941,7 +941,7 @@
     // 埋め込みモード対応も自前ドメインから読み込み
     (function() {
       const s = document.createElement('script');
-      s.src = (window.APP_ORIGIN || 'https://student-id-generator.pages.dev') + '/embed-mode.js';
+      s.src = (window.APP_ORIGIN || 'https://student-id-generator.pages.dev') + '/assets/js/embed-mode.js';
       s.defer = true;
       document.head.appendChild(s);
     })();
