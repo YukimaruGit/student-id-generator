@@ -682,78 +682,7 @@ function initializeApp() {
 
   // 写真アップロードの処理（セキュリティ強化版）
   elements.photoInput.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      // セキュリティ検証を最初に実行
-      if (window.PrivacySecurity && !window.PrivacySecurity.validateFileUpload(file)) {
-        throw new Error('このファイルは安全性の理由でアップロードできません。\nJPEG、PNG、GIF、WebP形式の画像ファイルのみアップロード可能です。');
-      }
-
-      // ファイル選択時のクライアント検証
-      async function validateSelectedFile(file){
-        if (!file){ alert('ファイルが選択されていません'); return false; }
-        const ext = getExt(file.name);
-        if (!ALLOWED_EXTS.includes(ext)) { alert('対応拡張子: ' + ALLOWED_EXTS.join(', ')); return false; }
-        if (file.size > MAX_FILE_SIZE){ alert('10MB以内の画像をご利用ください'); return false; }
-        const sig = await sniffImageType(file);
-        if (!sig || !ALLOWED_EXTS.includes(sig)){ alert('画像ファイルではありません'); return false; }
-        // MIMEヒントの改ざん対策：拡張子とシグネチャが極端に乖離なら拒否
-        if (ext==='png' && sig!=='png')  { alert('PNG形式の画像を選択してください'); return false; }
-        if ((ext==='jpg'||ext==='jpeg') && sig!=='jpg') { alert('JPEG形式の画像を選択してください'); return false; }
-        return true;
-      }
-
-      if (!(await validateSelectedFile(file))) { 
-        elements.photoInput.value = ''; 
-        return; 
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('ファイルサイズは5MB以下にしてください。');
-      }
-
-      if (!file.type.startsWith('image/')) {
-        throw new Error('画像ファイルを選択してください。');
-      }
-
-      // 画像内容の詳細検証
-      if (window.PrivacySecurity) {
-        const isValidImage = await window.PrivacySecurity.validateImageContent(file);
-        if (!isValidImage) {
-          throw new Error('このファイルは有効な画像ファイルではないか、セキュリティ上の問題があります。');
-        }
-      }
-
-      showLoading('写真を読み込み中...');
-
-      uploadedPhoto = new Image();
-      uploadedPhoto.onload = () => {
-        hideLoading();
-        window.drawStudentCard();
-      };
-      uploadedPhoto.onerror = () => {
-        throw new Error('画像の読み込みに失敗しました。');
-      };
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        uploadedPhoto.src = e.target.result;
-      };
-      reader.onerror = () => {
-        throw new Error('画像の読み込みに失敗しました。');
-      };
-      reader.readAsDataURL(file);
-
-    } catch (error) {
-      console.error('アップロードエラー:', error);
-      alert(error.message);
-      elements.photoInput.value = '';
-      uploadedPhoto = null;
-      hideLoading();
-      drawEmptyCard();
-    }
+    await handlePhotoSelected(e);
   });
 
   // 入力値のバリデーション
@@ -1588,4 +1517,143 @@ document.addEventListener('click', (e) => {
 
 // グローバル関数として公開
 window.openXShare = openXShare;
+window.handlePhotoSelected = handlePhotoSelected;
+window.downloadCanvasAsImage = downloadCanvasAsImage;
+
+// === ジェネレーター専用の初期化関数 ===
+// 写真アップロード処理（CORS対応・堅牢化）
+async function handlePhotoSelected(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    // セキュリティ検証を最初に実行
+    if (window.PrivacySecurity && !window.PrivacySecurity.validateFileUpload(file)) {
+      throw new Error('このファイルは安全性の理由でアップロードできません。\nJPEG、PNG、GIF、WebP形式の画像ファイルのみアップロード可能です。');
+    }
+
+    // ファイル選択時のクライアント検証
+    async function validateSelectedFile(file){
+      if (!file){ alert('ファイルが選択されていません'); return false; }
+      const ext = getExt(file.name);
+      if (!ALLOWED_EXTS.includes(ext)) { alert('対応拡張子: ' + ALLOWED_EXTS.join(', ')); return false; }
+      if (file.size > MAX_FILE_SIZE){ alert('10MB以内の画像をご利用ください'); return false; }
+      const sig = await sniffImageType(file);
+      if (!sig || !ALLOWED_EXTS.includes(sig)){ alert('画像ファイルではありません'); return false; }
+      // MIMEヒントの改ざん対策：拡張子とシグネチャが極端に乖離なら拒否
+      if (ext==='png' && sig!=='png')  { alert('PNG形式の画像を選択してください'); return false; }
+      if ((ext==='jpg'||ext==='jpeg') && sig!=='jpg') { alert('JPEG形式の画像を選択してください'); return false; }
+      return true;
+    }
+
+    if (!(await validateSelectedFile(file))) { 
+      e.target.value = ''; 
+      return; 
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error('ファイルサイズは5MB以下にしてください。');
+    }
+
+    if (!file.type.startsWith('image/')) {
+      throw new Error('画像ファイルを選択してください。');
+    }
+
+    // 画像内容の詳細検証
+    if (window.PrivacySecurity) {
+      const isValidImage = await window.PrivacySecurity.validateImageContent(file);
+      if (!isValidImage) {
+        throw new Error('このファイルは有効な画像ファイルではないか、セキュリティ上の問題があります。');
+      }
+    }
+
+    if (window.showLoading) window.showLoading('写真を読み込み中...');
+
+    uploadedPhoto = new Image();
+    uploadedPhoto.crossOrigin = 'anonymous'; // CORS対応
+    
+    uploadedPhoto.onload = async () => {
+      try {
+        // デコード待ち（描画ロジック自体は不変）
+        await uploadedPhoto.decode().catch(() => {});
+      } catch(e) {
+        console.warn('Image decode warning:', e);
+      }
+      if (window.hideLoading) window.hideLoading();
+      if (window.drawStudentCard) window.drawStudentCard();
+    };
+    
+    uploadedPhoto.onerror = () => {
+      throw new Error('画像の読み込みに失敗しました。');
+    };
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      uploadedPhoto.src = e.target.result;
+    };
+    reader.onerror = () => {
+      throw new Error('画像の読み込みに失敗しました。');
+    };
+    reader.readAsDataURL(file);
+
+  } catch (error) {
+    console.error('アップロードエラー:', error);
+    alert(error.message);
+    e.target.value = '';
+    uploadedPhoto = null;
+    if (window.hideLoading) window.hideLoading();
+    if (window.drawEmptyCard) window.drawEmptyCard();
+  }
+}
+
+function setupCardCanvas() {
+  const cvs = document.getElementById('cardCanvas');
+  if (!cvs) return null;
+  const dpr = window.devicePixelRatio || 1;
+  const W = 800, H = 500; // 既存の描画ロジックと完全一致させる
+  // 物理解像度のみ上げ、論理座標は 800x500 のまま
+  if (cvs.width !== W * dpr || cvs.height !== H * dpr) {
+    cvs.width  = W * dpr;
+    cvs.height = H * dpr;
+    cvs.style.width  = W + 'px';
+    cvs.style.height = H + 'px';
+    const ctx = cvs.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  return cvs;
+}
+
+function initGeneratorPage() {
+  if (!document.getElementById('cardCanvas')) return; // 他ページ無視
+  setupCardCanvas();
+
+  const idsChange = ['dobMonth','dobDay'];
+  const idsInput  = ['nameJa','nameEn'];
+  idsInput.forEach(id => document.getElementById(id)?.addEventListener('input', drawStudentCard));
+  idsChange.forEach(id => document.getElementById(id)?.addEventListener('change', drawStudentCard));
+  document.getElementById('photoInput')?.addEventListener('change', async (e) => {
+    // 既存の画像読込ハンドラ（座標・サイズはいじらない）
+    await handlePhotoSelected(e); // 既存関数名に合わせる。なければ既存実装を呼ぶ
+    drawStudentCard();
+  });
+
+  // 復元データがあれば反映後に描画
+  try {
+    const last = window.loadResult?.();
+    if (last) {
+      // 既存の保存形式に合わせてフィールドへ復元のみ（座標は触らない）
+      if (last.formData) {
+        const {nameJa, nameEn, dobMonth, dobDay} = last.formData;
+        if (nameJa)  document.getElementById('nameJa').value  = nameJa;
+        if (nameEn)  document.getElementById('nameEn').value  = nameEn;
+        if (dobMonth)document.getElementById('dobMonth').value= dobMonth;
+        if (dobDay)  document.getElementById('dobDay').value  = dobDay;
+      }
+    }
+  } catch(_) {}
+
+  drawStudentCard();
+}
+
+document.addEventListener('DOMContentLoaded', initGeneratorPage);
 

@@ -331,7 +331,18 @@
   <script src="/assets/js/security.js"></script>
   <script src="/assets/js/privacy-protection.js"></script>
   <script src="/assets/js/security-monitor.js"></script>
-  <script src="/assets/js/app.js?v=20250822"></script>
+  <script src="/app.js?v=20250822"></script>
+  
+  <!-- フォールバックローダー -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof window.drawStudentCard !== 'function') {
+        const s = document.createElement('script');
+        s.src = '/app.js?v=20250822';
+        document.head.appendChild(s);
+      }
+    });
+  </script>
   
   <!-- 共有URL生成機能 -->
   <script>
@@ -399,51 +410,12 @@
             '▼ #放課後クロニクル　のHPで自分だけの学生証を作ろう！'
           ].join('\n');
           // iOSはアプリのみ・他はIntent新規タブ
-          await window.shareToXAppFirstOnly?.(last.eager_url || last.secure_url, `${text}\n${shareUrl}`);
+          await window.shareToXAppFirstOnly?.(last.eager_url || last.secure_url, `${text}\n${shareLinkField}`);
         } catch (e){}
       }, { passive: false });
     });
 
-    // フォーム初期化処理
-    function resetStudentForm(){
-      ['nameJa','nameEn','dobMonth','dobDay'].forEach(id=>{
-        const el=document.getElementById(id); if(el) el.value='';
-      });
-    }
-    
-    // localStorage のキーをこのアプリ専用の名前空間に変更
-    const LS_PREFIX = 'sidg:v1:';  // 旧キーと区別
-    
-    function clearFormState() {
-      try {
-        // 旧キーをクリア
-        for (const k of Object.keys(localStorage)) {
-          if (k.startsWith('student_') || k.startsWith('profile') || k.startsWith('last_')) {
-            localStorage.removeItem(k);
-          }
-        }
-        // このアプリ専用キーもクリア
-        for (const k of Object.keys(localStorage)) {
-          if (k.startsWith(LS_PREFIX)) {
-            localStorage.removeItem(k);
-          }
-        }
-        // sessionStorageもクリア
-        sessionStorage.removeItem('student_form');
-        sessionStorage.removeItem('student_profile');
-        sessionStorage.removeItem('last_result');
-        sessionStorage.removeItem('profileCache');
-      } catch(e) {}
-      
-      // input値も空に
-      resetStudentForm();
-    }
-    
-    document.addEventListener('DOMContentLoaded', ()=>{
-      clearFormState();
-    });
-    // bfcache復帰でも毎回クリア
-    window.addEventListener('pageshow', ()=> clearFormState());
+    // フォーム初期化処理は app.js の initGeneratorPage に統合
     
 
   </script>
