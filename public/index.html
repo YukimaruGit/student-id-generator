@@ -1834,6 +1834,58 @@
             console.warn('⚠️ Studio埋め込み遷移処理に失敗:', e);
           }
           
+          // Studio埋め込み時の特別な遷移処理（確実版）
+          try {
+            // より確実なStudio埋め込み判定
+            const isStudioEmbed = 
+              window.parent !== window || 
+              window.top !== window || 
+              window.frameElement ||
+              new URLSearchParams(location.search).has('embed') ||
+              new URLSearchParams(location.search).has('studio') ||
+              new URLSearchParams(location.search).has('iframe') ||
+              (document.referrer && (
+                document.referrer.includes('studio') || 
+                document.referrer.includes('preview.studio.site') ||
+                document.referrer.includes('embed') ||
+                document.referrer.includes('iframe')
+              )) ||
+              window.location.href.includes('preview.studio.site') ||
+              window.location.href.includes('studio.site') ||
+              window.location.href.includes('live/');
+            
+            if (isStudioEmbed) {
+              // セッションストレージに遷移情報を保存
+              sessionStorage.setItem('studio_embed_flag', '1');
+              sessionStorage.setItem('generator_redirect_info', JSON.stringify({
+                timestamp: Date.now(),
+                target: url.toString(),
+                params: Object.fromEntries(url.searchParams.entries()),
+                isStudioEmbed: true
+              }));
+              
+              console.log('🚀 Studio埋め込み遷移開始（確実版）:', url.toString());
+              
+              // セッションストレージに遷移先URLを保存
+              sessionStorage.setItem('next_generator_url', url.toString());
+              
+              // 直接遷移ではなく、遅延遷移を使用（Studio埋め込み対応）
+              setTimeout(() => {
+                try {
+                  window.location.href = url.toString();
+                } catch(e) {
+                  console.warn('⚠️ 遅延遷移に失敗:', e);
+                  // フォールバック: 直接遷移
+                  window.location.href = url.toString();
+                }
+              }, 100);
+              
+              return; // ここで処理を終了
+            }
+          } catch(e) {
+            console.warn('⚠️ Studio埋め込み遷移処理（確実版）に失敗:', e);
+          }
+          
           window.location.href = url.toString();
         };
       }

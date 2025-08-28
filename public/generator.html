@@ -1936,6 +1936,37 @@
         isSecureContext: window.isSecureContext,
         windowTop: window.top !== window
       });
+      
+      // Studio埋め込み時の詳細デバッグ情報
+      try {
+        const debugInfo = {
+          timestamp: Date.now(),
+          url: window.location.href,
+          referrer: document.referrer,
+          hostname: window.location.hostname,
+          parent: window.parent !== window,
+          top: window.top !== window,
+          frameElement: !!window.frameElement,
+          isSecureContext: window.isSecureContext,
+          sessionStorage: {
+            studio_embed_flag: sessionStorage.getItem('studio_embed_flag'),
+            generator_redirect_info: sessionStorage.getItem('generator_redirect_info'),
+            next_generator_url: sessionStorage.getItem('next_generator_url'),
+            diagCtx: sessionStorage.getItem('diagCtx'),
+            as_chronicle_diagnosis: sessionStorage.getItem('as_chronicle_diagnosis'),
+            as_chronicle_last_result: sessionStorage.getItem('as_chronicle_last_result')
+          },
+          urlParams: Object.fromEntries(new URLSearchParams(location.search).entries())
+        };
+        
+        console.log('🔍 Studio埋め込み詳細デバッグ:', debugInfo);
+        
+        // セッションストレージにデバッグ情報を保存
+        sessionStorage.setItem('generator_debug_info', JSON.stringify(debugInfo));
+        
+      } catch(e) {
+        console.warn('⚠️ デバッグ情報の保存に失敗:', e);
+      }
     })();
   </script>
 </head>
