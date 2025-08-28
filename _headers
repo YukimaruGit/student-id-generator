@@ -8,6 +8,17 @@
 /generator.html
   X-Frame-Options: ALLOWALL
   Content-Security-Policy: frame-ancestors 'self' *.studio.site *.preview.studio.site
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+# Studio埋め込み用の特別な設定（パラメータ付き）
+/generator.html*
+  X-Frame-Options: ALLOWALL
+  Content-Security-Policy: frame-ancestors 'self' *.studio.site *.preview.studio.site
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
 
 /s/*
   Cache-Control: public, max-age=0, s-maxage=600

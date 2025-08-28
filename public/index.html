@@ -1037,7 +1037,7 @@
                   window.location.href.includes('live/')) {
                 url.searchParams.set('studio', '1');
                 url.searchParams.set('source', 'studio');
-                console.log('�� Studio環境URL検出、追加パラメータを付与');
+                console.log('🚀 Studio環境URL検出、追加パラメータを付与');
               }
               
               // デバッグ情報の記録
@@ -1727,7 +1727,7 @@
           url.searchParams.set('previewMessage', previewMessage);
           url.searchParams.set('episodeMessage', episodeMessage);
           
-          // 埋め込みモードの場合はembed=1を付与
+          // Studio埋め込みモードの場合はembed=1を付与
           if (window.parent !== window || window.top !== window || window.frameElement || 
               new URLSearchParams(location.search).has('embed') ||
               location.hostname.includes('studio') ||
@@ -1797,6 +1797,41 @@
             
           } catch(e) {
             console.warn('⚠️ 追加パラメータの設定に失敗:', e);
+          }
+          
+          // Studio埋め込み時の特別な遷移処理
+          try {
+            if (window.parent !== window || window.top !== window || 
+                new URLSearchParams(location.search).has('embed') ||
+                document.referrer.includes('studio') || document.referrer.includes('preview.studio.site')) {
+              
+              // セッションストレージに遷移情報を保存
+              sessionStorage.setItem('studio_embed_flag', '1');
+              sessionStorage.setItem('generator_redirect_info', JSON.stringify({
+                timestamp: Date.now(),
+                target: url.toString(),
+                params: Object.fromEntries(url.searchParams.entries())
+              }));
+              
+              console.log('🚀 Studio埋め込み遷移開始:', url.toString());
+              
+              // 直接遷移ではなく、window.openを使用（Studio埋め込み対応）
+              try {
+                if (window.parent !== window) {
+                  // iframe内の場合、親ウィンドウに遷移を通知
+                  window.parent.postMessage({
+                    type: 'redirect',
+                    url: url.toString(),
+                    params: Object.fromEntries(url.searchParams.entries())
+                  }, '*');
+                  console.log('🚀 親ウィンドウに遷移通知を送信');
+                }
+              } catch(e) {
+                console.warn('⚠️ 親ウィンドウ通知に失敗:', e);
+              }
+            }
+          } catch(e) {
+            console.warn('⚠️ Studio埋め込み遷移処理に失敗:', e);
           }
           
           window.location.href = url.toString();

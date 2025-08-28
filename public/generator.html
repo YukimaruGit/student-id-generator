@@ -1799,6 +1799,12 @@
           return;
         }
         
+        // generator_redirect_infoがある場合（Studio埋め込み遷移）
+        if (sessionStorage.getItem('generator_redirect_info')) {
+          console.log('🚀 Studio埋め込み遷移情報検出、直アクセス防止を無効化');
+          return;
+        }
+        
         // Cloudflare Pages環境では、Studio埋め込みの可能性を考慮して直アクセス防止を無効化
         if (window.location.hostname === 'student-id-generator.pages.dev') {
           console.log('🚀 Cloudflare環境検出、Studio埋め込みの可能性を考慮して直アクセス防止を無効化');

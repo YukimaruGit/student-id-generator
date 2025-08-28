@@ -7,7 +7,8 @@
 # メインページ
 / /index.html 200
 
-# 学生証作成
+# 学生証作成（Studio埋め込み対応）
+/generator.html /generator.html 200
 /create /generator.html 200
 /generator /generator.html 200
 
@@ -17,5 +18,12 @@
 # 静的アセット（JS/CSS/画像）はSPAフォールバック対象外
 /assets/* /assets/:splat 200
 
-# 404 リダイレクト
+# Studio埋め込み用の特別な設定
+/generator.html* /generator.html 200
+
+# 404 リダイレクト（generator.htmlは除外）
+!/generator.html
+!/index.html
+!/assets/*
+!/s/*
 /* /index.html 404 
