@@ -16,7 +16,13 @@
   <meta name="twitter:image" content="https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="/assets/css/style.css">
+  <link id="generator-style" rel="stylesheet">
+  <script>
+    (function(){
+      const ORIGIN = window.APP_ORIGIN || 'https://student-id-generator.pages.dev';
+      document.getElementById('generator-style').href = ORIGIN + '/assets/css/style.css';
+    })();
+  </script>
   <!-- <script src="assets/js/domain-masking.js"></script> -->
   <style>
     /* 進捗バーとカード高さ調整（診断結果ページと完全に同じ） */
@@ -213,66 +219,6 @@
       }
     }
 
-    /* === Generator overrides (layout fix) === */
-    
-    /* main をブロック化：ページ共通の 2カラム指定を打ち消す */
-    main.generator-container {
-      display: block;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
-    
-    /* このページの2カラムは .cards-grid に一本化 */
-    .generator-container .cards-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      align-items: stretch;          /* 両カードを同じ高さに統一 */
-    }
-    
-    /* 高さポリシーを統一：内容に合わせて自動調整 */
-    .generator-container .form-card,
-    .generator-container .preview-card {
-      height: auto;
-      min-height: 350px;             /* 診断結果ページと完全に同じ */
-      max-height: none;              /* 最大高さの制限を解除 */
-      overflow: visible;             /* スクロールなし、内容を全て表示 */
-      border-radius: 16px;           /* 既存の角丸に合わせる */
-    }
-    
-    /* プレビューの sticky は無効化（高さを揃えるため） */
-    .generator-container .preview-card {
-      position: static !important;
-      top: auto !important;
-    }
-    
-    /* 768px 以下は縦並び＆可変高 */
-    @media (max-width: 768px) {
-      .generator-container .cards-grid { grid-template-columns: 1fr; }
-      .generator-container .form-card,
-      .generator-container .preview-card { height: auto; min-height: 350px; }
-    }
-    
-    /* このページではヘッダーのグラデーションを非表示に */
-    header, .header-gradient, .gradient-header {
-      display: none !important;
-    }
-    
-    /* 進捗バーの上余白を診断結果ページと同じに */
-    .generator-container .progress-bar { margin-top: 2rem; }
-    
-    /* 既存の競合するCSSルールを完全に無効化 */
-    .generator-container .form-card,
-    .generator-container .preview-card {
-      height: auto !important;
-      min-height: 350px !important;   /* 診断結果ページと完全に同じ */
-      max-height: none !important;    /* 最大高さの制限を解除 */
-      position: static !important;
-      top: auto !important;
-      overflow: visible !important;
-    }
-
     /* トースト表示のスタイル */
     .toast {
       position: fixed;
@@ -294,33 +240,6 @@
 
     .toast.hide {
       opacity: 0;
-    }
-    
-
-    
-    /* プレビューのキャンバスは 8:5 を厳守して伸縮 */
-    .preview-card .card-body canvas#cardCanvas{
-      width: 100%;
-      height: auto;
-      aspect-ratio: 8 / 5;
-      display: block;
-    }
-    
-    /* プレビュー画像の全表示スタイル */
-    #cardPreview{
-      width: 100%;
-      height: auto;
-      object-fit: contain;   /* 切らずに全体表示 */
-      background: #fff;
-      display: none;
-    }
-    
-    /* style.cssのmainグリッド設定を完全に無効化 */
-    main.generator-container {
-      display: block !important;
-      grid-template-columns: none !important;
-      grid-template-rows: none !important;
-      gap: 0 !important;
     }
   </style>
   <script>
@@ -365,7 +284,11 @@
       load('assets/js/security-monitor.js');
 
       // app.jsはフォールバック付きで読み込み
-      loadWithFallback('assets/js/app.js?v=20250828', 'app.js?v=20250828');
+      loadWithFallback('assets/js/app.js?v=20250829', 'app.js?v=20250829');
+      
+      // デバッグ用ログ
+      console.log('✅ スクリプトローダー初期化完了');
+      console.log('APP_ORIGIN:', APP_ORIGIN);
     })();
   </script>
   
