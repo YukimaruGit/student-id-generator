@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/generator.html",
+      "dest": "/generator.html",
+      "headers": {
+        "X-Frame-Options": "ALLOWALL",
+        "Content-Security-Policy": "frame-ancestors 'self' *.studio.site *.preview.studio.site"
+      }
+    },
+    {
+      "src": "/generator.html(.*)",
+      "dest": "/generator.html",
+      "headers": {
+        "X-Frame-Options": "ALLOWALL",
+        "Content-Security-Policy": "frame-ancestors 'self' *.studio.site *.preview.studio.site"
+      }
+    },
+    {
+      "src": "/create",
+      "dest": "/generator.html",
+      "headers": {
+        "X-Frame-Options": "ALLOWALL",
+        "Content-Security-Policy": "frame-ancestors 'self' *.studio.site *.preview.studio.site"
+      }
+    },
+    {
+      "src": "/generator",
+      "dest": "/generator.html",
+      "headers": {
+        "X-Frame-Options": "ALLOWALL",
+        "Content-Security-Policy": "frame-ancestors 'self' *.studio.site *.preview.studio.site"
+      }
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ]
+}
