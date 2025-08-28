@@ -371,21 +371,44 @@
   <!-- 直アクセス防止：診断未実施なら診断ゲームへ誘導 -->
   <script>
     (() => {
+      // ① 既に一度リダイレクトしたら二度目はしない（ループ防止）
+      if (sessionStorage.getItem('redir_guard') === '1') return;
+
       const sp = new URLSearchParams(location.search);
       const hasParams = ['department','course','club'].some(k => sp.has(k));
-      // 診断結果をセッションに保持しているキー（あなたの実装に合わせて両対応）
+
       const hasCtx =
         sessionStorage.getItem('diagCtx') ||
-        sessionStorage.getItem('as_chronicle_diagnosis');
-      const inEmbed = sp.get('embed') === '1' || (window !== window.top);
+        sessionStorage.getItem('as_chronicle_diagnosis') ||
+        sessionStorage.getItem('as_chronicle_last_result');
 
-      // 直前に生成したユーザーはガードを通過
-      const hasResult = sessionStorage.getItem('as_chronicle_last_result');
-      
-      if (!hasParams && !hasCtx && !hasResult && !inEmbed) {
-        // 直リンク/履歴復帰で generator に来たと判断 → 診断へ誘導
-        location.replace('./index.html'); // または './quiz.html'
+      // ② 埋め込み判定を強化（sandbox / クロスオリジンでも確実に true になる条件を追加）
+      function isEmbedded() {
+        try { if (sp.get('embed') === '1') return true; } catch(_) {}
+        try { if (window.parent && window.parent !== window) return true; } catch(_) { return true; } // 例外＝埋め込み扱い
+        try {
+          // リファラが他オリジン（preview.studio.site 等）なら埋め込み
+          if (document.referrer && !document.referrer.startsWith(location.origin)) return true;
+          // ancestorOrigins が使える環境なら祖先が存在すれば埋め込み
+          if (location.ancestorOrigins && location.ancestorOrigins.length > 0) return true;
+        } catch(_) {}
+        return false;
       }
+      const inEmbed = isEmbedded();
+
+      // ③ 本当に"直リンク"だけ跳ねる
+      if (!hasParams && !hasCtx && !inEmbed) {
+        sessionStorage.setItem('redir_guard','1');
+        location.replace('./index.html');
+      }
+      
+      // デバッグ用ログ（埋め込み判定の確認）
+      console.log('🔍 直アクセス防止チェック:', {
+        hasParams, hasCtx, inEmbed,
+        referrer: document.referrer,
+        ancestorOrigins: location.ancestorOrigins,
+        windowParent: window.parent !== window
+      });
     })();
   </script>
 </head>
