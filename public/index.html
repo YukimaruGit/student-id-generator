@@ -1010,6 +1010,64 @@
               url.searchParams.set('embed', '1');
             }
             
+            // Studio埋め込み時の追加パラメータ
+            try {
+              // 現在のページがStudio環境に埋め込まれている場合
+              if (window.parent !== window || window.top !== window) {
+                url.searchParams.set('studio', '1');
+                url.searchParams.set('iframe', '1');
+                console.log('🚀 iframe環境検出、追加パラメータを付与');
+              }
+              
+              // リファラがStudio環境からの場合
+              if (document.referrer && (
+                  document.referrer.includes('preview.studio.site') ||
+                  document.referrer.includes('studio.site') ||
+                  document.referrer.includes('embed') ||
+                  document.referrer.includes('iframe')
+              )) {
+                url.searchParams.set('studio', '1');
+                url.searchParams.set('referrer', document.referrer);
+                console.log('🚀 Studioリファラ検出、追加パラメータを付与');
+              }
+              
+              // 現在のURLがStudio環境の場合
+              if (window.location.href.includes('preview.studio.site') || 
+                  window.location.href.includes('studio.site') ||
+                  window.location.href.includes('live/')) {
+                url.searchParams.set('studio', '1');
+                url.searchParams.set('source', 'studio');
+                console.log('�� Studio環境URL検出、追加パラメータを付与');
+              }
+              
+              // デバッグ情報の記録
+              console.log('🔍 Studio埋め込み遷移デバッグ:', {
+                currentUrl: window.location.href,
+                referrer: document.referrer,
+                parent: window.parent !== window,
+                top: window.top !== window,
+                frameElement: !!window.frameElement,
+                finalUrl: url.toString(),
+                params: Object.fromEntries(url.searchParams.entries())
+              });
+              
+              // セッションストレージに遷移情報を保存
+              try {
+                sessionStorage.setItem('studio_transition_debug', JSON.stringify({
+                  timestamp: Date.now(),
+                  from: window.location.href,
+                  to: url.toString(),
+                  referrer: document.referrer,
+                  params: Object.fromEntries(url.searchParams.entries())
+                }));
+              } catch(e) {
+                console.warn('⚠️ 遷移情報の保存に失敗:', e);
+              }
+              
+            } catch(e) {
+              console.warn('⚠️ 追加パラメータの設定に失敗:', e);
+            }
+            
             window.location.href = url.toString();
           };
         }
@@ -1681,6 +1739,64 @@
               window.location.href.includes('live/')) {
             url.searchParams.set('embed', '1');
             console.log('🚀 Studio埋め込み検出、embed=1を付与');
+          }
+          
+          // Studio埋め込み時の追加パラメータ
+          try {
+            // 現在のページがStudio環境に埋め込まれている場合
+            if (window.parent !== window || window.top !== window) {
+              url.searchParams.set('studio', '1');
+              url.searchParams.set('iframe', '1');
+              console.log('🚀 iframe環境検出、追加パラメータを付与');
+            }
+            
+            // リファラがStudio環境からの場合
+            if (document.referrer && (
+                document.referrer.includes('preview.studio.site') ||
+                document.referrer.includes('studio.site') ||
+                document.referrer.includes('embed') ||
+                document.referrer.includes('iframe')
+            )) {
+              url.searchParams.set('studio', '1');
+              url.searchParams.set('referrer', document.referrer);
+              console.log('🚀 Studioリファラ検出、追加パラメータを付与');
+            }
+            
+            // 現在のURLがStudio環境の場合
+            if (window.location.href.includes('preview.studio.site') || 
+                window.location.href.includes('studio.site') ||
+                window.location.href.includes('live/')) {
+              url.searchParams.set('studio', '1');
+              url.searchParams.set('source', 'studio');
+              console.log('🚀 Studio環境URL検出、追加パラメータを付与');
+            }
+            
+            // デバッグ情報の記録
+            console.log('🔍 Studio埋め込み遷移デバッグ:', {
+              currentUrl: window.location.href,
+              referrer: document.referrer,
+              parent: window.parent !== window,
+              top: window.top !== window,
+              frameElement: !!window.frameElement,
+              finalUrl: url.toString(),
+              params: Object.fromEntries(url.searchParams.entries())
+            });
+            
+            // セッションストレージに遷移情報を保存
+            try {
+              sessionStorage.setItem('studio_transition_debug', JSON.stringify({
+                timestamp: Date.now(),
+                from: window.location.href,
+                to: url.toString(),
+                referrer: document.referrer,
+                params: Object.fromEntries(url.searchParams.entries())
+              }));
+            } catch(e) {
+              console.warn('⚠️ 遷移情報の保存に失敗:', e);
+            }
+            
+          } catch(e) {
+            console.warn('⚠️ 追加パラメータの設定に失敗:', e);
           }
           
           window.location.href = url.toString();
