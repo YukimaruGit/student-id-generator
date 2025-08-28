@@ -16,9 +16,6 @@
 /create/      /generator.html   200
 /privacy/     /privacy.html     200
 
-# 短縮URL（クエリキーを明示）
-/s/*          /s.html?s=:splat  200
-
 # 静的アセット
 /assets/*     /assets/:splat    200
 
