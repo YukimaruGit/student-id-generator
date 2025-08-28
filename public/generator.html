@@ -1657,621 +1657,387 @@
 
   </script>
   
-  <!-- 直アクセス防止：Cloudflare Pages環境では完全に無効化 -->
+  <!-- 直アクセス防止：診断未実施なら診断ゲームへ誘導 -->
   <script>
     (() => {
-      console.log('🔍 直アクセス防止スクリプト起動（Cloudflare Pages環境では完全に無効化）');
-      
-      // Cloudflare Pages環境では直アクセス防止を完全に無効化
-      if (window.location.hostname === 'student-id-generator.pages.dev') {
-        console.log('🚀 Cloudflare Pages環境検出、直アクセス防止を完全に無効化');
-        return;
-      }
-      
-      // その他の環境でも、埋め込みの可能性がある場合は無効化
-      if (window.parent !== window || window.top !== window || window.frameElement) {
-        console.log('🚀 iframe環境検出、直アクセス防止を無効化');
-        return;
-      }
-      
-      // リファラが他オリジンの場合は埋め込みの可能性
-      if (document.referrer && !document.referrer.startsWith(location.origin)) {
-        console.log('🚀 他オリジンからのアクセス検出、埋め込みの可能性を考慮して直アクセス防止を無効化');
-        return;
-      }
-      
-      // 基本的な直アクセス防止のみ実行
-      const sp = new URLSearchParams(location.search);
-      const hasParams = ['department','course','club'].some(k => sp.has(k));
-      const hasCtx = sessionStorage.getItem('diagCtx') || 
-                     sessionStorage.getItem('as_chronicle_diagnosis') || 
-                     sessionStorage.getItem('as_chronicle_last_result');
+      // ① 既に一度リダイレクトしたら二度目はしない（ループ防止）
+      if (sessionStorage.getItem('redir_guard') === '1') return;
 
-      if (!hasParams && !hasCtx) {
-        console.log('🚫 直アクセスを検出、診断ゲームへリダイレクト');
-        location.replace('./index.html');
-      } else {
-        console.log('✅ 埋め込みまたは診断済み、リダイレクトしない');
-      }
-    })();
-  </script>
-  
-  <!-- 埋め込みモード対応 -->
-  <script>
-    // 埋め込みモード対応も自前ドメインから読み込み
-    (function() {
-      const s = document.createElement('script');
-      s.src = (window.APP_ORIGIN || 'https://student-id-generator.pages.dev') + '/assets/js/embed-mode.js';
-      s.defer = true;
-      document.head.appendChild(s);
-    })();
-  </script>
-  
-
-  
-  <!-- iPhoneでカメラが起動する件を修正 -->
-  <script>
-    // capture属性は既に削除済み
-  </script>
-  
-  <!-- 共有機能は共有ブリッジ経由で統一管理 -->
-  <!-- 共有ボタンは共有ブリッジを新規タブで開き、トップレベルでWeb Share実行 -->
-  <!-- これによりiframe内でのWeb Share拒否問題を回避 -->
-  
-  <!-- app.jsの直接読み込み（最も確実な方法） -->
-  <script>
-    // 重複読み込み防止
-    if (typeof window.APP_JS_LOADED === 'undefined' || !window.APP_JS_LOADED) {
-      window.APP_JS_LOADED = true;
-      const script = document.createElement('script');
-      script.src = 'assets/js/app.js?v=20250902';
-      script.onload = () => {
-        console.log('✅ app.js直接読み込み完了（重複防止）');
-        // 初期化を確実に実行
-        setTimeout(() => {
-          if (typeof window.initGeneratorPage === 'function') {
-            console.log('🔄 initGeneratorPageを実行中...');
-            window.initGeneratorPage();
-          } else {
-            console.log('❌ initGeneratorPageが見つかりません');
-          }
-        }, 100);
-        
-        // drawStudentCard関数の定義を待ってから初期化
-        const checkDrawFunction = () => {
-          // app.jsの読み込み完了もチェック
-          if (typeof window.initGeneratorPage === 'function') {
-            console.log('✅ initGeneratorPage関数が定義されました');
-            
-            // drawStudentCard関数が定義されていない場合は、すぐに関数を直接定義
-            if (typeof window.drawStudentCard === 'function') {
-              console.log('✅ drawStudentCard関数も定義されています');
-                              console.log('🔄 関数定義後にinitGeneratorPageを実行中...');
-                window.initGeneratorPage();
-                
-                        // フォームの値が変更された時に自動的に学生証を更新
-        const formElements = ['nameJa', 'nameEn', 'dobMonth', 'dobDay'];
-        formElements.forEach(id => {
-          const element = document.getElementById(id);
-          if (element) {
-            element.addEventListener('input', () => {
-              console.log('🔄 フォーム値変更を検知、学生証を更新中...');
-              setTimeout(() => window.drawStudentCard(), 100);
-            });
-            
-            // スマホ用の入力最適化
-            if (window.innerWidth <= 768) {
-              // 入力フィールドのフォーカス時の最適化
-              element.addEventListener('focus', () => {
-                element.style.fontSize = '16px'; // iOSでズームを防ぐ
-                element.style.transform = 'scale(1.02)';
-                element.style.transition = 'all 0.2s ease';
-              });
-              
-              element.addEventListener('blur', () => {
-                element.style.transform = 'scale(1)';
-                element.style.transition = 'all 0.2s ease';
-              });
-            }
-          }
-        });
-            } else {
-              console.log('⏳ drawStudentCard関数が定義されていないため、直接定義します');
-                          // 関数を直接定義
-            window.drawStudentCard = function() {
-              console.log('✅ drawStudentCard関数を直接定義しました');
-              
-              const canvas = document.getElementById('cardCanvas');
-              if (!canvas) {
-                console.error('❌ cardCanvas要素が見つかりません');
-                return;
-              }
-              
-              const ctx = canvas.getContext('2d');
-              if (!ctx) {
-                console.error('❌ Canvas 2Dコンテキストが取得できません');
-                return;
-              }
-              
-              // 学生証テンプレート画像を読み込んで描画
-              const templateImage = new Image();
-              templateImage.onload = function() {
-                console.log('✅ 学生証テンプレート画像の読み込み完了');
-                
-                // Canvasをクリア
-                ctx.clearRect(0, 0, 800, 500);
-                
-                // テンプレート画像を描画
-                ctx.drawImage(templateImage, 0, 0, 800, 500);
-                
-                // アップロードされた画像を描画（完璧な位置に調整済み【絶対変更禁止】）
-                const photoInput = document.getElementById('photoInput');
-                if (photoInput && photoInput.files && photoInput.files.length > 0) {
-                  const file = photoInput.files[0];
-                  const img = new Image();
-                  img.onload = function() {
-                    // 写真フレームの座標（完璧に調整済み【変更厳禁】）
-                    const PHOTO_FRAME = {
-                      x: 42,   // 完璧に調整済み【変更厳禁】
-                      y: 125,   // 完璧に調整済み【変更厳禁】
-                      width: 255,  // 完璧に調整済み【変更厳禁】
-                      height: 324  // 完璧に調整済み【変更厳禁】
-                    };
-                    
-                    // 画像処理ロジック（完璧に調整済み【変更厳禁】）
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rect(PHOTO_FRAME.x, PHOTO_FRAME.y, PHOTO_FRAME.width, PHOTO_FRAME.height);
-                    ctx.clip();
-                    
-                    const frameAspect = PHOTO_FRAME.width / PHOTO_FRAME.height;
-                    const imgAspect = img.width / img.height;
-                    
-                    let drawWidth, drawHeight, drawX, drawY;
-
-                    if (imgAspect > frameAspect) {
-                      drawHeight = PHOTO_FRAME.height;
-                      drawWidth = PHOTO_FRAME.height * imgAspect;
-                      drawX = PHOTO_FRAME.x - (drawWidth - PHOTO_FRAME.width) / 2;
-                      drawY = PHOTO_FRAME.y;
-                    } else {
-                      drawWidth = PHOTO_FRAME.width;
-                      drawHeight = PHOTO_FRAME.width / imgAspect;
-                      drawX = PHOTO_FRAME.x;
-                      drawY = PHOTO_FRAME.y - (drawHeight - PHOTO_FRAME.height) / 2;
-                    }
-                    
-                    ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-                    ctx.restore();
-                    
-                    console.log('✅ アップロード画像を描画完了');
-                    
-                    // 画像描画後に文字を刻印
-                    drawTextElements();
-                  };
-                  img.src = URL.createObjectURL(file);
-                } else {
-                  // 画像がない場合は直接文字を刻印
-                  drawTextElements();
-                }
-                
-                // 文字要素を描画する関数
-                function drawTextElements() {
-                  // フォームの値を取得
-                  const nameJa = document.getElementById('nameJa')?.value || '';
-                  const nameEn = document.getElementById('nameEn')?.value || '';
-                  const dobMonth = document.getElementById('dobMonth')?.value || '';
-                  const dobDay = document.getElementById('dobDay')?.value || '';
-                
-                // 診断結果の情報を取得
-                const params = new URLSearchParams(location.search);
-                const departmentLabel = params.get('course') || '';
-                const clubLabel = params.get('club') || '';
-                
-                // フォントの準備
-                ctx.font = '34px "Noto Serif JP", serif';
-                ctx.fillStyle = '#000';
-                ctx.textAlign = 'left';
-                
-                // 氏名（漢字）を刻印（完璧な位置に調整済み）
-                if (nameJa) {
-                  const nameX = Math.round(1400 / 2291 * 800);
-                  const nameY = Math.round(540 / 1440 * 500);
-                  ctx.fillText(nameJa, nameX, nameY);
-                  console.log('✅ 氏名（漢字）を刻印:', nameJa, '位置:', nameX, nameY);
-                }
-                
-                // 氏名（ローマ字）を刻印（完璧な位置に調整済み）
-                if (nameEn) {
-                  ctx.font = '16px "Noto Sans JP", sans-serif';
-                  ctx.fillStyle = '#666';
-                  const nameEnX = Math.round(1400 / 2291 * 800);
-                  const nameEnY = Math.round(620 / 1440 * 500);
-                  ctx.fillText(nameEn, nameEnX, nameEnY);
-                  console.log('✅ 氏名（ローマ字）を刻印:', nameEn, '位置:', nameEnX, nameEnY);
-                }
-                
-                // 生年月日を刻印（完璧な位置に調整済み【絶対変更禁止】）
-                if (dobMonth && dobDay) {
-                  ctx.font = '22px "Noto Sans JP", sans-serif';
-                  ctx.fillStyle = '#000';
-                  ctx.textAlign = 'center';
-                  const monthX = Math.round(1570 / 2291 * 800);
-                  const monthY = Math.round(1050 / 1440 * 500);
-                  const dayX = Math.round(1720 / 2291 * 800);
-                  const dayY = Math.round(1050 / 1440 * 500);
-                  ctx.fillText(dobMonth, monthX, monthY);
-                  ctx.fillText(dobDay, dayX, dayY);
-                  console.log('✅ 生年月日を刻印:', `${dobMonth}月${dobDay}日`, '位置:', monthX, monthY, dayX, dayY);
-                }
-                
-                // 学科・コース・部活動を刻印（完璧な位置に調整済み【絶対変更禁止】）
-                if (departmentLabel || clubLabel) {
-                  // 学科とコースを分けて生成
-                  let actualDepartment = '';
-                  let actualCourse = '';
-                  
-                  if (departmentLabel) {
-                    switch(departmentLabel) {
-                      case '特進':
-                      case '特進コース':
-                        actualDepartment = '普通科';
-                        actualCourse = '特進コース';
-                        break;
-                      case '英語':
-                      case '英語コース':
-                        actualDepartment = '普通科';
-                        actualCourse = '英語コース';
-                        break;
-                      case '音楽':
-                      case '音楽コース':
-                        actualDepartment = '芸術科';
-                        actualCourse = '音楽コース';
-                        break;
-                      case '美術':
-                      case '美術コース':
-                        actualDepartment = '芸術科';
-                        actualCourse = '美術コース';
-                        break;
-                      default:
-                        if (departmentLabel.endsWith('コース')) {
-                          const baseName = departmentLabel.replace('コース', '');
-                          if (baseName === '特進' || baseName === '英語') {
-                            actualDepartment = '普通科';
-                          } else if (baseName === '音楽' || baseName === '美術') {
-                            actualDepartment = '芸術科';
-                          } else {
-                            actualDepartment = '普通科';
-                          }
-                          actualCourse = departmentLabel;
-                        } else {
-                          actualDepartment = departmentLabel;
-                          actualCourse = departmentLabel + 'コース';
-                        }
-                    }
-                  }
-                  
-                  // 学科 - 完璧な位置に調整済み【絶対変更禁止】
-                  ctx.font = '22px "Noto Sans JP", sans-serif';
-                  ctx.fillStyle = '#000';
-                  ctx.textAlign = 'center';
-                  const deptX = Math.round(1520 / 2291 * 800);
-                  const deptY = Math.round(800 / 1440 * 500);
-                  if (actualDepartment) {
-                    const cleanDepartment = actualDepartment.replace(/科$/, '');
-                    ctx.fillText(cleanDepartment, deptX, deptY);
-                    console.log('✅ 学科を刻印:', cleanDepartment, '位置:', deptX, deptY);
-                  }
-                  
-                  // コース - 完璧な位置に調整済み【絶対変更禁止】
-                  ctx.font = '22px "Noto Sans JP", sans-serif';
-                  ctx.fillStyle = '#000';
-                  ctx.textAlign = 'center';
-                  const courseX = Math.round(2000 / 2291 * 800);
-                  const courseY = Math.round(800 / 1440 * 500);
-                  if (actualCourse) {
-                    ctx.fillText(actualCourse, courseX, courseY);
-                    console.log('✅ コースを刻印:', actualCourse, '位置:', courseX, courseY);
-                  }
-                  
-                  // 部活 - 完璧な位置に調整済み【絶対変更禁止】
-                  ctx.font = '22px "Noto Sans JP", sans-serif';
-                  ctx.fillStyle = '#000';
-                  ctx.textAlign = 'center';
-                  const clubX = Math.round(1620 / 2291 * 800);
-                  const clubY = Math.round(920 / 1440 * 500);
-                  if (clubLabel) {
-                    let displayClubName;
-                    if (clubLabel === '帰宅') {
-                      displayClubName = 'ー'; // 帰宅部の場合は横棒を表示
-                    } else {
-                      displayClubName = clubLabel.replace(/部$/, '');
-                    }
-                    ctx.fillText(displayClubName, clubX, clubY);
-                    console.log('✅ 部活動を刻印:', displayClubName, '位置:', clubX, clubY);
-                  }
-                }
-                
-                console.log('✅ 学生証の描画が完了しました');
-              }
-              
-              console.log('✅ 学生証の描画が完了しました');
-            };
-              
-              templateImage.onerror = function() {
-                console.error('❌ 学生証テンプレート画像の読み込みに失敗しました');
-                // フォールバック：基本的な描画
-                ctx.clearRect(0, 0, 800, 500);
-                ctx.fillStyle = '#f0f0f0';
-                ctx.fillRect(0, 0, 800, 500);
-                ctx.fillStyle = '#333';
-                ctx.font = '24px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('学生証テンプレート読み込みエラー', 400, 250);
-              };
-              
-              // 画像の読み込み開始
-              console.log('🔄 学生証テンプレート画像を読み込み中...');
-              templateImage.src = 'assets/img/student_template.png';
-            };
-              console.log('🔄 関数定義後にinitGeneratorPageを実行中...');
-              window.initGeneratorPage();
-            }
-          } else {
-            console.log('⏳ initGeneratorPage関数の定義を待機中...');
-            // 100ms間隔でチェック、最大5秒でタイムアウト
-            if (window.drawFunctionTimeout) {
-              clearTimeout(window.drawFunctionTimeout);
-            }
-            if (window.drawFunctionTimeoutCount === undefined) {
-              window.drawFunctionTimeoutCount = 0;
-            }
-            window.drawFunctionTimeoutCount++;
-            
-            if (window.drawFunctionTimeoutCount > 50) { // 5秒でタイムアウト
-              console.error('❌ initGeneratorPage関数の定義がタイムアウトしました');
-              return;
-            }
-            
-            window.drawFunctionTimeout = setTimeout(checkDrawFunction, 100);
-          }
-        };
-        checkDrawFunction();
-      };
-      script.onerror = () => console.error('❌ app.js直接読み込み失敗');
-      document.head.appendChild(script);
-    } else {
-      console.log('✅ app.jsは既に読み込まれています（直接読み込みスキップ）');
-      // 既に読み込まれている場合も初期化を実行
-      setTimeout(() => {
-        if (typeof window.initGeneratorPage === 'function') {
-          console.log('🔄 initGeneratorPageを実行中...（既存）');
-          window.initGeneratorPage();
-        } else {
-          console.log('❌ initGeneratorPageが見つかりません（既存）');
+      // Studio埋め込み時は直アクセス防止を完全に無効化
+      try {
+        // URLパラメータで明示的に埋め込み指定されている場合は無効化
+        const sp = new URLSearchParams(location.search);
+        if (sp.get('embed') === '1' || sp.get('studio') === '1' || sp.get('iframe') === '1') {
+          console.log('🚀 URLパラメータで埋め込み検出、直アクセス防止を無効化');
+          return;
         }
-      }, 100);
-      
-      // drawStudentCard関数の定義を待ってから初期化（既存）
-      const checkDrawFunctionExisting = () => {
-        // app.jsの読み込み完了もチェック
-        if (typeof window.initGeneratorPage === 'function') {
-          console.log('✅ initGeneratorPage関数が定義されました（既存）');
-          
-          // drawStudentCard関数が定義されていない場合は、すぐに関数を直接定義
-          if (typeof window.drawStudentCard === 'function') {
-            console.log('✅ drawStudentCard関数も定義されています（既存）');
-            console.log('🔄 関数定義後にinitGeneratorPageを実行中...（既存）');
-            window.initGeneratorPage();
-          } else {
-            console.log('⏳ drawStudentCard関数が定義されていないため、直接定義します（既存）');
-            // 関数を直接定義
-            window.drawStudentCard = function() {
-              console.log('✅ drawStudentCard関数を直接定義しました（既存）');
-              
-              const canvas = document.getElementById('cardCanvas');
-              if (!canvas) {
-                console.error('❌ cardCanvas要素が見つかりません（既存）');
-                return;
-              }
-              
-              const ctx = canvas.getContext('2d');
-              if (!ctx) {
-                console.error('❌ Canvas 2Dコンテキストが取得できません（既存）');
-                return;
-              }
-              
-              // 学生証テンプレート画像を読み込んで描画
-              const templateImage = new Image();
-              templateImage.onload = function() {
-                console.log('✅ 学生証テンプレート画像の読み込み完了（既存）');
-                
-                // Canvasをクリア
-                ctx.clearRect(0, 0, 800, 500);
-                
-                // テンプレート画像を描画
-                ctx.drawImage(templateImage, 0, 0, 800, 500);
-                
-                // フォームの値を取得
-                const nameJa = document.getElementById('nameJa')?.value || '';
-                const nameEn = document.getElementById('nameEn')?.value || '';
-                const dobMonth = document.getElementById('dobMonth')?.value || '';
-                const dobDay = document.getElementById('dobDay')?.value || '';
-                
-                // 診断結果の情報を取得
-                const params = new URLSearchParams(location.search);
-                const departmentLabel = params.get('course') || '';
-                const clubLabel = params.get('club') || '';
-                
-                // フォントの準備
-                ctx.font = '34px "Noto Serif JP", serif';
-                ctx.fillStyle = '#000';
-                ctx.textAlign = 'left';
-                
-                // 氏名（漢字）を刻印（完璧な位置に調整済み）
-                if (nameJa) {
-                  const nameX = Math.round(1400 / 2291 * 800);
-                  const nameY = Math.round(540 / 1440 * 500);
-                  ctx.fillText(nameJa, nameX, nameY);
-                  console.log('✅ 氏名（漢字）を刻印:', nameJa, '位置:', nameX, nameY);
-                }
-                
-                // 氏名（ローマ字）を刻印（完璧な位置に調整済み）
-                if (nameEn) {
-                  ctx.font = '16px "Noto Sans JP", sans-serif';
-                  ctx.fillStyle = '#666';
-                  const nameEnX = Math.round(1400 / 2291 * 800);
-                  const nameEnY = Math.round(620 / 1440 * 500);
-                  ctx.fillText(nameEn, nameEnX, nameEnY);
-                  console.log('✅ 氏名（ローマ字）を刻印:', nameEn, '位置:', nameEnX, nameEnY);
-                }
-                
-                // 生年月日を刻印（完璧な位置に調整済み【絶対変更禁止】）
-                if (dobMonth && dobDay) {
-                  ctx.font = '22px "Noto Sans JP", sans-serif';
-                  ctx.fillStyle = '#000';
-                  ctx.textAlign = 'center';
-                  const monthX = Math.round(1570 / 2291 * 800);
-                  const monthY = Math.round(1050 / 1440 * 500);
-                  const dayX = Math.round(1720 / 2291 * 800);
-                  const dayY = Math.round(1050 / 1440 * 500);
-                  ctx.fillText(dobMonth, monthX, monthY);
-                  ctx.fillText(dobDay, dayX, dayY);
-                  console.log('✅ 生年月日を刻印:', `${dobMonth}月${dobDay}日`, '位置:', monthX, monthY, dayX, dayY);
-                }
-                
-                // 学科・コース・部活動を刻印（完璧な位置に調整済み【絶対変更禁止】）
-                if (departmentLabel || clubLabel) {
-                  // 学科とコースを分けて生成
-                  let actualDepartment = '';
-                  let actualCourse = '';
-                  
-                  if (departmentLabel) {
-                    switch(departmentLabel) {
-                      case '特進':
-                      case '特進コース':
-                        actualDepartment = '普通科';
-                        actualCourse = '特進コース';
-                        break;
-                      case '英語':
-                      case '英語コース':
-                        actualDepartment = '普通科';
-                        actualCourse = '英語コース';
-                        break;
-                      case '音楽':
-                      case '音楽コース':
-                        actualDepartment = '芸術科';
-                        actualCourse = '音楽コース';
-                        break;
-                      case '美術':
-                      case '美術コース':
-                        actualDepartment = '芸術科';
-                        actualCourse = '美術コース';
-                        break;
-                      default:
-                        if (departmentLabel.endsWith('コース')) {
-                          const baseName = departmentLabel.replace('コース', '');
-                          if (baseName === '特進' || baseName === '英語') {
-                            actualDepartment = '普通科';
-                          } else if (baseName === '音楽' || baseName === '美術') {
-                            actualDepartment = '芸術科';
-                          } else {
-                            actualDepartment = '普通科';
-                          }
-                          actualCourse = departmentLabel;
-                        } else {
-                          actualDepartment = departmentLabel;
-                          actualCourse = departmentLabel + 'コース';
-                        }
-                    }
-                  }
-                  
-                  // 学科 - 完璧な位置に調整済み【絶対変更禁止】
-                  ctx.font = '22px "Noto Sans JP", sans-serif';
-                  ctx.fillStyle = '#000';
-                  ctx.textAlign = 'center';
-                  const deptX = Math.round(1520 / 2291 * 800);
-                  const deptY = Math.round(800 / 1440 * 500);
-                  if (actualDepartment) {
-                    const cleanDepartment = actualDepartment.replace(/科$/, '');
-                    ctx.fillText(cleanDepartment, deptX, deptY);
-                    console.log('✅ 学科を刻印:', cleanDepartment, '位置:', deptX, deptY);
-                  }
-                  
-                  // コース - 完璧な位置に調整済み【絶対変更禁止】
-                  ctx.font = '22px "Noto Sans JP", sans-serif';
-                  ctx.fillStyle = '#000';
-                  ctx.textAlign = 'center';
-                  const courseX = Math.round(2000 / 2291 * 800);
-                  const courseY = Math.round(800 / 1440 * 500);
-                  if (actualCourse) {
-                    ctx.fillText(actualCourse, courseX, courseY);
-                    console.log('✅ コースを刻印:', actualCourse, '位置:', courseX, courseY);
-                  }
-                  
-                  // 部活 - 完璧な位置に調整済み【絶対変更禁止】
-                  ctx.font = '22px "Noto Sans JP", sans-serif';
-                  ctx.fillStyle = '#000';
-                  ctx.textAlign = 'center';
-                  const clubX = Math.round(1620 / 2291 * 800);
-                  const clubY = Math.round(920 / 1440 * 500);
-                  if (clubLabel) {
-                    let displayClubName;
-                    if (clubLabel === '帰宅') {
-                      displayClubName = 'ー'; // 帰宅部の場合は横棒を表示
-                    } else {
-                      displayClubName = clubLabel.replace(/部$/, '');
-                    }
-                    ctx.fillText(displayClubName, clubX, clubY);
-                    console.log('✅ 部活動を刻印:', displayClubName, '位置:', clubX, clubY);
-                  }
-                }
-                
-                console.log('✅ 学生証の描画が完了しました（既存）');
-              };
-              
-              templateImage.onerror = function() {
-                console.error('❌ 学生証テンプレート画像の読み込みに失敗しました（既存）');
-                // フォールバック：基本的な描画
-                ctx.clearRect(0, 0, 800, 500);
-                ctx.fillStyle = '#f0f0f0';
-                ctx.fillRect(0, 0, 800, 500);
-                ctx.fillStyle = '#333';
-                ctx.font = '24px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('学生証テンプレート読み込みエラー', 400, 250);
-              };
-              
-              // 画像の読み込み開始
-              console.log('🔄 学生証テンプレート画像を読み込み中...（既存）');
-              templateImage.src = 'assets/img/student_template.png';
-            };
-            console.log('🔄 関数定義後にinitGeneratorPageを実行中...（既存）');
-            window.initGeneratorPage();
-          }
-        } else {
-          console.log('⏳ initGeneratorPage関数の定義を待機中...（既存）');
-          // 100ms間隔でチェック、最大5秒でタイムアウト
-          if (window.drawFunctionTimeoutExisting) {
-            clearTimeout(window.drawFunctionTimeoutExisting);
-          }
-          if (window.drawFunctionTimeoutCountExisting === undefined) {
-            window.drawFunctionTimeoutCountExisting = 0;
-          }
-          window.drawFunctionTimeoutCountExisting++;
-          
-          if (window.drawFunctionTimeoutCountExisting > 50) { // 5秒でタイムアウト
-            console.error('❌ initGeneratorPage関数の定義がタイムアウトしました（既存）');
+        
+        // 診断情報がsessionStorageにある場合は安全
+        if (sessionStorage.getItem('diagCtx') || 
+            sessionStorage.getItem('as_chronicle_diagnosis') || 
+            sessionStorage.getItem('as_chronicle_last_result')) {
+          console.log('🚀 診断情報検出、直アクセス防止を無効化');
+          return;
+        }
+        
+        // セッションストレージにStudioフラグがある場合
+        if (sessionStorage.getItem('studio_embed_flag') === '1') {
+          console.log('🚀 Studioフラグ検出、直アクセス防止を無効化');
+          return;
+        }
+        
+        // generator_redirect_infoがある場合（Studio埋め込み遷移）
+        if (sessionStorage.getItem('generator_redirect_info')) {
+          console.log('🚀 Studio埋め込み遷移情報検出、直アクセス防止を無効化');
+          return;
+        }
+        
+        // Cloudflare Pages環境では、Studio埋め込みの可能性を考慮して直アクセス防止を無効化
+        if (window.location.hostname === 'student-id-generator.pages.dev') {
+          console.log('🚀 Cloudflare環境検出、Studio埋め込みの可能性を考慮して直アクセス防止を無効化');
+          return;
+        }
+        
+        // その他の環境でも、埋め込みの可能性がある場合は無効化
+        if (window.parent !== window || window.top !== window || window.frameElement) {
+          console.log('🚀 iframe環境検出、直アクセス防止を無効化');
+          return;
+        }
+        
+        // リファラが他オリジンの場合は埋め込みの可能性
+        if (document.referrer && !document.referrer.startsWith(location.origin)) {
+          console.log('🚀 他オリジンからのアクセス検出、埋め込みの可能性を考慮して直アクセス防止を無効化');
+          return;
+        }
+        
+        // より強力な埋め込み判定
+        try {
+          // 現在のURLがStudio環境かどうかの判定
+          const currentUrl = window.location.href;
+          if (currentUrl.includes('preview.studio.site') || 
+              currentUrl.includes('studio.site') || 
+              currentUrl.includes('embed') ||
+              currentUrl.includes('iframe') ||
+              currentUrl.includes('live/') ||
+              currentUrl.includes('studio')) {
+            console.log('🚀 Studio環境URL検出、直アクセス防止を無効化');
             return;
           }
           
-          window.drawFunctionTimeoutExisting = setTimeout(checkDrawFunctionExisting, 100);
+          // リファラがStudio環境からの場合
+          if (document.referrer && (
+              document.referrer.includes('preview.studio.site') ||
+              document.referrer.includes('studio.site') ||
+              document.referrer.includes('embed') ||
+              document.referrer.includes('iframe') ||
+              document.referrer.includes('live/')
+          )) {
+            console.log('🚀 Studio埋め込み環境検出、直アクセス防止を無効化');
+            return;
+          }
+          
+          // セキュリティコンテキストの判定
+          if (window.isSecureContext === false) {
+            console.log('🚀 セキュリティコンテキスト判定、埋め込みの可能性を考慮して直アクセス防止を無効化');
+            return;
+          }
+          
+          // 例外発生時は埋め込み扱い
+          try {
+            if (window.trustedTypes && window.trustedTypes.defaultPolicy) {
+              console.log('🚀 trustedTypes判定、埋め込みの可能性を考慮して直アクセス防止を無効化');
+              return;
+            }
+          } catch(_) {}
+          
+        } catch(e) {
+          console.log('🚀 詳細判定での例外発生により埋め込み扱い、直アクセス防止を無効化');
+          return;
         }
-      };
-      checkDrawFunctionExisting();
-    }
-  </script>
-  
+        
+      } catch(e) {
+        console.log('🚀 例外発生により埋め込み扱い、直アクセス防止を無効化');
+        return;
+      }
 
+      // ② 本当に"直リンク"だけ跳ねる（埋め込み時は絶対にリダイレクトしない）
+      const sp = new URLSearchParams(location.search);
+      const hasParams = ['department','course','club'].some(k => sp.has(k));
+
+      const hasCtx =
+        sessionStorage.getItem('diagCtx') ||
+        sessionStorage.getItem('as_chronicle_diagnosis') ||
+        sessionStorage.getItem('as_chronicle_last_result');
+
+      if (!hasParams && !hasCtx) {
+        console.log('🚫 直アクセスを検出、診断ゲームへリダイレクト');
+        sessionStorage.setItem('redir_guard','1');
+        location.replace('./index.html');
+      } else {
+        console.log('✅ 埋め込みまたは診断済み、リダイレクトしない');
+        console.log('📋 詳細:', {
+          hasParams: hasParams,
+          hasCtx: hasCtx,
+          params: Object.fromEntries(sp.entries()),
+          sessionStorage: {
+            diagCtx: sessionStorage.getItem('diagCtx'),
+            as_chronicle_diagnosis: sessionStorage.getItem('as_chronicle_diagnosis'),
+            as_chronicle_last_result: sessionStorage.getItem('as_chronicle_last_result')
+          }
+        });
+        
+        // 診断情報をsessionStorageに保存（安全性向上）
+        if (hasParams) {
+          try {
+            const diagnosisData = {
+              department: sp.get('department'),
+              course: sp.get('course'),
+              club: sp.get('club'),
+              previewMessage: sp.get('previewMessage'),
+              episodeMessage: sp.get('episodeMessage'),
+              timestamp: Date.now()
+            };
+            sessionStorage.setItem('as_chronicle_diagnosis', JSON.stringify(diagnosisData));
+            console.log('💾 診断情報を保存:', diagnosisData);
+          } catch(e) {
+            console.warn('⚠️ 診断情報の保存に失敗:', e);
+          }
+        }
+        
+        // 埋め込みフラグを設定
+        try {
+          sessionStorage.setItem('studio_embed_flag', '1');
+          console.log('🏷️ 埋め込みフラグを設定');
+        } catch(e) {
+          console.warn('⚠️ 埋め込みフラグの設定に失敗:', e);
+        }
+      }
+      
+      // デバッグ用ログ（埋め込み判定の確認）
+      console.log('🔍 直アクセス防止チェック:', {
+        hasParams, hasCtx,
+        referrer: document.referrer,
+        ancestorOrigins: location.ancestorOrigins,
+        windowParent: window.parent !== window,
+        hostname: window.location.hostname,
+        isSecureContext: window.isSecureContext,
+        windowTop: window.top !== window
+      });
+      
+      // Studio埋め込み時の詳細デバッグ情報
+      try {
+        const debugInfo = {
+          timestamp: Date.now(),
+          url: window.location.href,
+          referrer: document.referrer,
+          hostname: window.location.hostname,
+          parent: window.parent !== window,
+          top: window.top !== window,
+          frameElement: !!window.frameElement,
+          isSecureContext: window.isSecureContext,
+          sessionStorage: {
+            studio_embed_flag: sessionStorage.getItem('studio_embed_flag'),
+            generator_redirect_info: sessionStorage.getItem('generator_redirect_info'),
+            next_generator_url: sessionStorage.getItem('next_generator_url'),
+            diagCtx: sessionStorage.getItem('diagCtx'),
+            as_chronicle_diagnosis: sessionStorage.getItem('as_chronicle_diagnosis'),
+            as_chronicle_last_result: sessionStorage.getItem('as_chronicle_last_result')
+          },
+          urlParams: Object.fromEntries(new URLSearchParams(location.search).entries())
+        };
+        
+        console.log('🔍 Studio埋め込み詳細デバッグ:', debugInfo);
+        
+        // セッションストレージにデバッグ情報を保存
+        sessionStorage.setItem('generator_debug_info', JSON.stringify(debugInfo));
+        
+      } catch(e) {
+        console.warn('⚠️ デバッグ情報の保存に失敗:', e);
+      }
+    })();
+  </script>
+</head>
+<body>
+  <header>
+    <!-- ヘッダータイトル削除 -->
+  </header>
+
+  <main class="generator-container">
+    <!-- 進捗バー -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div class="cards-grid">
+      <section class="form-card">
+        <h2>学生証を作成</h2>
+        <div id="studentForm">
+          <div class="form-group">
+            <label class="file-input-label" for="photoInput">
+              画像を選択
+              <input type="file" id="photoInput" accept="image/*">
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>
+              氏名（漢字）
+              <input type="text" id="nameJa" placeholder="例：高森のばら" autocomplete="off" autocapitalize="off" spellcheck="false">
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>
+              氏名（ローマ字）
+              <input type="text" id="nameEn" placeholder="例：Takamori Nobara" autocapitalize="words" inputmode="latin" spellcheck="false" autocomplete="off">
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>
+              生年月日
+            </label>
+            <div class="date-inputs">
+              <div class="number-input">
+                <select id="dobMonth" autocomplete="one-time-code">
+                  <option value="">月</option>
+                  <option value="1">1月</option>
+                  <option value="2">2月</option>
+                  <option value="3">3月</option>
+                  <option value="4">4月</option>
+                  <option value="5">5月</option>
+                  <option value="6">6月</option>
+                  <option value="7">7月</option>
+                  <option value="8">8月</option>
+                  <option value="9">9月</option>
+                  <option value="10">10月</option>
+                  <option value="11">11月</option>
+                  <option value="12">12月</option>
+                </select>
+              </div>
+              <div class="number-input">
+                <select id="dobDay" autocomplete="one-time-code">
+                  <option value="">日</option>
+                  <option value="1">1日</option>
+                  <option value="2">2日</option>
+                  <option value="3">3日</option>
+                  <option value="4">4日</option>
+                  <option value="5">5日</option>
+                  <option value="6">6日</option>
+                  <option value="7">7日</option>
+                  <option value="8">8日</option>
+                  <option value="9">9日</option>
+                  <option value="10">10日</option>
+                  <option value="11">11日</option>
+                  <option value="12">12日</option>
+                  <option value="13">13日</option>
+                  <option value="14">14日</option>
+                  <option value="15">15日</option>
+                  <option value="16">16日</option>
+                  <option value="17">17日</option>
+                  <option value="18">18日</option>
+                  <option value="19">19日</option>
+                  <option value="20">20日</option>
+                  <option value="21">21日</option>
+                  <option value="22">22日</option>
+                  <option value="23">23日</option>
+                  <option value="24">24日</option>
+                  <option value="25">25日</option>
+                  <option value="26">26日</option>
+                  <option value="27">27日</option>
+                  <option value="28">28日</option>
+                  <option value="29">29日</option>
+                  <option value="30">30日</option>
+                  <option value="31">31日</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 診断ゲーム連携ボタン（診断結果設定時のみ表示） -->
+          <div id="diagnosisButtons" style="display: none; margin-top: 1rem; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" id="backToDiagnosisBtn" style="background: linear-gradient(135deg, #98d7a5, #98c8a8); color: white; flex: 1; min-width: 120px;">
+              診断に戻る
+            </button>
+            <button type="button" id="viewDiagnosisResultBtn" style="background: linear-gradient(135deg, #87ceeb, #98c8e8); color: white; flex: 1; min-width: 120px;">
+              診断結果を見る
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="preview-card">
+        <div class="card-header">
+          プレビュー
+        </div>
+        <div class="card-body">
+          <canvas id="cardCanvas" width="800" height="500"></canvas>
+          <img id="cardPreview" alt="学生証プレビュー" style="display: none;">
+        </div>
+        <small style="display:block; margin:.5rem 0 0; font-size:12px; color:#888; text-align:center;">
+          ※PCはプレビュー画像の上で右クリック →「名前を付けて画像を保存」<br>
+          ※共有URLは必ず「URLをコピー」ボタンから取得してください
+        </small>
+        <div class="card-footer">
+          <button type="button" id="downloadBtn">
+            画像を保存
+          </button>
+          <script>
+            document.getElementById('downloadBtn')?.addEventListener('click', (e) => {
+              e.preventDefault(); e.stopPropagation();
+              try {
+                // 直前生成フラグ（ガードを通す）
+                sessionStorage.setItem('as_chronicle_last_result','1');
+                const cvs = document.getElementById('cardCanvas');
+                if (cvs) window.downloadCanvasAsImage?.(cvs, '放課後クロニクル_学生証.png');
+              } catch(e){}
+            }, { passive:false });
+          </script>
+          <button type="button" id="twitterBtn" class="btn-twitter">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            Xに投稿
+          </button>
+          <button type="button" id="urlBtn">
+            URLをコピー
+          </button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content" style="text-align: center; padding: 1rem; color: #666;">
+      <a href="./privacy.html" style="color: #2E8B57; text-decoration: none; margin: 0 1rem;">
+        プライバシーポリシー
+      </a>
+    </div>
+  </footer>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>処理中...</p>
+  </div>
+
+  <!-- トースト表示 -->
+  <div id="toast" class="toast" style="display: none;">
+    <div class="toast-content">
+      <span id="toastMessage"></span>
+    </div>
+  </div>
+  
+  <!-- スマホ用スクロールガイド -->
+  <div id="scrollGuide" class="scroll-guide" style="display: none; visibility: hidden; opacity: 0;">
+    プレビューを見る
+  </div>
+
+  <!-- 必要なJavaScriptファイルの読み込み -->
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/security.js"></script>
+  <script src="assets/js/comprehensive-security.js"></script>
+  <script src="assets/js/security-monitor.js"></script>
+  <script src="assets/js/privacy-protection.js"></script>
+  <script src="assets/js/embed-mode.js"></script>
 </body>
 </html> 
