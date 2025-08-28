@@ -59,65 +59,91 @@
       padding: 0 1rem;
     }
 
-    /* カードグリッドレイアウト（強制横並び） */
+    /* カードグリッドレイアウト（デフォルト設定・スマホサイズでは縦並び） */
     .cards-grid {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr !important;
-      gap: 2rem !important;
-      align-items: stretch !important;
-      width: 100% !important;
-      max-width: none !important;
-      min-height: 500px !important;
-      position: relative !important;
-      overflow: visible !important;
-      float: none !important;
-      clear: both !important;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      align-items: stretch;
+      width: 100%;
+      max-width: none;
+      min-height: 500px;
+      position: relative;
+      overflow: visible;
+      float: none;
+      clear: both;
     }
     
-    /* カードの強制横並び */
-    .cards-grid > * {
-      display: block !important;
-      float: none !important;
-      clear: none !important;
-      width: auto !important;
-      max-width: none !important;
+    /* デスクトップサイズでのみグリッドレイアウト */
+    @media (min-width: 769px) {
+      .cards-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
     }
     
-    /* フォームカードとプレビューカードの強制横並び */
-    .form-card, .preview-card {
-      display: block !important;
-      float: none !important;
-      clear: none !important;
-      width: auto !important;
-      max-width: none !important;
-      position: relative !important;
+    /* カードの強制横並び（デスクトップサイズのみ） */
+    @media (min-width: 769px) {
+      .cards-grid > * {
+        display: block !important;
+        float: none !important;
+        clear: none !important;
+        width: auto !important;
+        max-width: none !important;
+      }
+      
+      /* フォームカードとプレビューカードの強制横並び */
+      .form-card, .preview-card {
+        display: block !important;
+        float: none !important;
+        clear: none !important;
+        width: auto !important;
+        max-width: none !important;
+        position: relative !important;
+      }
     }
 
-    /* フォームカードとプレビューカードの高さ調整 */
+    /* フォームカードとプレビューカードの高さ調整（PCサイズは元の設定、スマホサイズは拡縮可能） */
     .form-card, .preview-card {
       background: rgba(255, 255, 255, 0.98);
       border-radius: 16px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
       border: 1px solid rgba(185, 151, 214, 0.2);
       position: relative;
-      overflow: hidden;
+      overflow: hidden; /* PCサイズでは元の設定に戻す */
       display: flex;
       flex-direction: column;
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 450px; /* PCサイズでは元の高さに戻す */
+      height: 550px; /* PCサイズでは元の高さに戻す */
+      max-height: 550px; /* PCサイズでは元の高さに戻す */
+    }
+    
+    /* デスクトップサイズでのみFlexboxレイアウト */
+    @media (min-width: 769px) {
+      .form-card, .preview-card {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
     }
 
-    /* カードのパディング調整 */
+    /* カードのパディング調整（PCサイズは元の設定） */
     .form-card {
-      padding: 2rem;
+      padding: 1.5rem;
+      min-height: 450px; /* PCサイズでは元の高さに戻す */
     }
 
     .preview-card {
-      padding: 2rem;
+      padding: 1.5rem;
+      min-height: 450px; /* PCサイズでは元の高さに戻す */
     }
 
-    /* カードヘッダーとフッターのマージン調整 */
+    /* カードヘッダーとフッターのマージン調整（PCサイズは元の設定） */
     .card-header {
-      margin-bottom: 1.5rem;
-      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
       font-weight: 700;
       color: #666;
       text-align: center;
@@ -126,38 +152,71 @@
 
     .card-footer {
       margin-top: auto;
-      padding-top: 1.5rem;
+      padding-top: 1rem;
       display: flex;
-      gap: 1rem;
+      gap: 0.8rem;
       justify-content: center;
       flex-wrap: wrap;
       flex-shrink: 0;
     }
+    
+    /* デスクトップサイズでのみFlexboxレイアウト */
+    @media (min-width: 769px) {
+      .card-header {
+        flex-shrink: 0;
+      }
+      
+      .card-footer {
+        margin-top: auto;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        flex-shrink: 0;
+      }
+    }
 
-    /* カードボディの調整 */
+    /* カードボディの調整（PCサイズは元の設定） */
     .card-body {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
     }
+    
+    /* デスクトップサイズでのみFlexboxレイアウト */
+    @media (min-width: 769px) {
+      .card-body {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
 
-    /* フォームカードの内容調整 */
+    /* フォームカードの内容調整（PCサイズは元の設定） */
     .form-card h2 {
       margin-top: 0;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       flex-shrink: 0;
     }
-
-    /* フォームグループのマージン調整 */
-    .form-group {
-      margin-bottom: 1.5rem;
+    
+    /* デスクトップサイズでのみFlexboxレイアウト */
+    @media (min-width: 769px) {
+      .form-card h2 {
+        flex-shrink: 0;
+      }
     }
 
-    /* ボタンコンテナのマージン調整 */
+    /* フォームグループのマージン調整（PCサイズは元の設定） */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    /* ボタンコンテナのマージン調整（PCサイズは元の設定） */
     .card-footer button {
-      margin: 0.5rem;
-      padding: 0.75rem 1.5rem;
+      margin: 0.4rem;
+      padding: 0.6rem 1.2rem;
       border: none;
       border-radius: 8px;
       background: #B997D6;
@@ -165,6 +224,14 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
+    }
+    
+    /* デスクトップサイズでのみ横並びボタン */
+    @media (min-width: 769px) {
+      .card-footer button {
+        margin: 0.5rem;
+        width: auto;
+      }
     }
 
     .card-footer button:hover {
@@ -183,7 +250,7 @@
     .form-group input,
     .form-group select {
       width: 100%;
-      padding: 0.75rem;
+      padding: 0.6rem;
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       font-size: 1rem;
@@ -196,17 +263,35 @@
       border-color: #B997D6;
     }
 
-    /* 日付入力のレイアウト */
+    /* 日付入力のレイアウト（スマホサイズでは縦並び対応） */
     .date-inputs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    .date-inputs .number-input {
+      margin-bottom: 0.8rem;
+      width: 100%;
+    }
+    
+    /* デスクトップサイズでのみグリッドレイアウト */
+    @media (min-width: 769px) {
+      .date-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      
+      .date-inputs .number-input {
+        margin-bottom: 0;
+      }
     }
 
-    /* ファイル入力のスタイル */
+    /* ファイル入力のスタイル（PCサイズは元の設定） */
     .file-input-label {
       display: block;
-      padding: 2rem;
+      padding: 1.5rem;
       border: 2px dashed #B997D6;
       border-radius: 12px;
       text-align: center;
@@ -224,36 +309,677 @@
       display: none;
     }
 
-    /* レスポンシブ対応（モバイルのみ） */
-    @media (max-width: 768px) and (orientation: portrait) {
-      .cards-grid {
-        grid-template-columns: 1fr !important;
-        gap: 1.5rem !important;
+    /* スマホ用レスポンシブ対応（UX重視） */
+    @media (max-width: 768px) {
+      /* 強制的に適用するための最強セレクタ */
+      html body .generator-container .cards-grid .form-card,
+      html body .generator-container .cards-grid .preview-card {
+        padding: 1rem !important;
+        min-height: 600px !important;
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+        transform: none !important;
+        transition: none !important;
+        animation: none !important;
       }
       
+      html body .generator-container .cards-grid .form-card {
+        min-height: 800px !important;
+      }
+      
+      html body .generator-container .cards-grid .preview-card {
+        min-height: 600px !important;
+      }
+      
+      html body .generator-container .cards-grid .form-card > *,
+      html body .generator-container .cards-grid .preview-card > * {
+        margin-bottom: 1rem !important;
+      }
+      /* コンテナの調整 */
       .generator-container {
+        padding: 0 1rem !important;
+        margin: 1rem auto !important;
+      }
+      
+      /* 進捗バーの調整 */
+      .progress-bar {
+        margin: 1rem 0 1.5rem 0 !important;
+        height: 6px !important;
+      }
+      
+      /* カードグリッドを縦並びに変更（スマホ最適化・最強化版） */
+      .cards-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        grid: none !important;
+        grid-template-columns: none !important;
+        grid-template-rows: none !important;
+        gap: 1.5rem !important;
+        min-height: auto !important;
+        height: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        position: relative !important;
+        overflow: visible !important;
+        float: none !important;
+        clear: both !important;
+      }
+      
+      /* スマホでは横並びを完全に無効化（重複設定で確実性向上） */
+      .cards-grid {
+        grid: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        grid-template-columns: none !important;
+        grid-template-rows: none !important;
+        grid-auto-flow: none !important;
+        grid-auto-rows: none !important;
+        grid-auto-columns: none !important;
+      }
+      
+      /* カードの調整（スマホ最適化・コンパクトUI・重なり防止・縦幅最適化・全要素収容対応・要素切れ完全防止・高さ最適化・拡縮可能） */
+      body .generator-container .cards-grid .form-card,
+      body .generator-container .cards-grid .preview-card,
+      .form-card, .preview-card {
+        padding: 1rem !important; /* パディングをさらに縮小 */
+        height: auto !important;
+        min-height: 600px !important; /* 高さをさらに最適化 */
+        max-height: none !important;
+        margin: 0 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+        box-sizing: border-box !important;
+        overflow: visible !important; /* 要素の切れを防ぐ */
+        position: relative !important;
+        z-index: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: none !important;
+        order: 0 !important;
+        /* 要素切れ完全防止のための追加設定 */
+        word-wrap: break-word !important;
+        word-break: break-word !important;
+        white-space: normal !important;
+        text-overflow: clip !important;
+        /* 全要素収容のための追加設定 */
+        flex-wrap: wrap !important;
+        align-content: flex-start !important;
+        justify-content: flex-start !important;
+        /* スマホサイズでのみ拡縮可能 */
+        resize: vertical !important;
+        overflow-y: auto !important;
+        /* 強制的に適用するための追加設定 */
+        transform: none !important;
+        transition: none !important;
+        animation: none !important;
+      }
+      
+      /* カード間の重なり防止・全要素収容対応・要素切れ完全防止・高さ大幅増加・拡縮可能 */
+      body .generator-container .cards-grid .form-card,
+      .form-card {
+        z-index: 2 !important;
+        margin-bottom: 1.5rem !important;
+        min-height: 800px !important; /* フォームカードは全要素を確実に収容するため縦幅を最適化 */
+        order: 1 !important;
+        /* 要素切れ完全防止のための追加設定 */
+        word-wrap: break-word !important;
+        word-break: break-word !important;
+        white-space: normal !important;
+        text-overflow: clip !important;
+        /* 全要素収容のための追加設定 */
+        flex-wrap: wrap !important;
+        align-content: flex-start !important;
+        justify-content: flex-start !important;
+        /* スマホサイズでのみ拡縮可能 */
+        resize: vertical !important;
+        overflow-y: auto !important;
+      }
+      
+      body .generator-container .cards-grid .preview-card,
+      .preview-card {
+        z-index: 1 !important;
+        margin-top: 0 !important;
+        min-height: 600px !important; /* プレビューカードも縦幅を最適化 */
+        order: 2 !important;
+        /* 要素切れ完全防止のための追加設定 */
+        word-wrap: break-word !important;
+        word-break: break-word !important;
+        white-space: normal !important;
+        text-overflow: clip !important;
+        /* 全要素収容のための追加設定 */
+        flex-wrap: wrap !important;
+        align-content: flex-start !important;
+        justify-content: flex-start !important;
+        /* スマホサイズでのみ拡縮可能 */
+        resize: vertical !important;
+        overflow-y: auto !important;
+        /* 強制的に適用するための追加設定 */
+        transform: none !important;
+        transition: none !important;
+        animation: none !important;
+      }
+      
+      /* カード内の要素間隔を調整（重なり防止・全要素収容対応・間隔最適化） */
+      body .generator-container .cards-grid .form-card > *,
+      body .generator-container .cards-grid .preview-card > *,
+      .form-card > *,
+      .preview-card > * {
+        margin-bottom: 1rem !important; /* 要素間隔をさらに最適化して全要素収容を確実に */
+        position: relative !important;
+        z-index: 1 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+        max-height: none !important;
+        height: auto !important;
+      }
+      
+      .form-card > *:last-child,
+      .preview-card > *:last-child {
+        margin-bottom: 0 !important;
+      }
+      
+      /* 重なり防止のための明示的な配置（Flexbox最適化・要素切れ防止） */
+      .form-card h2 {
+        position: relative !important;
+        z-index: 2 !important;
+        margin-bottom: 0.8rem !important;
+        flex-shrink: 0 !important;
+        height: auto !important; /* 高さ制限を解除 */
+        overflow: visible !important; /* 要素の切れを防ぐ */
+      }
+      
+      .form-card #studentForm {
+        position: relative !important;
+        z-index: 1 !important;
+        margin-bottom: 0.8rem !important;
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        gap: 0.8rem !important;
+        height: auto !important; /* 高さ制限を解除 */
+        overflow: visible !important; /* 要素の切れを防ぐ */
+        min-height: 0 !important; /* 最小高さ制限を解除 */
+      }
+      
+      .form-card #diagnosisButtons {
+        position: relative !important;
+        z-index: 1 !important;
+        margin-top: 0.8rem !important; /* autoから固定値に変更 */
+        padding-top: 0.8rem !important;
+        flex-shrink: 0 !important;
+        height: auto !important; /* 高さ制限を解除 */
+        overflow: visible !important; /* 要素の切れを防ぐ */
+      }
+      
+      .preview-card .card-header {
+        position: relative !important;
+        z-index: 2 !important;
+        margin-bottom: 0.8rem !important;
+        flex-shrink: 0 !important;
+        height: auto !important; /* 高さ制限を解除 */
+        overflow: visible !important; /* 要素の切れを防ぐ */
+      }
+      
+      .preview-card .card-body {
+        position: relative !important;
+        z-index: 1 !important;
+        margin-bottom: 0.8rem !important;
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important; /* 上揃えに変更 */
+        align-items: center !important;
+        min-height: 250px !important; /* プレビューエリアの最小高さをさらに最適化 */
+        gap: 0.8rem !important; /* 要素間の間隔をさらに最適化 */
+        padding: 0.3rem 0 !important; /* 上下のパディングをさらに最適化 */
+        height: auto !important; /* 高さ制限を解除 */
+        overflow: visible !important; /* 要素の切れを防ぐ */
+      }
+      
+      .preview-card .card-footer {
+        position: relative !important;
+        z-index: 1 !important;
+        margin-top: 0.8rem !important; /* autoから固定値に変更 */
+        padding-top: 0.8rem !important;
+        flex-shrink: 0 !important;
+        height: auto !important; /* 高さ制限を解除 */
+        overflow: visible !important; /* 要素の切れを防ぐ */
+      }
+      
+      /* フォームカードの視認性向上・全要素収容対応 */
+      .form-card {
+        border-bottom: 3px solid #98d7a5 !important;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 246, 240, 0.95)) !important;
+        position: relative !important;
+        /* 全要素収容のための追加設定 */
+        min-height: 1400px !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        flex-wrap: wrap !important;
+        align-content: flex-start !important;
+        justify-content: flex-start !important;
+      }
+      
+      /* フォームカードの最適化（PCサイズと統一・メリハリ付き） */
+      .form-card h2 {
+        font-size: 1.7rem !important; /* フォームタイトルも大きく */
+        margin-bottom: 2rem !important;
+        text-align: left !important;
+        color: #333 !important; /* より濃い色で強調 */
+        font-family: 'Noto Serif JP', serif !important;
+        font-weight: 700 !important; /* より太く */
+        line-height: 1.2 !important;
+      }
+      
+      /* 画像選択エリアの最適化（余裕のあるUI・重なり防止・全要素収容対応） */
+      .file-input-label {
+        padding: 1.5rem 1rem !important; /* 全要素収容のためパディングをさらに最適化 */
+        border-radius: 12px !important;
+        font-size: 1.1rem !important;
+        min-height: 120px !important; /* 全要素収容のため高さをさらに最適化 */
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin-bottom: 1rem !important; /* 全要素収容のためマージンをさらに最適化 */
+        border: 2px dashed #B997D6 !important;
+        background: rgba(185, 151, 214, 0.05) !important;
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+        text-align: center !important;
+        line-height: 1.4 !important;
+        position: relative !important;
+        z-index: 1 !important;
+      }
+      
+      .file-input-label:hover {
+        background: rgba(185, 151, 214, 0.1) !important;
+        border-color: #A895D0 !important;
+        transform: translateY(-2px) !important;
+      }
+      
+      /* フォーム要素の最適化（余裕のあるUI・重なり防止・全要素収容対応・要素切れ防止） */
+      .form-group {
+        margin-bottom: 1rem !important; /* 全要素収容のため間隔をさらに最適化 */
+        padding: 0 !important;
+        position: relative !important;
+        z-index: 1 !important;
+        height: auto !important; /* 高さ制限を解除 */
+        overflow: visible !important; /* 要素の切れを防ぐ */
+      }
+      
+      .form-group label {
+        font-size: 1rem !important;
+        margin-bottom: 0.6rem !important; /* ラベルと入力フィールドの間隔をさらに最適化 */
+        font-weight: 600 !important;
+        color: #666 !important;
+        display: block !important;
+        line-height: 1.4 !important;
+        position: relative !important;
+        z-index: 1 !important;
+        height: auto !important; /* 高さ制限を解除 */
+        overflow: visible !important; /* 要素の切れを防ぐ */
+      }
+      
+      .form-group input,
+      .form-group select {
+        padding: 0.8rem !important; /* 全要素収容のためパディングをさらに最適化 */
+        font-size: 16px !important; /* iOSでズームを防ぐ */
+        border-radius: 10px !important;
+        border-width: 2px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        line-height: 1.4 !important;
+        min-height: 44px !important; /* 全要素収容のためタッチターゲットサイズをさらに最適化 */
+        position: relative !important;
+        z-index: 1 !important;
+        height: auto !important; /* 高さ制限を解除 */
+        overflow: visible !important; /* 要素の切れを防ぐ */
+      }
+      
+      /* 日付入力の最適化（余裕のあるUI・全要素収容対応） */
+      .date-inputs {
+        gap: 0.8rem !important; /* 全要素収容のため間隔をさらに最適化 */
+        margin-bottom: 0.8rem !important; /* 全要素収容のためマージンをさらに最適化 */
+      }
+      
+      .number-input select {
+        padding: 0.8rem !important; /* 全要素収容のためパディングをさらに最適化 */
+        font-size: 16px !important;
+        min-height: 44px !important; /* 全要素収容のため高さをさらに最適化 */
+        border-radius: 10px !important;
+        border: 2px solid #e0e0e0 !important;
+        background: white !important;
+        cursor: pointer !important;
+      }
+      
+      /* 診断ボタンの最適化（余裕のあるUI・重なり防止・全要素収容対応） */
+      #diagnosisButtons {
+        margin-top: 1rem !important; /* 全要素収容のためマージンをさらに最適化 */
+        gap: 0.8rem !important; /* 全要素収容のため間隔をさらに最適化 */
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding-top: 0.8rem !important; /* 全要素収容のためパディングをさらに最適化 */
+        position: relative !important;
+        z-index: 1 !important;
+      }
+      
+      #diagnosisButtons button {
+        padding: 0.8rem 1rem !important; /* 全要素収容のためパディングをさらに最適化 */
+        font-size: 1rem !important;
+        border-radius: 10px !important;
+        min-height: 44px !important; /* 全要素収容のため高さをさらに最適化 */
+        font-weight: 600 !important;
+        border: none !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
+        z-index: 1 !important;
+      }
+      
+      #diagnosisButtons button:active {
+        transform: scale(0.98) !important;
+      }
+      
+      /* プレビューカードの最適化（PCサイズと統一・余裕のあるUI・メリハリ付き） */
+      .preview-card .card-header {
+        font-size: 1.8rem !important; /* 学生証は大きく */
+        margin-bottom: 2rem !important;
+        text-align: left !important;
+        color: #333 !important; /* より濃い色で強調 */
+        font-family: 'Noto Serif JP', serif !important;
+        font-weight: 700 !important; /* より太く */
+        padding: 0 !important;
+        line-height: 1.2 !important;
+      }
+      
+      /* プレビューカードの視認性向上・全要素収容対応 */
+      .preview-card {
+        position: relative !important;
+        margin-top: 1rem !important;
+        border-top: 3px solid #B997D6 !important;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 246, 240, 0.95)) !important;
+        /* 全要素収容のための追加設定 */
+        min-height: 1200px !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        flex-wrap: wrap !important;
+        align-content: flex-start !important;
+        justify-content: flex-start !important;
+      }
+      
+      /* プレビューカードの説明文を強調（メリハリ付き・重なり防止・配置最適化） */
+      .preview-card small {
+        background: rgba(185, 151, 214, 0.1) !important;
+        padding: 0.8rem !important;
+        border-radius: 10px !important;
+        border-left: 4px solid #B997D6 !important;
+        margin: 0.3rem 0 !important; /* 上下のマージンをさらに最適化 */
+        font-weight: 500 !important;
+        line-height: 1.6 !important;
+        font-size: 0.8rem !important; /* 画像保存誘導文は小さく */
+        color: #666 !important;
+        position: relative !important;
+        z-index: 2 !important; /* z-indexを上げて重なりを防止 */
+        flex-shrink: 0 !important;
+        width: 100% !important; /* 幅を100%に設定 */
+        box-sizing: border-box !important;
+      }
+      
+      /* プレビュー画像の最適化 */
+      #cardCanvas {
+        max-width: 100% !important;
+        height: auto !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+      }
+      
+      /* 説明文の最適化 */
+      .preview-card small {
+        font-size: 0.85rem !important;
+        line-height: 1.5 !important;
+        margin: 1rem 0 !important;
         padding: 0 0.5rem !important;
       }
       
-      .form-card, .preview-card {
-        padding: 1.5rem !important;
-        height: auto !important;
-        min-height: 350px !important;
-      }
-      
+      /* アクションボタンの最適化（余裕のあるUI・重なり防止） */
       .card-footer {
         flex-direction: column !important;
-        align-items: center !important;
-        margin-top: 1.5rem !important;
+        align-items: stretch !important;
+        gap: 0.8rem !important;
+        margin-top: auto !important;
+        padding-top: 0.8rem !important;
+        border-top: 1px solid rgba(185, 151, 214, 0.2) !important;
+        position: relative !important;
+        z-index: 1 !important;
       }
       
       .card-footer button {
         width: 100% !important;
-        max-width: 300px !important;
+        padding: 0.8rem 1rem !important;
+        font-size: 0.95rem !important; /* シェアボタンは中くらい */
+        border-radius: 12px !important;
+        min-height: 44px !important; /* タッチターゲットサイズをさらに最適化 */
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        border: none !important;
+        cursor: pointer !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+      }
+      
+      .card-footer button:active {
+        transform: scale(0.96) !important;
+        transition: transform 0.1s ease !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15) !important;
+      }
+      
+      .card-footer button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+      }
+      
+      /* ボタンの色分けを明確化 */
+      #downloadBtn {
+        background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+        color: white !important;
+        border: none !important;
+      }
+      
+      #twitterBtn {
+        background: linear-gradient(135deg, #1DA1F2, #0d8bd9) !important;
+        color: white !important;
+        border: none !important;
+      }
+      
+      #urlBtn {
+        background: linear-gradient(135deg, #6c757d, #5a6268) !important;
+        color: white !important;
+        border: none !important;
+      }
+      
+      /* スクロールガイドの追加 */
+      .scroll-guide {
+        position: fixed !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        background: linear-gradient(135deg, rgba(185, 151, 214, 0.95), rgba(168, 149, 208, 0.9)) !important;
+        color: white !important;
+        padding: 0.8rem 1rem !important;
+        border-radius: 25px !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+        z-index: 1000 !important;
+        animation: bounce 2s infinite !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(10px) !important;
+        transition: all 0.3s ease !important;
+      }
+      
+      .scroll-guide:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+        background: linear-gradient(135deg, rgba(185, 151, 214, 1), rgba(168, 149, 208, 1)) !important;
+      }
+      
+      .scroll-guide::before {
+        content: '↓' !important;
+        font-size: 1.4rem !important;
+        font-weight: bold !important;
+        color: white !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        /* 矢印アイコンの代替オプション（コメントアウト） */
+        /* content: '▼' !important; */ /* 黒い下向き三角形 */
+        /* content: '⌄' !important; */ /* 下向き矢印（シンプル） */
+        /* content: '⌃' !important; */ /* 上向き矢印（シンプル） */
+        /* content: '◄' !important; */ /* 左向き矢印 */
+        /* content: '►' !important; */ /* 右向き矢印 */
+      }
+      
+      @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+          transform: translateY(0);
+        }
+        40% {
+          transform: translateY(-10px);
+        }
+        60% {
+          transform: translateY(-5px);
+        }
+      }
+      
+      /* フッターの最適化 */
+      footer {
+        margin-top: 2rem !important;
+        padding: 1rem !important;
+      }
+      
+      footer a {
+        font-size: 0.9rem !important;
+        padding: 0.5rem 1rem !important;
+        border-radius: 6px !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        display: inline-block !important;
+        margin: 0.3rem !important;
+      }
+    }
+    
+    /* 超小型スマホ対応（重なり防止・縦幅最適化・全要素収容対応・高さ最適化） */
+    @media (max-width: 375px) {
+      .generator-container {
+        padding: 0 0.8rem !important;
+      }
+      
+      .form-card, .preview-card {
+        padding: 1rem !important;
+        min-height: 700px !important; /* 全要素収容のため縦幅をさらに最適化 */
+      }
+      
+      .form-card {
+        min-height: 800px !important; /* 全要素収容のため縦幅をさらに最適化 */
+      }
+      
+      .preview-card {
+        min-height: 600px !important; /* 全要素収容のため縦幅をさらに最適化 */
+      }
+      
+      .file-input-label {
+        padding: 2rem 1rem !important; /* 全要素収容のためパディングを拡大 */
+        min-height: 140px !important; /* 全要素収容のため高さを拡大 */
+      }
+      
+      .form-group {
+        margin-bottom: 2rem !important; /* 全要素収容のため間隔を拡大 */
+      }
+      
+      .form-group input,
+      .form-group select {
+        padding: 1rem !important; /* 全要素収容のためパディングを拡大 */
+        min-height: 48px !important; /* 全要素収容のため高さを拡大 */
+      }
+      
+      .card-footer button {
+        padding: 1rem 1.2rem !important; /* 全要素収容のためパディングを拡大 */
+        min-height: 52px !important; /* 全要素収容のため高さを拡大 */
+      }
+    }
+    
+    /* 横向きスマホ対応（縦並び維持・重なり防止・縦幅最適化・全要素収容対応・高さ最適化） */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .generator-container {
+        padding: 0 1.5rem !important;
+        margin: 0.5rem auto !important;
+      }
+      
+      /* 横向きでも縦並びを維持 */
+      .cards-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+        grid: none !important;
+      }
+      
+      .form-card, .preview-card {
+        padding: 1rem !important;
+        min-height: 600px !important; /* 全要素収容のため縦幅をさらに最適化 */
+      }
+      
+      .form-card {
+        min-height: 700px !important; /* 全要素収容のため縦幅をさらに最適化 */
+      }
+      
+      .preview-card {
+        min-height: 500px !important; /* 全要素収容のため縦幅をさらに最適化 */
+      }
+      
+      .file-input-label {
+        min-height: 150px !important; /* 全要素収容のため高さを拡大 */
+        padding: 1.5rem !important;
+      }
+      
+      .form-group {
+        margin-bottom: 2rem !important; /* 全要素収容のため間隔を拡大 */
+      }
+      
+      .card-footer {
+        flex-direction: row !important;
+        gap: 0.6rem !important;
+      }
+      
+      .card-footer button {
+        flex: 1 !important;
+        min-width: 0 !important;
+        padding: 0.8rem 1rem !important;
+        min-height: 48px !important;
+      }
+      
+      /* 横向き時のスクロールガイド位置調整 */
+      .scroll-guide {
+        bottom: 15px !important;
+        right: 15px !important;
+        padding: 0.6rem 0.8rem !important;
+        font-size: 0.8rem !important;
+        /* 横向き時は矢印アイコンも少し小さく */
+      }
+      
+      .scroll-guide::before {
+        font-size: 1.2rem !important;
       }
     }
 
-    /* デスクトップ表示の強制横並び（重要） */
+    /* デスクトップ表示の強制横並び（重要・スマホサイズでは無効化） */
     @media (min-width: 769px) {
       .cards-grid {
         display: grid !important;
@@ -281,9 +1007,17 @@
         clear: none !important;
         max-width: none !important;
         position: relative !important;
+        overflow: visible !important; /* 要素の切れを防ぐ */
+        max-height: none !important; /* 高さ制限を解除 */
+        display: flex !important; /* デスクトップではFlexbox表示 */
+        flex-direction: column !important;
       }
     }
+    
+    /* 重複するメディアクエリを削除（統合版に統合済み） */
 
+    /* 重複するタッチ操作最適化を削除（統合版に統合済み） */
+    
     /* トースト表示のスタイル */
     .toast {
       position: fixed;
@@ -314,6 +1048,62 @@
       display: block !important;
       grid-template-columns: none !important;
       gap: 0 !important;
+    }
+    
+    /* スマホサイズでの強制適用（最強版） */
+    @media (max-width: 768px) {
+      /* カードの高さを強制的に設定 */
+      .generator-container .cards-grid .form-card {
+        min-height: 800px !important;
+        max-height: none !important;
+        height: auto !important;
+        padding: 1rem !important;
+        overflow: visible !important;
+      }
+      
+      .generator-container .cards-grid .preview-card {
+        min-height: 600px !important;
+        max-height: none !important;
+        height: auto !important;
+        padding: 1rem !important;
+        overflow: visible !important;
+      }
+      
+      /* カード内の要素間隔を強制的に設定 */
+      .generator-container .cards-grid .form-card > *,
+      .generator-container .cards-grid .preview-card > * {
+        margin-bottom: 1rem !important;
+      }
+      
+      /* フォーム要素の間隔を強制的に設定 */
+      .generator-container .cards-grid .form-card .form-group {
+        margin-bottom: 1rem !important;
+      }
+      
+      /* 画像選択エリアを強制的に設定 */
+      .generator-container .cards-grid .form-card .file-input-label {
+        padding: 1.5rem 1rem !important;
+        min-height: 120px !important;
+        margin-bottom: 1rem !important;
+      }
+      
+      /* スクロールガイドを表示（スマホサイズのみ） */
+      .scroll-guide {
+        display: flex !important;
+      }
+    }
+    
+    /* PCサイズではスクロールガイドを完全に非表示 */
+    @media (min-width: 769px) {
+      .scroll-guide {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        position: absolute !important;
+        left: -9999px !important;
+        top: -9999px !important;
+      }
     }
     
     /* style.cssのmain要素グリッド設定を完全に無効化 */
@@ -410,154 +1200,171 @@
       grid-area: auto !important;
     }
     
-    /* cards-gridのグリッド設定を確実に有効化 */
-    .cards-grid {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr !important;
-      grid-template-rows: 1fr !important;
-      gap: 2rem !important;
-      width: 100% !important;
-      max-width: none !important;
-      min-height: 600px !important;
-      height: 600px !important;
-      align-items: stretch !important;
-      justify-items: stretch !important;
-      position: relative !important;
-      overflow: visible !important;
-      float: none !important;
-      clear: both !important;
-      box-sizing: border-box !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      grid-auto-flow: row !important;
-      grid-auto-rows: 1fr !important;
+    /* cards-gridのグリッド設定を確実に有効化（デスクトップサイズのみ） */
+    @media (min-width: 769px) {
+      .cards-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        grid-template-rows: 1fr !important;
+        gap: 2rem !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-height: 550px !important;
+        height: 550px !important;
+        align-items: stretch !important;
+        justify-items: stretch !important;
+        position: relative !important;
+        overflow: visible !important;
+        float: none !important;
+        clear: both !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        grid-auto-flow: row !important;
+        grid-auto-rows: 1fr !important;
+      }
     }
     
-    /* フォームカードとプレビューカードの高さ統一（最強化版） */
-    .form-card, .preview-card {
-      height: 600px !important;
-      min-height: 600px !important;
-      max-height: 600px !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: flex-start !important;
-      align-items: stretch !important;
-      box-sizing: border-box !important;
-      overflow: hidden !important;
-      position: relative !important;
-      top: 0 !important;
-      margin-top: 0 !important;
-      padding-top: 2rem !important;
+    /* フォームカードとプレビューカードの高さ統一（PCサイズのみ・スマホサイズでは無効化） */
+    @media (min-width: 769px) {
+      .form-card, .preview-card {
+        height: 550px !important;
+        min-height: 550px !important;
+        max-height: 550px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        align-items: stretch !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        position: relative !important;
+        top: 0 !important;
+        margin-top: 0 !important;
+        padding-top: 1.5rem !important;
+      }
     }
     
-    /* カード内の要素を強制的に配置 */
-    .form-card > *, .preview-card > * {
-      box-sizing: border-box !important;
-      margin: 0 !important;
-    }
+          /* カード内の要素を強制的に配置（PCサイズのみ・スマホサイズでは無効化） */
+      @media (min-width: 769px) {
+        .form-card > *, .preview-card > * {
+          box-sizing: border-box !important;
+          margin: 0 !important;
+          height: auto !important; /* 高さ制限を解除 */
+          overflow: visible !important; /* 要素の切れを防ぐ */
+          max-height: none !important; /* 最大高さ制限を解除 */
+        }
+        
+        /* カードヘッダーの調整（高さ統一・要素切れ防止） */
+        .form-card h2, .preview-card .card-header {
+          margin-top: 0 !important;
+          margin-bottom: 1rem !important;
+          flex-shrink: 0 !important;
+          height: auto !important;
+          line-height: 1.2 !important;
+          padding: 0 !important;
+          overflow: visible !important; /* 要素の切れを防ぐ */
+          max-height: none !important; /* 最大高さ制限を解除 */
+        }
+        
+        /* カードボディの調整（高さ統一・要素切れ防止） */
+        .form-card #studentForm, .preview-card .card-body {
+          flex: 1 !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: flex-start !important;
+          align-items: stretch !important;
+          min-height: 0 !important;
+          height: auto !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: visible !important; /* 要素の切れを防ぐ */
+          max-height: none !important; /* 最大高さ制限を解除 */
+        }
+        
+        /* カードフッターの調整（高さ統一・要素切れ防止） */
+        .form-card #diagnosisButtons, .preview-card .card-footer {
+          margin-top: 1.5rem !important; /* autoから固定値に変更 */
+          padding-top: 1rem !important;
+          flex-shrink: 0 !important;
+          height: auto !important;
+          position: relative !important;
+          bottom: 0 !important;
+          overflow: visible !important; /* 要素の切れを防ぐ */
+          max-height: none !important; /* 最大高さ制限を解除 */
+        }
+      }
     
-    /* カードヘッダーの調整（高さ統一） */
-    .form-card h2, .preview-card .card-header {
-      margin-top: 0 !important;
-      margin-bottom: 1.5rem !important;
-      flex-shrink: 0 !important;
-      height: auto !important;
-      line-height: 1.2 !important;
-      padding: 0 !important;
-    }
-    
-    /* カードボディの調整（高さ統一） */
-    .form-card #studentForm, .preview-card .card-body {
-      flex: 1 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: flex-start !important;
-      align-items: stretch !important;
-      min-height: 0 !important;
-      height: auto !important;
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-    
-    /* カードフッターの調整（高さ統一） */
-    .form-card #diagnosisButtons, .preview-card .card-footer {
-      margin-top: auto !important;
-      padding-top: 1.5rem !important;
-      flex-shrink: 0 !important;
-      height: auto !important;
-      position: relative !important;
-      bottom: 0 !important;
-    }
-    
-    /* プレビューカードの内容を中央に配置 */
-    .preview-card .card-body {
-      align-items: center !important;
-      justify-content: center !important;
-      flex: 1 !important;
-    }
-    
-    /* プレビュー画像のサイズ調整 */
-    #cardCanvas {
-      max-width: 100% !important;
-      height: auto !important;
-      border-radius: 8px !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-    }
-    
-    /* 説明文の配置調整 */
-    .preview-card small {
-      margin-top: 1rem !important;
-      text-align: center !important;
-      line-height: 1.4 !important;
-      flex-shrink: 0 !important;
-    }
-    
-    /* カード内の要素を強制的に配置 */
-    .form-card > *, .preview-card > * {
-      box-sizing: border-box !important;
-    }
-    
-    /* カードヘッダーの調整 */
-    .form-card h2, .preview-card .card-header {
-      margin-top: 0 !important;
-      margin-bottom: 1.5rem !important;
-      flex-shrink: 0 !important;
-    }
-    
-    /* カードボディの調整 */
-    .form-card #studentForm, .preview-card .card-body {
-      flex: 1 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: flex-start !important;
-    }
-    
-    /* カードフッターの調整 */
-    .form-card #diagnosisButtons, .preview-card .card-footer {
-      margin-top: auto !important;
-      padding-top: 1.5rem !important;
-      flex-shrink: 0 !important;
-    }
-    
-    /* プレビューカードの内容を中央に配置 */
-    .preview-card .card-body {
-      align-items: center !important;
-      justify-content: center !important;
-    }
-    
-    /* プレビュー画像のサイズ調整 */
-    #cardCanvas {
-      max-width: 100% !important;
-      height: auto !important;
-      border-radius: 8px !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-    }
-    
-    /* 説明文の配置調整 */
-    .preview-card small {
-      margin-top: 1rem !important;
-      text-align: center !important;
-      line-height: 1.4 !important;
+    /* プレビューカードの内容を中央に配置（PCサイズのみ・スマホサイズでは無効化） */
+    @media (min-width: 769px) {
+      .preview-card .card-body {
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 1 !important;
+      }
+      
+      /* プレビュー画像のサイズ調整 */
+      #cardCanvas {
+        max-width: 100% !important;
+        height: auto !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+      }
+      
+      /* 説明文の配置調整 */
+      .preview-card small {
+        margin-top: 1rem !important;
+        text-align: center !important;
+        line-height: 1.4 !important;
+        flex-shrink: 0 !important;
+      }
+      
+      /* カード内の要素を強制的に配置 */
+      .form-card > *, .preview-card > * {
+        box-sizing: border-box !important;
+      }
+      
+      /* カードヘッダーの調整 */
+      .form-card h2, .preview-card .card-header {
+        margin-top: 0 !important;
+        margin-bottom: 1rem !important;
+        flex-shrink: 0 !important;
+      }
+      
+      /* カードボディの調整 */
+      .form-card #studentForm, .preview-card .card-body {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+      }
+      
+      /* カードフッターの調整 */
+      .form-card #diagnosisButtons, .preview-card .card-footer {
+        margin-top: auto !important;
+        padding-top: 1rem !important;
+        flex-shrink: 0 !important;
+      }
+      
+      /* プレビューカードの内容を中央に配置 */
+      .preview-card .card-body {
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      
+      /* プレビュー画像のサイズ調整 */
+      #cardCanvas {
+        max-width: 100% !important;
+        height: auto !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+      }
+      
+      /* 説明文の配置調整 */
+      .preview-card small {
+        margin-top: 1rem !important;
+        text-align: center !important;
+        line-height: 1.4 !important;
+      }
     }
   </style>
   <script>
@@ -968,11 +1775,24 @@
       <span id="toastMessage"></span>
     </div>
   </div>
+  
+  <!-- スマホ用スクロールガイド -->
+  <div id="scrollGuide" class="scroll-guide" style="display: none; visibility: hidden; opacity: 0;">
+    プレビューを見る
+  </div>
 
   <!-- レイアウト強制修正 -->
   <script>
-    // レイアウトを強制的に横並びに修正
+    // レイアウトを強制的に横並びに修正（スマホサイズでは無効化・デスクトップサイズのみ）
     function forceHorizontalLayout() {
+      // スマホサイズでは実行しない
+      if (window.innerWidth <= 768) {
+        console.log('📱 スマホサイズのため横並び強制処理をスキップ');
+        return;
+      }
+      
+      console.log('🖥️ デスクトップサイズのため横並び強制処理を実行');
+      
       const cardsGrid = document.querySelector('.cards-grid');
       if (cardsGrid) {
         // インラインスタイルで強制適用
@@ -983,8 +1803,8 @@
           gap: 2rem !important;
           width: 100% !important;
           max-width: none !important;
-          min-height: 600px !important;
-          height: 600px !important;
+          min-height: 550px !important;
+          height: 550px !important;
           align-items: stretch !important;
           justify-items: stretch !important;
           position: relative !important;
@@ -1051,27 +1871,27 @@
           cardsGrid.style.setProperty('grid-template-columns', '1fr 1fr', 'important');
           cardsGrid.style.setProperty('grid-template-rows', '1fr', 'important');
           cardsGrid.style.setProperty('gap', '2rem', 'important');
-          cardsGrid.style.setProperty('height', '600px', 'important');
+          cardsGrid.style.setProperty('height', '550px', 'important');
           console.log('✅ 遅延強制適用完了');
         }, 10);
         
-        // さらに遅延して強制適用（確実性のため）
+        // さらに遅延して強制適用（確実性のため・スマホサイズでは制限しない）
         setTimeout(() => {
           if (formCard) {
-            formCard.style.setProperty('height', '600px', 'important');
-            formCard.style.setProperty('min-height', '600px', 'important');
-            formCard.style.setProperty('max-height', '600px', 'important');
+            formCard.style.setProperty('height', 'auto', 'important');
+            formCard.style.setProperty('min-height', window.innerWidth <= 768 ? '1000px' : '550px', 'important');
+            formCard.style.setProperty('max-height', 'none', 'important');
             formCard.style.setProperty('top', '0', 'important');
             formCard.style.setProperty('margin-top', '0', 'important');
           }
           if (previewCard) {
-            previewCard.style.setProperty('height', '600px', 'important');
-            previewCard.style.setProperty('min-height', '600px', 'important');
-            previewCard.style.setProperty('max-height', '600px', 'important');
+            previewCard.style.setProperty('height', 'auto', 'important');
+            previewCard.style.setProperty('min-height', window.innerWidth <= 768 ? '900px' : '550px', 'important');
+            previewCard.style.setProperty('max-height', 'none', 'important');
             previewCard.style.setProperty('top', '0', 'important');
             previewCard.style.setProperty('margin-top', '0', 'important');
           }
-          console.log('✅ 最終遅延強制適用完了');
+          console.log('✅ 最終遅延強制適用完了（スマホサイズ対応）');
         }, 100);
         
         // 子要素も強制修正
@@ -1083,38 +1903,38 @@
           formCard.style.setProperty('flex-direction', 'column', 'important');
           formCard.style.setProperty('justify-content', 'flex-start', 'important');
           formCard.style.setProperty('align-items', 'stretch', 'important');
-          formCard.style.setProperty('height', '600px', 'important');
-          formCard.style.setProperty('min-height', '600px', 'important');
-          formCard.style.setProperty('max-height', '600px', 'important');
+          formCard.style.setProperty('height', 'auto', 'important');
+                      formCard.style.setProperty('min-height', window.innerWidth <= 768 ? '800px' : '550px', 'important');
+          formCard.style.setProperty('max-height', 'none', 'important');
           formCard.style.setProperty('float', 'none', 'important');
           formCard.style.setProperty('clear', 'none', 'important');
           formCard.style.setProperty('width', 'auto', 'important');
           formCard.style.setProperty('max-width', 'none', 'important');
           formCard.style.setProperty('position', 'relative', 'important');
           formCard.style.setProperty('box-sizing', 'border-box', 'important');
-          formCard.style.setProperty('overflow', 'hidden', 'important');
+          formCard.style.setProperty('overflow', 'visible', 'important');
           formCard.style.setProperty('top', '0', 'important');
           formCard.style.setProperty('margin-top', '0', 'important');
-          formCard.style.setProperty('padding-top', '2rem', 'important');
+          formCard.style.setProperty('padding-top', '1.5rem', 'important');
           
           // 通常のスタイルプロパティも設定（バックアップ）
           formCard.style.display = 'flex';
           formCard.style.flexDirection = 'column';
           formCard.style.justifyContent = 'flex-start';
           formCard.style.alignItems = 'stretch';
-          formCard.style.height = '600px';
-          formCard.style.minHeight = '600px';
-          formCard.style.maxHeight = '600px';
+          formCard.style.height = 'auto';
+          formCard.style.minHeight = window.innerWidth <= 768 ? '1000px' : '550px';
+          formCard.style.maxHeight = 'none';
           formCard.style.float = 'none';
           formCard.style.clear = 'none';
           formCard.style.width = 'auto';
           formCard.style.maxWidth = 'none';
           formCard.style.position = 'relative';
           formCard.style.boxSizing = 'border-box';
-          formCard.style.overflow = 'hidden';
+          formCard.style.overflow = 'visible';
           formCard.style.top = '0';
           formCard.style.marginTop = '0';
-          formCard.style.paddingTop = '2rem';
+          formCard.style.paddingTop = '1.5rem';
         }
         
         if (previewCard) {
@@ -1122,38 +1942,38 @@
           previewCard.style.setProperty('flex-direction', 'column', 'important');
           previewCard.style.setProperty('justify-content', 'flex-start', 'important');
           previewCard.style.setProperty('align-items', 'stretch', 'important');
-          previewCard.style.setProperty('height', '600px', 'important');
-          previewCard.style.setProperty('min-height', '600px', 'important');
-          previewCard.style.setProperty('max-height', '600px', 'important');
+          previewCard.style.setProperty('height', 'auto', 'important');
+                      previewCard.style.setProperty('min-height', window.innerWidth <= 768 ? '600px' : '550px', 'important');
+          previewCard.style.setProperty('max-height', 'none', 'important');
           previewCard.style.setProperty('float', 'none', 'important');
           previewCard.style.setProperty('clear', 'none', 'important');
           previewCard.style.setProperty('width', 'auto', 'important');
           previewCard.style.setProperty('max-width', 'none', 'important');
           previewCard.style.setProperty('position', 'relative', 'important');
           previewCard.style.setProperty('box-sizing', 'border-box', 'important');
-          previewCard.style.setProperty('overflow', 'hidden', 'important');
+          previewCard.style.setProperty('overflow', 'visible', 'important');
           previewCard.style.setProperty('top', '0', 'important');
           previewCard.style.setProperty('margin-top', '0', 'important');
-          previewCard.style.setProperty('padding-top', '2rem', 'important');
+          previewCard.style.setProperty('padding-top', '1.5rem', 'important');
           
           // 通常のスタイルプロパティも設定（バックアップ）
           previewCard.style.display = 'flex';
           previewCard.style.flexDirection = 'column';
           previewCard.style.justifyContent = 'flex-start';
           previewCard.style.alignItems = 'stretch';
-          previewCard.style.height = '600px';
-          previewCard.style.minHeight = '600px';
-          previewCard.style.maxHeight = '600px';
+          previewCard.style.height = 'auto';
+          previewCard.style.minHeight = window.innerWidth <= 768 ? '900px' : '550px';
+          previewCard.style.maxHeight = 'none';
           previewCard.style.float = 'none';
           previewCard.style.clear = 'none';
           previewCard.style.width = 'auto';
           previewCard.style.maxWidth = 'none';
           previewCard.style.position = 'relative';
           previewCard.style.boxSizing = 'border-box';
-          previewCard.style.overflow = 'hidden';
+          previewCard.style.overflow = 'visible';
           previewCard.style.top = '0';
           previewCard.style.marginTop = '0';
-          previewCard.style.paddingTop = '2rem';
+          previewCard.style.paddingTop = '1.5rem';
         }
         
         console.log('✅ カードの高さを600pxに統一しました');
@@ -1216,6 +2036,153 @@
     window.addEventListener('load', forceHorizontalLayout);
     
     // レイアウトチェックは削除済み（正常動作確認完了）
+    
+    // スマホ用の最適化
+    function optimizeForMobile() {
+      const isMobile = window.innerWidth <= 768;
+      
+      if (isMobile) {
+        // スマホ用の設定
+        console.log('📱 スマホ用最適化を適用中...');
+        
+        // カードグリッドを縦並びに強制変更（最強化版）
+        const cardsGrid = document.querySelector('.cards-grid');
+        if (cardsGrid) {
+          // より強力なスタイル適用
+          cardsGrid.style.cssText = `
+            display: flex !important;
+            flex-direction: column !important;
+            grid: none !important;
+            grid-template-columns: none !important;
+            grid-template-rows: none !important;
+            gap: 1.5rem !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-height: auto !important;
+            height: auto !important;
+          `;
+          
+          // setPropertyでも強制適用
+          cardsGrid.style.setProperty('display', 'flex', 'important');
+          cardsGrid.style.setProperty('flex-direction', 'column', 'important');
+          cardsGrid.style.setProperty('grid', 'none', 'important');
+          cardsGrid.style.setProperty('grid-template-columns', 'none', 'important');
+          cardsGrid.style.setProperty('grid-template-rows', 'none', 'important');
+          cardsGrid.style.setProperty('gap', '1.5rem', 'important');
+          cardsGrid.style.setProperty('width', '100%', 'important');
+          
+          // 直接プロパティでも設定
+          cardsGrid.style.display = 'flex';
+          cardsGrid.style.flexDirection = 'column';
+          cardsGrid.style.grid = 'none';
+          
+          console.log('✅ スマホ用縦並びレイアウトを最強化で強制適用');
+        }
+        
+        // タッチ操作の最適化
+        document.addEventListener('touchstart', function() {}, {passive: true});
+        
+        // ズーム防止（iOS）
+        const viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport) {
+          viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
+        }
+        
+        // ファイル入力の最適化
+        const photoInput = document.getElementById('photoInput');
+        if (photoInput) {
+          photoInput.setAttribute('capture', 'environment'); // カメラ起動
+          photoInput.setAttribute('accept', 'image/*');
+        }
+        
+        console.log('✅ スマホ用最適化完了');
+      }
+    }
+    
+    // ページ読み込み時にスマホ最適化を実行
+    document.addEventListener('DOMContentLoaded', optimizeForMobile);
+    window.addEventListener('resize', optimizeForMobile);
+    
+    // 遅延強制適用（確実性のため）
+    setTimeout(optimizeForMobile, 100);
+    setTimeout(optimizeForMobile, 500);
+    setTimeout(optimizeForMobile, 1000);
+    
+    // ページ読み込み完了後にも実行
+    window.addEventListener('load', () => {
+      setTimeout(optimizeForMobile, 100);
+      setTimeout(optimizeForMobile, 500);
+    });
+    
+    // スクロールガイドの制御
+    function setupScrollGuide() {
+      const scrollGuide = document.getElementById('scrollGuide');
+      const previewCard = document.querySelector('.preview-card');
+      
+      // PCサイズでは確実に非表示
+      if (window.innerWidth > 768) {
+        if (scrollGuide) {
+          scrollGuide.style.display = 'none';
+          scrollGuide.style.visibility = 'hidden';
+          scrollGuide.style.opacity = '0';
+          scrollGuide.style.pointerEvents = 'none';
+        }
+        return;
+      }
+      
+      if (scrollGuide && previewCard && window.innerWidth <= 768) {
+        // スマホサイズでのみスクロールガイドを表示
+        scrollGuide.style.display = 'flex';
+        scrollGuide.style.visibility = 'visible';
+        scrollGuide.style.opacity = '1';
+        scrollGuide.style.pointerEvents = 'auto';
+        
+        // スクロールガイドをクリックした時の動作
+        scrollGuide.addEventListener('click', () => {
+          previewCard.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        });
+        
+        // スクロール位置に応じてガイドを非表示
+        window.addEventListener('scroll', () => {
+          const previewCardTop = previewCard.offsetTop;
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          
+          if (scrollTop > previewCardTop - 100) {
+            scrollGuide.style.display = 'none';
+          } else {
+            scrollGuide.style.display = 'flex';
+          }
+        });
+        
+        console.log('📱 スクロールガイドを設定しました（スマホサイズ）');
+      }
+    }
+    
+    // ページ読み込み完了後にスクロールガイドを設定
+    window.addEventListener('load', setupScrollGuide);
+    
+    // ウィンドウリサイズ時にもスクロールガイドの表示/非表示を制御
+    window.addEventListener('resize', () => {
+      const scrollGuide = document.getElementById('scrollGuide');
+      if (scrollGuide) {
+        if (window.innerWidth > 768) {
+          // PCサイズでは非表示
+          scrollGuide.style.display = 'none';
+          scrollGuide.style.visibility = 'hidden';
+          scrollGuide.style.opacity = '0';
+          scrollGuide.style.pointerEvents = 'none';
+        } else {
+          // スマホサイズでは表示
+          scrollGuide.style.display = 'flex';
+          scrollGuide.style.visibility = 'visible';
+          scrollGuide.style.opacity = '1';
+          scrollGuide.style.pointerEvents = 'auto';
+        }
+      }
+    });
     
     // 進捗バーの更新
     function updateProgress() {
@@ -1584,17 +2551,32 @@
                               console.log('🔄 関数定義後にinitGeneratorPageを実行中...');
                 window.initGeneratorPage();
                 
-                // フォームの値が変更された時に自動的に学生証を更新
-                const formElements = ['nameJa', 'nameEn', 'dobMonth', 'dobDay'];
-                formElements.forEach(id => {
-                  const element = document.getElementById(id);
-                  if (element) {
-                    element.addEventListener('input', () => {
-                      console.log('🔄 フォーム値変更を検知、学生証を更新中...');
-                      setTimeout(() => window.drawStudentCard(), 100);
-                    });
-                  }
-                });
+                        // フォームの値が変更された時に自動的に学生証を更新
+        const formElements = ['nameJa', 'nameEn', 'dobMonth', 'dobDay'];
+        formElements.forEach(id => {
+          const element = document.getElementById(id);
+          if (element) {
+            element.addEventListener('input', () => {
+              console.log('🔄 フォーム値変更を検知、学生証を更新中...');
+              setTimeout(() => window.drawStudentCard(), 100);
+            });
+            
+            // スマホ用の入力最適化
+            if (window.innerWidth <= 768) {
+              // 入力フィールドのフォーカス時の最適化
+              element.addEventListener('focus', () => {
+                element.style.fontSize = '16px'; // iOSでズームを防ぐ
+                element.style.transform = 'scale(1.02)';
+                element.style.transition = 'all 0.2s ease';
+              });
+              
+              element.addEventListener('blur', () => {
+                element.style.transform = 'scale(1)';
+                element.style.transition = 'all 0.2s ease';
+              });
+            }
+          }
+        });
             } else {
               console.log('⏳ drawStudentCard関数が定義されていないため、直接定義します');
                           // 関数を直接定義
