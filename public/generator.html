@@ -1660,19 +1660,24 @@
   <!-- 直アクセス防止：診断未実施なら診断ゲームへ誘導 -->
   <script>
     (() => {
+      console.log('🔍 直アクセス防止スクリプト起動');
+      
       // ① 既に一度リダイレクトしたら二度目はしない（ループ防止）
-      if (sessionStorage.getItem('redir_guard') === '1') return;
+      if (sessionStorage.getItem('redir_guard') === '1') {
+        console.log('🚫 リダイレクトガードが有効、処理を停止');
+        return;
+      }
 
-      // Studio埋め込み時は直アクセス防止を完全に無効化
+      // ② Studio埋め込み時は直アクセス防止を完全に無効化
       try {
-        // URLパラメータで明示的に埋め込み指定されている場合は無効化
+        // URLパラメータで明示的に埋め込み指定されている場合
         const sp = new URLSearchParams(location.search);
         if (sp.get('embed') === '1' || sp.get('studio') === '1' || sp.get('iframe') === '1') {
           console.log('🚀 URLパラメータで埋め込み検出、直アクセス防止を無効化');
           return;
         }
         
-        // 診断情報がsessionStorageにある場合は安全
+        // 診断情報がsessionStorageにある場合
         if (sessionStorage.getItem('diagCtx') || 
             sessionStorage.getItem('as_chronicle_diagnosis') || 
             sessionStorage.getItem('as_chronicle_last_result')) {
@@ -1680,7 +1685,7 @@
           return;
         }
         
-        // セッションストレージにStudioフラグがある場合
+        // Studioフラグがある場合
         if (sessionStorage.getItem('studio_embed_flag') === '1') {
           console.log('🚀 Studioフラグ検出、直アクセス防止を無効化');
           return;
@@ -1692,66 +1697,40 @@
           return;
         }
         
-        // Cloudflare Pages環境では、Studio埋め込みの可能性を考慮して直アクセス防止を無効化
+        // Cloudflare Pages環境では、Studio埋め込みの可能性を考慮
         if (window.location.hostname === 'student-id-generator.pages.dev') {
           console.log('🚀 Cloudflare環境検出、Studio埋め込みの可能性を考慮して直アクセス防止を無効化');
           return;
         }
         
-        // その他の環境でも、埋め込みの可能性がある場合は無効化
+        // iframe環境の場合
         if (window.parent !== window || window.top !== window || window.frameElement) {
           console.log('🚀 iframe環境検出、直アクセス防止を無効化');
           return;
         }
         
-        // リファラが他オリジンの場合は埋め込みの可能性
+        // リファラが他オリジンの場合
         if (document.referrer && !document.referrer.startsWith(location.origin)) {
           console.log('🚀 他オリジンからのアクセス検出、埋め込みの可能性を考慮して直アクセス防止を無効化');
           return;
         }
         
-        // より強力な埋め込み判定
-        try {
-          // 現在のURLがStudio環境かどうかの判定
-          const currentUrl = window.location.href;
-          if (currentUrl.includes('preview.studio.site') || 
-              currentUrl.includes('studio.site') || 
-              currentUrl.includes('embed') ||
-              currentUrl.includes('iframe') ||
-              currentUrl.includes('live/') ||
-              currentUrl.includes('studio')) {
-            console.log('🚀 Studio環境URL検出、直アクセス防止を無効化');
-            return;
-          }
-          
-          // リファラがStudio環境からの場合
-          if (document.referrer && (
-              document.referrer.includes('preview.studio.site') ||
-              document.referrer.includes('studio.site') ||
-              document.referrer.includes('embed') ||
-              document.referrer.includes('iframe') ||
-              document.referrer.includes('live/')
-          )) {
-            console.log('🚀 Studio埋め込み環境検出、直アクセス防止を無効化');
-            return;
-          }
-          
-          // セキュリティコンテキストの判定
-          if (window.isSecureContext === false) {
-            console.log('🚀 セキュリティコンテキスト判定、埋め込みの可能性を考慮して直アクセス防止を無効化');
-            return;
-          }
-          
-          // 例外発生時は埋め込み扱い
-          try {
-            if (window.trustedTypes && window.trustedTypes.defaultPolicy) {
-              console.log('🚀 trustedTypes判定、埋め込みの可能性を考慮して直アクセス防止を無効化');
-              return;
-            }
-          } catch(_) {}
-          
-        } catch(e) {
-          console.log('🚀 詳細判定での例外発生により埋め込み扱い、直アクセス防止を無効化');
+        // Studio環境の判定
+        const currentUrl = window.location.href;
+        const referrer = document.referrer;
+        
+        if (currentUrl.includes('preview.studio.site') || 
+            currentUrl.includes('studio.site') || 
+            currentUrl.includes('embed') ||
+            currentUrl.includes('iframe') ||
+            currentUrl.includes('live/') ||
+            currentUrl.includes('studio') ||
+            referrer.includes('preview.studio.site') ||
+            referrer.includes('studio.site') ||
+            referrer.includes('embed') ||
+            referrer.includes('iframe') ||
+            referrer.includes('live/')) {
+          console.log('🚀 Studio環境検出、直アクセス防止を無効化');
           return;
         }
         
@@ -1760,14 +1739,11 @@
         return;
       }
 
-      // ② 本当に"直リンク"だけ跳ねる（埋め込み時は絶対にリダイレクトしない）
-      const sp = new URLSearchParams(location.search);
+      // ③ 本当に"直リンク"だけ跳ねる（埋め込み時は絶対にリダイレクトしない）
       const hasParams = ['department','course','club'].some(k => sp.has(k));
-
-      const hasCtx =
-        sessionStorage.getItem('diagCtx') ||
-        sessionStorage.getItem('as_chronicle_diagnosis') ||
-        sessionStorage.getItem('as_chronicle_last_result');
+      const hasCtx = sessionStorage.getItem('diagCtx') || 
+                     sessionStorage.getItem('as_chronicle_diagnosis') || 
+                     sessionStorage.getItem('as_chronicle_last_result');
 
       if (!hasParams && !hasCtx) {
         console.log('🚫 直アクセスを検出、診断ゲームへリダイレクト');
@@ -1778,81 +1754,11 @@
         console.log('📋 詳細:', {
           hasParams: hasParams,
           hasCtx: hasCtx,
-          params: Object.fromEntries(sp.entries()),
-          sessionStorage: {
-            diagCtx: sessionStorage.getItem('diagCtx'),
-            as_chronicle_diagnosis: sessionStorage.getItem('as_chronicle_diagnosis'),
-            as_chronicle_last_result: sessionStorage.getItem('as_chronicle_last_result')
-          }
-        });
-        
-        // 診断情報をsessionStorageに保存（安全性向上）
-        if (hasParams) {
-          try {
-            const diagnosisData = {
-              department: sp.get('department'),
-              course: sp.get('course'),
-              club: sp.get('club'),
-              previewMessage: sp.get('previewMessage'),
-              episodeMessage: sp.get('episodeMessage'),
-              timestamp: Date.now()
-            };
-            sessionStorage.setItem('as_chronicle_diagnosis', JSON.stringify(diagnosisData));
-            console.log('💾 診断情報を保存:', diagnosisData);
-          } catch(e) {
-            console.warn('⚠️ 診断情報の保存に失敗:', e);
-          }
-        }
-        
-        // 埋め込みフラグを設定
-        try {
-          sessionStorage.setItem('studio_embed_flag', '1');
-          console.log('🏷️ 埋め込みフラグを設定');
-        } catch(e) {
-          console.warn('⚠️ 埋め込みフラグの設定に失敗:', e);
-        }
-      }
-      
-      // デバッグ用ログ（埋め込み判定の確認）
-      console.log('🔍 直アクセス防止チェック:', {
-        hasParams, hasCtx,
-        referrer: document.referrer,
-        ancestorOrigins: location.ancestorOrigins,
-        windowParent: window.parent !== window,
-        hostname: window.location.hostname,
-        isSecureContext: window.isSecureContext,
-        windowTop: window.top !== window
-      });
-      
-      // Studio埋め込み時の詳細デバッグ情報
-      try {
-        const debugInfo = {
-          timestamp: Date.now(),
-          url: window.location.href,
+          url: location.href,
           referrer: document.referrer,
-          hostname: window.location.hostname,
-          parent: window.parent !== window,
-          top: window.top !== window,
-          frameElement: !!window.frameElement,
-          isSecureContext: window.isSecureContext,
-          sessionStorage: {
-            studio_embed_flag: sessionStorage.getItem('studio_embed_flag'),
-            generator_redirect_info: sessionStorage.getItem('generator_redirect_info'),
-            next_generator_url: sessionStorage.getItem('next_generator_url'),
-            diagCtx: sessionStorage.getItem('diagCtx'),
-            as_chronicle_diagnosis: sessionStorage.getItem('as_chronicle_diagnosis'),
-            as_chronicle_last_result: sessionStorage.getItem('as_chronicle_last_result')
-          },
-          urlParams: Object.fromEntries(new URLSearchParams(location.search).entries())
-        };
-        
-        console.log('🔍 Studio埋め込み詳細デバッグ:', debugInfo);
-        
-        // セッションストレージにデバッグ情報を保存
-        sessionStorage.setItem('generator_debug_info', JSON.stringify(debugInfo));
-        
-      } catch(e) {
-        console.warn('⚠️ デバッグ情報の保存に失敗:', e);
+          hostname: location.hostname,
+          isIframe: window.parent !== window || window.top !== window || !!window.frameElement
+        });
       }
     })();
   </script>

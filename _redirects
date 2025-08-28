@@ -4,9 +4,6 @@
 # 短縮URL（シェアページ）
 /s/* /s.html?:splat 200
 
-# メインページ
-/ /index.html 200
-
 # 学生証作成（Studio埋め込み対応）
 /generator.html /generator.html 200
 /generator.html* /generator.html 200
@@ -16,8 +13,13 @@
 # プライバシー
 /privacy /privacy.html 200
 
-# 静的アセット（JS/CSS/画像）はSPAフォールバック対象外
+# 静的アセット
 /assets/* /assets/:splat 200
+
+# Cloudflare Pages用の特別な設定
+# Studio埋め込み時のパラメータ付きアクセス
+/generator.html?* /generator.html 200
+/generator.html&* /generator.html 200
 
 # 404 リダイレクト（generator.htmlは完全除外）
 !/generator.html
