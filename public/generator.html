@@ -1784,24 +1784,103 @@
         sessionStorage.getItem('as_chronicle_diagnosis') ||
         sessionStorage.getItem('as_chronicle_last_result');
 
-      // ② 埋め込み判定を強化（sandbox / クロスオリジンでも確実に true になる条件を追加）
+      // ② 埋め込み判定を最強化（Studio環境での確実な検出）
       function isEmbedded() {
-        try { if (sp.get('embed') === '1') return true; } catch(_) {}
-        try { if (window.parent && window.parent !== window) return true; } catch(_) { return true; } // 例外＝埋め込み扱い
+        try { 
+          // URLパラメータで明示的に埋め込み指定
+          if (sp.get('embed') === '1') return true; 
+          if (sp.get('studio') === '1') return true; // Studio環境用
+          if (sp.get('iframe') === '1') return true; // iframe用
+        } catch(_) {}
+        
+        try { 
+          // iframe内での実行
+          if (window.parent && window.parent !== window) return true; 
+        } catch(_) { 
+          return true; // 例外＝埋め込み扱い
+        }
+        
         try {
           // リファラが他オリジン（preview.studio.site 等）なら埋め込み
-          if (document.referrer && !document.referrer.startsWith(location.origin)) return true;
+          if (document.referrer && !document.referrer.startsWith(location.origin)) {
+            console.log('🔍 リファラ判定で埋め込み検出:', document.referrer);
+            return true;
+          }
+          
           // ancestorOrigins が使える環境なら祖先が存在すれば埋め込み
-          if (location.ancestorOrigins && location.ancestorOrigins.length > 0) return true;
+          if (location.ancestorOrigins && location.ancestorOrigins.length > 0) {
+            console.log('🔍 ancestorOrigins判定で埋め込み検出:', location.ancestorOrigins);
+            return true;
+          }
+          
+          // Studio環境の特徴的な判定
+          if (window.location.hostname !== 'student-id-generator.pages.dev' && 
+              window.location.hostname !== 'localhost' && 
+              window.location.hostname !== '127.0.0.1') {
+            console.log('🔍 ホスト名判定で埋め込み検出:', window.location.hostname);
+            return true;
+          }
+          
+          // より厳密な埋め込み判定
+          if (window.top !== window) {
+            console.log('🔍 window.top判定で埋め込み検出');
+            return true;
+          }
+          
+          // セキュリティコンテキストの判定
+          if (window.isSecureContext === false) {
+            console.log('🔍 セキュリティコンテキスト判定で埋め込み検出');
+            return true;
+          }
+          
+          // 追加の埋め込み判定
+          if (window.frameElement) {
+            console.log('🔍 frameElement判定で埋め込み検出');
+            return true;
+          }
+          
+          // スタイルシートの判定（埋め込み時は異なるスタイルが適用される可能性）
+          const computedStyle = window.getComputedStyle(document.body);
+          if (computedStyle && computedStyle.getPropertyValue('--studio-embed')) {
+            console.log('🔍 CSS変数判定で埋め込み検出');
+            return true;
+          }
+          
+          // より強力な埋め込み判定
+          try {
+            // 現在のURLがStudio環境かどうかの判定
+            const currentUrl = window.location.href;
+            if (currentUrl.includes('preview.studio.site') || 
+                currentUrl.includes('studio.site') || 
+                currentUrl.includes('embed') ||
+                currentUrl.includes('iframe')) {
+              console.log('🔍 URL判定で埋め込み検出:', currentUrl);
+              return true;
+            }
+          } catch(_) {}
+          
+          // 最終的な埋め込み判定（より厳密）
+          try {
+            // セキュリティポリシーの判定
+            if (window.trustedTypes && window.trustedTypes.defaultPolicy) {
+              console.log('🔍 trustedTypes判定で埋め込み検出');
+              return true;
+            }
+          } catch(_) {}
+          
         } catch(_) {}
+        
         return false;
       }
       const inEmbed = isEmbedded();
 
-      // ③ 本当に"直リンク"だけ跳ねる
+      // ③ 本当に"直リンク"だけ跳ねる（埋め込み時は絶対にリダイレクトしない）
       if (!hasParams && !hasCtx && !inEmbed) {
+        console.log('🚫 直アクセスを検出、診断ゲームへリダイレクト');
         sessionStorage.setItem('redir_guard','1');
         location.replace('./index.html');
+      } else {
+        console.log('✅ 埋め込みまたは診断済み、リダイレクトしない');
       }
       
       // デバッグ用ログ（埋め込み判定の確認）
@@ -1809,7 +1888,10 @@
         hasParams, hasCtx, inEmbed,
         referrer: document.referrer,
         ancestorOrigins: location.ancestorOrigins,
-        windowParent: window.parent !== window
+        windowParent: window.parent !== window,
+        hostname: window.location.hostname,
+        isSecureContext: window.isSecureContext,
+        windowTop: window.top !== window
       });
       
       // Studio埋め込み診断スクリプト（コンソールにコピペ用）
