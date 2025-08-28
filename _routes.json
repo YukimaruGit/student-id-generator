@@ -1,22 +1,22 @@
 {
   "version": 1,
   "include": ["/s/*"],
-  "exclude": ["/generator.html*", "/assets/*"],
   "routes": [
     {
-      "src": "/generator.html*",
-      "dest": "/generator.html",
-      "status": 200
+      "src": "/generator.html",
+      "dest": "/generator.html"
     },
     {
       "src": "/create",
-      "dest": "/generator.html",
-      "status": 200
+      "dest": "/generator.html"
     },
     {
       "src": "/generator",
-      "dest": "/generator.html",
-      "status": 200
+      "dest": "/generator.html"
+    },
+    {
+      "src": "/privacy",
+      "dest": "/privacy.html"
     }
   ]
 }

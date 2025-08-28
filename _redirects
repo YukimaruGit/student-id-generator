@@ -1,19 +1,8 @@
 # Cloudflare Pages用リダイレクト設定
-# シンプル版
+# 最小限版
 
 # 短縮URL
 /s/* /s.html?:splat 200
 
-# 学生証作成
-/generator.html /generator.html 200
-/create /generator.html 200
-/generator /generator.html 200
-
-# プライバシー
-/privacy /privacy.html 200
-
-# 静的アセット
-/assets/* /assets/:splat 200
-
-# 404 リダイレクト（シンプル版）
+# 404 リダイレクト（最小限版）
 /* /index.html 404 
