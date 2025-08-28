@@ -1778,6 +1778,14 @@
 
       // Studio埋め込み時は直アクセス防止を完全に無効化
       try {
+        // URLパラメータで明示的に埋め込み指定されている場合は無効化
+        const sp = new URLSearchParams(location.search);
+        if (sp.get('embed') === '1' || sp.get('studio') === '1' || sp.get('iframe') === '1') {
+          console.log('🚀 URLパラメータで埋め込み検出、直アクセス防止を無効化');
+          return;
+        }
+        
+        // リファラがStudio環境からの場合
         if (document.referrer && (
             document.referrer.includes('preview.studio.site') ||
             document.referrer.includes('studio.site') ||
@@ -1788,6 +1796,7 @@
           return;
         }
         
+        // 現在のURLがStudio環境の場合
         const currentUrl = window.location.href;
         if (currentUrl.includes('preview.studio.site') || 
             currentUrl.includes('studio.site') || 
@@ -1798,15 +1807,79 @@
           return;
         }
         
+        // iframe環境の場合
         if (window.parent !== window || window.top !== window) {
           console.log('🚀 iframe環境検出、直アクセス防止を無効化');
           return;
         }
         
+        // セッションストレージにStudioフラグがある場合
         if (sessionStorage.getItem('studio_embed_flag') === '1') {
           console.log('🚀 Studioフラグ検出、直アクセス防止を無効化');
           return;
         }
+        
+        // 診断情報がsessionStorageにある場合は安全
+        if (sessionStorage.getItem('diagCtx') || 
+            sessionStorage.getItem('as_chronicle_diagnosis') || 
+            sessionStorage.getItem('as_chronicle_last_result')) {
+          console.log('🚀 診断情報検出、直アクセス防止を無効化');
+          return;
+        }
+        
+        // Cloudflare Pages環境での追加判定
+        if (window.location.hostname === 'student-id-generator.pages.dev') {
+          // より厳密なStudio埋め込み判定
+          try {
+            // リファラがStudio環境からの場合（より詳細）
+            if (document.referrer && (
+                document.referrer.includes('preview.studio.site') ||
+                document.referrer.includes('studio.site') ||
+                document.referrer.includes('embed') ||
+                document.referrer.includes('iframe') ||
+                document.referrer.includes('live/')
+            )) {
+              console.log('🚀 Cloudflare環境でのStudio埋め込み検出、直アクセス防止を無効化');
+              return;
+            }
+            
+            // 現在のURLがStudio環境の場合（より詳細）
+            if (currentUrl.includes('preview.studio.site') || 
+                currentUrl.includes('studio.site') || 
+                currentUrl.includes('embed') ||
+                currentUrl.includes('iframe') ||
+                currentUrl.includes('live/') ||
+                currentUrl.includes('studio')) {
+              console.log('🚀 Cloudflare環境でのStudio環境URL検出、直アクセス防止を無効化');
+              return;
+            }
+            
+            // より強力なiframe判定
+            if (window.parent !== window || window.top !== window || window.frameElement) {
+              console.log('🚀 Cloudflare環境でのiframe環境検出、直アクセス防止を無効化');
+              return;
+            }
+            
+            // セキュリティコンテキストの判定
+            if (window.isSecureContext === false) {
+              console.log('🚀 Cloudflare環境でのセキュリティコンテキスト判定、直アクセス防止を無効化');
+              return;
+            }
+            
+            // 例外発生時は埋め込み扱い
+            try {
+              if (window.trustedTypes && window.trustedTypes.defaultPolicy) {
+                console.log('🚀 Cloudflare環境でのtrustedTypes判定、直アクセス防止を無効化');
+                return;
+              }
+            } catch(_) {}
+            
+          } catch(e) {
+            console.log('🚀 Cloudflare環境での例外発生により埋め込み扱い、直アクセス防止を無効化');
+            return;
+          }
+        }
+        
       } catch(e) {
         console.log('🚀 例外発生により埋め込み扱い、直アクセス防止を無効化');
         return;
