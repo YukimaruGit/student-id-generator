@@ -1,26 +1,7 @@
 # Cloudflare Pages用ヘッダー設定
-# 最適化版
+# 最小限版
 
 # 全ページの基本設定
 /*
   X-Frame-Options: SAMEORIGIN
   X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
-
-# Studio埋め込み用の設定
-/generator.html
-  X-Frame-Options: ALLOWALL
-  Content-Security-Policy: frame-ancestors 'self' *.studio.site *.preview.studio.site
-
-# Studio埋め込み用の設定（パラメータ付き）
-/generator.html*
-  X-Frame-Options: ALLOWALL
-  Content-Security-Policy: frame-ancestors 'self' *.studio.site *.preview.studio.site
-
-# Studio埋め込み用の設定（全パターン）
-/generator*
-  X-Frame-Options: ALLOWALL
-  Content-Security-Policy: frame-ancestors 'self' *.studio.site *.preview.studio.site
-
-# 静的アセット
-/assets/* /assets/:splat 200
