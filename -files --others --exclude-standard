@@ -1,0 +1,107 @@
+warning: in the working copy of 'public/assets/js/app.js', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/public/assets/js/app.js b/public/assets/js/app.js[m
+[1mindex 6ef1958..db05067 100644[m
+[1m--- a/public/assets/js/app.js[m
+[1m+++ b/public/assets/js/app.js[m
+[36m@@ -467,6 +467,20 @@[m [mfunction initializeApp() {[m
+     urlBtn: document.getElementById('urlBtn'),[m
+     loadingOverlay: document.getElementById('loadingOverlay')[m
+   };[m
+[32m+[m[41m  [m
+[32m+[m[32m  // デバッグ情報[m
+[32m+[m[32m  console.log('DOM要素の取得状況:', {[m
+[32m+[m[32m    photoInput: !!elements.photoInput,[m
+[32m+[m[32m    nameJa: !!elements.nameJa,[m
+[32m+[m[32m    nameEn: !!elements.nameEn,[m
+[32m+[m[32m    dobMonth: !!elements.dobMonth,[m
+[32m+[m[32m    dobDay: !!elements.dobDay,[m
+[32m+[m[32m    cardCanvas: !!elements.cardCanvas,[m
+[32m+[m[32m    downloadBtn: !!elements.downloadBtn,[m
+[32m+[m[32m    twitterBtn: !!elements.twitterBtn,[m
+[32m+[m[32m    urlBtn: !!elements.urlBtn,[m
+[32m+[m[32m    loadingOverlay: !!elements.loadingOverlay[m
+[32m+[m[32m  });[m
+ [m
+   // NGワードリスト（包括的）[m
+   const ngWords = [[m
+[36m@@ -599,8 +613,15 @@[m [mfunction initializeApp() {[m
+   // セキュリティ機能の初期化[m
+   setupInputValidation();[m
+ [m
+[31m-  // Canvas コンテキストの取得[m
+[31m-  const ctx = elements.cardCanvas.getContext('2d');[m
+[32m+[m[32m  // Canvas コンテキストの取得（要素の存在確認付き）[m
+[32m+[m[32m  let ctx = null;[m
+[32m+[m[32m  if (elements.cardCanvas) {[m
+[32m+[m[32m    ctx = elements.cardCanvas.getContext('2d');[m
+[32m+[m[32m    console.log('Canvas 2Dコンテキストを取得しました:', ctx);[m
+[32m+[m[32m  } else {[m
+[32m+[m[32m    console.error('cardCanvas要素が見つかりません');[m
+[32m+[m[32m    return; // 早期リターン[m
+[32m+[m[32m  }[m
+ [m
+   // 画像オブジェクトの初期化（ローカル環境対応）[m
+   const templateImage = new Image();[m
+[36m@@ -1628,24 +1649,36 @@[m [mfunction setupCardCanvas() {[m
+     cvs.height = H * dpr;[m
+     cvs.style.width  = W + 'px';[m
+     cvs.style.height = H + 'px';[m
+[31m-    const ctx = cvs.getContext('2d');[m
+[32m+[m[32m    ctx = cvs.getContext('2d');[m
+     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);[m
+   }[m
+   return cvs;[m
+ }[m
+ [m
+ function initGeneratorPage() {[m
+[31m-  if (!document.getElementById('cardCanvas')) return; // 他ページ無視[m
+[32m+[m[32m  console.log('initGeneratorPage開始');[m
+[32m+[m[41m  [m
+[32m+[m[32m  const cardCanvas = document.getElementById('cardCanvas');[m
+[32m+[m[32m  if (!cardCanvas) {[m
+[32m+[m[32m    console.error('cardCanvas要素が見つかりません');[m
+[32m+[m[32m    return; // 他ページ無視[m
+[32m+[m[32m  }[m
+[32m+[m[41m  [m
+[32m+[m[32m  console.log('cardCanvas要素を発見:', cardCanvas);[m
+   setupCardCanvas();[m
+ [m
+   const idsChange = ['dobMonth','dobDay'];[m
+   const idsInput  = ['nameJa','nameEn'];[m
+[31m-  idsInput.forEach(id => document.getElementById(id)?.addEventListener('input', drawStudentCard));[m
+[31m-  idsChange.forEach(id => document.getElementById(id)?.addEventListener('change', drawStudentCard));[m
+[32m+[m[32m  idsInput.forEach(id => document.getElementById(id)?.addEventListener('input', () => {[m
+[32m+[m[32m    if (typeof window.drawStudentCard === 'function') window.drawStudentCard();[m
+[32m+[m[32m  }));[m
+[32m+[m[32m  idsChange.forEach(id => document.getElementById(id)?.addEventListener('change', () => {[m
+[32m+[m[32m    if (typeof window.drawStudentCard === 'function') window.drawStudentCard();[m
+[32m+[m[32m  }));[m
+   document.getElementById('photoInput')?.addEventListener('change', async (e) => {[m
+     // 既存の画像読込ハンドラ（座標・サイズはいじらない）[m
+     await handlePhotoSelected(e); // 既存関数名に合わせる。なければ既存実装を呼ぶ[m
+[31m-    drawStudentCard();[m
+[32m+[m[32m    if (typeof window.drawStudentCard === 'function') window.drawStudentCard();[m
+   });[m
+ [m
+   // 復元データがあれば反映後に描画[m
+[36m@@ -1663,7 +1696,19 @@[m [mfunction initGeneratorPage() {[m
+     }[m
+   } catch(_) {}[m
+ [m
+[31m-  drawStudentCard();[m
+[32m+[m[32m  // drawStudentCard関数が定義されているか確認してから実行[m
+[32m+[m[32m  if (typeof window.drawStudentCard === 'function') {[m
+[32m+[m[32m    window.drawStudentCard();[m
+[32m+[m[32m  } else {[m
+[32m+[m[32m    // 関数がまだ定義されていない場合は遅延実行[m
+[32m+[m[32m    setTimeout(() => {[m
+[32m+[m[32m      if (typeof window.drawStudentCard === 'function') {[m
+[32m+[m[32m        window.drawStudentCard();[m
+[32m+[m[32m      } else {[m
+[32m+[m[32m        console.error('drawStudentCard関数が見つかりません');[m
+[32m+[m[32m      }[m
+[32m+[m[32m    }, 100);[m
+[32m+[m[32m  }[m
+ }[m
+ [m
+ document.addEventListener('DOMContentLoaded', initGeneratorPage);[m

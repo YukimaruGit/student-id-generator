@@ -467,6 +467,20 @@ function initializeApp() {
     urlBtn: document.getElementById('urlBtn'),
     loadingOverlay: document.getElementById('loadingOverlay')
   };
+  
+  // デバッグ情報
+  console.log('DOM要素の取得状況:', {
+    photoInput: !!elements.photoInput,
+    nameJa: !!elements.nameJa,
+    nameEn: !!elements.nameEn,
+    dobMonth: !!elements.dobMonth,
+    dobDay: !!elements.dobDay,
+    cardCanvas: !!elements.cardCanvas,
+    downloadBtn: !!elements.downloadBtn,
+    twitterBtn: !!elements.twitterBtn,
+    urlBtn: !!elements.urlBtn,
+    loadingOverlay: !!elements.loadingOverlay
+  });
 
   // NGワードリスト（包括的）
   const ngWords = [
@@ -599,8 +613,15 @@ function initializeApp() {
   // セキュリティ機能の初期化
   setupInputValidation();
 
-  // Canvas コンテキストの取得
-  const ctx = elements.cardCanvas.getContext('2d');
+  // Canvas コンテキストの取得（要素の存在確認付き）
+  let ctx = null;
+  if (elements.cardCanvas) {
+    ctx = elements.cardCanvas.getContext('2d');
+    console.log('Canvas 2Dコンテキストを取得しました:', ctx);
+  } else {
+    console.error('cardCanvas要素が見つかりません');
+    return; // 早期リターン
+  }
 
   // 画像オブジェクトの初期化（ローカル環境対応）
   const templateImage = new Image();
@@ -1628,24 +1649,36 @@ function setupCardCanvas() {
     cvs.height = H * dpr;
     cvs.style.width  = W + 'px';
     cvs.style.height = H + 'px';
-    const ctx = cvs.getContext('2d');
+    ctx = cvs.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   return cvs;
 }
 
 function initGeneratorPage() {
-  if (!document.getElementById('cardCanvas')) return; // 他ページ無視
+  console.log('initGeneratorPage開始');
+  
+  const cardCanvas = document.getElementById('cardCanvas');
+  if (!cardCanvas) {
+    console.error('cardCanvas要素が見つかりません');
+    return; // 他ページ無視
+  }
+  
+  console.log('cardCanvas要素を発見:', cardCanvas);
   setupCardCanvas();
 
   const idsChange = ['dobMonth','dobDay'];
   const idsInput  = ['nameJa','nameEn'];
-  idsInput.forEach(id => document.getElementById(id)?.addEventListener('input', drawStudentCard));
-  idsChange.forEach(id => document.getElementById(id)?.addEventListener('change', drawStudentCard));
+  idsInput.forEach(id => document.getElementById(id)?.addEventListener('input', () => {
+    if (typeof window.drawStudentCard === 'function') window.drawStudentCard();
+  }));
+  idsChange.forEach(id => document.getElementById(id)?.addEventListener('change', () => {
+    if (typeof window.drawStudentCard === 'function') window.drawStudentCard();
+  }));
   document.getElementById('photoInput')?.addEventListener('change', async (e) => {
     // 既存の画像読込ハンドラ（座標・サイズはいじらない）
     await handlePhotoSelected(e); // 既存関数名に合わせる。なければ既存実装を呼ぶ
-    drawStudentCard();
+    if (typeof window.drawStudentCard === 'function') window.drawStudentCard();
   });
 
   // 復元データがあれば反映後に描画
@@ -1663,7 +1696,19 @@ function initGeneratorPage() {
     }
   } catch(_) {}
 
-  drawStudentCard();
+  // drawStudentCard関数が定義されているか確認してから実行
+  if (typeof window.drawStudentCard === 'function') {
+    window.drawStudentCard();
+  } else {
+    // 関数がまだ定義されていない場合は遅延実行
+    setTimeout(() => {
+      if (typeof window.drawStudentCard === 'function') {
+        window.drawStudentCard();
+      } else {
+        console.error('drawStudentCard関数が見つかりません');
+      }
+    }, 100);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', initGeneratorPage);
