@@ -409,6 +409,23 @@
         ancestorOrigins: location.ancestorOrigins,
         windowParent: window.parent !== window
       });
+      
+      // Studio埋め込み診断スクリプト（コンソールにコピペ用）
+      console.log('🔧 埋め込み診断スクリプト（以下をコピペして実行）:');
+      console.log(`
+(async()=>{
+  const ORG='https://student-id-generator.pages.dev';
+  const show=(lab,r)=>console.log(lab,'=>',r.status, r.headers.get('content-type')||'', r.headers.get('location')||'');
+  // 1) /generator の応答（リダイレクト追わない）
+  let r = await fetch(ORG+'/generator',{redirect:'manual'});
+  show('/generator', r);
+  r.headers.forEach((v,k)=>/frame-ancestors|x-frame-options|location/i.test(k)&&console.log(k+':',v));
+  // 2) JS/MIME
+  await fetch(ORG+'/assets/js/app.js?v=20250901',{cache:'no-store'}).then(r=>show('app.js', r));
+  // 3) 台紙PNG（初期描画のトリガー）
+  await fetch(ORG+'/assets/img/student_template.png',{cache:'no-store'}).then(r=>show('template.png', r));
+})();
+      `);
     })();
   </script>
 </head>
