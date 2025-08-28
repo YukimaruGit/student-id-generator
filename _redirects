@@ -1,8 +1,0 @@
-# Cloudflare Pages用リダイレクト設定
-# 最小限版
-
-# 短縮URL
-/s/* /s.html?:splat 200
-
-# 404 リダイレクト（最小限版）
-/* /index.html 404 

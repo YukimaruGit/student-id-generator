@@ -1,7 +1,0 @@
-# Cloudflare Pages用ヘッダー設定
-# 最小限版
-
-# 全ページの基本設定
-/*
-  X-Frame-Options: SAMEORIGIN
-  X-Content-Type-Options: nosniff
