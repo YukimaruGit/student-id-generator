@@ -1786,17 +1786,39 @@
 
       // ② 埋め込み判定を最強化（Studio環境での確実な検出）
       function isEmbedded() {
+        console.log('🔍 埋め込み判定開始 - 現在の状況:', {
+          url: window.location.href,
+          searchParams: Object.fromEntries(sp.entries()),
+          referrer: document.referrer,
+          hostname: window.location.hostname,
+          parent: window.parent !== window,
+          top: window.top !== window
+        });
+        
         try { 
           // URLパラメータで明示的に埋め込み指定
-          if (sp.get('embed') === '1') return true; 
-          if (sp.get('studio') === '1') return true; // Studio環境用
-          if (sp.get('iframe') === '1') return true; // iframe用
+          if (sp.get('embed') === '1') {
+            console.log('✅ URLパラメータembed=1で埋め込み検出');
+            return true; 
+          }
+          if (sp.get('studio') === '1') {
+            console.log('✅ URLパラメータstudio=1で埋め込み検出');
+            return true; // Studio環境用
+          }
+          if (sp.get('iframe') === '1') {
+            console.log('✅ URLパラメータiframe=1で埋め込み検出');
+            return true; // iframe用
+          }
         } catch(_) {}
         
         try { 
           // iframe内での実行
-          if (window.parent && window.parent !== window) return true; 
+          if (window.parent && window.parent !== window) {
+            console.log('✅ window.parent判定で埋め込み検出');
+            return true; 
+          }
         } catch(_) { 
+          console.log('✅ 例外発生で埋め込み扱い');
           return true; // 例外＝埋め込み扱い
         }
         
@@ -1866,6 +1888,41 @@
               console.log('🔍 trustedTypes判定で埋め込み検出');
               return true;
             }
+          } catch(_) {}
+          
+          // 追加の埋め込み判定
+          try {
+            // 現在のページのタイトルやメタ情報で判定
+            if (document.title && document.title.includes('Studio')) {
+              console.log('✅ タイトル判定で埋め込み検出');
+              return true;
+            }
+            
+            // 現在のページのURLパスで判定
+            if (window.location.pathname && window.location.pathname.includes('studio')) {
+              console.log('✅ パス判定で埋め込み検出');
+              return true;
+            }
+            
+            // より厳密なStudio環境判定
+            if (window.location.hostname.includes('studio') || 
+                window.location.hostname.includes('preview') ||
+                window.location.hostname.includes('embed')) {
+              console.log('✅ ホスト名詳細判定で埋め込み検出:', window.location.hostname);
+              return true;
+            }
+            
+            // リファラの詳細判定
+            if (document.referrer && (
+                document.referrer.includes('studio') ||
+                document.referrer.includes('preview') ||
+                document.referrer.includes('embed') ||
+                document.referrer.includes('iframe')
+            )) {
+              console.log('✅ リファラ詳細判定で埋め込み検出:', document.referrer);
+              return true;
+            }
+            
           } catch(_) {}
           
         } catch(_) {}
