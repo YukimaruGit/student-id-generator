@@ -1,12 +1,18 @@
-export async function onRequest({ request }) {
+// functions/s/[slug].js
+export async function onRequest(context) {
+  const { request, next } = context;
+  const url = new URL(request.url);
+
+  // ★ /s/<slug> だけを処理。/s/以外は静的配信へ（/generator 等は確実に素通り）
+  const m = url.pathname.match(/^\/s\/([^/]+)$/);
+  if (!m) return next();
+  const slug = m[1];
+
   // -------- Settings --------
   // 人間を誘導したい最終遷移先（HP）
   const PAGE_URL = 'https://preview.studio.site/live/1Va6D4lMO7/student-id';
   const CLOUD_NAME = 'di5xqlddy';          // 既存のまま
   const NAMED = 't_ogp_card';              // ★レターボックスのNamed変換
-
-  const url = new URL(request.url);
-  const slug = url.pathname.split('/').pop() || '';
 
   // --- URL-safe Base64 → UTF-8 文字列 ---
   const decodeB64Url = (s) => {
