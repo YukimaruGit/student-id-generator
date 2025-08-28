@@ -93,7 +93,6 @@
   
   <!-- Studio埋め込み用の特別な設定 -->
   <meta name="robots" content="noindex, nofollow">
-  <meta name="referrer" content="no-referrer">
   
   <!-- Cloudflare Pages用の特別な設定 -->
   <meta name="cf-pages" content="true">
@@ -1663,6 +1662,17 @@
   <!-- 直アクセス防止：診断未実施なら診断ゲームへ誘導 -->
   <script>
     (() => {
+      // ★ 最優先：iframe 埋め込みなら即終了（クロスオリジン安全）
+      try {
+        if (window.self !== window.top) {
+          console.log('🚀 iframe検出：直アクセス防止を無効化');
+          return;
+        }
+      } catch (_) {
+        console.log('🚀 iframe(クロスオリジン)想定：直アクセス防止を無効化');
+        return;
+      }
+
       // ① 既に一度リダイレクトしたら二度目はしない（ループ防止）
       if (sessionStorage.getItem('redir_guard') === '1') return;
 
