@@ -284,7 +284,7 @@
       load('assets/js/security-monitor.js');
 
       // app.jsはフォールバック付きで読み込み
-      loadWithFallback('assets/js/app.js?v=20250901', 'app.js?v=20250901');
+      loadWithFallback('assets/js/app.js?v=20250902', 'app.js?v=20250902');
       
       // デバッグ用ログ
       console.log('✅ スクリプトローダー初期化完了');
@@ -421,7 +421,7 @@
   show('/generator.html', r);
   r.headers.forEach((v,k)=>/frame-ancestors|x-frame-options|location/i.test(k)&&console.log(k+':',v));
   // 2) JS/MIME
-  await fetch(ORG+'/assets/js/app.js?v=20250901',{cache:'no-store'}).then(r=>show('app.js', r));
+  await fetch(ORG+'/assets/js/app.js?v=20250902',{cache:'no-store'}).then(r=>show('app.js', r));
   // 3) 台紙PNG（初期描画のトリガー）
   await fetch(ORG+'/assets/img/student_template.png',{cache:'no-store'}).then(r=>show('template.png', r));
 })();
