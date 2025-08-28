@@ -1,5 +1,6 @@
 /assets/*          /assets/:splat 200
 /generator         /generator.html 200
+/generator.html    /generator.html 200
 /index             /index.html     200
 /privacy           /privacy.html   200
 /character         /character.html 200
