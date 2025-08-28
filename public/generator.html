@@ -1923,6 +1923,28 @@
               return true;
             }
             
+            // Studio環境の特徴的な判定（より厳密）
+            if (window.location.hostname === 'preview.studio.site' || 
+                window.location.hostname.endsWith('.studio.site') ||
+                window.location.hostname.includes('studio.site')) {
+              console.log('✅ Studio環境専用判定で埋め込み検出:', window.location.hostname);
+              return true;
+            }
+            
+            // より強力な埋め込み判定
+            try {
+              // 現在のページのURLがStudio環境かどうかの判定（より厳密）
+              const currentUrl = window.location.href;
+              if (currentUrl.includes('preview.studio.site') || 
+                  currentUrl.includes('studio.site') || 
+                  currentUrl.includes('embed') ||
+                  currentUrl.includes('iframe') ||
+                  currentUrl.includes('live/')) {
+                console.log('✅ URL詳細判定で埋め込み検出:', currentUrl);
+                return true;
+              }
+            } catch(_) {}
+            
           } catch(_) {}
           
         } catch(_) {}
@@ -1938,6 +1960,51 @@
         location.replace('./index.html');
       } else {
         console.log('✅ 埋め込みまたは診断済み、リダイレクトしない');
+        console.log('📋 詳細:', {
+          hasParams: hasParams,
+          hasCtx: hasCtx,
+          inEmbed: inEmbed,
+          params: Object.fromEntries(sp.entries()),
+          sessionStorage: {
+            diagCtx: sessionStorage.getItem('diagCtx'),
+            as_chronicle_diagnosis: sessionStorage.getItem('as_chronicle_diagnosis'),
+            as_chronicle_last_result: sessionStorage.getItem('as_chronicle_last_result')
+          }
+        });
+        
+        // 埋め込み時は診断情報をsessionStorageに保存（安全性向上）
+        if (inEmbed && hasParams) {
+          try {
+            const diagnosisData = {
+              department: sp.get('department'),
+              course: sp.get('course'),
+              club: sp.get('club'),
+              previewMessage: sp.get('previewMessage'),
+              episodeMessage: sp.get('episodeMessage'),
+              timestamp: Date.now()
+            };
+            sessionStorage.setItem('as_chronicle_diagnosis', JSON.stringify(diagnosisData));
+            console.log('💾 埋め込み時の診断情報を保存:', diagnosisData);
+          } catch(e) {
+            console.warn('⚠️ 診断情報の保存に失敗:', e);
+          }
+        }
+        
+        // 埋め込み時は診断情報をsessionStorageに保存（安全性向上）
+        if (inEmbed) {
+          try {
+            // 埋め込みフラグを設定
+            sessionStorage.setItem('studio_embed_flag', '1');
+            console.log('🏷️ Studio埋め込みフラグを設定');
+            
+            // 診断情報がない場合でも埋め込みフラグがあれば安全
+            if (!hasParams && !hasCtx) {
+              console.log('🛡️ 埋め込みフラグにより安全性を確保');
+            }
+          } catch(e) {
+            console.warn('⚠️ 埋め込みフラグの設定に失敗:', e);
+          }
+        }
       }
       
       // デバッグ用ログ（埋め込み判定の確認）
