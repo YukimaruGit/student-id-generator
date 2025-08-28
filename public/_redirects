@@ -7,7 +7,7 @@
 # 短縮URL（明示キーで扱いやすく）
 /s/*            /s.html?s=:splat 200
 
-# ページ：拡張子なし → .html へ 200 書き換え
+# ページ：拡張子なし → .html へ 200 書き換え（ワイルドカード対応）
 /index           /index.html 200
 /diagnosis       /diagnosis.html 200
 /result          /result.html 200
@@ -15,7 +15,7 @@
 /create          /generator.html 200
 /privacy         /privacy.html 200
 
-# 必要なら「/foo/」も拾う
+# 必要なら「/foo/」も拾う（ワイルドカード対応）
 /diagnosis/      /diagnosis.html 200
 /result/         /result.html 200
 /generator/      /generator.html 200
