@@ -1,8 +1,15 @@
+# Cloudflare Pages用ヘッダー設定
+# Studio埋め込み対応版
+
+# 全ページの基本設定
 /*
   X-Frame-Options: SAMEORIGIN
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), web-share=()
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
 
 # Studio埋め込み用の特別な設定
 /generator.html
@@ -28,12 +35,7 @@
   Pragma: no-cache
   Expires: 0
 
-# 全ページのキャッシュクリア（Studio埋め込み対応）
-/*
-  Cache-Control: no-cache, no-store, must-revalidate
-  Pragma: no-cache
-  Expires: 0
-
+# 静的アセット
 /s/*
   Cache-Control: public, max-age=0, s-maxage=600
 

@@ -86,134 +86,21 @@
 </script>
 <html lang="ja">
 <head>
+  <!-- Cloudflare Pages用の特別な設定 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <!-- Studio埋め込み用の特別な設定 -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  
+  <!-- Cloudflare Pages用の特別な設定 -->
+  <meta name="cf-pages" content="true">
+  
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  
-  <!-- セキュリティヘッダーは _headers で統一管理（Studio埋め込み許可） -->
-  
-  <!-- 最優先TypeSquare完全遮断スクリプト -->
-  <script>
-    (function() {
-      'use strict';
-      
-      // ローカル開発時は過剰ギミックを無効化
-      if (location.protocol === 'file:') { return; }
-      
-      console.log('🛡️ TypeSquare遮断システム起動（Generator版）');
-      
-      // TypeSquareエラー検出カウンター
-      let typeSquareErrorCount = 0;
-      
-      // すべてのエラーを無条件で抑制
-      window.addEventListener('error', function(e) {
-        if (e.filename && (e.filename.includes('typesquare') || e.filename.includes('ts?') || e.filename.includes('entry.') || e.filename.includes('l.typesquare.com'))) {
-          typeSquareErrorCount++;
-          console.warn('🚫 TypeSquareエラーを無効化:', e.message, '(カウント:', typeSquareErrorCount, ')');
-          e.stopImmediatePropagation();
-          e.preventDefault();
-          return false;
-        }
-        if (e.message && (e.message.includes('typesquare') || e.message.includes('ERR_BLOCKED_BY_CLIENT') || e.message.includes('Failed to load resource') || e.message.includes('net::ERR_'))) {
-          typeSquareErrorCount++;
-          console.warn('🚫 TypeSquareエラーを無効化:', e.message, '(カウント:', typeSquareErrorCount, ')');
-          e.stopImmediatePropagation();
-          e.preventDefault();
-          return false;
-        }
-      }, true);
-      
-      window.addEventListener('unhandledrejection', function(e) {
-        if (e.reason && (e.reason.toString().includes('typesquare') || e.reason.toString().includes('ERR_BLOCKED_BY_CLIENT') || e.reason.toString().includes('Failed to fetch'))) {
-          typeSquareErrorCount++;
-          console.warn('🚫 TypeSquare Promise rejection を無効化 (カウント:', typeSquareErrorCount, ')');
-          e.stopImmediatePropagation();
-          e.preventDefault();
-          return false;
-        }
-      }, true);
-      
-      // TypeSquare関連のグローバル変数を即座に無効化
-      const tsVariables = ['ts', 'TypeSquare', 'Typekit', 'WebFont', 'Ts', 'TS'];
-      tsVariables.forEach(varName => {
-        Object.defineProperty(window, varName, {
-          get: function() { return null; },
-          set: function() { console.warn('🚫 TypeSquare変数設定を阻止:', varName); },
-          configurable: false,
-          enumerable: false
-        });
-      });
-      
-      // コンソールエラーも抑制
-      const originalConsoleError = console.error;
-      console.error = function(...args) {
-        const message = args.join(' ');
-        if (message.includes('typesquare') || message.includes('ERR_BLOCKED_BY_CLIENT') || message.includes('Failed to load resource') || message.includes('net::ERR_')) {
-          console.warn('🔇 TypeSquareコンソールエラーを抑制:', message);
-          return;
-        }
-        return originalConsoleError.apply(console, args);
-      };
-      
-      // fetchとXMLHttpRequestをフックしてTypeSquareリクエストをブロック
-      const originalFetch = window.fetch;
-      if (originalFetch) {
-        window.fetch = function(url, options) {
-          if (typeof url === 'string' && (url.includes('typesquare') || url.includes('l.typesquare.com') || url.includes('ts?condition='))) {
-            console.log('🚫 TypeSquare fetchリクエストをブロック:', url);
-            return Promise.reject(new Error('TypeSquare request blocked'));
-          }
-          return originalFetch.apply(this, arguments);
-        };
-      }
-      
-      const originalXHROpen = XMLHttpRequest.prototype.open;
-      XMLHttpRequest.prototype.open = function(method, url) {
-        if (typeof url === 'string' && (url.includes('typesquare') || url.includes('l.typesquare.com') || url.includes('ts?condition='))) {
-          console.log('🚫 TypeSquare XHRリクエストをブロック:', url);
-          return;
-        }
-        return originalXHROpen.apply(this, arguments);
-      };
-      
-      // MutationObserverでTypeSquareスクリプトの動的追加を監視・ブロック
-      const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          mutation.addedNodes.forEach(function(node) {
-            if (node.nodeType === 1) { // Element node
-              // TypeSquare関連のスクリプトやリンクを即座に削除
-              if (node.src && (node.src.includes('typesquare') || node.src.includes('entry.') || node.src.includes('l.typesquare.com'))) {
-                node.remove();
-                console.log('🚫 TypeSquareスクリプトを削除:', node.src);
-              }
-              if (node.href && node.href.includes('typesquare')) {
-                node.remove();
-                console.log('🚫 TypeSquareリンクを削除:', node.href);
-              }
-              // 子要素もチェック
-              const typeSquareElements = node.querySelectorAll && node.querySelectorAll('[src*="typesquare"], [href*="typesquare"], [src*="entry."], [src*="l.typesquare.com"]');
-              if (typeSquareElements) {
-                typeSquareElements.forEach(el => {
-                  el.remove();
-                  console.log('🚫 TypeSquare子要素を削除');
-                });
-              }
-            }
-          });
-        });
-      });
-      
-      // DOM全体を監視開始
-      observer.observe(document, {
-        childList: true,
-        subtree: true
-      });
-      
-      console.log('✅ TypeSquare遮断システム完了（Generator版）');
-    })();
-  </script>
-  
-  <title>放課後クロニクル 学生証ジェネレーター</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学生証ジェネレーター</title>
   <meta property="og:title" content="放課後クロニクル 学生証ジェネレーター">
   <meta property="og:description" content="あなただけの学生証を作成しよう！">
   <meta property="og:image" content="https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png">

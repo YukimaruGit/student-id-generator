@@ -1,0 +1,38 @@
+# Cloudflare Pages用設定ファイル
+# Studio埋め込み対応版
+
+name = "student-id-generator"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "student-id-generator"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+
+[env.production.routes]
+pattern = "student-id-generator.pages.dev/*"
+zone_name = "pages.dev"
+
+# Studio埋め込み用の特別な設定
+[[env.production.redirects]]
+from = "/generator.html*"
+to = "/generator.html"
+status = 200
+
+[[env.production.redirects]]
+from = "/create"
+to = "/generator.html"
+status = 200
+
+[[env.production.redirects]]
+from = "/generator"
+to = "/generator.html"
+status = 200
+
+# 404 リダイレクト（generator.htmlは除外）
+[[env.production.redirects]]
+from = "/*"
+to = "/index.html"
+status = 404
+exclude = ["/generator.html*", "/assets/*", "/s/*", "/create", "/generator", "/privacy"]

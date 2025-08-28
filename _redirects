@@ -1,5 +1,5 @@
-# カスタムドメイン用リダイレクト設定
-# s-id.app ドメイン用
+# Cloudflare Pages用リダイレクト設定
+# Studio埋め込み対応版
 
 # 短縮URL（シェアページ）
 /s/* /s.html?:splat 200
