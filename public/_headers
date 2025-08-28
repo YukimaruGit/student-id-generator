@@ -1,5 +1,4 @@
 /*
-  X-Frame-Options: 
   Content-Security-Policy: frame-ancestors https://preview.studio.site https://*.studio.site https://studio.site 'self';
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
