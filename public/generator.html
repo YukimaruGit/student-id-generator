@@ -1776,6 +1776,42 @@
       // ① 既に一度リダイレクトしたら二度目はしない（ループ防止）
       if (sessionStorage.getItem('redir_guard') === '1') return;
 
+      // Studio埋め込み時は直アクセス防止を完全に無効化
+      try {
+        if (document.referrer && (
+            document.referrer.includes('preview.studio.site') ||
+            document.referrer.includes('studio.site') ||
+            document.referrer.includes('embed') ||
+            document.referrer.includes('iframe')
+        )) {
+          console.log('🚀 Studio埋め込み環境検出、直アクセス防止を無効化');
+          return;
+        }
+        
+        const currentUrl = window.location.href;
+        if (currentUrl.includes('preview.studio.site') || 
+            currentUrl.includes('studio.site') || 
+            currentUrl.includes('embed') ||
+            currentUrl.includes('iframe') ||
+            currentUrl.includes('live/')) {
+          console.log('🚀 Studio環境URL検出、直アクセス防止を無効化');
+          return;
+        }
+        
+        if (window.parent !== window || window.top !== window) {
+          console.log('🚀 iframe環境検出、直アクセス防止を無効化');
+          return;
+        }
+        
+        if (sessionStorage.getItem('studio_embed_flag') === '1') {
+          console.log('🚀 Studioフラグ検出、直アクセス防止を無効化');
+          return;
+        }
+      } catch(e) {
+        console.log('🚀 例外発生により埋め込み扱い、直アクセス防止を無効化');
+        return;
+      }
+
       const sp = new URLSearchParams(location.search);
       const hasParams = ['department','course','club'].some(k => sp.has(k));
 
@@ -1867,6 +1903,57 @@
             console.log('🔍 CSS変数判定で埋め込み検出');
             return true;
           }
+          
+          // 本番環境での埋め込み判定を強化
+          try {
+            // 本番環境（student-id-generator.pages.dev）での埋め込み判定
+            if (window.location.hostname === 'student-id-generator.pages.dev') {
+              // リファラがStudio環境からの場合
+              if (document.referrer && (
+                  document.referrer.includes('preview.studio.site') ||
+                  document.referrer.includes('studio.site') ||
+                  document.referrer.includes('embed') ||
+                  document.referrer.includes('iframe')
+              )) {
+                console.log('✅ 本番環境でのStudio埋め込み検出:', document.referrer);
+                return true;
+              }
+              
+              // URLパラメータに埋め込み関連の情報がある場合
+              const currentUrl = window.location.href;
+              if (currentUrl.includes('embed') || currentUrl.includes('studio') || currentUrl.includes('iframe')) {
+                console.log('✅ 本番環境でのURLパラメータ埋め込み検出:', currentUrl);
+                return true;
+              }
+              
+              // セッションストレージに埋め込みフラグがある場合
+              if (sessionStorage.getItem('studio_embed_flag') === '1') {
+                console.log('✅ 本番環境でのセッションストレージ埋め込みフラグ検出');
+                return true;
+              }
+              
+              // より強力なStudio埋め込み判定
+              try {
+                // 現在のページのURLがStudio環境かどうかの判定（より厳密）
+                if (currentUrl.includes('preview.studio.site') || 
+                    currentUrl.includes('studio.site') || 
+                    currentUrl.includes('embed') ||
+                    currentUrl.includes('iframe') ||
+                    currentUrl.includes('live/')) {
+                  console.log('✅ 本番環境でのURL詳細判定で埋め込み検出:', currentUrl);
+                  return true;
+                }
+              } catch(_) {}
+              
+              // Studio環境の特徴的な判定（より厳密）
+              if (window.location.hostname === 'preview.studio.site' || 
+                  window.location.hostname.endsWith('.studio.site') ||
+                  window.location.hostname.includes('studio.site')) {
+                console.log('✅ Studio環境専用判定で埋め込み検出:', window.location.hostname);
+                return true;
+              }
+            }
+          } catch(_) {}
           
           // より強力な埋め込み判定
           try {

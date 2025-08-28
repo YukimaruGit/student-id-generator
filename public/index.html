@@ -1673,8 +1673,14 @@
           if (window.parent !== window || window.top !== window || window.frameElement || 
               new URLSearchParams(location.search).has('embed') ||
               location.hostname.includes('studio') ||
-              (document.referrer && document.referrer.includes('studio'))) {
+              (document.referrer && (document.referrer.includes('studio') || document.referrer.includes('preview.studio.site') || document.referrer.includes('embed') || document.referrer.includes('iframe'))) ||
+              window.location.href.includes('preview.studio.site') ||
+              window.location.href.includes('studio.site') ||
+              window.location.href.includes('embed') ||
+              window.location.href.includes('iframe') ||
+              window.location.href.includes('live/')) {
             url.searchParams.set('embed', '1');
+            console.log('🚀 Studio埋め込み検出、embed=1を付与');
           }
           
           window.location.href = url.toString();
@@ -1688,10 +1694,16 @@
           if (window.parent !== window || window.top !== window || window.frameElement || 
               new URLSearchParams(location.search).has('embed') ||
               location.hostname.includes('studio') ||
-              (document.referrer && document.referrer.includes('studio'))) {
+              (document.referrer && (document.referrer.includes('studio') || document.referrer.includes('preview.studio.site') || document.referrer.includes('embed') || document.referrer.includes('iframe'))) ||
+              window.location.href.includes('preview.studio.site') ||
+              window.location.href.includes('studio.site') ||
+              window.location.href.includes('embed') ||
+              window.location.href.includes('iframe') ||
+              window.location.href.includes('live/')) {
             const url = new URL('index.html', window.location.href);
             url.searchParams.set('embed', '1');
             window.location.href = url.toString();
+            console.log('🚀 Studio埋め込み検出、リスタート');
           } else {
             window.location.reload();
           }
