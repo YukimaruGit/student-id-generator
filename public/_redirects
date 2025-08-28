@@ -4,8 +4,8 @@
 # 静的アセット
 /assets/*        /assets/:splat 200
 
-# 短縮URL
-/s/*            /s.html?:splat 200
+# 短縮URL（明示キーで扱いやすく）
+/s/*            /s.html?s=:splat 200
 
 # ページ：拡張子なし → .html へ 200 書き換え
 /index           /index.html 200

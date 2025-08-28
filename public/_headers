@@ -3,21 +3,17 @@
 
 # 全ページの基本設定
 /*
-  X-Frame-Options: SAMEORIGIN
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
 
 # Studio埋め込み用の設定（generator.html）
 /generator.html
-  X-Frame-Options: ALLOWALL
-  Content-Security-Policy: frame-ancestors 'self' *.studio.site *.preview.studio.site
+  Content-Security-Policy: frame-ancestors 'self' https://studio.site https://*.studio.site https://*.preview.studio.site
 
 # Studio埋め込み用の設定（拡張子なし）
 /generator
-  X-Frame-Options: ALLOWALL
-  Content-Security-Policy: frame-ancestors 'self' *.studio.site *.preview.studio.site
+  Content-Security-Policy: frame-ancestors 'self' https://studio.site https://*.studio.site https://*.preview.studio.site
 
 # Studio埋め込み用の設定（create）
 /create
-  X-Frame-Options: ALLOWALL
-  Content-Security-Policy: frame-ancestors 'self' *.studio.site *.preview.studio.site
+  Content-Security-Policy: frame-ancestors 'self' https://studio.site https://*.studio.site https://*.preview.studio.site
