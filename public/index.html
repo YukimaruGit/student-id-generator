@@ -994,8 +994,8 @@
         if (toGeneratorBtn) {
           
           // 学生証作成ボタンの処理（元の結果に戻る）
-          toGeneratorBtn.onclick = () => {
-            const url = new URL('generator.html', window.location.href);
+                  toGeneratorBtn.onclick = () => {
+          const url = new URL('g.html', window.location.href);
             url.searchParams.set('department', department);
             url.searchParams.set('course', course);
             url.searchParams.set('club', club);
@@ -1720,7 +1720,7 @@
           };
           const mappedClub = normalizeClub(result.club);
           
-          const url = new URL('generator.html', window.location.href);
+          const url = new URL('g.html', window.location.href);
           url.searchParams.set('department', result.department);
           url.searchParams.set('course', result.course);
           url.searchParams.set('club', mappedClub);
@@ -1807,7 +1807,7 @@
               
               // セッションストレージに遷移情報を保存
               sessionStorage.setItem('studio_embed_flag', '1');
-              sessionStorage.setItem('generator_redirect_info', JSON.stringify({
+              sessionStorage.setItem('g_redirect_info', JSON.stringify({
                 timestamp: Date.now(),
                 target: url.toString(),
                 params: Object.fromEntries(url.searchParams.entries())
@@ -1857,7 +1857,7 @@
             if (isStudioEmbed) {
               // セッションストレージに遷移情報を保存
               sessionStorage.setItem('studio_embed_flag', '1');
-              sessionStorage.setItem('generator_redirect_info', JSON.stringify({
+              sessionStorage.setItem('g_redirect_info', JSON.stringify({
                 timestamp: Date.now(),
                 target: url.toString(),
                 params: Object.fromEntries(url.searchParams.entries()),
@@ -1867,7 +1867,7 @@
               console.log('🚀 Studio埋め込み遷移開始（確実版）:', url.toString());
               
               // セッションストレージに遷移先URLを保存
-              sessionStorage.setItem('next_generator_url', url.toString());
+              sessionStorage.setItem('next_g_url', url.toString());
               
               // 直接遷移ではなく、遅延遷移を使用（Studio埋め込み対応）
               setTimeout(() => {
