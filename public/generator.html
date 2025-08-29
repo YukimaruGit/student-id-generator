@@ -1598,7 +1598,7 @@
 
     <!-- 共有URL生成は app.js の実装を利用（再定義しない） -->
     
-    // 共有リンク更新関数（app.jsから呼び出される）…UIは保持のみ、ハンドラはapp.jsが参照
+    // 共有リンク更新関数（app.jsから呼び出される）
     function updateShareLinksWithImage(imageData, text) {
       const shareUrl = buildShareUrlWithImage({
         public_id: imageData.public_id,
@@ -1612,7 +1612,7 @@
       const urlBtn = document.getElementById('urlBtn');
       if (urlBtn) urlBtn.onclick = () => copyTextReliable(window.__shareUrl);
       
-      // 画像生成後は共有素材を最新に更新（常時バインド済みハンドラがこれを参照する）
+      // 画像生成後は共有素材を最新に更新
       window.__lastImageData = imageData;
       window.__ogpImageUrl = `${location.origin}/ogp/v${imageData.version}/${imageData.public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
       
@@ -1624,35 +1624,7 @@
     
 
     
-    // ✅ ページ読込時に"常時"バインド（画像生成の有無に関わらず動く）
-    document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('twitterBtn');
-      if (!btn) return;
-      btn.addEventListener('click', async (e) => {
-        e.preventDefault(); e.stopPropagation();
-        try {
-          const last = window.loadResult?.();
-          if (!last || !last.public_id || !last.version) {
-            alert('先に学生証を作成してください'); return;
-          }
-          // 共有URLは app.js の実装を使う
-          const shareUrl = window.buildShareUrlWithImage?.({
-            public_id: last.public_id,
-            version  : last.version,
-            eager_url: last.eager_url || last.secure_url
-          });
-          const text = [
-            'ようこそ、夢見が丘女子高等学校へ！',
-            '　忘れられない放課後を、あなたに。',
-            '✎︎＿＿＿＿＿＿＿＿＿＿＿＿＿＿',
-            '',
-            '▼ #放課後クロニクル　のHPで自分だけの学生証を作ろう！'
-          ].join('\n');
-          // iOSはアプリのみ・他はIntent新規タブ
-          await window.shareToXAppFirstOnly?.(last.eager_url || last.secure_url, `${text}\n${shareUrl}`);
-        } catch (e){}
-      }, { passive: false });
-    });
+
 
     // フォーム初期化処理は app.js の initGeneratorPage に統合
     
@@ -2006,12 +1978,7 @@
               } catch(e){}
             }, { passive:false });
           </script>
-          <button type="button" id="twitterBtn" class="btn-twitter">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-            </svg>
-            Xに投稿
-          </button>
+
           <button type="button" id="urlBtn">
             URLをコピー
           </button>
