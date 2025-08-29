@@ -14,26 +14,85 @@
   
   <style>
     /* 学生証ジェネレーター用のスタイル */
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
       font-family: 'Noto Sans JP', sans-serif;
       margin: 0;
       padding: 0;
       background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
       min-height: 100vh;
+      color: #333;
     }
     
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 2rem;
+      padding: 1rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .header p {
+      font-size: 1.1rem;
+      color: #7f8c8d;
+      margin: 0;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: #B997D6;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      background: rgba(185, 151, 214, 0.1);
+    }
+    
+    .back-link:hover {
+      background: rgba(185, 151, 214, 0.2);
+      transform: translateX(-5px);
+    }
+    
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
     }
     
     .generator-form {
       background: white;
-      border-radius: 16px;
+      border-radius: 20px;
       padding: 2rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .form-section {
       margin-bottom: 2rem;
+    }
+    
+    .form-section h2 {
+      color: #2c3e50;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 3px solid #B997D6;
     }
     
     .form-group {
@@ -44,67 +103,263 @@
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 600;
-      color: #333;
+      color: #34495e;
+      font-size: 0.95rem;
     }
     
     .form-group input,
     .form-group select {
       width: 100%;
-      padding: 0.75rem;
+      padding: 1rem;
       border: 2px solid #e0e0e0;
-      border-radius: 8px;
+      border-radius: 12px;
       font-size: 1rem;
-      transition: border-color 0.3s ease;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
     }
     
     .form-group input:focus,
     .form-group select:focus {
       outline: none;
       border-color: #B997D6;
-    }
-    
-    .btn {
-      background: #B997D6;
-      color: white;
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .btn:hover {
-      background: #A895D0;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(185, 151, 214, 0.1);
       transform: translateY(-2px);
     }
     
-    .preview {
-      background: white;
-      border-radius: 16px;
-      padding: 2rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      text-align: center;
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
     }
     
-    .preview img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-    
-    .back-link {
-      display: inline-block;
-      margin-bottom: 1rem;
-      color: #B997D6;
-      text-decoration: none;
+    .btn {
+      background: linear-gradient(135deg, #B997D6 0%, #A895D0 100%);
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
       font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      box-shadow: 0 4px 15px rgba(185, 151, 214, 0.3);
     }
     
-    .back-link:hover {
-      text-decoration: underline;
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(185, 151, 214, 0.4);
+    }
+    
+    .btn:active {
+      transform: translateY(-1px);
+    }
+    
+    .preview-section {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: sticky;
+      top: 2rem;
+    }
+    
+    .preview-section h2 {
+      color: #2c3e50;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      padding-bottom: 0.5rem;
+      border-bottom: 3px solid #B997D6;
+    }
+    
+    .preview-content {
+      text-align: center;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 16px;
+      border: 2px dashed #dee2e6;
+    }
+    
+    .preview-placeholder {
+      color: #6c757d;
+      font-size: 1.1rem;
+    }
+    
+    .student-info {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 1.5rem;
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #B997D6;
+    }
+    
+    .student-info h3 {
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .info-item:last-child {
+      border-bottom: none;
+    }
+    
+    .info-label {
+      font-weight: 600;
+      color: #495057;
+    }
+    
+    .info-value {
+      color: #6c757d;
+    }
+    
+    .download-section {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    
+    .download-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+    
+    .download-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    }
+    
+    .diagnosis-result {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      padding: 1.5rem;
+      border-radius: 16px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #2196f3;
+    }
+    
+    .diagnosis-result h3 {
+      color: #1565c0;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    
+    .diagnosis-item {
+      margin-bottom: 0.5rem;
+      padding: 0.5rem 0;
+    }
+    
+    .diagnosis-label {
+      font-weight: 600;
+      color: #1976d2;
+    }
+    
+    .diagnosis-value {
+      color: #424242;
+      margin-left: 0.5rem;
+    }
+    
+    /* レスポンシブ対応 */
+    @media (max-width: 1024px) {
+      .main-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      
+      .preview-section {
+        position: static;
+        order: -1;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 0.5rem;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .generator-form,
+      .preview-section {
+        padding: 1.5rem;
+        border-radius: 16px;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+      
+      .btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 1.75rem;
+      }
+      
+      .generator-form,
+      .preview-section {
+        padding: 1rem;
+        border-radius: 12px;
+      }
+      
+      .form-group input,
+      .form-group select {
+        padding: 0.875rem;
+        font-size: 0.95rem;
+      }
+      
+      .btn {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+      }
+    }
+    
+    /* アニメーション */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .generator-form,
+    .preview-section {
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+      animation: fadeInUp 0.3s ease-out;
     }
   </style>
 </head>
@@ -112,88 +367,102 @@
   <div class="container">
     <a href="/" class="back-link">← 診断ゲームに戻る</a>
     
-    <h1 style="text-align: center; color: #333; margin-bottom: 2rem;">
-      学生証ジェネレーター
-    </h1>
-    
-    <div class="generator-form">
-      <h2>学生証を作成</h2>
-      <form id="studentForm">
-        <div class="form-group">
-          <label for="name">氏名（漢字）</label>
-          <input type="text" id="name" placeholder="例：高森のばら" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="nameEn">氏名（ローマ字）</label>
-          <input type="text" id="nameEn" placeholder="例：Takamori Nobara" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="dobMonth">生年月日（月）</label>
-          <select id="dobMonth" required>
-            <option value="">月を選択</option>
-            <option value="1">1月</option>
-            <option value="2">2月</option>
-            <option value="3">3月</option>
-            <option value="4">4月</option>
-            <option value="5">5月</option>
-            <option value="6">6月</option>
-            <option value="7">7月</option>
-            <option value="8">8月</option>
-            <option value="9">9月</option>
-            <option value="10">10月</option>
-            <option value="11">11月</option>
-            <option value="12">12月</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="dobDay">生年月日（日）</label>
-          <select id="dobDay" required>
-            <option value="">日を選択</option>
-            <option value="1">1日</option>
-            <option value="2">2日</option>
-            <option value="3">3日</option>
-            <option value="4">4日</option>
-            <option value="5">5日</option>
-            <option value="6">6日</option>
-            <option value="7">7日</option>
-            <option value="8">8日</option>
-            <option value="9">9日</option>
-            <option value="10">10日</option>
-            <option value="11">11日</option>
-            <option value="12">12日</option>
-            <option value="13">13日</option>
-            <option value="14">14日</option>
-            <option value="15">15日</option>
-            <option value="16">16日</option>
-            <option value="17">17日</option>
-            <option value="18">18日</option>
-            <option value="19">19日</option>
-            <option value="20">20日</option>
-            <option value="21">21日</option>
-            <option value="22">22日</option>
-            <option value="23">23日</option>
-            <option value="24">24日</option>
-            <option value="25">25日</option>
-            <option value="26">26日</option>
-            <option value="27">27日</option>
-            <option value="28">28日</option>
-            <option value="29">29日</option>
-            <option value="30">30日</option>
-            <option value="31">31日</option>
-          </select>
-        </div>
-        
-        <button type="submit" class="btn">学生証を生成</button>
-      </form>
+    <div class="header">
+      <h1>学生証ジェネレーター</h1>
+      <p>あなただけの学生証を作成しよう！</p>
     </div>
     
-    <div class="preview" id="preview" style="display: none;">
-      <h2>プレビュー</h2>
-      <div id="previewContent"></div>
-      <button class="btn" onclick="downloadCard()">画像を保存</button>
+    <div class="main-content">
+      <div class="generator-form">
+        <div class="form-section">
+          <h2>基本情報</h2>
+          <form id="studentForm">
+            <div class="form-group">
+              <label for="name">氏名（漢字）</label>
+              <input type="text" id="name" placeholder="例：高森のばら" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="nameEn">氏名（ローマ字）</label>
+              <input type="text" id="nameEn" placeholder="例：Takamori Nobara" required>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="dobMonth">生年月日（月）</label>
+                <select id="dobMonth" required>
+                  <option value="">月を選択</option>
+                  <option value="1">1月</option>
+                  <option value="2">2月</option>
+                  <option value="3">3月</option>
+                  <option value="4">4月</option>
+                  <option value="5">5月</option>
+                  <option value="6">6月</option>
+                  <option value="7">7月</option>
+                  <option value="8">8月</option>
+                  <option value="9">9月</option>
+                  <option value="10">10月</option>
+                  <option value="11">11月</option>
+                  <option value="12">12月</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="dobDay">生年月日（日）</label>
+                <select id="dobDay" required>
+                  <option value="">日を選択</option>
+                  <option value="1">1日</option>
+                  <option value="2">2日</option>
+                  <option value="3">3日</option>
+                  <option value="4">4日</option>
+                  <option value="5">5日</option>
+                  <option value="6">6日</option>
+                  <option value="7">7日</option>
+                  <option value="8">8日</option>
+                  <option value="9">9日</option>
+                  <option value="10">10日</option>
+                  <option value="11">11日</option>
+                  <option value="12">12日</option>
+                  <option value="13">13日</option>
+                  <option value="14">14日</option>
+                  <option value="15">15日</option>
+                  <option value="16">16日</option>
+                  <option value="17">17日</option>
+                  <option value="18">18日</option>
+                  <option value="19">19日</option>
+                  <option value="20">20日</option>
+                  <option value="21">21日</option>
+                  <option value="22">22日</option>
+                  <option value="23">23日</option>
+                  <option value="24">24日</option>
+                  <option value="25">25日</option>
+                  <option value="26">26日</option>
+                  <option value="27">27日</option>
+                  <option value="28">28日</option>
+                  <option value="29">29日</option>
+                  <option value="30">30日</option>
+                  <option value="31">31日</option>
+                </select>
+              </div>
+            </div>
+            
+            <button type="submit" class="btn">学生証を生成</button>
+          </form>
+        </div>
+      </div>
+      
+      <div class="preview-section">
+        <h2>プレビュー</h2>
+        <div class="preview-content" id="previewContent">
+          <div class="preview-placeholder">
+            フォームに入力して<br>学生証を生成してください
+          </div>
+        </div>
+        
+        <div class="download-section" id="downloadSection" style="display: none;">
+          <button class="download-btn" onclick="downloadCard()">画像を保存</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -208,12 +477,12 @@
     if (department || course || club) {
       const form = document.getElementById('studentForm');
       const infoDiv = document.createElement('div');
-      infoDiv.style.cssText = 'background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #B997D6;';
+      infoDiv.className = 'diagnosis-result';
       infoDiv.innerHTML = `
         <h3>診断結果</h3>
-        ${department ? `<p><strong>学科:</strong> ${department}</p>` : ''}
-        ${course ? `<p><strong>コース:</strong> ${course}</p>` : ''}
-        ${club ? `<p><strong>部活動:</strong> ${club}</p>` : ''}
+        ${department ? `<div class="diagnosis-item"><span class="diagnosis-label">学科:</span><span class="diagnosis-value">${department}</span></div>` : ''}
+        ${course ? `<div class="diagnosis-item"><span class="diagnosis-label">コース:</span><span class="diagnosis-value">${course}</span></div>` : ''}
+        ${club ? `<div class="diagnosis-item"><span class="diagnosis-label">部活動:</span><span class="diagnosis-value">${club}</span></div>` : ''}
       `;
       form.insertBefore(infoDiv, form.firstChild);
     }
@@ -237,24 +506,38 @@
     });
     
     function showPreview(name, nameEn, dobMonth, dobDay) {
-      const preview = document.getElementById('preview');
       const previewContent = document.getElementById('previewContent');
+      const downloadSection = document.getElementById('downloadSection');
       
       previewContent.innerHTML = `
-        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <div class="student-info">
           <h3>学生証情報</h3>
-          <p><strong>氏名（漢字）:</strong> ${name}</p>
-          <p><strong>氏名（ローマ字）:</strong> ${nameEn}</p>
-          <p><strong>生年月日:</strong> ${dobMonth}月${dobDay}日</p>
-          ${department ? `<p><strong>学科:</strong> ${department}</p>` : ''}
-          ${course ? `<p><strong>コース:</strong> ${course}</p>` : ''}
-          ${club ? `<p><strong>部活動:</strong> ${club}</p>` : ''}
+          <div class="info-item">
+            <span class="info-label">氏名（漢字）:</span>
+            <span class="info-value">${name}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">氏名（ローマ字）:</span>
+            <span class="info-value">${nameEn}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">生年月日:</span>
+            <span class="info-value">${dobMonth}月${dobDay}日</span>
+          </div>
+          ${department ? `<div class="info-item"><span class="info-label">学科:</span><span class="info-value">${department}</span></div>` : ''}
+          ${course ? `<div class="info-item"><span class="info-label">コース:</span><span class="info-value">${course}</span></div>` : ''}
+          ${club ? `<div class="info-item"><span class="info-label">部活動:</span><span class="info-value">${club}</span></div>` : ''}
         </div>
-        <p>学生証の生成が完了しました！</p>
+        <p style="color: #28a745; font-weight: 600; margin: 0;">学生証の生成が完了しました！</p>
       `;
       
-      preview.style.display = 'block';
-      preview.scrollIntoView({ behavior: 'smooth' });
+      downloadSection.style.display = 'block';
+      
+      // プレビューセクションまでスクロール
+      document.querySelector('.preview-section').scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
     }
     
     function downloadCard() {
