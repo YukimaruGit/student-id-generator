@@ -14,6 +14,21 @@
   
   <style>
     /* 学生証ジェネレーター用のスタイル */
+    :root {
+      --primary-color: #dda0dd;    /* 撫子色風の柔らかい紫がかったピンク */
+      --secondary-color: #b0c4de;  /* 水浅葱風の柔らかい青みのグレー */
+      --accent-color: #98d7a5;     /* 若葉色風の柔らかい黄緑 */
+      --background-color: #1a1a1a; /* 黒方眼紙風背景 */
+      --card-background: #ffffff;
+      --text-color: #787878;       /* 優しいミディアムグレー */
+      --error-color: #f8d7da;      /* 薄紅色風の非常に優しいピンク */
+      --success-color: #d4edda;    /* 白群色風の柔らかいミントグリーン */
+      --border-radius: 12px;
+      --transition-duration: 0.3s;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --container-width: 1400px;
+    }
+    
     * {
       box-sizing: border-box;
     }
@@ -22,13 +37,14 @@
       font-family: 'Noto Sans JP', sans-serif;
       margin: 0;
       padding: 0;
-      background: #2c3e50;
+      background: var(--background-color);
       background-image: 
-        linear-gradient(rgba(44, 62, 80, 0.9) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(44, 62, 80, 0.9) 1px, transparent 1px);
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
       background-size: 20px 20px;
       min-height: 100vh;
-      color: #333;
+      color: var(--text-color);
+      line-height: 1.6;
     }
     
     .header-line {
@@ -38,7 +54,7 @@
     }
     
     .container {
-      max-width: 1400px;
+      max-width: var(--container-width);
       margin: 0 auto;
       padding: 2rem;
     }
@@ -46,17 +62,17 @@
     .back-link {
       display: inline-block;
       margin-bottom: 2rem;
-      color: #B997D6;
+      color: var(--primary-color);
       text-decoration: none;
       font-weight: 600;
       padding: 0.5rem 1rem;
       border-radius: 8px;
       transition: all 0.3s ease;
-      background: rgba(185, 151, 214, 0.1);
+      background: rgba(221, 160, 221, 0.1);
     }
     
     .back-link:hover {
-      background: rgba(185, 151, 214, 0.2);
+      background: rgba(221, 160, 221, 0.2);
       transform: translateX(-5px);
     }
     
@@ -68,42 +84,44 @@
     }
     
     .panel {
-      background: #ecf0f1;
-      border-radius: 16px;
+      background: rgba(248, 246, 240, 0.7);
+      border-radius: var(--border-radius);
       padding: 2rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--box-shadow);
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     .panel-title {
-      color: #7f8c8d;
+      color: #666;
       font-size: 1.3rem;
-      font-weight: 600;
+      font-weight: 650;
       margin-bottom: 1.5rem;
       text-align: center;
+      font-family: 'Noto Serif JP', serif;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8), 0 0 4px rgba(255, 255, 255, 0.3);
     }
     
     .image-selection {
       width: 100%;
       height: 200px;
-      border: 3px dashed #B997D6;
+      border: 3px dashed var(--primary-color);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 2rem;
-      background: rgba(185, 151, 214, 0.05);
+      background: rgba(221, 160, 221, 0.05);
       cursor: pointer;
       transition: all 0.3s ease;
     }
     
     .image-selection:hover {
-      border-color: #A895D0;
-      background: rgba(185, 151, 214, 0.1);
+      border-color: #c8a2c8;
+      background: rgba(221, 160, 221, 0.1);
     }
     
     .image-selection-text {
-      color: #B997D6;
+      color: var(--primary-color);
       font-size: 1.1rem;
       font-weight: 600;
     }
@@ -115,9 +133,8 @@
     .form-group label {
       display: block;
       margin-bottom: 0.5rem;
-      font-weight: 600;
-      color: #34495e;
-      font-size: 0.95rem;
+      font-weight: 500;
+      color: #666;
     }
     
     .form-group input,
@@ -134,8 +151,8 @@
     .form-group input:focus,
     .form-group select:focus {
       outline: none;
-      border-color: #B997D6;
-      box-shadow: 0 0 0 3px rgba(185, 151, 214, 0.1);
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(221, 160, 221, 0.1);
     }
     
     .form-row {
@@ -163,20 +180,20 @@
     }
     
     .btn-return {
-      background: #27ae60;
+      background: var(--accent-color);
     }
     
     .btn-return:hover {
-      background: #229954;
+      background: #8bc8a0;
       transform: translateY(-2px);
     }
     
     .btn-view-results {
-      background: #3498db;
+      background: var(--secondary-color);
     }
     
     .btn-view-results:hover {
-      background: #2980b9;
+      background: #9fb8d1;
       transform: translateY(-2px);
     }
     
@@ -236,17 +253,18 @@
     }
     
     .diagnosis-result {
-      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      background: rgba(176, 196, 222, 0.3);
       padding: 1.5rem;
       border-radius: 12px;
       margin-bottom: 2rem;
-      border-left: 4px solid #2196f3;
+      border-left: 4px solid var(--secondary-color);
     }
     
     .diagnosis-result h3 {
-      color: #1565c0;
+      color: #5a6c7d;
       margin-bottom: 1rem;
       font-size: 1.2rem;
+      font-weight: 600;
     }
     
     .diagnosis-item {
@@ -256,7 +274,7 @@
     
     .diagnosis-label {
       font-weight: 600;
-      color: #1976d2;
+      color: #5a6c7d;
     }
     
     .diagnosis-value {
@@ -265,17 +283,18 @@
     }
     
     .student-info {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      background: rgba(248, 246, 240, 0.9);
       padding: 1.5rem;
       border-radius: 12px;
       margin-bottom: 1.5rem;
-      border-left: 4px solid #B997D6;
+      border-left: 4px solid var(--primary-color);
     }
     
     .student-info h3 {
-      color: #2c3e50;
+      color: #666;
       margin-bottom: 1rem;
       font-size: 1.2rem;
+      font-weight: 600;
     }
     
     .info-item {
@@ -512,7 +531,7 @@
       infoDiv.innerHTML = `
         <h3>診断結果</h3>
         ${department ? `<div class="diagnosis-item"><span class="diagnosis-label">学科:</span><span class="diagnosis-value">${department}</span></div>` : ''}
-        ${course ? `<div class="diagnosis-item"><span class="diagnosis-item"><span class="diagnosis-label">コース:</span><span class="diagnosis-value">${course}</span></div>` : ''}
+        ${course ? `<div class="diagnosis-item"><span class="diagnosis-label">コース:</span><span class="diagnosis-value">${course}</span></div>` : ''}
         ${club ? `<div class="diagnosis-item"><span class="diagnosis-label">部活動:</span><span class="diagnosis-value">${club}</span></div>` : ''}
       `;
       form.insertBefore(infoDiv, form.firstChild);
@@ -530,8 +549,8 @@
           reader.onload = function(e) {
             const imageSelection = document.querySelector('.image-selection');
             imageSelection.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
-            imageSelection.style.border = '3px solid #27ae60';
-            imageSelection.style.background = 'rgba(39, 174, 96, 0.1)';
+            imageSelection.style.border = '3px solid var(--accent-color)';
+            imageSelection.style.background = 'rgba(152, 215, 165, 0.1)';
           };
           reader.readAsDataURL(file);
         }
@@ -615,7 +634,7 @@
           ${course ? `<div class="info-item"><span class="info-label">コース:</span><span class="info-value">${course}</span></div>` : ''}
           ${club ? `<div class="info-item"><span class="info-label">部活動:</span><span class="info-value">${club}</span></div>` : ''}
         </div>
-        <p style="color: #27ae60; font-weight: 600; margin: 0; text-align: center;">学生証の生成が完了しました！</p>
+        <p style="color: var(--accent-color); font-weight: 600; margin: 0; text-align: center;">学生証の生成が完了しました！</p>
       `;
       
       // プレビューセクションまでスクロール
