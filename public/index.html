@@ -995,7 +995,7 @@
           
           // 学生証作成ボタンの処理（元の結果に戻る）
                   toGeneratorBtn.onclick = () => {
-          const url = new URL('g.html', window.location.href);
+          const url = new URL('student-card.html', window.location.href);
             url.searchParams.set('department', department);
             url.searchParams.set('course', course);
             url.searchParams.set('club', club);
@@ -1720,7 +1720,7 @@
           };
           const mappedClub = normalizeClub(result.club);
           
-          const url = new URL('g.html', window.location.href);
+          const url = new URL('student-card.html', window.location.href);
           url.searchParams.set('department', result.department);
           url.searchParams.set('course', result.course);
           url.searchParams.set('club', mappedClub);
