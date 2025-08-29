@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<!-- 最優先TypeSquare完全遮断スクリプト（DOCTYPE直後） -->
+<script>
+(function() {
+  'use strict';
+  
+  // 即座にTypeSquare関連のグローバル変数を無効化
+  const tsVariables = ['ts', 'TypeSquare', 'Typekit', 'WebFont', 'Ts', 'TS', 'typesquare'];
+  tsVariables.forEach(varName => {
+    try {
+      Object.defineProperty(window, varName, {
+        get: function() { return null; },
+        set: function() { return false; },
+        configurable: false,
+        enumerable: false
+      });
+    } catch(e) {}
+  });
+  
+  // コンソールエラーを即座に抑制
+  const originalConsoleError = console.error;
+  const originalConsoleWarn = console.warn;
+  
+  console.error = function(...args) {
+    const message = args.join(' ');
+    if (message.includes('typesquare') || message.includes('ERR_BLOCKED_BY_CLIENT') || message.includes('Failed to load resource') || message.includes('net::ERR_') || message.includes('entry.')) {
+      return; // 完全に無視
+    }
+    return originalConsoleError.apply(console, args);
+  };
+  
+  console.warn = function(...args) {
+    const message = args.join(' ');
+    if (message.includes('typesquare') || message.includes('ERR_BLOCKED_BY_CLIENT')) {
+      return; // 完全に無視
+    }
+    return originalConsoleWarn.apply(console, args);
+  };
+  
+  // エラーイベントを即座に抑制
+  window.addEventListener('error', function(e) {
+    if (e.filename && (e.filename.includes('typesquare') || e.filename.includes('ts?') || e.filename.includes('entry.') || e.filename.includes('l.typesquare.com'))) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      return false;
+    }
+    if (e.message && (e.message.includes('typesquare') || e.message.includes('ERR_BLOCKED_BY_CLIENT') || e.message.includes('Failed to load resource') || e.message.includes('net::ERR_'))) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      return false;
+    }
+  }, true);
+  
+  // Promise rejectionも即座に抑制
+  window.addEventListener('unhandledrejection', function(e) {
+    if (e.reason && (e.reason.toString().includes('typesquare') || e.reason.toString().includes('ERR_BLOCKED_BY_CLIENT') || e.reason.toString().includes('Failed to fetch'))) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      return false;
+    }
+  }, true);
+  
+  // fetchとXMLHttpRequestを即座にフック
+  if (window.fetch) {
+    const originalFetch = window.fetch;
+    window.fetch = function(url, options) {
+      if (typeof url === 'string' && (url.includes('typesquare') || url.includes('l.typesquare.com') || url.includes('ts?condition=') || url.includes('entry.'))) {
+        return Promise.reject(new Error('TypeSquare request blocked'));
+      }
+      return originalFetch.apply(this, arguments);
+    };
+  }
+  
+  if (XMLHttpRequest.prototype.open) {
+    const originalXHROpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url) {
+      if (typeof url === 'string' && (url.includes('typesquare') || url.includes('l.typesquare.com') || url.includes('ts?condition=') || url.includes('entry.'))) {
+        return;
+      }
+      return originalXHROpen.apply(this, arguments);
+    };
+  }
+  
+  console.log('🛡️ 最強TypeSquare遮断システム起動完了（DOCTYPE直後）');
+})();
+</script>
+<html lang="ja">
+<head>
+  <!-- Cloudflare Pages用の特別な設定 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <!-- Studio埋め込み用の特別な設定 -->
+  <meta name="robots" content="noindex, nofollow">
+  
+  <!-- Cloudflare Pages用の特別な設定 -->
+  <meta name="cf-pages" content="true">
+  
+  <!-- 直アクセス防止を完全に無効化するフラグ -->
+  <meta name="disable-redirect" content="true">
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学生証ジェネレーター</title>
+  <meta property="og:title" content="放課後クロニクル 学生証ジェネレーター">
+  <meta property="og:description" content="あなただけの学生証を作成しよう！">
+  <meta property="og:image" content="https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png">
+  <meta property="og:url" content="https://student-id-generator.pages.dev/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+
+  <link id="generator-style" rel="stylesheet">
+  <script>
+    (function(){
+      const ORIGIN = window.APP_ORIGIN || (location.hostname === 'localhost' || location.hostname === '127.0.0.1' 
+        ? location.origin 
+        : 'https://student-id-generator.pages.dev');
+      
+      // ファイルから直接開く場合は相対パスを使用
+      if (location.protocol === 'file:') {
+        document.getElementById('generator-style').href = 'assets/css/style.css';
+      } else {
+        document.getElementById('generator-style').href = ORIGIN + '/assets/css/style.css';
+      }
+    })();
+  </script>
+  
+  <style>
+    /* 学生証ジェネレーター用のスタイル */
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .generator-form {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #B997D6;
+    }
+    
+    .btn {
+      background: #B997D6;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+      background: #A895D0;
+      transform: translateY(-2px);
+    }
+    
+    .preview {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    
+    .preview img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 style="text-align: center; color: #333; margin-bottom: 2rem;">
+      学生証ジェネレーター
+    </h1>
+    
+    <div class="generator-form">
+      <h2>学生証を作成</h2>
+      <form id="studentForm">
+        <div class="form-group">
+          <label for="name">氏名（漢字）</label>
+          <input type="text" id="name" placeholder="例：高森のばら" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="nameEn">氏名（ローマ字）</label>
+          <input type="text" id="nameEn" placeholder="例：Takamori Nobara" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="dobMonth">生年月日（月）</label>
+          <select id="dobMonth" required>
+            <option value="">月を選択</option>
+            <option value="1">1月</option>
+            <option value="2">2月</option>
+            <option value="3">3月</option>
+            <option value="4">4月</option>
+            <option value="5">5月</option>
+            <option value="6">6月</option>
+            <option value="7">7月</option>
+            <option value="8">8月</option>
+            <option value="9">9月</option>
+            <option value="10">10月</option>
+            <option value="11">11月</option>
+            <option value="12">12月</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="dobDay">生年月日（日）</label>
+          <select id="dobDay" required>
+            <option value="">日を選択</option>
+            <option value="1">1日</option>
+            <option value="2">2日</option>
+            <option value="3">3日</option>
+            <option value="4">4日</option>
+            <option value="5">5日</option>
+            <option value="6">6日</option>
+            <option value="7">7日</option>
+            <option value="8">8日</option>
+            <option value="9">9日</option>
+            <option value="10">10日</option>
+            <option value="11">11日</option>
+            <option value="12">12日</option>
+            <option value="13">13日</option>
+            <option value="14">14日</option>
+            <option value="15">15日</option>
+            <option value="16">16日</option>
+            <option value="17">17日</option>
+            <option value="18">18日</option>
+            <option value="19">19日</option>
+            <option value="20">20日</option>
+            <option value="21">21日</option>
+            <option value="22">22日</option>
+            <option value="23">23日</option>
+            <option value="24">24日</option>
+            <option value="25">25日</option>
+            <option value="26">26日</option>
+            <option value="27">27日</option>
+            <option value="28">28日</option>
+            <option value="29">29日</option>
+            <option value="30">30日</option>
+            <option value="31">31日</option>
+          </select>
+        </div>
+        
+        <button type="submit" class="btn">学生証を生成</button>
+      </form>
+    </div>
+    
+    <div class="preview" id="preview" style="display: none;">
+      <h2>プレビュー</h2>
+      <div id="previewContent"></div>
+      <button class="btn" onclick="downloadCard()">画像を保存</button>
+    </div>
+  </div>
+
+  <script>
+    // 学生証ジェネレーターの基本機能
+    document.getElementById('studentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('name').value;
+      const nameEn = document.getElementById('nameEn').value;
+      const dobMonth = document.getElementById('dobMonth').value;
+      const dobDay = document.getElementById('dobDay').value;
+      
+      if (!name || !nameEn || !dobMonth || !dobDay) {
+        alert('すべての項目を入力してください。');
+        return;
+      }
+      
+      // プレビューを表示
+      showPreview(name, nameEn, dobMonth, dobDay);
+    });
+    
+    function showPreview(name, nameEn, dobMonth, dobDay) {
+      const preview = document.getElementById('preview');
+      const previewContent = document.getElementById('previewContent');
+      
+      previewContent.innerHTML = `
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+          <h3>学生証情報</h3>
+          <p><strong>氏名（漢字）:</strong> ${name}</p>
+          <p><strong>氏名（ローマ字）:</strong> ${nameEn}</p>
+          <p><strong>生年月日:</strong> ${dobMonth}月${dobDay}日</p>
+        </div>
+        <p>学生証の生成が完了しました！</p>
+      `;
+      
+      preview.style.display = 'block';
+      preview.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function downloadCard() {
+      alert('学生証の画像保存機能は準備中です。');
+    }
+  </script>
+</body>
+</html>

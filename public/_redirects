@@ -1,23 +1,26 @@
 # Cloudflare Pages用リダイレクト設定
 # 200書き換えで統一（往復リダイレクト防止）
 
-# --- ページ（拡張子なし→.html） ---
+# --- 新しいパス（g.html） ---
+/g           /g.html        200
+/g/          /g.html        200
+
+# --- 既存パスからの200書き換え（リダイレクト回避） ---
+/generator   /g.html        200
+/generator/  /g.html        200
+
+# --- その他のページ（拡張子なし→.html） ---
 /index        /index.html       200
 /diagnosis    /diagnosis.html   200
 /result       /result.html      200
-/generator    /generator.html   200
-/create       /generator.html   200
+/create       /g.html           200
 /privacy      /privacy.html     200
 
 # 末尾スラッシュも拾う
 /diagnosis/   /diagnosis.html   200
 /result/      /result.html      200
-/generator/   /generator.html   200
-/create/      /generator.html   200
+/create/      /g.html           200
 /privacy/     /privacy.html     200
 
 # 静的アセット
 /assets/*     /assets/:splat    200
-
-# カスタム404を使うなら↓のコメントを外し、/public/ に 404.html を置く
-# /*           /404.html         404
