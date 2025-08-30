@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  
+  <!-- セキュリティヘッダーは _headers で統一管理（Studio埋め込み許可） -->
+  
+  <title>放課後クロニクル 学生証ジェネレーター</title>
+  <meta property="og:title" content="放課後クロニクル 学生証ジェネレーター">
+  <meta property="og:description" content="あなただけの学生証を作成しよう！">
+  <meta property="og:image" content="https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png">
+  <meta property="og:url" content="https://student-id-generator.pages.dev/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+
+  <link id="generator-style" rel="stylesheet">
+  <script>
+    (function(){
+      const ORIGIN = window.APP_ORIGIN || 'https://student-id-generator.pages.dev';
+      document.getElementById('generator-style').href = ORIGIN + '/assets/css/style.css';
+    })();
+  </script>
+  <!-- <script src="assets/js/domain-masking.js"></script> -->
+  <style>
+    /* 進捗バーとカード高さ調整（診断結果ページと完全に同じ） */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+      margin-top: 2rem;  /* 診断結果ページと同じ上余白 */
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #B997D6;
+      border-radius: 4px;
+      transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      width: 0%;
+    }
+
+    /* メインコンテナのレイアウト */
+    .generator-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    /* カードグリッドレイアウト */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: stretch;
+    }
+
+    /* フォームカードとプレビューカードの高さ調整 */
+    .form-card, .preview-card {
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(185, 151, 214, 0.2);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* カードのパディング調整 */
+    .form-card {
+      padding: 2rem;
+    }
+
+    .preview-card {
+      padding: 2rem;
+    }
+
+    /* カードヘッダーとフッターのマージン調整 */
+    .card-header {
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #666;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .card-footer {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    /* カードボディの調整 */
+    .card-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* フォームカードの内容調整 */
+    .form-card h2 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    /* フォームグループのマージン調整 */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    /* ボタンコンテナのマージン調整 */
+    .card-footer button {
+      margin: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      background: #B997D6;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .card-footer button:hover {
+      background: #A895D0;
+      transform: translateY(-1px);
+    }
+
+    /* フォーム要素のスタイル */
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #666;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #B997D6;
+    }
+
+    /* 日付入力のレイアウト */
+    .date-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* ファイル入力のスタイル */
+    .file-input-label {
+      display: block;
+      padding: 2rem;
+      border: 2px dashed #B997D6;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(185, 151, 214, 0.05);
+    }
+
+    .file-input-label:hover {
+      background: rgba(185, 151, 214, 0.1);
+      border-color: #A895D0;
+    }
+
+    .file-input-label input[type="file"] {
+      display: none;
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 768px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      
+      .generator-container {
+        padding: 0 0.5rem;
+      }
+      
+      .form-card, .preview-card {
+        padding: 1.5rem;
+        height: auto;
+        min-height: 350px;
+      }
+      
+      .card-footer {
+        flex-direction: column;
+        align-items: center;
+        margin-top: 1.5rem;
+      }
+      
+      .card-footer button {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+
+    /* トースト表示のスタイル */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      z-index: 10000;
+      font-size: 14px;
+      transition: opacity 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .toast.hide {
+      opacity: 0;
+    }
+  </style>
+  <script>
+    // このページでは高度対策をOFF（画像保存・Canvas操作のため）
+    window.AdvancedSecurityConfig = { preventSideChannelAttacks: false };
+  </script>
+  <!-- ブートローダー（フォールバック付き・自前ドメイン固定） -->
+  <script>
+    (function () {
+      // あなたのサイトの実ドメイン（Cloudflare Pages のままならこれでOK）
+      const MY_ORIGIN = 'https://student-id-generator.pages.dev';
+
+      // 埋め込み先(preview.studio.site等)では常に自分のドメインから読み込む
+      window.APP_ORIGIN = MY_ORIGIN;
+
+      function loadWithFallback(primary, fallback) {
+        const s = document.createElement('script');
+        s.defer = true;
+        s.src = APP_ORIGIN + '/' + primary;
+        s.onerror = () => {
+          if (!fallback) return;
+          console.log('フォールバック: ' + primary + ' → ' + fallback);
+          const s2 = document.createElement('script');
+          s2.defer = true;
+          s2.src = APP_ORIGIN + '/' + fallback;
+          document.head.appendChild(s2);
+        };
+        document.head.appendChild(s);
+      }
+
+      function load(p) {
+        const s = document.createElement('script');
+        s.src = APP_ORIGIN + '/' + p;
+        s.defer = true;
+        document.head.appendChild(s);
+      }
+
+      // セキュリティ系（現状のままでOK）
+      load('assets/js/comprehensive-security.js');
+      load('assets/js/security.js');
+      load('assets/js/privacy-protection.js');
+      load('assets/js/security-monitor.js');
+
+      // app.jsはフォールバック付きで読み込み
+      loadWithFallback('assets/js/app.js?v=20250902', 'app.js?v=20250902');
+      
+      // デバッグ用ログ
+      console.log('✅ スクリプトローダー初期化完了');
+      console.log('APP_ORIGIN:', APP_ORIGIN);
+    })();
+  </script>
+  
+  <!-- 共有URL生成機能 -->
+  <script>
+    // 共有用ドメイン
+    const SHARE_BASE = 'https://student-id-generator.pages.dev';
+    
+    // Cloudinary設定（app.jsと同期、二重定義防止）
+    window.cloudinaryConfig ??= { 
+      cloudName: 'di5xqlddy', 
+      uploadPreset: 'student_card_AS_chronicle' 
+    };
+
+    // Base64URL関数は削除済み（短い固定形式に統一）
+
+    <!-- 共有URL生成は app.js の実装を利用（再定義しない） -->
+    
+    // 共有リンク更新関数（app.jsから呼び出される）…UIは保持のみ、ハンドラはapp.jsが参照
+    function updateShareLinksWithImage(imageData, text) {
+      const shareUrl = buildShareUrlWithImage({
+        public_id: imageData.public_id,
+        version: imageData.version
+      });
+      console.log('共有URL更新:', shareUrl);
+      // 共有URLを保存
+      window.__shareUrl = shareUrl;
+      
+      // URLコピー
+      const urlBtn = document.getElementById('urlBtn');
+      if (urlBtn) urlBtn.onclick = () => copyTextReliable(window.__shareUrl);
+      
+      // 画像生成後は共有素材を最新に更新（常時バインド済みハンドラがこれを参照する）
+      window.__lastImageData = imageData;
+      window.__ogpImageUrl = `${location.origin}/ogp/v${imageData.version}/${imageData.public_id.split('/').map(encodeURIComponent).join('/')}.jpg`;
+      
+      // 表示用フィールドがあれば更新
+      const field = document.getElementById('shareLinkField');
+      if (field) field.value = shareUrl;
+    }
+    window.updateShareLinksWithImage = updateShareLinksWithImage;
+    
+
+    
+    // ✅ ページ読込時に"常時"バインド（画像生成の有無に関わらず動く）
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('twitterBtn');
+      if (!btn) return;
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault(); e.stopPropagation();
+        try {
+          const last = window.loadResult?.();
+          if (!last || !last.public_id || !last.version) {
+            alert('先に学生証を作成してください'); return;
+          }
+          // 共有URLは app.js の実装を使う
+          const shareUrl = window.buildShareUrlWithImage?.({
+            public_id: last.public_id,
+            version  : last.version,
+            eager_url: last.eager_url || last.secure_url
+          });
+          const text = [
+            'ようこそ、夢見が丘女子高等学校へ！',
+            '　忘れられない放課後を、あなたに。',
+            '✎︎＿＿＿＿＿＿＿＿＿＿＿＿＿＿',
+            '',
+            '▼ #放課後クロニクル　のHPで自分だけの学生証を作ろう！'
+          ].join('\n');
+          // iOSはアプリのみ・他はIntent新規タブ
+          await window.shareToXAppFirstOnly?.(last.eager_url || last.secure_url, `${text}\n${shareLinkField}`);
+        } catch (e){}
+      }, { passive: false });
+    });
+
+    // フォーム初期化処理は app.js の initGeneratorPage に統合
+    
+
+  </script>
+  
+  <!-- 直アクセス防止：診断未実施なら診断ゲームへ誘導 -->
+  <script>
+    (() => {
+      // ① 既に一度リダイレクトしたら二度目はしない（ループ防止）
+      if (sessionStorage.getItem('redir_guard') === '1') return;
+
+      const sp = new URLSearchParams(location.search);
+      const hasParams = ['department','course','club'].some(k => sp.has(k));
+
+      const hasCtx =
+        sessionStorage.getItem('diagCtx') ||
+        sessionStorage.getItem('as_chronicle_diagnosis') ||
+        sessionStorage.getItem('as_chronicle_last_result');
+
+      // ② 埋め込み判定を強化（sandbox / クロスオリジンでも確実に true になる条件を追加）
+      function isEmbedded() {
+        try { if (sp.get('embed') === '1') return true; } catch(_) {}
+        try { if (window.parent && window.parent !== window) return true; } catch(_) { return true; } // 例外＝埋め込み扱い
+        try {
+          // リファラが他オリジン（preview.studio.site 等）なら埋め込み
+          if (document.referrer && !document.referrer.startsWith(location.origin)) return true;
+          // ancestorOrigins が使える環境なら祖先が存在すれば埋め込み
+          if (location.ancestorOrigins && location.ancestorOrigins.length > 0) return true;
+        } catch(_) {}
+        return false;
+      }
+      const inEmbed = isEmbedded();
+
+      // ③ 本当に"直リンク"だけ跳ねる
+      if (!hasParams && !hasCtx && !inEmbed) {
+        sessionStorage.setItem('redir_guard','1');
+        location.replace('./index.html');
+      }
+      
+      // デバッグ用ログ（埋め込み判定の確認）
+      console.log('🔍 直アクセス防止チェック:', {
+        hasParams, hasCtx, inEmbed,
+        referrer: document.referrer,
+        ancestorOrigins: location.ancestorOrigins,
+        windowParent: window.parent !== window
+      });
+      
+      // Studio埋め込み診断スクリプト（コンソールにコピペ用）
+      console.log('🔧 埋め込み診断スクリプト（以下をコピペして実行）:');
+      console.log(`
+(async()=>{
+  const ORG='https://student-id-generator.pages.dev';
+  const show=(lab,r)=>console.log(lab,'=>',r.status, r.headers.get('content-type')||'', r.headers.get('location')||'');
+  // 1) /generator.html の応答（リダイレクトなし、200で返る）
+  let r = await fetch(ORG+'/generator.html',{redirect:'manual'});
+  show('/generator.html', r);
+  r.headers.forEach((v,k)=>/frame-ancestors|x-frame-options|location/i.test(k)&&console.log(k+':',v));
+  // 2) JS/MIME
+  await fetch(ORG+'/assets/js/app.js?v=20250902',{cache:'no-store'}).then(r=>show('app.js', r));
+  // 3) 台紙PNG（初期描画のトリガー）
+  await fetch(ORG+'/assets/img/student_template.png',{cache:'no-store'}).then(r=>show('template.png', r));
+})();
+      `);
+    })();
+  </script>
+</head>
+<body>
+  <header>
+    <!-- ヘッダータイトル削除 -->
+  </header>
+
+  <main class="generator-container">
+    <!-- 進捗バー -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div class="cards-grid">
+      <section class="form-card">
+        <h2>学生証を作成</h2>
+        <div id="studentForm">
+          <div class="form-group">
+          <label class="file-input-label" for="photoInput">
+            画像を選択
+            <input type="file" id="photoInput" accept="image/*">
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>
+            氏名（漢字）
+            <input type="text" id="nameJa" placeholder="例：高森のばら" autocomplete="off" autocapitalize="off" spellcheck="false">
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>
+            氏名（ローマ字）
+            <input type="text" id="nameEn" placeholder="例：Takamori Nobara" autocapitalize="words" inputmode="latin" spellcheck="false" autocomplete="off">
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>
+            生年月日
+          </label>
+          <div class="date-inputs">
+            <div class="number-input">
+              <select id="dobMonth" autocomplete="one-time-code">
+                <option value="">月</option>
+                <option value="1">1月</option>
+                <option value="2">2月</option>
+                <option value="3">3月</option>
+                <option value="4">4月</option>
+                <option value="5">5月</option>
+                <option value="6">6月</option>
+                <option value="7">7月</option>
+                <option value="8">8月</option>
+                <option value="9">9月</option>
+                <option value="10">10月</option>
+                <option value="11">11月</option>
+                <option value="12">12月</option>
+              </select>
+            </div>
+            <div class="number-input">
+              <select id="dobDay" autocomplete="one-time-code">
+                <option value="">日</option>
+                <option value="1">1日</option>
+                <option value="2">2日</option>
+                <option value="3">3日</option>
+                <option value="4">4日</option>
+                <option value="5">5日</option>
+                <option value="6">6日</option>
+                <option value="7">7日</option>
+                <option value="8">8日</option>
+                <option value="9">9日</option>
+                <option value="10">10日</option>
+                <option value="11">11日</option>
+                <option value="12">12日</option>
+                <option value="13">13日</option>
+                <option value="14">14日</option>
+                <option value="15">15日</option>
+                <option value="16">16日</option>
+                <option value="17">17日</option>
+                <option value="18">18日</option>
+                <option value="19">19日</option>
+                <option value="20">20日</option>
+                <option value="21">21日</option>
+                <option value="22">22日</option>
+                <option value="23">23日</option>
+                <option value="24">24日</option>
+                <option value="25">25日</option>
+                <option value="26">26日</option>
+                <option value="27">27日</option>
+                <option value="28">28日</option>
+                <option value="29">29日</option>
+                <option value="30">30日</option>
+                <option value="31">31日</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 診断ゲーム連携ボタン（診断結果設定時のみ表示） -->
+        <div id="diagnosisButtons" style="display: none; margin-top: 1rem; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" id="backToDiagnosisBtn" style="background: linear-gradient(135deg, #98d7a5, #98c8a8); color: white; flex: 1; min-width: 120px;">
+            診断に戻る
+          </button>
+          <button type="button" id="viewDiagnosisResultBtn" style="background: linear-gradient(135deg, #87ceeb, #98c8e8); color: white; flex: 1; min-width: 120px;">
+            診断結果を見る
+          </button>
+        </div>
+      </section>
+
+      <section class="preview-card">
+        <div class="card-header">
+          プレビュー
+        </div>
+        <div class="card-body">
+          <canvas id="cardCanvas" width="800" height="500"></canvas>
+          <img id="cardPreview" alt="学生証プレビュー" style="display: none;">
+        </div>
+        <small style="display:block; margin:.5rem 0 0; font-size:12px; color:#888; text-align:center;">
+          ※PCはプレビュー画像の上で右クリック →「名前を付けて画像を保存」<br>
+          ※共有URLは必ず「URLをコピー」ボタンから取得してください
+        </small>
+        <div class="card-footer">
+          <button type="button" id="downloadBtn">
+            画像を保存
+          </button>
+          <script>
+            document.getElementById('downloadBtn')?.addEventListener('click', (e) => {
+              e.preventDefault(); e.stopPropagation();
+              try {
+                // 直前生成フラグ（ガードを通す）
+                sessionStorage.setItem('as_chronicle_last_result','1');
+                const cvs = document.getElementById('cardCanvas');
+                if (cvs) window.downloadCanvasAsImage?.(cvs, '放課後クロニクル_学生証.png');
+              } catch(e){}
+            }, { passive:false });
+          </script>
+          <button type="button" id="twitterBtn" class="btn-twitter">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            Xに投稿
+          </button>
+          <button type="button" id="urlBtn">
+            URLをコピー
+          </button>
+        </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+          <div class="footer-content" style="text-align: center; padding: 1rem; color: #666;">
+        <a href="./privacy.html" style="color: #2E8B57; text-decoration: none; margin: 0 1rem;">
+          プライバシーポリシー
+        </a>
+      </div>
+  </footer>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>処理中...</p>
+  </div>
+
+  <!-- トースト表示 -->
+  <div id="toast" class="toast" style="display: none;">
+    <div class="toast-content">
+      <span id="toastMessage"></span>
+    </div>
+  </div>
+
+  <!-- 進捗バー制御 -->
+  <script>
+    // 進捗バーの更新
+    function updateProgress() {
+      const progressFill = document.getElementById('progressFill');
+      if (!progressFill) return;
+      
+      let completedFields = 0;
+      const totalFields = 6; // 画像、氏名（漢字）、氏名（ローマ字）、生年月日、学科、部活動
+      
+      // 画像が選択されているかチェック
+      const photoInput = document.getElementById('photoInput');
+      if (photoInput && photoInput.files && photoInput.files.length > 0) {
+        completedFields++;
+      }
+      
+      // 氏名（漢字）が入力されているかチェック
+      const nameJa = document.getElementById('nameJa');
+      if (nameJa && nameJa.value.trim()) {
+        completedFields++;
+      }
+      
+      // 氏名（ローマ字）が入力されているかチェック
+      const nameEn = document.getElementById('nameEn');
+      if (nameEn && nameEn.value.trim()) {
+        completedFields++;
+      }
+      
+      // 生年月日が選択されているかチェック
+      const dobMonth = document.getElementById('dobMonth');
+      const dobDay = document.getElementById('dobDay');
+      if (dobMonth && dobDay && dobMonth.value && dobDay.value) {
+        completedFields++;
+      }
+      
+      // 学科が選択されているかチェック
+      const department = document.getElementById('department');
+      if (department && department.value) {
+        completedFields++;
+      }
+      
+      // 部活動が選択されているかチェック
+      const club = document.getElementById('club');
+      if (club && club.value) {
+        completedFields++;
+      }
+      
+      // 進捗率を計算して更新
+      const progress = (completedFields / totalFields) * 100;
+      progressFill.style.width = `${progress}%`;
+    }
+    
+    // フォーム要素の変更を監視
+    function setupProgressTracking() {
+      const formElements = [
+        'photoInput', 'nameJa', 'nameEn', 'dobMonth', 'dobDay', 'department', 'club'
+      ];
+      
+      formElements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          if (element.type === 'file') {
+            element.addEventListener('change', updateProgress);
+          } else if (element.tagName === 'SELECT') {
+            element.addEventListener('change', updateProgress);
+          } else {
+            element.addEventListener('input', updateProgress);
+          }
+        }
+      });
+    }
+  </script>
+
+  <!-- 診断ゲーム連携処理 -->
+  <script>
+    // 放課後クロニクル診断ゲームからの連携処理（セキュリティ強化版）
+    document.addEventListener('DOMContentLoaded', function() {
+      // 状態復元処理
+      function restoreStudentIdState() {
+        try {
+          const savedResult = window.loadResult ? window.loadResult() : null;
+          if (savedResult && savedResult.public_id && savedResult.version) {
+            console.log('学生証の状態を復元します:', savedResult);
+            
+            // 共有URLを復元
+            if (window.buildShareUrlWithImage) {
+              const shareUrl = window.buildShareUrlWithImage({
+                public_id: savedResult.public_id,
+                version: savedResult.version
+              });
+              window.__shareUrl = shareUrl;
+              
+              // 共有リンクを更新
+              if (window.updateShareLinksWithImage) {
+                window.updateShareLinksWithImage(savedResult, '学生証が復元されました');
+              }
+            }
+            
+            // OGP画像URLを復元
+            if (savedResult.eager_url) {
+              window.__ogpImageUrl = savedResult.eager_url;
+            }
+            
+            // 画像データを復元
+            if (savedResult.imageData) {
+              window.__lastImageData = savedResult.imageData;
+            }
+            
+            // フォーム値を復元
+            if (savedResult.formData) {
+              const { nameJa, nameEn, dobMonth, dobDay } = savedResult.formData;
+              if (nameJa && document.getElementById('nameJa')) {
+                document.getElementById('nameJa').value = nameJa;
+              }
+              if (nameEn && document.getElementById('nameEn')) {
+                document.getElementById('nameEn').value = nameEn;
+              }
+              if (dobMonth && document.getElementById('dobMonth')) {
+                document.getElementById('dobMonth').value = dobMonth;
+              }
+              if (dobDay && document.getElementById('dobDay')) {
+                document.getElementById('dobDay').value = dobDay;
+              }
+            }
+            
+            // プレビューを再描画
+            if (typeof window.drawStudentCard === 'function') {
+              setTimeout(() => window.drawStudentCard(), 100);
+            }
+            
+            console.log('✅ 学生証の状態が復元されました');
+          }
+        } catch (error) {
+          console.error('状態復元エラー:', error);
+        }
+      }
+      
+          // 状態復元を実行
+    restoreStudentIdState();
+    
+    // トースト表示機能
+    function showToast(message, duration = 3000) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      if (toast && toastMessage) {
+        toastMessage.textContent = message;
+        toast.style.display = 'block';
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+          toast.classList.add('hide');
+          setTimeout(() => {
+            toast.style.display = 'none';
+            toast.classList.remove('show', 'hide');
+          }, 300);
+        }, duration);
+      }
+    }
+    
+    window.showToast = showToast;
+      // 診断情報をsessionStorageにバックアップ（クエリがある場合のみ）
+      if (location.search) {
+        sessionStorage.setItem('diagCtx', location.search);
+      }
+      
+      // 安全なURLパラメータ取得
+      const department = window.Security ? window.Security.getSafeUrlParam('department') : new URLSearchParams(location.search).get('department');
+      const course = window.Security ? window.Security.getSafeUrlParam('course') : new URLSearchParams(location.search).get('course');
+      const club = window.Security ? window.Security.getSafeUrlParam('club') : new URLSearchParams(location.search).get('club');
+      
+      console.log('診断結果連携:', { department, course, club });
+
+      // 学科の自動設定
+      if (department && course) {
+        const selDept = document.getElementById('department');
+        if (selDept) {
+          // 既存の選択肢にない場合は動的に追加
+          const existingOption = Array.from(selDept.options).find(opt => opt.value === course);
+          if (!existingOption && course !== '') {
+            const newOption = document.createElement('option');
+            newOption.value = course;
+            newOption.textContent = course;
+            selDept.appendChild(newOption);
+          }
+          
+          selDept.value = course;
+          selDept.style.display = 'none';
+          
+          // ラベルを診断結果表示に変更（XSS対策：textContent使用）
+          const deptLabel = selDept.parentElement.querySelector('label');
+          if (deptLabel) {
+            // 安全な表示用HTMLを構築
+            const safeDepartment = document.createElement('div');
+            safeDepartment.style.cssText = 'padding: 0.75rem; background: #f8f9fa; border-radius: 8px; color: #666; border: 2px solid #e0e0e0;';
+            
+            const deptText = document.createTextNode(`${department}（${course}コース） `);
+            const resultSpan = document.createElement('span');
+            resultSpan.style.cssText = 'font-size: 0.8em; color: #999;';
+            resultSpan.textContent = '（診断結果）';
+            
+            safeDepartment.appendChild(deptText);
+            safeDepartment.appendChild(resultSpan);
+            
+            // 既存の内容をクリアして安全に追加
+            deptLabel.textContent = '学科';
+            deptLabel.appendChild(safeDepartment);
+          }
+        }
+      }
+
+      // 部活動の自動設定
+      if (club) {
+        const selClub = document.getElementById('club');
+        if (selClub) {
+          // 既存の選択肢にない場合は動的に追加
+          const existingOption = Array.from(selClub.options).find(opt => opt.value === club);
+          if (!existingOption && club !== '') {
+            const newOption = document.createElement('option');
+            newOption.value = club;
+            newOption.textContent = club;
+            selClub.appendChild(newOption);
+          }
+          
+          selClub.value = club;
+          selClub.style.display = 'none';
+          
+          // ラベルを診断結果表示に変更（XSS対策：textContent使用）
+          const clubLabel = selClub.parentElement.querySelector('label');
+          if (clubLabel) {
+            // 安全な表示用HTMLを構築
+            const safeClub = document.createElement('div');
+            safeClub.style.cssText = 'padding: 0.75rem; background: #f8f9fa; border-radius: 8px; color: #666; border: 2px solid #e0e0e0;';
+            
+            const clubText = document.createTextNode(`${club} `);
+            const resultSpan = document.createElement('span');
+            resultSpan.style.cssText = 'font-size: 0.8em; color: #999;';
+            resultSpan.textContent = '（診断結果）';
+            
+            safeClub.appendChild(clubText);
+            safeClub.appendChild(resultSpan);
+            
+            // 既存の内容をクリアして安全に追加
+            clubLabel.textContent = '部活動';
+            clubLabel.appendChild(safeClub);
+          }
+        }
+      }
+
+      // 診断結果が設定された場合、リアルタイムプレビューを更新
+      if (department || course || club) {
+        // 診断関連ボタンを表示
+        const diagnosisButtons = document.getElementById('diagnosisButtons');
+        if (diagnosisButtons) {
+          diagnosisButtons.style.display = 'flex';
+          
+          // 診断に戻るボタン
+          const backBtn = document.getElementById('backToDiagnosisBtn');
+          if (backBtn) {
+            backBtn.onclick = () => {
+              const url = new URL('index.html', location.href);
+              if (location.search.includes('embed=1')) url.searchParams.set('embed','1');
+              location.href = url.toString();
+            };
+          }
+          
+          // 診断結果を見るボタン
+          const viewResultBtn = document.getElementById('viewDiagnosisResultBtn');
+          if (viewResultBtn) {
+            viewResultBtn.onclick = () => {
+              // URLパラメータを保持してindex.htmlの結果ページに移動
+              const currentParams = new URLSearchParams(location.search);
+              const diagnosisUrl = new URL('index.html', window.location.href);
+              diagnosisUrl.searchParams.set('showResult', 'true');
+              diagnosisUrl.searchParams.set('department', currentParams.get('department') || '');
+              diagnosisUrl.searchParams.set('course', currentParams.get('course') || '');
+              diagnosisUrl.searchParams.set('club', currentParams.get('club') || '');
+              diagnosisUrl.searchParams.set('previewMessage', currentParams.get('previewMessage') || '');
+              diagnosisUrl.searchParams.set('episodeMessage', currentParams.get('episodeMessage') || '');
+              
+              // 埋め込みモードの場合はembed=1を付与
+              if (location.search.includes('embed=1')) diagnosisUrl.searchParams.set('embed','1');
+              
+              window.location.href = diagnosisUrl.toString();
+            };
+          }
+        }
+
+        // 少し遅延を入れてからプレビュー更新（他の初期化が完了してから）
+        setTimeout(() => {
+          if (typeof drawStudentCard === 'function') {
+            drawStudentCard();
+          }
+        }, 500);
+      }
+      
+      // 進捗バーの初期化
+      setupProgressTracking();
+      updateProgress();
+      
+      // 端末別の保存UI
+      const isPc = matchMedia('(pointer:fine)').matches && (navigator.maxTouchPoints || 0) === 0;
+      const saveBtn = document.getElementById('downloadBtn');
+      if (saveBtn) {
+        if (isPc) {
+          // PCはボタン不要（右クリック保存）
+          saveBtn.remove();
+        } else {
+          // モバイルはOGP画像を新規タブで開く（長押し保存）
+          saveBtn.onclick = () => {
+            if (window.__ogpImageUrl) window.open(window.__ogpImageUrl, '_blank', 'noopener');
+          };
+        }
+      }
+    });
+  </script>
+  
+  <!-- 埋め込みモード対応 -->
+  <script>
+    // 埋め込みモード対応も自前ドメインから読み込み
+    (function() {
+      const s = document.createElement('script');
+      s.src = (window.APP_ORIGIN || 'https://student-id-generator.pages.dev') + '/assets/js/embed-mode.js';
+      s.defer = true;
+      document.head.appendChild(s);
+    })();
+  </script>
+  
+  <!-- iPhoneでカメラが起動する件を修正 -->
+  <script>
+    // capture属性は既に削除済み
+  </script>
+  
+  <!-- 共有機能は共有ブリッジ経由で統一管理 -->
+  <!-- 共有ボタンは共有ブリッジを新規タブで開き、トップレベルでWeb Share実行 -->
+  <!-- これによりiframe内でのWeb Share拒否問題を回避 -->
+  
+
+</body>
+</html> 

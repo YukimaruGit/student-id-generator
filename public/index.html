@@ -861,6 +861,28 @@
       .unified-result-card .preview-msg {
         font-size: 1rem;
       }
+      
+      /* 学生証画像プレビュー用スタイル */
+      .student-card-preview {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .preview-image-container {
+        text-align: center;
+        margin-top: 1rem;
+      }
+      
+      .preview-image-container img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
     }
   </style>
 </head>
@@ -908,6 +930,14 @@
               <!-- 個性エピソードがここに表示される -->
             </div>
           </div>
+          
+          <!-- 学生証画像プレビューセクション -->
+          <div class="student-card-preview" id="studentCardPreview" style="display: none;">
+            <div class="episode-title"><i class="fas fa-id-card"></i> 学生証プレビュー</div>
+            <div class="preview-image-container">
+              <img id="studentCardImage" src="" alt="学生証" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);">
+            </div>
+          </div>
         </div>
 
         <div class="button-container">
@@ -946,6 +976,8 @@
       const club = params.get('club');
       const previewMessage = params.get('previewMessage');
       const episodeMessage = params.get('episodeMessage');
+      const studentCardImage = params.get('studentCardImage');
+      const studentCardImageId = params.get('studentCardImageId');
       
       // showResultがtrueで診断結果の情報がある場合、直接結果を表示
       if (showResult === 'true' && department && course && club) {
@@ -985,6 +1017,37 @@
           // フォールバック: 新しいエピソードを生成
           const fallbackEpisode = episodeTemplates[Math.floor(Math.random() * episodeTemplates.length)];
           document.getElementById('episodeMsg').textContent = fallbackEpisode;
+        }
+        
+        // 学生証画像がある場合、プレビューを表示
+        if (studentCardImage) {
+          const previewSection = document.getElementById('studentCardPreview');
+          const previewImage = document.getElementById('studentCardImage');
+          
+          if (previewSection && previewImage) {
+            previewImage.src = studentCardImage;
+            previewSection.style.display = 'block';
+            console.log('✅ 学生証画像プレビューを表示:', studentCardImage);
+          }
+        }
+        
+        // 学生証画像のみがある場合（共有URLからのアクセス）もプレビューを表示
+        else if (studentCardImage) {
+          console.log('🎯 学生証画像プレビューモード');
+          
+          // 診断ゲームの最初の画面を表示
+          document.getElementById('questionContainer').style.display = 'block';
+          document.getElementById('resultContainer').style.display = 'none';
+          
+          // 学生証画像プレビューを表示
+          const previewSection = document.getElementById('studentCardPreview');
+          const previewImage = document.getElementById('studentCardImage');
+          
+          if (previewSection && previewImage) {
+            previewImage.src = studentCardImage;
+            previewSection.style.display = 'block';
+            console.log('✅ 共有URLからの学生証画像プレビューを表示:', studentCardImage);
+          }
         }
         
         // ボタンの処理

@@ -7,9 +7,12 @@
   <meta property="og:title" content="放課後クロニクル 学生証ジェネレーター">
   <meta property="og:description" content="あなただけの学生証を作成しよう！">
   <meta property="og:image" content="https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png">
-  <meta property="og:url" content="https://student-id-generator.pages.dev/">
+  <meta property="og:url" content="https://preview.studio.site/live/1Va6D4lMO7/student-id">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="放課後クロニクル">
+  <meta name="twitter:site" content="@as_chronicle">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
   
   <style>
@@ -159,6 +162,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
+
     }
     
     .action-buttons {
@@ -197,18 +201,25 @@
       transform: translateY(-2px);
     }
     
-    .preview-area {
-      width: 100%;
-      height: 300px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid #ecf0f1;
-    }
+         .preview-area {
+       width: 100%;
+       height: 400px;
+       background: white;
+       border-radius: 12px;
+       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+       margin-bottom: 1.5rem;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       border: 1px solid #ecf0f1;
+       position: relative;
+     }
+     
+     .preview-area canvas {
+       max-width: 100%;
+       max-height: 100%;
+       object-fit: contain;
+     }
     
     .preview-placeholder {
       color: #95a5a6;
@@ -217,12 +228,16 @@
       line-height: 1.6;
     }
     
-    .instructions {
-      color: #7f8c8d;
-      font-size: 0.85rem;
-      line-height: 1.6;
-      margin-bottom: 2rem;
-    }
+         .instructions {
+       color: #7f8c8d;
+       font-size: 0.85rem;
+       line-height: 1.6;
+       margin: 1rem 0 2rem 0;
+       padding: 1rem;
+       background: rgba(255, 255, 255, 0.1);
+       border-radius: 8px;
+       border-left: 3px solid var(--accent-color);
+     }
     
     .sharing-buttons {
       display: grid;
@@ -247,10 +262,19 @@
       background: #95a5a6;
     }
     
-    .btn-copy-url:hover {
-      background: #7f8c8d;
-      transform: translateY(-2px);
-    }
+         .btn-copy-url:hover {
+       background: #7f8c8d;
+       transform: translateY(-2px);
+     }
+     
+     .btn-primary {
+       background: var(--primary-color);
+     }
+     
+     .btn-primary:hover {
+       background: #c8a2c8;
+       transform: translateY(-2px);
+     }
     
     .diagnosis-result {
       background: rgba(176, 196, 222, 0.3);
@@ -350,9 +374,9 @@
         height: 150px;
       }
       
-      .preview-area {
-        height: 250px;
-      }
+             .preview-area {
+         height: 300px;
+       }
     }
     
     @media (max-width: 480px) {
@@ -403,7 +427,7 @@
   <div class="header-line"></div>
   
   <div class="container">
-    <a href="/" class="back-link">← 診断ゲームに戻る</a>
+         <!-- 診断ゲームに戻るボタンは削除済み -->
     
     <div class="main-content">
       <!-- 左パネル: 学生証作成フォーム -->
@@ -415,20 +439,20 @@
         </div>
         
         <form id="studentForm">
-          <div class="form-group">
-            <label for="name">氏名（漢字）</label>
-            <input type="text" id="name" placeholder="例: 高森のばら" required>
+                                <div class="form-group">
+            <label for="nameJa">氏名（漢字）</label>
+            <input type="text" id="nameJa" placeholder="例: 高森のばら" required oninput="updateStudentCard()">
           </div>
           
           <div class="form-group">
             <label for="nameEn">氏名（ローマ字）</label>
-            <input type="text" id="nameEn" placeholder="例: Takamori Nobara" required>
+            <input type="text" id="nameEn" placeholder="例: Takamori Nobara" required oninput="updateStudentCard()">
           </div>
           
           <div class="form-row">
             <div class="form-group">
               <label for="dobMonth">生年月日</label>
-              <select id="dobMonth" required>
+              <select id="dobMonth" required onchange="updateStudentCard()">
                 <option value="">月</option>
                 <option value="1">1月</option>
                 <option value="2">2月</option>
@@ -447,7 +471,7 @@
             
             <div class="form-group">
               <label for="dobDay">&nbsp;</label>
-              <select id="dobDay" required>
+              <select id="dobDay" required onchange="updateStudentCard()">
                 <option value="">日</option>
                 <option value="1">1日</option>
                 <option value="2">2日</option>
@@ -484,10 +508,12 @@
             </div>
           </div>
           
-          <div class="action-buttons">
-            <button type="button" class="btn btn-return" onclick="returnToDiagnosis()">診断に戻る</button>
-            <button type="button" class="btn btn-view-results" onclick="viewDiagnosisResults()">診断結果を見る</button>
-          </div>
+
+           
+           <div class="action-buttons" style="margin-top: 1rem;">
+             <button type="button" class="btn btn-return" onclick="returnToDiagnosis()">診断に戻る</button>
+             <button type="button" class="btn btn-view-results" onclick="viewDiagnosisResults()">診断結果を見る</button>
+           </div>
         </form>
       </div>
       
@@ -496,22 +522,21 @@
         <h2 class="panel-title">プレビュー</h2>
         
         <div class="preview-area" id="previewArea">
-          <div class="preview-placeholder">
+          <div id="previewPlaceholder" class="preview-placeholder">
             学生証のプレビューが<br>ここに表示されます
           </div>
+                     <canvas id="cardCanvas" width="800" height="500" style="display: none; max-width: 100%; height: auto; border: 2px solid #ddd; border-radius: 8px;"></canvas>
         </div>
         
-        <div class="instructions">
-          ※PCはプレビュー画像の上で右クリック→「名前を付けて画像を保存」<br>
-          ※共有URLは必ず「URLをコピー」ボタンから取得してください
-        </div>
+                 <div class="instructions">
+           ※完成した学生証は「画像を保存」ボタンで保存できます<br>
+           ※共有URLは必ず「URLをコピー」ボタンから取得してください
+         </div>
         
-        <div class="sharing-buttons">
-          <button class="btn btn-share-x" onclick="shareToX()">
-            <span>X</span> Xに投稿
-          </button>
-          <button class="btn btn-copy-url" onclick="copyUrl()">URLをコピー</button>
-        </div>
+                 <div class="sharing-buttons">
+           <button class="btn btn-primary" onclick="saveStudentCard()">画像を保存</button>
+           <button class="btn btn-copy-url" onclick="copyUrl()">URLをコピー</button>
+         </div>
       </div>
     </div>
   </div>
@@ -523,22 +548,36 @@
     const course = urlParams.get('course');
     const club = urlParams.get('club');
     
-    // 診断結果が設定されている場合、表示
-    if (department || course || club) {
-      const form = document.getElementById('studentForm');
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'diagnosis-result';
-      infoDiv.innerHTML = `
-        <h3>診断結果</h3>
-        ${department ? `<div class="diagnosis-item"><span class="diagnosis-label">学科:</span><span class="diagnosis-value">${department}</span></div>` : ''}
-        ${course ? `<div class="diagnosis-item"><span class="diagnosis-label">コース:</span><span class="diagnosis-value">${course}</span></div>` : ''}
-        ${club ? `<div class="diagnosis-item"><span class="diagnosis-label">部活動:</span><span class="diagnosis-value">${club}</span></div>` : ''}
-      `;
-      form.insertBefore(infoDiv, form.firstChild);
-    }
+    // 診断結果は学生証のプレビューに反映されるため、付箋は表示しない
     
-    // 画像選択機能
-    function selectImage() {
+    // グローバル変数
+    let selectedImage = null;
+    let currentNameJa = '';
+    let currentNameEn = '';
+    let currentDobMonth = '';
+    let currentDobDay = '';
+    
+         // ページ読み込み時に初期描画
+     window.addEventListener('load', function() {
+       drawStudentCard();
+       enableRightClickSave(); // 右クリック保存機能を有効化
+     });
+    
+         // Base64URL変換用ヘルパー関数
+     function b64UrlFromUtf8(jsonStr) {
+       const bin = Array.from(new TextEncoder().encode(jsonStr), b => String.fromCharCode(b)).join('');
+       return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+     }
+
+     // 共有URL作成関数
+     function buildShareUrlWithImage({ public_id, version, eager_url }) {
+       const payload = { p: public_id, v: version, i: eager_url || '' };
+       const slug = b64UrlFromUtf8(JSON.stringify(payload));
+       return new URL(`/s/${slug}`, location.origin).toString();
+     }
+
+     // 画像選択機能
+     function selectImage() {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
@@ -547,10 +586,14 @@
         if (file) {
           const reader = new FileReader();
           reader.onload = function(e) {
+            selectedImage = e.target.result;
             const imageSelection = document.querySelector('.image-selection');
             imageSelection.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
             imageSelection.style.border = '3px solid var(--accent-color)';
             imageSelection.style.background = 'rgba(152, 215, 165, 0.1)';
+            
+            // 画像選択時に学生証を更新
+            drawStudentCard();
           };
           reader.readAsDataURL(file);
         }
@@ -560,89 +603,434 @@
     
     // 診断に戻る
     function returnToDiagnosis() {
-      window.location.href = '/';
+      window.location.href = 'index.html';
     }
     
-    // 診断結果を見る
-    function viewDiagnosisResults() {
-      if (department || course || club) {
-        alert(`診断結果:\n学科: ${department || '未設定'}\nコース: ${course || '未設定'}\n部活動: ${club || '未設定'}`);
-      } else {
-        alert('診断結果が設定されていません。\nまずは診断ゲームを完了してください。');
-      }
-    }
+         // 診断結果を見る
+     function viewDiagnosisResults() {
+       // 現在の診断結果パラメータを使ってindex.htmlに遷移
+       const url = new URL('index.html', window.location.href);
+       url.searchParams.set('showResult', 'true'); // '1'ではなく'true'を使用
+       if (department) url.searchParams.set('department', department);
+       if (course) url.searchParams.set('course', course);
+       if (club) url.searchParams.set('club', club);
+       
+       // プレビューメッセージとエピソードメッセージも設定
+       const previewMessage = urlParams.get('previewMessage');
+       const episodeMessage = urlParams.get('episodeMessage');
+       if (previewMessage) url.searchParams.set('previewMessage', previewMessage);
+       if (episodeMessage) url.searchParams.set('episodeMessage', episodeMessage);
+       
+       window.location.href = url.toString();
+     }
     
-    // Xに投稿
-    function shareToX() {
-      alert('Xへの投稿機能は準備中です。\n\n学生証の画像が生成された後に利用可能になります。');
-    }
+         // 学生証画像を保存
+     function saveStudentCard() {
+       const canvas = document.getElementById('cardCanvas');
+       const previewPlaceholder = document.getElementById('previewPlaceholder');
+       
+       if (previewPlaceholder.style.display === 'block') {
+         alert('プレビューが表示されていません。まず学生証を作成してください。');
+         return;
+       }
+       
+       try {
+         // 画像をダウンロード
+         const link = document.createElement('a');
+         link.download = 'student_card.png';
+         link.href = canvas.toDataURL('image/png', 1.0);
+         document.body.appendChild(link);
+         link.click();
+         document.body.removeChild(link);
+         
+         // 成功メッセージ
+         const notification = document.createElement('div');
+         notification.style.cssText = `
+           position: fixed;
+           top: 20px;
+           right: 20px;
+           background: #4CAF50;
+           color: white;
+           padding: 12px 20px;
+           border-radius: 8px;
+           z-index: 1000;
+           font-family: 'Noto Sans JP', sans-serif;
+           box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+           font-size: 14px;
+         `;
+         notification.textContent = '学生証を保存しました！';
+         document.body.appendChild(notification);
+         
+         setTimeout(() => {
+           notification.remove();
+         }, 3000);
+       } catch (error) {
+         console.error('画像保存エラー:', error);
+         alert('画像の保存に失敗しました。もう一度お試しください。');
+       }
+     }
+     
+     // Xに投稿
+     function shareToX() {
+       alert('Xへの投稿機能は準備中です。\n\n学生証の画像が生成された後に利用可能になります。');
+     }
     
     // URLをコピー
     function copyUrl() {
-      const currentUrl = window.location.href;
-      navigator.clipboard.writeText(currentUrl).then(function() {
-        alert('URLをクリップボードにコピーしました！');
-      }).catch(function() {
-        // フォールバック
-        const textArea = document.createElement('textarea');
-        textArea.value = currentUrl;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        alert('URLをクリップボードにコピーしました！');
-      });
+      // 学生証画像をCloudinaryにアップロードして共有URLを生成
+      uploadStudentCardToCloudinary();
     }
     
-    // フォーム送信時の処理
-    document.getElementById('studentForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const name = document.getElementById('name').value;
+         // 学生証画像をCloudinaryにアップロード
+     function uploadStudentCardToCloudinary() {
+       const canvas = document.getElementById('cardCanvas');
+       const previewPlaceholder = document.getElementById('previewPlaceholder');
+       
+       if (previewPlaceholder.style.display === 'block') {
+         alert('プレビューが表示されていません。まず学生証を作成してください。');
+         return;
+       }
+       
+       // ローディング表示
+       const copyButton = document.querySelector('.btn-copy-url');
+       const originalText = copyButton.textContent;
+       copyButton.textContent = 'アップロード中...';
+       copyButton.disabled = true;
+       
+       // Canvasから画像データを取得
+       canvas.toBlob(function(blob) {
+                   // FormDataを作成
+          const formData = new FormData();
+          formData.append('file', blob, 'student_card.png');
+          formData.append('upload_preset', 'student_card_AS_chronicle');
+          formData.append('folder', 'as_chronicle/student_card');
+         
+                   // Cloudinaryにアップロード
+          fetch('https://api.cloudinary.com/v1_1/di5xqlddy/image/upload', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => {
+            if (!response.ok) {
+              // より詳細なエラー情報を取得
+              return response.text().then(text => {
+                try {
+                  const errorData = JSON.parse(text);
+                  throw new Error(`Cloudinaryエラー: ${errorData.error?.message || errorData.error || `HTTP ${response.status}`}`);
+                } catch (e) {
+                  throw new Error(`HTTP error! status: ${response.status}, response: ${text.substring(0, 100)}`);
+                }
+              });
+            }
+            return response.json();
+          })
+         .then(data => {
+           if (data.secure_url) {
+                          // SNS共有用のURLを生成（/s/{slug}形式）
+             const shareUrl = buildShareUrlWithImage({
+               public_id: data.public_id,
+               version: data.version,
+               eager_url: data.secure_url
+             });
+             
+                            // URLをクリップボードにコピー
+               navigator.clipboard.writeText(shareUrl).then(function() {
+                 alert('SNS共有用URLをクリップボードにコピーしました！\n\nこのURLを共有すると、他の人が作成した学生証をプレビューできます。\n\nURL: ' + shareUrl);
+               }).catch(function() {
+                 // フォールバック
+                 const textArea = document.createElement('textarea');
+                 textArea.value = shareUrl;
+                 document.body.appendChild(textArea);
+                 textArea.select();
+                 document.execCommand('copy');
+                 document.body.removeChild(textArea);
+                 alert('SNS共有用URLをクリップボードにコピーしました！\n\nURL: ' + shareUrl);
+               });
+           } else {
+             throw new Error('アップロードレスポンスにsecure_urlが含まれていません');
+           }
+         })
+         .catch(error => {
+           console.error('アップロードエラー:', error);
+           let errorMessage = '画像のアップロードに失敗しました。';
+           
+           if (error.message.includes('Overwrite parameter')) {
+             errorMessage += '\n\nCloudinaryの設定に問題があります。';
+           } else if (error.message.includes('HTTP error! status: 400')) {
+             errorMessage += '\n\nアップロードパラメータに問題があります。';
+           } else {
+             errorMessage += '\n\nエラー詳細: ' + error.message;
+           }
+           
+           errorMessage += '\n\nもう一度お試しください。';
+           alert(errorMessage);
+         })
+         .finally(() => {
+           // ボタンを元に戻す
+           copyButton.textContent = originalText;
+           copyButton.disabled = false;
+         });
+       }, 'image/png');
+     }
+    
+    // 学生証を更新する関数
+    function updateStudentCard() {
+      const nameJa = document.getElementById('nameJa').value;
       const nameEn = document.getElementById('nameEn').value;
       const dobMonth = document.getElementById('dobMonth').value;
       const dobDay = document.getElementById('dobDay').value;
       
-      if (!name || !nameEn || !dobMonth || !dobDay) {
-        alert('すべての項目を入力してください。');
-        return;
-      }
+      // グローバル変数を更新
+      currentNameJa = nameJa;
+      currentNameEn = nameEn;
+      currentDobMonth = dobMonth;
+      currentDobDay = dobDay;
       
-      // プレビューを表示
-      showPreview(name, nameEn, dobMonth, dobDay);
-    });
-    
-    function showPreview(name, nameEn, dobMonth, dobDay) {
-      const previewArea = document.getElementById('previewArea');
-      
-      previewArea.innerHTML = `
-        <div class="student-info">
-          <h3>学生証情報</h3>
-          <div class="info-item">
-            <span class="info-label">氏名（漢字）:</span>
-            <span class="info-value">${name}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">氏名（ローマ字）:</span>
-            <span class="info-value">${nameEn}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">生年月日:</span>
-            <span class="info-value">${dobMonth}月${dobDay}日</span>
-          </div>
-          ${department ? `<div class="info-item"><span class="info-label">学科:</span><span class="info-value">${department}</span></div>` : ''}
-          ${course ? `<div class="info-item"><span class="info-label">コース:</span><span class="info-value">${course}</span></div>` : ''}
-          ${club ? `<div class="info-item"><span class="info-label">部活動:</span><span class="info-value">${club}</span></div>` : ''}
-        </div>
-        <p style="color: var(--accent-color); font-weight: 600; margin: 0; text-align: center;">学生証の生成が完了しました！</p>
-      `;
-      
-      // プレビューセクションまでスクロール
-      document.querySelector('.panel:last-child').scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
+      // 学生証を描画
+      drawStudentCard();
     }
+    
+         
+    
+               // 右クリックを無効化（HTML保存を防ぐ）
+      function enableRightClickSave() {
+        const canvas = document.getElementById('cardCanvas');
+        if (canvas) {
+          // 右クリックを完全に無効化
+          canvas.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+          });
+          
+          // ダブルクリックも無効化
+          canvas.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+            return false;
+          });
+        }
+        
+        // ページ全体の右クリックを無効化
+        document.addEventListener('contextmenu', function(e) {
+          e.preventDefault();
+          return false;
+        });
+        
+        // ページ全体のダブルクリックも無効化
+        document.addEventListener('dblclick', function(e) {
+          e.preventDefault();
+          return false;
+        });
+      }
+     
+
+      
+      // 学生証を描画する関数
+      function drawStudentCard() {
+       console.log('drawStudentCard関数開始');
+       const canvas = document.getElementById('cardCanvas');
+       const ctx = canvas.getContext('2d');
+       const previewPlaceholder = document.getElementById('previewPlaceholder');
+       
+       console.log('Canvas要素:', canvas);
+       console.log('プレビュープレースホルダー:', previewPlaceholder);
+       
+       // プレースホルダーを非表示にしてCanvasを表示
+       previewPlaceholder.style.display = 'none';
+       canvas.style.display = 'block';
+       
+       // キャンバスをクリア
+       ctx.clearRect(0, 0, canvas.width, canvas.height);
+       
+       // 学生証テンプレート画像を読み込んで描画
+       const templateImg = new Image();
+       
+       // 画像読み込み成功時の処理
+       templateImg.onload = function() {
+         console.log('画像読み込み成功');
+         // テンプレート画像を描画
+         ctx.drawImage(templateImg, 0, 0, canvas.width, canvas.height);
+         
+                   // ユーザーがアップロードした画像を描画（generator.htmlと同じ配置方法）
+          if (selectedImage) {
+            const userImg = new Image();
+            userImg.onload = function() {
+              // 写真フレームの座標（完璧に調整済み【変更厳禁】）
+              const PHOTO_FRAME = {
+                x: 42,   // 完璧に調整済み【変更厳禁】
+                y: 125,   // 完璧に調整済み【変更厳禁】
+                width: 255,  // 完璧に調整済み【変更厳禁】
+                height: 324  // 完璧に調整済み【変更厳禁】
+              };
+              
+              // 画像処理ロジック（完璧に調整済み【変更厳禁】）
+              ctx.save();
+              ctx.beginPath();
+              ctx.rect(PHOTO_FRAME.x, PHOTO_FRAME.y, PHOTO_FRAME.width, PHOTO_FRAME.height);
+              ctx.clip();
+              
+              const frameAspect = PHOTO_FRAME.width / PHOTO_FRAME.height;
+              const imgAspect = userImg.width / userImg.height;
+              
+              let drawWidth, drawHeight, drawX, drawY;
+
+              if (imgAspect > frameAspect) {
+                drawHeight = PHOTO_FRAME.height;
+                drawWidth = PHOTO_FRAME.height * imgAspect;
+                drawX = PHOTO_FRAME.x - (drawWidth - PHOTO_FRAME.width) / 2;
+                drawY = PHOTO_FRAME.y;
+              } else {
+                drawWidth = PHOTO_FRAME.width;
+                drawHeight = PHOTO_FRAME.width / imgAspect;
+                drawX = PHOTO_FRAME.x;
+                drawY = PHOTO_FRAME.y - (drawHeight - PHOTO_FRAME.height) / 2;
+              }
+              
+              ctx.drawImage(userImg, drawX, drawY, drawWidth, drawHeight);
+              ctx.restore();
+              
+              console.log('✅ アップロード画像を描画完了');
+              
+              // 学生情報を描画
+              drawStudentInfo();
+            };
+            userImg.src = selectedImage;
+          } else {
+            // 画像がない場合は学生情報のみ描画
+            drawStudentInfo();
+          }
+       };
+       
+       // 画像読み込みエラー時のフォールバック
+       templateImg.onerror = function() {
+         console.log('画像読み込みエラー');
+         // テンプレート画像が読み込めない場合のフォールバック描画
+         const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+         gradient.addColorStop(0, '#f8f9fa');
+         gradient.addColorStop(1, '#e9ecef');
+         ctx.fillStyle = gradient;
+         ctx.fillRect(0, 0, canvas.width, canvas.height);
+         
+         // 枠線を描画
+         ctx.strokeStyle = '#6c757d';
+         ctx.lineWidth = 3;
+         ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+         
+         // タイトル
+         ctx.fillStyle = '#495057';
+         ctx.font = 'bold 32px "Noto Sans JP", sans-serif';
+         ctx.textAlign = 'center';
+         ctx.fillText('学生証', canvas.width / 2, 80);
+         
+         // 学生情報
+         ctx.font = 'bold 24px "Noto Sans JP", sans-serif';
+         ctx.fillStyle = '#212529';
+         ctx.textAlign = 'left';
+         ctx.fillText(`氏名: ${currentNameJa || ''}`, 50, 180);
+         ctx.fillText(`Name: ${currentNameEn || ''}`, 50, 220);
+         ctx.fillText(`生年月日: ${currentDobMonth || ''}月${currentDobDay || ''}日`, 50, 260);
+         
+         if (department) ctx.fillText(`学科: ${department}`, 50, 300);
+         if (course) ctx.fillText(`コース: ${course}`, 50, 330);
+         if (club) ctx.fillText(`部活動: ${club}`, 50, 360);
+       };
+       
+       // テンプレート画像のパスを設定
+       templateImg.src = 'assets/img/student_template.png';
+       console.log('画像パス設定完了:', templateImg.src);
+     }
+     
+     // 学生情報を描画する関数
+     function drawStudentInfo() {
+       const canvas = document.getElementById('cardCanvas');
+       const ctx = canvas.getContext('2d');
+       
+       // 学生情報を描画（完璧な位置に調整済み【絶対変更禁止】）
+       ctx.font = '34px "Noto Serif JP", serif';
+       ctx.fillStyle = '#000';
+       ctx.textAlign = 'left';
+       
+       // 氏名（漢字）を刻印（完璧な位置に調整済み）
+       if (currentNameJa) {
+         const nameX = Math.round(1400 / 2291 * 800);
+         const nameY = Math.round(540 / 1440 * 500);
+         ctx.fillText(currentNameJa, nameX, nameY);
+         console.log('✅ 氏名（漢字）を刻印:', currentNameJa, '位置:', nameX, nameY);
+       }
+       
+       // 氏名（ローマ字）を刻印（完璧な位置に調整済み）
+       if (currentNameEn) {
+         ctx.font = '16px "Noto Sans JP", sans-serif';
+         ctx.fillStyle = '#666';
+         const nameEnX = Math.round(1400 / 2291 * 800);
+         const nameEnY = Math.round(620 / 1440 * 500);
+         ctx.fillText(currentNameEn, nameEnX, nameEnY);
+         console.log('✅ 氏名（ローマ字）を刻印:', currentNameEn, '位置:', nameEnX, nameEnY);
+       }
+       
+       // 生年月日を刻印（完璧な位置に調整済み【絶対変更禁止】）
+       if (currentDobMonth && currentDobDay) {
+         ctx.font = '22px "Noto Sans JP", sans-serif';
+         ctx.fillStyle = '#000';
+         ctx.textAlign = 'center';
+         const monthX = Math.round(1570 / 2291 * 800);
+         const monthY = Math.round(1050 / 1440 * 500);
+         const dayX = Math.round(1720 / 2291 * 800);
+         const dayY = Math.round(1050 / 1440 * 500);
+         ctx.fillText(currentDobMonth, monthX, monthY);
+         ctx.fillText(currentDobDay, dayX, dayY);
+         console.log('✅ 生年月日を刻印:', `${currentDobMonth}月${currentDobDay}日`, '位置:', monthX, monthY, dayX, dayY);
+       }
+       
+       // 学科・コース・部活動を刻印（完璧な位置に調整済み【絶対変更禁止】）
+       if (department || course || club) {
+         // 学科 - 完璧な位置に調整済み【絶対変更禁止】
+         ctx.font = '22px "Noto Sans JP", sans-serif';
+         ctx.fillStyle = '#000';
+         ctx.textAlign = 'center';
+         const deptX = Math.round(1520 / 2291 * 800);
+         const deptY = Math.round(800 / 1440 * 500);
+         if (department) {
+           const cleanDepartment = department.replace(/科$/, '');
+           ctx.fillText(cleanDepartment, deptX, deptY);
+           console.log('✅ 学科を刻印:', cleanDepartment, '位置:', deptX, deptY);
+         }
+         
+         // コース - 完璧な位置に調整済み【絶対変更禁止】
+         ctx.font = '22px "Noto Sans JP", sans-serif';
+         ctx.fillStyle = '#000';
+         ctx.textAlign = 'center';
+         const courseX = Math.round(2000 / 2291 * 800);
+         const courseY = Math.round(800 / 1440 * 500);
+         if (course) {
+           // コース名に「コース」を追加
+           let displayCourse = course;
+           if (!course.endsWith('コース')) {
+             displayCourse = course + 'コース';
+           }
+           ctx.fillText(displayCourse, courseX, courseY);
+           console.log('✅ コースを刻印:', displayCourse, '位置:', courseX, courseY);
+         }
+         
+         // 部活 - 完璧な位置に調整済み【絶対変更禁止】
+         ctx.font = '22px "Noto Sans JP", sans-serif';
+         ctx.fillStyle = '#000';
+         ctx.textAlign = 'center';
+         const clubX = Math.round(1620 / 2291 * 800);
+         const clubY = Math.round(920 / 1440 * 500);
+         if (club) {
+           let displayClubName;
+           if (club === '帰宅') {
+             displayClubName = 'ー'; // 帰宅部の場合は横棒を表示
+           } else {
+             displayClubName = club.replace(/部$/, '');
+           }
+           ctx.fillText(displayClubName, clubX, clubY);
+           console.log('✅ 部活動を刻印:', displayClubName, '位置:', clubX, clubY);
+         }
+       }
+     }
+    
+
   </script>
 </body>
 </html>
