@@ -1,6 +1,7 @@
 // /functions/s/[slug].js
 export async function onRequest({ params, request }) {
   const { slug } = params;
+  
   try {
     // Base64URL → Uint8Array → UTF-8 文字列 → JSON
     const b64 = slug.replace(/-/g, '+').replace(/_/g, '/');
@@ -16,26 +17,30 @@ export async function onRequest({ params, request }) {
     const ogImage = `${PUBLIC_ORIGIN}/ogp/v${version}/${publicId}.jpg`;
     const dest = `https://preview.studio.site/live/1Va6D4lMO7/student-id?studentCardImage=${encodeURIComponent(ogImage)}`;
 
-    const html = `<!doctype html><html lang="ja"><head>
-<meta charset="utf-8"><title>学生証を表示中…</title>
-<meta property="og:title" content="放課後クロニクル 学生証">
-<meta property="og:description" content="あなたが作った学生証">
-<meta property="og:image" content="${ogImage}">
-<meta property="og:image:width" content="1200"><meta property="og:image:height" content="628">
-<meta property="og:url" content="${request.url}">
-<meta property="og:type" content="website"><meta property="og:site_name" content="放課後クロニクル">
-<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${ogImage}">
-<meta http-equiv="refresh" content="0;url=${dest}"></head>
+    const html = `<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>学生証を表示中…</title>
+  <meta property="og:title" content="放課後クロニクル 学生証">
+  <meta property="og:description" content="あなたが作った学生証">
+  <meta property="og:image" content="${ogImage}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="628">
+  <meta property="og:url" content="${request.url}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="放課後クロニクル">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="${ogImage}">
+  <meta http-equiv="refresh" content="0;url=${dest}">
+</head>
 <body>
-<!-- デバッグ情報 -->
-<div style="display:none;">
-  <p>Debug: publicId = ${publicId}</p>
-  <p>Debug: version = ${version}</p>
-  <p>Debug: ogImage = ${ogImage}</p>
-  <p>Debug: dest = ${dest}</p>
-</div>
-<script>location.replace(${JSON.stringify(dest)});</script>
-<noscript><a href="${dest}">こちらをクリック</a></noscript></body></html>`;
+  <h1>学生証を表示中…</h1>
+  <p>自動的にリダイレクトされます。</p>
+  <p><a href="${dest}">ここをクリック</a></p>
+  <script>location.replace(${JSON.stringify(dest)});</script>
+</body>
+</html>`;
 
     return new Response(html, {
       headers: {
@@ -44,7 +49,8 @@ export async function onRequest({ params, request }) {
         "X-Robots-Tag": "noindex"
       }
     });
-  } catch {
+  } catch (error) {
+    console.error('Error processing slug:', error);
     return new Response("Bad share link", { status: 400 });
   }
 }
