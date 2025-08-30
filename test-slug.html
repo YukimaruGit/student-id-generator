@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>テスト用Slug作成</title>
+</head>
+<body>
+    <h1>テスト用Slug作成</h1>
+    
+    <h2>現在の共有URL</h2>
+    <p>現在の共有URL: <code id="currentUrl"></code></p>
+    
+    <h2>テスト用の簡単なSlug</h2>
+    <p>テスト用データ: <code id="testData"></code></p>
+    <p>Base64URL: <code id="testSlug"></code></p>
+    <p>テスト用URL: <code id="testUrl"></code></p>
+    
+    <script>
+        // 現在の共有URLを表示
+        const currentUrl = 'https://student-id-generator.pages.dev/s/eyJwIjoiYXNfY2hyb25pY2xlL3N0dWRlbnRfY2FyZC9tYndwNWtjeGdpcXd1ODJkdXpseilsInYiOjE3NTY1NjU1NTgsImkiOiJodHRwczovL3Jlcy5jbG91ZGluYXJ5LmNvbS9kaTV4cWxkZHkvaW1hZ2UvdXBsb2FkL3YxNzU2NTY1NTU4L2FzX2Nocm9uaWNsZS9zdHVkZW50X2NhcmQvbWJ3cDVrY3hnaXF3dTgyZHV6bHoucG5nIn0';
+        document.getElementById('currentUrl').textContent = currentUrl;
+        
+        // テスト用の簡単なデータ
+        const testData = {
+            p: "as_chronicle/student_card/test123",
+            v: 1234567890,
+            i: ""
+        };
+        document.getElementById('testData').textContent = JSON.stringify(testData);
+        
+        // Base64URLエンコード
+        function b64UrlFromUtf8(str) {
+            return btoa(str)
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+        }
+        
+        const testSlug = b64UrlFromUtf8(JSON.stringify(testData));
+        document.getElementById('testSlug').textContent = testSlug;
+        
+        // テスト用URL
+        const testUrl = `https://student-id-generator.pages.dev/s/${testSlug}`;
+        document.getElementById('testUrl').textContent = testUrl;
+        
+        // クリックでコピー
+        document.getElementById('testUrl').addEventListener('click', function() {
+            navigator.clipboard.writeText(testUrl);
+            alert('テスト用URLをコピーしました！');
+        });
+    </script>
+</body>
+</html>

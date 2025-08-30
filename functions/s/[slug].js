@@ -3,11 +3,23 @@ export async function onRequest({ params, request }) {
   const { slug } = params;
   
   try {
+    console.log('Processing slug:', slug);
+    
     // Base64URL → Uint8Array → UTF-8 文字列 → JSON
     const b64 = slug.replace(/-/g, '+').replace(/_/g, '/');
+    console.log('Base64:', b64);
+    
     const bin = atob(b64);
+    console.log('Binary length:', bin.length);
+    
     const bytes = new Uint8Array([...bin].map(c => c.charCodeAt(0)));
-    const json = JSON.parse(new TextDecoder().decode(bytes));
+    console.log('Bytes length:', bytes.length);
+    
+    const jsonStr = new TextDecoder().decode(bytes);
+    console.log('JSON string:', jsonStr);
+    
+    const json = JSON.parse(jsonStr);
+    console.log('Parsed JSON:', json);
 
     const publicId = json.p;
     const version = json.v;
@@ -51,6 +63,17 @@ export async function onRequest({ params, request }) {
     });
   } catch (error) {
     console.error('Error processing slug:', error);
-    return new Response("Bad share link", { status: 400 });
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      slug: slug
+    });
+    
+    return new Response(`Bad share link: ${error.message}`, { 
+      status: 400,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8"
+      }
+    });
   }
 }
