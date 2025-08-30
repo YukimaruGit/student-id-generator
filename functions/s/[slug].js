@@ -6,7 +6,7 @@ export async function onRequest({ params, request }) {
     const { p: publicId, v: version } = JSON.parse(new TextDecoder().decode(bytes));
 
     const PUBLIC_ORIGIN = 'https://student-id-generator.pages.dev'; // ←固定
-    const ogImage = `${PUBLIC_ORIGIN}/ogp/v${version}/${publicId}.jpg`;
+    const ogImage = `${PUBLIC_ORIGIN}/ogp/v/${version}/${publicId}.jpg`;
     const dest = `https://preview.studio.site/live/1Va6D4lMO7/student-id?studentCardImage=${encodeURIComponent(ogImage)}`;
 
     const html = `<!doctype html><html lang="ja"><head>

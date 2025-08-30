@@ -23,7 +23,7 @@ async function sniffImageType(file){
 function buildCldOgUrl({cloudName, public_id, version, eager_url=null}){
   // 自ドメインのOGPプロキシを最優先（Botが確実にアクセス可能）
   const pidSafe = String(public_id).split('/').map(encodeURIComponent).join('/');
-  return `${window.location.origin}/ogp/v${version}/${pidSafe}.jpg`;
+  return `${window.location.origin}/ogp/v/${version}/${pidSafe}.jpg`;
 }
 
 // window.open / 動的 <a> の noopener 徹底
@@ -297,7 +297,7 @@ async function prefetchOgpFile(url){
 
 // OGP共有用URL作成関数
 function buildOgpShareUrl(publicId) {
-  return `https://student-id-generator.pages.dev/ogp/v${Date.now()}/as_chronicle/student_card/${publicId}.jpg`;
+  return `https://student-id-generator.pages.dev/ogp/v/${Date.now()}/as_chronicle/student_card/${publicId}.jpg`;
 }
 
 // Cloudinary OGP画像URL作成関数
