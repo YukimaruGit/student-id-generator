@@ -125,7 +125,9 @@ function b64UrlFromUtf8(jsonStr) {
 function buildShareUrlWithImage({ public_id, version, eager_url }) {
   const payload = { p: public_id, v: version, i: eager_url || '' };
   const slug = b64UrlFromUtf8(JSON.stringify(payload));
-  return new URL(`/s/${slug}`, location.origin).toString();
+  // 公開ドメイン固定で共有URLを生成（埋め込み対策）
+  const SHARE_ORIGIN = 'https://student-id-generator.pages.dev';
+  return `${SHARE_ORIGIN}/s/${slug}`;
 }
 
 // 共有URLの作り方を一本化
