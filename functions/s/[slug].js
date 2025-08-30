@@ -1,4 +1,4 @@
-// /functions/s/[slug].js
+// /functions/s/[slug].js - FORCED UPDATE
 export async function onRequest({ params, request }) {
   const { slug } = params;
   
