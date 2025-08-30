@@ -13,7 +13,7 @@ export async function onRequest({ params, request }) {
 
     // 公開ドメイン固定でOGPプロキシを使う（埋め込み対策）
     const PUBLIC_ORIGIN = 'https://student-id-generator.pages.dev';
-    const ogImage = `${PUBLIC_ORIGIN}/ogp/v${version}/as_chronicle/student_card/${publicId}.jpg`;
+    const ogImage = `${PUBLIC_ORIGIN}/ogp/v${version}/${publicId}.jpg`;
     const dest = `https://preview.studio.site/live/1Va6D4lMO7/student-id?studentCardImage=${encodeURIComponent(ogImage)}`;
 
     const html = `<!doctype html><html lang="ja"><head>
