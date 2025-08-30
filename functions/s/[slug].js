@@ -26,7 +26,15 @@ export async function onRequest({ params, request }) {
 <meta property="og:type" content="website"><meta property="og:site_name" content="放課後クロニクル">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${ogImage}">
 <meta http-equiv="refresh" content="0;url=${dest}"></head>
-<body><script>location.replace(${JSON.stringify(dest)});</script>
+<body>
+<!-- デバッグ情報 -->
+<div style="display:none;">
+  <p>Debug: publicId = ${publicId}</p>
+  <p>Debug: version = ${version}</p>
+  <p>Debug: ogImage = ${ogImage}</p>
+  <p>Debug: dest = ${dest}</p>
+</div>
+<script>location.replace(${JSON.stringify(dest)});</script>
 <noscript><a href="${dest}">こちらをクリック</a></noscript></body></html>`;
 
     return new Response(html, {
