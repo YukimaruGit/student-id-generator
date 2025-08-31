@@ -749,18 +749,20 @@
              });
              
                             // URLをクリップボードにコピー
-               navigator.clipboard.writeText(shareUrl).then(function() {
-                 alert('SNS共有用URLをクリップボードにコピーしました！\n\nこのURLを共有すると、他の人が作成した学生証をプレビューできます。\n\nURL: ' + shareUrl);
-               }).catch(function() {
-                 // フォールバック
-                 const textArea = document.createElement('textarea');
-                 textArea.value = shareUrl;
-                 document.body.appendChild(textArea);
-                 textArea.select();
-                 document.execCommand('copy');
-                 document.body.removeChild(textArea);
-                 alert('SNS共有用URLをクリップボードにコピーしました！\n\nURL: ' + shareUrl);
-               });
+             navigator.clipboard.writeText(shareUrl).then(function() {
+               // アラートを削除 - 静かにコピー
+               console.log('URLをコピーしました:', shareUrl);
+             }).catch(function() {
+               // フォールバック
+               const textArea = document.createElement('textarea');
+               textArea.value = shareUrl;
+               document.body.appendChild(textArea);
+               textArea.select();
+               document.execCommand('copy');
+               document.body.removeChild(textArea);
+               // アラートを削除 - 静かにコピー
+               console.log('URLをコピーしました（フォールバック）:', shareUrl);
+             });
            } else {
              throw new Error('アップロードレスポンスにsecure_urlが含まれていません');
            }
