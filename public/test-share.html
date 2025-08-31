@@ -173,7 +173,9 @@
       const bin = Array.from(new TextEncoder().encode(jsonStr), b => String.fromCharCode(b)).join('');
       const slug = btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
       
-      const shareUrl = new URL(`/s/${slug}`, location.origin).toString();
+      // 設定されたドメインを使用してURLを生成
+      const currentDomain = document.getElementById('currentDomain').textContent;
+      const shareUrl = `${currentDomain}/s/${slug}`;
       
       document.getElementById('testUrl').textContent = shareUrl;
       document.getElementById('testUrlResult').style.display = 'block';
@@ -211,9 +213,11 @@
       const originalLength = 200; // 元のURLの推定長
       const currentLength = url.length;
       const shorteningRatio = Math.round((1 - currentLength / originalLength) * 100);
+      const currentDomain = document.getElementById('currentDomain').textContent;
       
       document.getElementById('urlLength').textContent = currentLength;
       document.getElementById('shorteningRatio').textContent = `${shorteningRatio}%短縮`;
+      document.getElementById('generatedDomain').textContent = currentDomain;
       document.getElementById('urlAnalysis').style.display = 'block';
     }
     
@@ -242,5 +246,15 @@
     function resetTestResults() {
       document.getElementById('x-status').innerHTML = '<span class="status-indicator status-pending"></span>テスト待ち';
       document.getElementById('discord-status').innerHTML = '<span class="status-indicator status-pending"></span>テスト待ち';
+    }
+    
+    function updateDomain() {
+      const newDomain = document.getElementById('domainInput').value;
+      if (newDomain) {
+        document.getElementById('currentDomain').textContent = newDomain;
+        alert('ドメインが更新されました！');
+      } else {
+        alert('ドメインを入力してください。');
+      }
     }
   </script>
