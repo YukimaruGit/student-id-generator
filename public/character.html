@@ -1403,8 +1403,7 @@
 
         /* ========= 全画面サイズで統一された学生証とカードスタイル ========= */
         /* 学生証の基本サイズ統一 - 全画面サイズで過不足なく表示 */
-        .student-id-image-container,
-        .student-id-views {
+        .student-id-image-container {
             width: 100% !important;
             max-width: 400px !important;
             height: auto !important;
@@ -1416,80 +1415,17 @@
             position: relative !important;
         }
         
-        .student-id-view img {
+        .student-id-image-container img {
             width: 100% !important;
             height: auto !important;
             object-fit: contain !important;
         }
         
-        /* 学生証クリック時のカードサイズ調整 - 学生証と同じサイズで統一 */
-        .student-id-detail,
-        .student-id-back,
-        #nobara-profile .student-id-detail,
-        #nobara-profile .student-id-back{
-            width: 100% !important;
-            height: auto !important;
-            aspect-ratio: 3 / 2 !important; /* 学生証と同じ縦横比 */
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            padding: 20px !important; /* 適切な余白を確保 */
-            box-sizing: border-box !important;
-            border-radius: 16px !important; /* より洗練された角丸 */
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important; /* より洗練された影 */
-            margin: 0 !important; /* マージンをリセット */
-            position: relative !important;
-            overflow: hidden !important; /* 縁が切れないように */
-        }
+
         
-        .detail-content,
-        .back-content{
-            width: 100% !important;
-            text-align: center !important;
-            padding: 12px !important; /* 適切な余白を確保 */
-            box-sizing: border-box !important;
-            max-width: calc(100% - 24px) !important; /* 縁が切れないように */
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            justify-content: center !important;
-        }
+
         
-        /* 学生証のテキストスタイルに合わせる - 全画面サイズで統一された美しいデザイン */
-        .detail-title,
-        .back-title{
-            font-family: 'Caveat', 'Klee One', cursive !important;
-            font-size: 1.3rem !important;
-            font-weight: 700 !important;
-            margin-bottom: 16px !important;
-            color: white !important;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
-            text-align: center !important;
-            letter-spacing: 0.5px !important;
-            line-height: 1.3 !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            display: block !important;
-            width: 100% !important;
-            max-width: 100% !important;
-        }
-        
-        .detail-text,
-        .back-text{
-            font-family: 'Caveat', 'Klee One', cursive !important;
-            font-size: 1.1rem !important;
-            line-height: 1.6 !important;
-            color: white !important;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
-            font-weight: 400 !important;
-            text-align: center !important;
-            letter-spacing: 0.4px !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            display: block !important;
-            width: 100% !important;
-            max-width: 100% !important;
-        }
+
 
         /* ========= ≤1024pxのみ適用。1920×1080は一切変更しない ========= */
         @media (max-width: 1024px){
@@ -1912,7 +1848,13 @@
           background: transparent;
           box-sizing: border-box;
         }
-        .id-modal__stage{ width:100%; height:100%; }
+        .id-modal__stage{ 
+          width:100%; 
+          height:100%; 
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
 
         /* ====== Mobile only: Prevent "overflow clipping" within the modal ====== */
         @media (max-width:1024px){
@@ -1953,6 +1895,15 @@
           .student-id,
           .student-id-view img{
             width:100% !important; height:100% !important; object-fit: contain !important;
+          }
+
+          /* モーダル内の画像も確実に表示 */
+          .id-modal__stage img{
+            width:100% !important; 
+            height:100% !important; 
+            object-fit: contain !important;
+            max-width: 100%;
+            max-height: 100%;
           }
 
           /* コンテンツ余白を確保 */
@@ -2048,34 +1999,8 @@
                 <h2 class="section-title">自己紹介ノート</h2>
                 
                 <!-- 学生証画像 -->
-                <div class="student-id-image-container" id="amane-student-id" onclick="cycleAmaneStudentId()">
-                    <div class="student-id-views">
-                        <div class="student-id-view active" id="amane-view1">
-                            <img src="assets/img/amane.png" alt="九条あまね 学生証" loading="eager" />
-                        </div>
-                        <div class="student-id-view" id="amane-view2">
-                            <div class="student-id-detail">
-                                <div class="detail-content">
-                                    <div class="detail-title">帰宅部</div>
-                                    <div class="detail-text">
-                                        ここだけの話、部活動に興味はあるらしい。
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="student-id-view" id="amane-view3">
-                            <div class="student-id-back">
-                                <div class="back-content">
-                                    <div class="back-title">隠された一面</div>
-                                    <div class="back-text">
-                                        目に映る景色が真実とは限らない。<br>
-                                        黄昏は、ふいに足元をさらっていく。
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                <div class="student-id-image-container" id="amane-student-id">
+                    <img src="assets/img/amane.png" alt="九条あまね 学生証" loading="eager" />
                 </div>
 
                 <!-- キャラクター情報 -->
@@ -2143,34 +2068,8 @@
                 <h2 class="section-title">自己紹介ノート</h2>
                 
                 <!-- 学生証画像 -->
-                <div class="student-id-image-container" id="nobara-student-id" onclick="cycleNobaraStudentId()">
-                    <div class="student-id-views">
-                        <div class="student-id-view active" id="nobara-view1">
-                            <img src="assets/img/nobara_ID.png" alt="高森のばら 学生証" loading="eager" />
-                        </div>
-                        <div class="student-id-view" id="nobara-view2">
-                            <div class="student-id-detail">
-                                <div class="detail-content">
-                                    <div class="detail-title">ホラー布教部</div>
-                                    <div class="detail-text">
-                                        夢見が丘女子高等学校には、<br>
-                                        "あったりなかったりする部活"の噂がある。<br>
-                                        その名も――ホラー布教部。<br>
-                                        部長に会えば、昔からの友人のように感じるのに、<br>
-                                        いなくなると、誰もその存在を思い出せなくなるという。
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="student-id-view" id="nobara-view3">
-                            <div class="student-id-back">
-                                <div class="back-content">
-                                    <div class="back-title">バッドエンドも好き</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                <div class="student-id-image-container" id="nobara-student-id">
+                    <img src="assets/img/nobara_ID.png" alt="高森のばら 学生証" loading="eager" />
                 </div>
 
                 <!-- キャラクター情報 -->
@@ -2277,35 +2176,7 @@
 
 
 
-        // 学生証クリック機能
-        let amaneCurrentView = 1;
-        let nobaraCurrentView = 1;
 
-        function cycleAmaneStudentId() {
-            console.log('Amane student ID clicked, current view:', amaneCurrentView);
-            
-            // 現在のビューを非表示
-            document.getElementById(`amane-view${amaneCurrentView}`).classList.remove('active');
-            
-            // 次のビューに切り替え
-            amaneCurrentView = amaneCurrentView >= 3 ? 1 : amaneCurrentView + 1;
-            document.getElementById(`amane-view${amaneCurrentView}`).classList.add('active');
-            
-            console.log('Amane switched to view:', amaneCurrentView);
-        }
-
-        function cycleNobaraStudentId() {
-            console.log('Nobara student ID clicked, current view:', nobaraCurrentView);
-            
-            // 現在のビューを非表示
-            document.getElementById(`nobara-view${nobaraCurrentView}`).classList.remove('active');
-            
-            // 次のビューに切り替え
-            nobaraCurrentView = nobaraCurrentView >= 3 ? 1 : nobaraCurrentView + 1;
-            document.getElementById(`nobara-view${nobaraCurrentView}`).classList.add('active');
-            
-            console.log('Nobara switched to view:', nobaraCurrentView);
-        }
 
 
 
@@ -2453,24 +2324,17 @@
       }
 
       function openZoom(fromContainer){
-        // 学生証ビュー（.student-id-views）をクローンしてモーダルに差し込む
-        const base = fromContainer.closest('.content-card') || document;
-        const views = base.querySelector('.student-id-views');
+        // 学生証画像をそのまま拡大表示
+        const img = fromContainer.querySelector('img')?.cloneNode(true);
         stage.innerHTML = '';
-
-        if (views){
-          const clone = views.cloneNode(true);
-          // 最初は先頭だけ表示（activeを強制）
-          const list = clone.querySelectorAll('.student-id-view');
-          list.forEach((v,i)=>{
-            v.classList.toggle('active', i===0);
-            v.style.display = i===0 ? 'block' : 'none';
-          });
-          stage.appendChild(clone);
-        } else {
-          // 万一ビューが無い場合は画像をそのまま拡大
-          const img = fromContainer.querySelector('.student-id')?.cloneNode(true);
-          if (img) stage.appendChild(img);
+        
+        if (img) {
+          // 画像のスタイルを設定して確実に表示されるようにする
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'contain';
+          img.style.display = 'block';
+          stage.appendChild(img);
         }
 
         // Actual aspect ratio if image exists, otherwise 3:2
@@ -2499,18 +2363,6 @@
         modal.classList.add('open');
       }
 
-      function toggleInside(){
-        const list = stage.querySelectorAll('.student-id-view');
-        if (!list.length) return;
-        const arr = Array.from(list);
-        const cur = arr.findIndex(v=>v.classList.contains('active'));
-        const next = (cur + 1) % arr.length;
-        arr.forEach((v,i)=>{
-          v.classList.toggle('active', i===next);
-          v.style.display = i===next ? 'block' : 'none';
-        });
-      }
-
       function closeZoom(){
         modal.classList.remove('open');
         document.documentElement.classList.remove('no-scroll');
@@ -2528,14 +2380,12 @@
       // モバイル時だけバインド
       function bindMobile(){
         if (!mq.matches) return;
-        // 学生証画像タップで拡大（画像でもコンテナでもOKにしておく）
-        document.querySelectorAll('.student-id-image-container, .student-id-image-container .student-id')
+        // 学生証画像タップで拡大（コンテナと画像の両方にイベントを追加）
+        document.querySelectorAll('.student-id-image-container, .student-id-image-container img')
           .forEach(el=>{
             el.style.cursor = 'zoom-in';
             el.addEventListener('click', onOpen, { passive:true });
           });
-        // モーダル内どこでもタップでビュー切替（✕と背景は除外）
-        stage.addEventListener('click', onToggle, { passive:true });
       }
       function unbindMobile(){
         // 既存のイベントは最低限で付けているため明示解除は省略（必要ならWeakRef管理でremove）
@@ -2544,11 +2394,6 @@
         ev.preventDefault?.();
         const container = ev.currentTarget.closest('.student-id-image-container') || ev.currentTarget;
         openZoom(container);
-      }
-      function onToggle(ev){
-        // 内部のカードを順送り（閉じるボタンや背景は対象外）
-        if (ev.target.closest('[data-close]')) return;
-        toggleInside();
       }
 
       mq.addEventListener?.('change', e=>{ e.matches ? installShields() : removeShields(); });
