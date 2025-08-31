@@ -1249,53 +1249,30 @@ function initializeApp() {
         // buildShareUrlWithImageが利用できない場合はエラー
         console.error('共有URL生成に必要な関数が利用できません');
         shareUrl = '共有URLの生成に失敗しました';
+        window.__shareUrl = shareUrl;
       }
       
+      // 共有URLを文字列化
+      const urlToCopy = shareUrl.toString();
+      console.log('📋 コピー対象URL:', urlToCopy);
+
+      // まずは堅牢コピー（iframeでも成功率高）
+      const ok = await copyTextReliable(urlToCopy);  // ← 既存関数を活用
       hideLoading();
-      
-      // 新しい共有方式：画像付きシェア（最優先）
-      if (window.__ogpImageUrl && shareUrl) {
-        const text = buildPostText();
-        await shareToXAppFirstOnly(window.__ogpImageUrl, text);
-        return;
-      }
 
-      // フォールバック：従来のテキストシェア
-      // URLパラメータから学科/部活を取得（部活は"部"を付ける）
-      const searchParams = new URLSearchParams(location.search);
-      const courseName = searchParams.get('course') || '普通科';
-      const rawClubName = searchParams.get('club') || '帰宅';
-      const clubName = /部$/.test(rawClubName) ? rawClubName : `${rawClubName}部`;
-
-      const tweet = [
-        `${shareUrl}`,
-        '',
-        '🏫夢見が丘女子高等学校 入学診断',
-        `【${courseName}】の【${clubName}】になりました！`,
-        '診断の最後には、自分だけの学生証ももらえます🎓📸',
-        '',
-        '君も放課後クロニクルの世界へ――',
-        '',
-        '#放課後クロニクル #学生証メーカー'
-      ].join('\n');
-
-      // 1) まず OS の共有シート（Web Share API）を試す
-      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-      if (isMobile && navigator.share) {
-        try {
-          await navigator.share({ text: tweet });   // URLは本文先頭に含める運用なので text のみでOK
-          return;
-        } catch (e) {
-          // ユーザーキャンセルや未許可はフォールバック
+      if (ok) {
+        console.log('✅ シェア用URLをクリップボードにコピーしました');
+        // 成功時のフィードバック
+        if (typeof showToast === 'function') {
+          showToast('共有URLをコピーしました！', 'success');
+        } else {
+          alert('共有URLをコピーしました！');
         }
+      } else {
+        // 最終手段：モーダルでURLを表示（遷移しない）
+        showManualCopyModal(urlToCopy);
+        console.log('✅ コピーできない環境のため、モーダルでURLを表示しました');
       }
-
-      // 2) フォールバック: Web Intent（新しいタブで安定）
-      shareToX();
-      
-      // 成功時のフィードバック（ポップアップなし）
-      console.log('✅ X投稿処理が完了しました');
-      
     } catch (error) {
       console.error('Twitterシェアエラー:', error);
       hideLoading();
@@ -1403,25 +1380,39 @@ function initializeApp() {
         if (window.updateShareLinksWithImage) {
           window.updateShareLinksWithImage(imageData, '学生証を発行しました');
         }
+        
+        // window.__shareUrlを確実に設定
+        window.__shareUrl = shareUrl;
+        console.log('✅ 共有URL設定完了:', shareUrl);
+        
       } else {
         // buildShareUrlWithImageが利用できない場合はエラー
         console.error('共有URL生成に必要な関数が利用できません');
         shareUrl = '共有URLの生成に失敗しました';
+        window.__shareUrl = shareUrl;
       }
-             // 共有URLを文字列化
-       const urlToCopy = shareUrl.toString();
+      
+      // 共有URLを文字列化
+      const urlToCopy = shareUrl.toString();
+      console.log('📋 コピー対象URL:', urlToCopy);
 
-       // まずは堅牢コピー（iframeでも成功率高）
-       const ok = await copyTextReliable(urlToCopy);  // ← 既存関数を活用
-       hideLoading();
+      // まずは堅牢コピー（iframeでも成功率高）
+      const ok = await copyTextReliable(urlToCopy);  // ← 既存関数を活用
+      hideLoading();
 
-       if (ok) {
-         console.log('✅ シェア用URLをクリップボードにコピーしました');
-       } else {
-         // 最終手段：モーダルでURLを表示（遷移しない）
-         showManualCopyModal(urlToCopy);
-         console.log('✅ コピーできない環境のため、モーダルでURLを表示しました');
-       }
+      if (ok) {
+        console.log('✅ シェア用URLをクリップボードにコピーしました');
+        // 成功時のフィードバック
+        if (typeof showToast === 'function') {
+          showToast('共有URLをコピーしました！', 'success');
+        } else {
+          alert('共有URLをコピーしました！');
+        }
+      } else {
+        // 最終手段：モーダルでURLを表示（遷移しない）
+        showManualCopyModal(urlToCopy);
+        console.log('✅ コピーできない環境のため、モーダルでURLを表示しました');
+      }
     } catch (error) {
       console.error('URLコピーエラー:', error);
       hideLoading();
