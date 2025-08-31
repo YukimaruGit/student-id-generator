@@ -69,7 +69,7 @@ export async function onRequest({ params, request }) {
       <h1>放課後クロニクル 学生証</h1>
       <div class="info">
         <p>あなたが作った学生証を表示中...</p>
-        <img src="${ogImage}" alt="放課後クロニクル 学生証" width="600" height="315">
+        <img src="${ogImage}" alt="放課後クロニクル 学生証" style="width: 100%; max-width: 600px; height: auto; object-fit: contain;">
       </div>
       
       <div class="redirect-notice">
