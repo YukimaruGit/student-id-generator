@@ -879,8 +879,8 @@
        // 2) レア判定（強いときだけ・それ以外は低確率に抑制）
        const maxMajor = Math.max(sum.sports, sum.culture, sum.other);
        if (sum.rare > 0 && sum.rare >= maxMajor * 1.2) return 'ホラー布教'; // 回答が強く示唆
-       // 低確率での遊び（1〜2%）にしたいときは下行を有効化
-       // if (Math.random() < 0.015) return 'ホラー布教';
+       // 低確率での遊び（1.5%）を有効化
+       if (Math.random() < 0.015) return 'ホラー布教';
 
        // 3) 上位グループ（帰宅=other はハードルを上げる）
        const majors = { sports:sum.sports, culture:sum.culture };
