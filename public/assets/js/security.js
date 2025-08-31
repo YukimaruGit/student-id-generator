@@ -581,7 +581,7 @@
       // Studio埋め込み互換のframe-ancestorsを追加
       const studioCompatibleCSP = [
         newContent,
-        "frame-ancestors https://*.studio.site https://preview.studio.site 'self'"
+        "frame-ancestors https://*.studio.site https://lime016395.studio.site 'self'"
       ].join('; ');
       
       existingCSP.content = studioCompatibleCSP;

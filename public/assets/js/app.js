@@ -260,7 +260,7 @@ function buildPostText() {
     'ようこそ、夢見が丘女子高等学校へ！',
     '',
     '▼自分だけの学生証を作ろう！',
-    '（https://preview.studio.site/live/1Va6D4lMO7/student-id）',
+    '（https://lime016395.studio.site/student-id）',
     '（画像）', // 共有シートでは画像ファイル自体を添付する想定
     '',
     '#放課後クロニクル #学生証メーカー'
@@ -1418,7 +1418,7 @@ function buildShareText() {
     "✎︎＿＿＿＿＿＿＿＿＿＿＿＿＿＿",
     "",
     "▼ #放課後クロニクル のHPで自分だけの学生証を作ろう！",
-    "https://preview.studio.site/live/1Va6D4lMO7/student-id"
+    "https://lime016395.studio.site/student-id"
   ].join("\n");
 }
 

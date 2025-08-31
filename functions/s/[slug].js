@@ -11,7 +11,7 @@ export async function onRequest({ params, request }) {
       `https://res.cloudinary.com/di5xqlddy/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,fl_force_strip/v1/student-id-generator/preview.png`;
 
     // 正しい遷移先URL
-    const dest = `https://preview.studio.site/live/1Va6D4lMO7/student-id?shared=true&image=${encodeURIComponent(fullImageUrl)}`;
+    const dest = `https://lime016395.studio.site/student-id?shared=true&image=${encodeURIComponent(fullImageUrl)}`;
     
     // OGP画像URL（Cloudinaryの画像を直接使用）
     const ogImage = fullImageUrl;
