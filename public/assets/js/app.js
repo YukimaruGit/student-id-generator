@@ -1792,3 +1792,119 @@ function initGeneratorPage() {
 
 document.addEventListener('DOMContentLoaded', initGeneratorPage);
 
+// スマホサイズ専用のURLコピー処理
+async function copyTextMobileOptimized(text) {
+  console.log('📱 スマホ専用コピー処理開始:', text);
+  
+  // 1) 共有シート（最も確実）
+  if (navigator.share) {
+    try {
+      console.log('📋 共有シート使用');
+      await navigator.share({ text });
+      console.log('✅ 共有シート成功');
+      return true;
+    } catch (error) {
+      console.warn('⚠️ 共有シート失敗:', error);
+    }
+  }
+  
+  // 2) モバイル用の特別なコピー処理（iOS/Android対応）
+  try {
+    console.log('📋 モバイル用特別処理実行');
+    
+    // 一時的なテキストエリアを作成
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 2em;
+      height: 2em;
+      padding: 0;
+      border: none;
+      outline: none;
+      boxShadow: none;
+      background: transparent;
+      z-index: -1;
+      opacity: 0;
+    `;
+    
+    document.body.appendChild(textArea);
+    
+    // フォーカスと選択
+    textArea.focus();
+    textArea.select();
+    
+    // コピー実行
+    const ok = document.execCommand('copy');
+    
+    // クリーンアップ
+    document.body.removeChild(textArea);
+    
+    if (ok) {
+      console.log('✅ モバイル用特別処理成功');
+      return true;
+    }
+  } catch (error) {
+    console.warn('⚠️ モバイル用特別処理失敗:', error);
+  }
+  
+  // 3) より強力なモバイルコピー処理
+  try {
+    console.log('📋 強力なモバイルコピー処理実行');
+    
+    // 選択可能なテキスト要素を作成
+    const selectableDiv = document.createElement('div');
+    selectableDiv.textContent = text;
+    selectableDiv.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 1rem;
+      border: 2px solid #B997D6;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 14px;
+      z-index: 2147483646;
+      user-select: text;
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+    `;
+    
+    document.body.appendChild(selectableDiv);
+    
+    // テキストを選択
+    const range = document.createRange();
+    range.selectNodeContents(selectableDiv);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    
+    // コピー実行
+    const ok = document.execCommand('copy');
+    
+    // 選択をクリア
+    sel.removeAllRanges();
+    
+    // 少し待ってから削除（ユーザーがコピーできるように）
+    setTimeout(() => {
+      if (document.body.contains(selectableDiv)) {
+        document.body.removeChild(selectableDiv);
+      }
+    }, 2000);
+    
+    if (ok) {
+      console.log('✅ 強力なモバイルコピー処理成功');
+      return true;
+    }
+  } catch (error) {
+    console.warn('⚠️ 強力なモバイルコピー処理失敗:', error);
+  }
+  
+  return false;
+}
+
