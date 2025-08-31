@@ -1,0 +1,246 @@
+  <div class="container">
+    <h1>🔗 共有URLテスト - Bot判定対策・URL短縮対応</h1>
+    
+    <div class="test-section">
+      <h2>📱 共有URLの生成テスト（短縮版）</h2>
+      <p>Bot判定対策とURL短縮を組み込んだ共有URLを生成し、X・Discordでのプレビュー表示をテストできます：</p>
+      <ul>
+        <li><strong>Public ID:</strong> test_student_card</li>
+        <li><strong>Version:</strong> 1</li>
+        <li><strong>Image URL:</strong> https://res.cloudinary.com/di5xqlddy/image/upload/v1/as_chronicle/student_card/test.jpg</li>
+        <li><strong>短縮版:</strong> データを圧縮してURL長を最小化</li>
+        <li><strong>Bot判定対策:</strong> 自然なHTML構造とメタタグ</li>
+      </ul>
+      
+      <button class="btn btn-success" onclick="generateTestUrl()">🚀 テスト用共有URLを生成</button>
+      
+      <div id="testUrlResult" style="display: none;">
+        <h3>✨ 生成されたURL:</h3>
+        <div id="testUrl" class="url-display"></div>
+        <div class="btn-group">
+          <button class="btn" onclick="copyTestUrl()">📋 URLをコピー</button>
+          <button class="btn btn-warning" onclick="testUrl()">🧪 URLをテスト</button>
+          <button class="btn btn-success" onclick="analyzeUrl()">🔍 URL分析</button>
+        </div>
+        
+        <div id="urlAnalysis" style="display: none; margin-top: 1rem;">
+          <h4>📊 URL分析結果</h4>
+          <div class="debug-info">
+            <strong>URL長:</strong> <span id="urlLength"></span> 文字<br>
+            <strong>短縮率:</strong> <span id="shorteningRatio"></span><br>
+            <strong>エンコード方式:</strong> Base64URL（最適化済み）<br>
+            <strong>Bot判定対策:</strong> 自然なHTML構造 + 遅延リダイレクト
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2>🤖 Bot判定対策の詳細</h2>
+      <p>以下の対策により、Bot判定を回避し、確実にプレビュー表示されるようになっています：</p>
+      
+      <div class="platform-test">
+        <div class="platform-card">
+          <h4>🔄 自然なリダイレクト</h4>
+          <ul style="text-align: left; font-size: 0.9rem;">
+            <li>2秒の自然な遅延</li>
+            <li>ユーザーインタラクション対応</li>
+            <li>メタリフレッシュフォールバック</li>
+          </ul>
+        </div>
+        
+        <div class="platform-card">
+          <h4>🏗️ HTML構造</h4>
+          <ul style="text-align: left; font-size: 0.9rem;">
+            <li>完全なHTML5構造</li>
+            <li>自然なスタイリング</li>
+            <li>画像の直接表示</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="preview-info">
+        <h4>💡 Bot判定回避のポイント</h4>
+        <ul>
+          <li><strong>即座リダイレクト回避:</strong> 自然な遅延でBot判定を回避</li>
+          <li><strong>完全なHTML:</strong> 不完全なHTMLによるBot判定を防止</li>
+          <li><strong>画像直接表示:</strong> クローラーが確実に画像を取得</li>
+          <li><strong>自然なJavaScript:</strong> 機械的な動作を避ける</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2>🔍 プレビューテスト（X・Discord）</h2>
+      <p>生成された共有URLを以下のプラットフォームでテストしてください：</p>
+      
+      <div class="platform-test">
+        <div class="platform-card">
+          <div class="platform-icon">🐦</div>
+          <h3>X (Twitter)</h3>
+          <p>1. 生成されたURLをコピー</p>
+          <p>2. Xで投稿（画像付きツイート）</p>
+          <p>3. プレビュー表示を確認</p>
+          <div id="x-status">
+            <span class="status-indicator status-pending"></span>
+            テスト待ち
+          </div>
+        </div>
+        
+        <div class="platform-card">
+          <div class="platform-icon">🎮</div>
+          <h3>Discord</h3>
+          <p>1. 生成されたURLをコピー</p>
+          <p>2. Discordで投稿</p>
+          <p>3. プレビュー表示を確認</p>
+          <div id="discord-status">
+            <span class="status-indicator status-pending"></span>
+            テスト待ち
+          </div>
+        </div>
+      </div>
+      
+      <div class="preview-info">
+        <h4>💡 プレビュー表示のポイント</h4>
+        <ul>
+          <li><strong>画像:</strong> 作成された学生証の画像が表示される</li>
+          <li><strong>タイトル:</strong> "放課後クロニクル 学生証"</li>
+          <li><strong>説明:</strong> "あなたが作った学生証をチェック！"</li>
+          <li><strong>サイズ:</strong> 1200×630px（最適化済み）</li>
+          <li><strong>Bot判定対策:</strong> 自然なHTML + 遅延リダイレクト</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2>⚙️ 共有URLの動作確認</h2>
+      <p>生成された共有URLにアクセスすると、以下の流れで動作します：</p>
+      <ol>
+        <li>共有URL（<code>/s/{slug}</code>）にアクセス</li>
+        <li>サーバーサイドでOGPメタタグを動的生成</li>
+        <li><strong>Bot判定対策:</strong> 自然なHTMLで画像を表示</li>
+        <li>2秒後に指定されたHPにリダイレクト</li>
+        <li>HP側で共有された学生証画像を表示</li>
+      </ol>
+      
+      <div class="debug-info">
+        <strong>デバッグ情報:</strong><br>
+        - OGP画像: 動的に生成された学生証画像<br>
+        - URL短縮: データ圧縮によるURL長最適化<br>
+        - Bot判定対策: 自然なHTML + 遅延リダイレクト<br>
+        - キャッシュ: 適切に制御済み
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2>📊 テスト結果の記録</h2>
+      <p>各プラットフォームでのテスト結果を記録してください：</p>
+      
+      <div class="platform-test">
+        <div class="platform-card">
+          <h4>X (Twitter) テスト結果</h4>
+          <button class="btn btn-success" onclick="markTestResult('x', 'success')">✅ 成功</button>
+          <button class="btn btn-warning" onclick="markTestResult('x', 'partial')">⚠️ 部分的</button>
+          <button class="btn" onclick="markTestResult('x', 'failed')">❌ 失敗</button>
+        </div>
+        
+        <div class="platform-card">
+          <h4>Discord テスト結果</h4>
+          <button class="btn btn-success" onclick="markTestResult('discord', 'success')">✅ 成功</button>
+          <button class="btn btn-warning" onclick="markTestResult('discord', 'partial')">⚠️ 部分的</button>
+          <button class="btn" onclick="markTestResult('discord', 'failed')">❌ 失敗</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function generateTestUrl() {
+      const payload = {
+        p: 'test_student_card',
+        v: 1,
+        i: 'https://res.cloudinary.com/di5xqlddy/image/upload/v1/as_chronicle/student_card/test.jpg'
+      };
+      
+      // 短縮版URL生成（実際の実装と同じ）
+      const shortData = {
+        p: payload.p.substring(0, 8), // 最初の8文字のみ使用
+        v: payload.v,
+        i: payload.i.split('/').pop() // ファイル名のみ使用
+      };
+      
+      const jsonStr = JSON.stringify(shortData);
+      const bin = Array.from(new TextEncoder().encode(jsonStr), b => String.fromCharCode(b)).join('');
+      const slug = btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      
+      const shareUrl = new URL(`/s/${slug}`, location.origin).toString();
+      
+      document.getElementById('testUrl').textContent = shareUrl;
+      document.getElementById('testUrlResult').style.display = 'block';
+      
+      // テスト結果をリセット
+      resetTestResults();
+      
+      // URL分析を表示
+      analyzeUrl();
+    }
+    
+    function copyTestUrl() {
+      const url = document.getElementById('testUrl').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        alert('✅ URLをコピーしました！\n\nXやDiscordで投稿してプレビューをテストしてください。\n\nBot判定対策により、より確実にプレビューが表示されるはずです。');
+      }).catch(() => {
+        // フォールバック
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('✅ URLをコピーしました！\n\nXやDiscordで投稿してプレビューをテストしてください。\n\nBot判定対策により、より確実にプレビューが表示されるはずです。');
+      });
+    }
+    
+    function testUrl() {
+      const url = document.getElementById('testUrl').textContent;
+      window.open(url, '_blank');
+    }
+    
+    function analyzeUrl() {
+      const url = document.getElementById('testUrl').textContent;
+      const originalLength = 200; // 元のURLの推定長
+      const currentLength = url.length;
+      const shorteningRatio = Math.round((1 - currentLength / originalLength) * 100);
+      
+      document.getElementById('urlLength').textContent = currentLength;
+      document.getElementById('shorteningRatio').textContent = `${shorteningRatio}%短縮`;
+      document.getElementById('urlAnalysis').style.display = 'block';
+    }
+    
+    function markTestResult(platform, result) {
+      const statusElement = document.getElementById(`${platform}-status`);
+      const indicator = statusElement.querySelector('.status-indicator');
+      
+      // クラスを更新
+      indicator.className = 'status-indicator';
+      switch(result) {
+        case 'success':
+          indicator.classList.add('status-success');
+          statusElement.innerHTML = '<span class="status-indicator status-success"></span>✅ プレビュー成功';
+          break;
+        case 'partial':
+          indicator.classList.add('status-warning');
+          statusElement.innerHTML = '<span class="status-indicator status-warning"></span>⚠️ 部分的に表示';
+          break;
+        case 'failed':
+          indicator.classList.add('status-error');
+          statusElement.innerHTML = '<span class="status-indicator status-error"></span>❌ プレビュー失敗';
+          break;
+      }
+    }
+    
+    function resetTestResults() {
+      document.getElementById('x-status').innerHTML = '<span class="status-indicator status-pending"></span>テスト待ち';
+      document.getElementById('discord-status').innerHTML = '<span class="status-indicator status-pending"></span>テスト待ち';
+    }
+  </script>

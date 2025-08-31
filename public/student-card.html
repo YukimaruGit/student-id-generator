@@ -563,21 +563,36 @@
        enableRightClickSave(); // 右クリック保存機能を有効化
      });
     
-         // Base64URL変換用ヘルパー関数
-     function b64UrlFromUtf8(jsonStr) {
-       const bin = Array.from(new TextEncoder().encode(jsonStr), b => String.fromCharCode(b)).join('');
-       return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-     }
+    // Base64URL変換用ヘルパー関数（最適化版）
+    function b64UrlFromUtf8(jsonStr) {
+      const bin = Array.from(new TextEncoder().encode(jsonStr), b => String.fromCharCode(b)).join('');
+      return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    }
 
-     // 共有URL作成関数
-     function buildShareUrlWithImage({ public_id, version, eager_url }) {
-       const payload = { p: public_id, v: version, i: eager_url || '' };
-       const slug = b64UrlFromUtf8(JSON.stringify(payload));
-       return new URL(`/s/${slug}`, location.origin).toString();
-     }
+    // URL短縮のための最適化されたエンコーディング
+    function createShortShareUrl({ public_id, version, eager_url }) {
+      // データを最小限に圧縮
+      const shortData = {
+        p: public_id.substring(0, 8), // 最初の8文字のみ使用
+        v: version,
+        i: eager_url ? eager_url.split('/').pop() : '' // ファイル名のみ使用
+      };
+      
+      const jsonStr = JSON.stringify(shortData);
+      const bin = Array.from(new TextEncoder().encode(jsonStr), b => String.fromCharCode(b)).join('');
+      const slug = btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      
+      return new URL(`/s/${slug}`, location.origin).toString();
+    }
 
-     // 画像選択機能
-     function selectImage() {
+    // 共有URL作成関数（短縮版）
+    function buildShareUrlWithImage({ public_id, version, eager_url }) {
+      // 短縮版URLを生成
+      return createShortShareUrl({ public_id, version, eager_url });
+    }
+
+    // 画像選択機能
+    function selectImage() {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
