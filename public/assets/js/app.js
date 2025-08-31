@@ -1796,19 +1796,7 @@ document.addEventListener('DOMContentLoaded', initGeneratorPage);
 async function copyTextMobileOptimized(text) {
   console.log('📱 スマホ専用コピー処理開始:', text);
   
-  // 1) 共有シート（最も確実）
-  if (navigator.share) {
-    try {
-      console.log('📋 共有シート使用');
-      await navigator.share({ text });
-      console.log('✅ 共有シート成功');
-      return true;
-    } catch (error) {
-      console.warn('⚠️ 共有シート失敗:', error);
-    }
-  }
-  
-  // 2) モバイル用の特別なコピー処理（iOS/Android対応）
+  // 1) モバイル用の特別なコピー処理（iOS/Android対応）
   try {
     console.log('📋 モバイル用特別処理実行');
     
@@ -1850,7 +1838,7 @@ async function copyTextMobileOptimized(text) {
     console.warn('⚠️ モバイル用特別処理失敗:', error);
   }
   
-  // 3) より強力なモバイルコピー処理
+  // 2) より強力なモバイルコピー処理
   try {
     console.log('📋 強力なモバイルコピー処理実行');
     

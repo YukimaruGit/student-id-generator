@@ -691,13 +691,13 @@
      }
     
     // URLをコピー
-    function copyUrl() {
+    async function copyUrl() {
       // 学生証画像をCloudinaryにアップロードして共有URLを生成
-      uploadStudentCardToCloudinary();
+      await uploadStudentCardToCloudinary();
     }
     
          // 学生証画像をCloudinaryにアップロード
-     function uploadStudentCardToCloudinary() {
+     async function uploadStudentCardToCloudinary() {
        const canvas = document.getElementById('cardCanvas');
        const previewPlaceholder = document.getElementById('previewPlaceholder');
        
@@ -749,19 +749,12 @@
              });
              
                             // URLをクリップボードにコピー
-             navigator.clipboard.writeText(shareUrl).then(function() {
-               // アラートを削除 - 静かにコピー
-               console.log('URLをコピーしました:', shareUrl);
-             }).catch(function() {
-               // フォールバック
-               const textArea = document.createElement('textarea');
-               textArea.value = shareUrl;
-               document.body.appendChild(textArea);
-               textArea.select();
-               document.execCommand('copy');
-               document.body.removeChild(textArea);
-               // アラートを削除 - 静かにコピー
-               console.log('URLをコピーしました（フォールバック）:', shareUrl);
+             copyTextReliable(shareUrl).then((success) => {
+               if (success) {
+                 console.log('URLをコピーしました:', shareUrl);
+               } else {
+                 console.log('コピーに失敗、手動コピーモーダルが表示されました');
+               }
              });
            } else {
              throw new Error('アップロードレスポンスにsecure_urlが含まれていません');
@@ -1047,7 +1040,172 @@
        }
      }
     
+    // コピー処理を一元化（堅牢版）
+    async function copyTextReliable(text) {
+      console.log('📋 コピー開始:', text);
+      
+      // 0) テキストが空の場合はエラー
+      if (!text || typeof text !== 'string') {
+        console.error('❌ コピーするテキストが無効です:', text);
+        alert('コピーするURLが準備されていません。先に学生証を作成してください。');
+        return false;
+      }
 
+      // 1) Clipboard API（ユーザー操作中なら多くの環境でOK）
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          console.log('📋 Clipboard API使用');
+          await navigator.clipboard.writeText(text);
+          console.log('✅ Clipboard API成功');
+          return true;
+        }
+      } catch (error) {
+        console.warn('⚠️ Clipboard API失敗:', error);
+      }
+
+      // 2) モバイル環境での特別処理
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(navigator.userAgent) || 
+                       (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) ||
+                       ('ontouchstart' in window);
+      
+      if (isMobile) {
+        console.log('📱 モバイル環境検出、専用処理実行');
+        console.log('📱 User Agent:', navigator.userAgent);
+        console.log('📱 Touch Points:', navigator.maxTouchPoints);
+        console.log('📱 Touch Start:', 'ontouchstart' in window);
+        
+        try {
+          const mobileResult = await copyTextMobileOptimized(text);
+          if (mobileResult) {
+            console.log('✅ モバイル専用処理成功');
+            return true;
+          }
+        } catch (error) {
+          console.error('❌ モバイル専用処理でエラー:', error);
+        }
+      }
+
+      // 3) contentEditable + execCommand（iOS/埋め込みに強い「同期」コピー）
+      try {
+        console.log('📋 execCommand使用');
+        const div = document.createElement('div');
+        div.contentEditable = 'true';
+        div.style.cssText = `
+          position: fixed; 
+          top: -9999px; 
+          left: -9999px; 
+          width: 1px; 
+          height: 1px; 
+          opacity: 0; 
+          z-index: -1;
+        `;
+        div.textContent = text;
+        document.body.appendChild(div);
+        
+        const range = document.createRange();
+        range.selectNodeContents(div);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        
+        const ok = document.execCommand('copy');
+        sel.removeAllRanges();
+        document.body.removeChild(div);
+        
+        if (ok) {
+          console.log('✅ execCommand成功');
+          return true;
+        }
+      } catch (error) {
+        console.warn('⚠️ execCommand失敗:', error);
+      }
+
+      // 4) 最終手段：モーダルでURLを表示して手動コピー（遷移しない）
+      console.log('📋 手動コピーモーダル表示');
+      showManualCopyModal(text);
+      return false;
+    }
+
+    // 手動コピーモーダル表示関数
+    function showManualCopyModal(text) {
+      // 既存のモーダルがあれば削除
+      const existingModal = document.getElementById('manualCopyModal');
+      if (existingModal) {
+        existingModal.remove();
+      }
+
+      const modal = document.createElement('div');
+      modal.id = 'manualCopyModal';
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      `;
+
+      const modalContent = document.createElement('div');
+      modalContent.style.cssText = `
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        max-width: 90%;
+        max-height: 80%;
+        overflow-y: auto;
+        text-align: center;
+        font-family: 'Noto Sans JP', sans-serif;
+      `;
+
+      modalContent.innerHTML = `
+        <h3 style="margin: 0 0 1rem 0; color: #333;">📋 URLをコピーしてください</h3>
+        <p style="margin: 0 0 1rem 0; color: #666; font-size: 0.9rem;">
+          以下のURLを長押ししてコピーしてください
+        </p>
+        <div style="
+          background: #f5f5f5;
+          padding: 1rem;
+          border-radius: 8px;
+          border: 2px solid #B997D6;
+          margin: 1rem 0;
+          font-family: monospace;
+          font-size: 0.9rem;
+          word-break: break-all;
+          user-select: text;
+          -webkit-user-select: text;
+          cursor: text;
+        ">${text}</div>
+        <div style="margin-top: 1.5rem;">
+          <button onclick="this.closest('#manualCopyModal').remove()" style="
+            background: #B997D6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+          ">閉じる</button>
+        </div>
+      `;
+
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+
+      // モーダル内のテキストを自動選択
+      const textElement = modalContent.querySelector('div');
+      if (textElement) {
+        const range = document.createRange();
+        range.selectNodeContents(textElement);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
   </script>
 </body>
 </html>
