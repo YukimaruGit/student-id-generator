@@ -441,39 +441,73 @@ window.shareToXAppFirstOnly = shareToXAppFirstOnly;
 
 // コピー処理を一元化
 async function copyTextReliable(text) {
+  console.log('📋 コピー開始:', text);
+  
+  // 0) テキストが空の場合はエラー
+  if (!text || typeof text !== 'string') {
+    console.error('❌ コピーするテキストが無効です:', text);
+    alert('コピーするURLが準備されていません。先に学生証を作成してください。');
+    return false;
+  }
+
   // 1) Clipboard API（ユーザー操作中なら多くの環境でOK）
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
+      console.log('📋 Clipboard API使用');
       await navigator.clipboard.writeText(text);
+      console.log('✅ Clipboard API成功');
       return true;
     }
-  } catch (_) {/* 次へ */}
+  } catch (error) {
+    console.warn('⚠️ Clipboard API失敗:', error);
+  }
 
-  // 2) contentEditable + execCommand（iOS/埋め込みに強い「同期」コピー）
+  // 2) モバイル環境での特別処理
+  if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    console.log('📱 モバイル環境検出、専用処理実行');
+    const mobileResult = await copyTextMobileOptimized(text);
+    if (mobileResult) {
+      return true;
+    }
+  }
+
+  // 3) contentEditable + execCommand（iOS/埋め込みに強い「同期」コピー）
   try {
+    console.log('📋 execCommand使用');
     const div = document.createElement('div');
     div.contentEditable = 'true';
-    div.style.position = 'fixed';
-    div.style.opacity = '0';
+    div.style.cssText = `
+      position: fixed; 
+      top: -9999px; 
+      left: -9999px; 
+      width: 1px; 
+      height: 1px; 
+      opacity: 0; 
+      z-index: -1;
+    `;
     div.textContent = text;
     document.body.appendChild(div);
+    
     const range = document.createRange();
     range.selectNodeContents(div);
     const sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
+    
     const ok = document.execCommand('copy');
     sel.removeAllRanges();
     document.body.removeChild(div);
-    if (ok) return true;
-  } catch (_) {/* 次へ */}
-
-  // 3) 共有シート（ここにも「コピー」がある）
-  if (navigator.share) {
-    try { await navigator.share({ text }); return true; } catch (_) {/* 次へ */}
+    
+    if (ok) {
+      console.log('✅ execCommand成功');
+      return true;
+    }
+  } catch (error) {
+    console.warn('⚠️ execCommand失敗:', error);
   }
 
   // 4) 最終手段：モーダルでURLを表示して手動コピー（遷移しない）
+  console.log('📋 手動コピーモーダル表示');
   showManualCopyModal(text);
   return false;
 }
