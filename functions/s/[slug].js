@@ -16,55 +16,55 @@ export async function onRequest({ params, request }) {
     // OGP画像URL（Cloudinaryの画像を直接使用）
     const ogImage = fullImageUrl;
 
-    // Bot判定対策: 自然なHTML構造
+    // Bot判定対策: より自然なHTML構造とメタタグ
     const html = `<!DOCTYPE html>
-    <html lang="ja">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>放課後クロニクル 学生証</title>
-      
-      <!-- 基本OGP -->
-      <meta property="og:title" content="放課後クロニクル 学生証">
-      <meta property="og:description" content="あなたが作った学生証をチェック！">
-      <meta property="og:image" content="${ogImage}">
-      <meta property="og:image:width" content="1200">
-      <meta property="og:image:height" content="630">
-      <meta property="og:image:type" content="image/png">
-      <meta property="og:image:alt" content="放課後クロニクル 学生証">
-      <meta property="og:url" content="${request.url}">
-      <meta property="og:type" content="website">
-      <meta property="og:site_name" content="放課後クロニクル">
-      <meta property="og:locale" content="ja_JP">
-      
-      <!-- Twitter Card最適化 -->
-      <meta name="twitter:card" content="summary_large_image">
-      <meta name="twitter:site" content="@as_chronicle">
-      <meta name="twitter:creator" content="@as_chronicle">
-      <meta name="twitter:title" content="放課後クロニクル 学生証">
-      <meta name="twitter:description" content="あなたが作った学生証をチェック！">
-      <meta name="twitter:image" content="${ogImage}">
-      <meta name="twitter:image:alt" content="放課後クロニクル 学生証">
-      
-      <!-- Discord最適化 -->
-      <meta name="theme-color" content="#dda0dd">
-      <meta name="msapplication-TileColor" content="#dda0dd">
-      
-      <!-- 即座リダイレクト -->
-      <meta http-equiv="refresh" content="0;url=${dest}">
-    </head>
-    <body>
-      <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-        <p>学生証ジェネレーターに移動中...</p>
-      </div>
-      
-      <!-- JavaScriptによる即座リダイレクト -->
-      <script>
-        // 即座にリダイレクト
-        window.location.replace(${JSON.stringify(dest)});
-      </script>
-    </body>
-    </html>`;
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>放課後クロニクル 学生証</title>
+  
+  <!-- 基本OGP -->
+  <meta property="og:title" content="放課後クロニクル 学生証">
+  <meta property="og:description" content="あなたが作った学生証をチェック！">
+  <meta property="og:image" content="${ogImage}">
+  <meta property="og:image:width" content="800">
+  <meta property="og:image:height" content="500">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:alt" content="放課後クロニクル 学生証">
+  <meta property="og:url" content="${request.url}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="放課後クロニクル">
+  <meta property="og:locale" content="ja_JP">
+  
+  <!-- Twitter Card最適化 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@as_chronicle">
+  <meta name="twitter:creator" content="@as_chronicle">
+  <meta name="twitter:title" content="放課後クロニクル 学生証">
+  <meta name="twitter:description" content="あなたが作った学生証をチェック！">
+  <meta name="twitter:image" content="${ogImage}">
+  <meta name="twitter:image:alt" content="放課後クロニクル 学生証">
+  
+  <!-- Discord最適化 -->
+  <meta name="theme-color" content="#dda0dd">
+  <meta name="msapplication-TileColor" content="#dda0dd">
+  
+  <!-- 即座リダイレクト -->
+  <meta http-equiv="refresh" content="0;url=${dest}">
+</head>
+<body>
+  <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+    <p>学生証ジェネレーターに移動中...</p>
+  </div>
+  
+  <!-- JavaScriptによる即座リダイレクト -->
+  <script>
+    // 即座にリダイレクト
+    window.location.replace(${JSON.stringify(dest)});
+  </script>
+</body>
+</html>`;
 
     return new Response(html, {
       headers: {
