@@ -47,13 +47,23 @@ function showManualCopyModal(text) {
     content.style.cssText = `
       background: white; padding: 2rem; border-radius: 16px; 
       max-width: 90vw; max-height: 80vh; overflow: auto;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     `;
     
+    // スマホサイズでの表示を改善
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const textareaHeight = isMobile ? '120px' : '100px';
+    
     content.innerHTML = `
-      <h3 style="margin: 0 0 1rem 0; color: #333;">URLをコピーしてください</h3>
-      <textarea readonly style="width: 100%; height: 100px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; resize: none;">${text}</textarea>
-      <div style="margin-top: 1rem; text-align: center;">
-        <button onclick="this.closest('.copy-modal').remove()" style="padding: 0.5rem 1rem; background: #B997D6; color: white; border: none; border-radius: 4px; cursor: pointer;">閉じる</button>
+      <h3 style="margin: 0 0 1rem 0; color: #333; font-size: ${isMobile ? '1.2rem' : '1.1rem'};">URLをコピーしてください</h3>
+      <textarea readonly style="width: 100%; height: ${textareaHeight}; padding: 0.8rem; border: 2px solid #B997D6; border-radius: 8px; font-family: monospace; font-size: ${isMobile ? '0.9rem' : '0.8rem'}; resize: none; background: #f8f6f0;">${text}</textarea>
+      <div style="margin-top: 1.5rem; text-align: center; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <button id="copyBtn" style="padding: 0.8rem 1.5rem; background: #B997D6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: ${isMobile ? '1rem' : '0.9rem'}; font-weight: 600;">コピー</button>
+        <button id="closeBtn" style="padding: 0.8rem 1.5rem; background: #a8a8a8; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: ${isMobile ? '1rem' : '0.9rem'};">閉じる</button>
+      </div>
+      <div style="margin-top: 1rem; text-align: center; font-size: 0.8rem; color: #666;">
+        <p style="margin: 0.5rem 0;">📱 スマホの場合：テキストを長押しして「コピー」を選択</p>
+        <p style="margin: 0.5rem 0;">💻 PCの場合：テキストを選択してCtrl+C</p>
       </div>
     `;
     
@@ -61,10 +71,52 @@ function showManualCopyModal(text) {
     modal.appendChild(content);
     document.body.appendChild(modal);
     
+    // コピーボタンの機能
+    const copyBtn = content.querySelector('#copyBtn');
+    if (copyBtn) {
+      copyBtn.onclick = async () => {
+        try {
+          const success = await copyTextReliable(text);
+          if (success) {
+            copyBtn.textContent = '✅ コピー完了！';
+            copyBtn.style.background = '#4CAF50';
+            setTimeout(() => {
+              copyBtn.textContent = 'コピー';
+              copyBtn.style.background = '#B997D6';
+            }, 2000);
+          } else {
+            copyBtn.textContent = '❌ コピー失敗';
+            copyBtn.style.background = '#f44336';
+            setTimeout(() => {
+              copyBtn.textContent = 'コピー';
+              copyBtn.style.background = '#B997D6';
+            }, 2000);
+          }
+        } catch (error) {
+          console.error('コピー処理エラー:', error);
+        }
+      };
+    }
+    
+    // 閉じるボタンの機能
+    const closeBtn = content.querySelector('#closeBtn');
+    if (closeBtn) {
+      closeBtn.onclick = () => modal.remove();
+    }
+    
     // 背景クリックで閉じる
     modal.addEventListener('click', (e) => {
       if (e.target === modal) modal.remove();
     });
+    
+    // テキストエリアを自動選択（コピーしやすくする）
+    const textarea = content.querySelector('textarea');
+    if (textarea) {
+      setTimeout(() => {
+        textarea.focus();
+        textarea.select();
+      }, 100);
+    }
     
   } catch (error) {
     console.error('Manual copy modal error:', error);
